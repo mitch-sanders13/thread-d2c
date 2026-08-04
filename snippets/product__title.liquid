@@ -1,0 +1,132 @@
+<!-- snippets/product__title.liquid -->
+{% comment %} 
+  Block to display a product title with optional rich text content.
+
+  Accepts:
+    - blocksettings: liquid object of block settings
+    - featured: boolean to assign product object from section settings, set this to true if block is used within a section rather than product template
+
+  Usage:
+    {% render 'product__title', 
+      blocksettings: block.settings, 
+      featured: true %}
+
+  Globals:
+    - settings.type_seperator: setting to pick the type of seperator between text
+
+  Possible enhancements: 
+    - Revise design of vender, variant and product category text. 
+    - Add option to set product title font size - longer product titles may need to be smaller.
+  
+  Pro tips:
+    - Use metafields to display dynamic product content in rich text field.
+{% endcomment %}
+
+{% if featured %}
+  {%- assign product = section.settings.product -%}
+{% endif %}
+
+<div class="px-4 pdp-block pdp-block--title
+    {{ section.settings.color_border }}
+    {{ blocksettings.color_scheme }}
+    {{ blocksettings.style_border }}"
+  data-pdp-block
+  data-block-id="{{ blocksettings.id | default: 'title' }}"
+  style="
+    padding-top:{{ blocksettings.spacing_top }}px;
+    padding-bottom:{{ blocksettings.spacing_bottom }}px;">
+
+  <h1 class="pdp-title flex mb-0 leading-none type__heading type__heading--bold-3 ">
+    {{ product.title }}
+  </h1>
+
+  {% unless blocksettings.content == blank %}
+    <div class="pdp-title-subtitle block m-0--clear">
+      {{ blocksettings.content }}
+    </div>
+  {% endunless %}
+
+  <div
+  class="pdp-rating flex items-center justify-start cursor-pointer hover:underline underline-offset-4 text-primary"
+  data-pdp-rating-scroll
+  role="button"
+  tabindex="0"
+  aria-label="Read customer reviews">
+  {% assign hide_ratings = false %}
+  {% if product.tags contains 'hide_ratings' %}
+    {% assign hide_ratings = true %}
+  {% endif %}
+
+  {% if hide_ratings == false %}
+    {% assign rating = product.metafields.reviews.rating.value.rating | times: 1 %}
+    {% assign max = product.metafields.reviews.rating.value.scale_max %}
+    {% assign percentage = rating | times: 100 | divided_by: max %}
+    <div class="oke-stars transform hover:scale-110 transition-transform duration-150">
+      <div class="oke-stars-background">
+        <svg height="14" viewBox="0 0 81 14" aria-hidden="true"><use x="0" href="#oke-star-empty"></use><use x="16.6" href="#oke-star-empty"></use><use x="33.2" href="#oke-star-empty"></use><use x="49.800000000000004" href="#oke-star-empty"></use><use x="66.4" href="#oke-star-empty"></use></svg>
+      </div>
+      {% if product.metafields.reviews.rating_count > 0 %}
+        <div class="oke-stars-foreground" style="width: {{ percentage }}%;">
+          <svg height="14" viewBox="0 0 81 14" aria-hidden="true"><use x="0" href="#oke-star-filled"></use><use x="16.6" href="#oke-star-filled"></use><use x="33.2" href="#oke-star-filled"></use><use x="49.800000000000004" href="#oke-star-filled"></use><use x="66.4" href="#oke-star-filled"></use></svg>
+        </div>
+      {% endif %}
+    </div>
+    {% if product.metafields.reviews.rating_count > 0 %}
+      <span class="pdp-rating-count ml-1 opacity-75 type--small">({{ product.metafields.reviews.rating_count }})</span>
+    {% else %}
+      <span class="pdp-rating-count ml-1 opacity-75 type--small">{{ product.metafields.reviews.rating_count }}</span>
+    {% endif %}
+  {% endif %}
+</div>
+
+</div>
+
+{%- comment -%}
+  Rating click -> jump to reviews.
+
+  The reviews widget lives inside a collapsed accordion row, so a plain
+  anchor jump would land on a closed dropdown. This opens that row first
+  (via its header button, since the row's Alpine state owns the open
+  class) and then smooth-scrolls to it, offset below the sticky header.
+{%- endcomment -%}
+<script>
+  (function () {
+    var triggers = document.querySelectorAll('[data-pdp-rating-scroll]');
+    if (!triggers.length) return;
+
+    function stickyHeaderOffset() {
+      var header = document.querySelector('header');
+      if (!header) return 0;
+      var pos = getComputedStyle(header).position;
+      if (pos !== 'sticky' && pos !== 'fixed') return 0;
+      return header.getBoundingClientRect().height;
+    }
+
+    function goToReviews() {
+      var widget = document.querySelector('.pdp-acc__reviews');
+      if (!widget) return;
+      var row = widget.closest('.pdp-acc');
+      var target = row || widget;
+
+      if (row && !row.classList.contains('pdp-acc--open')) {
+        var accHeader = row.querySelector('.pdp-acc__header');
+        if (accHeader) accHeader.click();
+      }
+
+      var top = target.getBoundingClientRect().top + window.scrollY - stickyHeaderOffset() - 12;
+      window.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' });
+    }
+
+    triggers.forEach(function (el) {
+      if (el.dataset.pdpRatingBound) return;
+      el.dataset.pdpRatingBound = '1';
+      el.addEventListener('click', goToReviews);
+      el.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+          e.preventDefault();
+          goToReviews();
+        }
+      });
+    });
+  })();
+</script>

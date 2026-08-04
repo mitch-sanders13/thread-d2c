@@ -1,0 +1,219 @@
+{% comment %}
+  blocks/accordion_row.liquid
+
+  A collapsible dropdown row for the "Product details (accordion)"
+  section. Nestable: an accordion_row accepts more accordion_rows as
+  children, so a dropdown can hold sub-dropdowns to any depth.
+
+  Open / close: one Alpine boolean toggles `.pdp-acc--open` on the
+  root. CSS does the rest (icon swap + grid-rows height animation),
+  so each row — including every nested one — keeps its own state.
+
+  Structural CSS lives in sections/product__details-accordion.liquid;
+  only settings-driven CSS is emitted here, scoped to this block id.
+{% endcomment %}
+
+{%- liquid
+  assign bs = block.settings
+  assign open = bs.enable_open
+  assign col = bs.column | default: 'full'
+  assign ncols = bs.content_columns | default: '2'
+-%}
+
+<div
+  id="pdp-acc-{{ block.id }}"
+  class="pdp-acc pdp-acc__col--{{ col }}{% if open %} pdp-acc--open{% endif %}"
+  x-data="{ open: {% if open %}true{% else %}false{% endif %} }"
+  :class="{ 'pdp-acc--open': open }"
+  {{ block.shopify_attributes }}>
+
+  <button
+    type="button"
+    class="pdp-acc__header"
+    aria-expanded="{% if open %}true{% else %}false{% endif %}"
+    :aria-expanded="open ? 'true' : 'false'"
+    aria-controls="pdp-acc-panel-{{ block.id }}"
+    @click="open = !open">
+    <span class="pdp-acc__title">{{ bs.title }}</span>
+    <span class="pdp-acc__icon" aria-hidden="true">
+      <span class="pdp-acc__icon-plus">{% render 'component__icon', icon: 'plus', size: '22', class: '' %}</span>
+      <span class="pdp-acc__icon-minus">{% render 'component__icon', icon: 'minus', size: '22', class: '' %}</span>
+    </span>
+  </button>
+
+  <div class="pdp-acc__panel" id="pdp-acc-panel-{{ block.id }}">
+    <div class="pdp-acc__panel-inner">
+      <div class="pdp-acc__grid">
+        {% content_for "blocks" %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% style %}
+  #pdp-acc-{{ block.id }} {
+    {%- if bs.divider_width > 0 %}border-top: {{ bs.divider_width }}px solid {{ bs.divider_color | default: '#e7e7e7' }};{% endif -%}
+    {%- if bs.bg_color != blank %}background-color: {{ bs.bg_color }};{% endif -%}
+    {%- if bs.mb_d > 0 %}margin-bottom: {{ bs.mb_d }}px;{% endif -%}
+  }
+  #pdp-acc-{{ block.id }} > .pdp-acc__header {
+    {%- if bs.hdr_pad_v > 0 %}padding-top: {{ bs.hdr_pad_v }}px; padding-bottom: {{ bs.hdr_pad_v }}px;{% endif -%}
+  }
+  #pdp-acc-{{ block.id }} > .pdp-acc__header .pdp-acc__title {
+    {%- case bs.hdr_font -%}
+      {%- when 'body' -%}font-family: var(--type-font-body-family);
+      {%- when 'heading' -%}font-family: var(--type-font-header-family);
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family);
+    {%- endcase -%}
+    {%- if bs.hdr_size_d > 0 %} font-size: {{ bs.hdr_size_d }}px;{% endif -%}
+    {%- if bs.hdr_weight != blank %} font-weight: {{ bs.hdr_weight }};{% endif -%}
+    {%- if bs.hdr_case != blank %} text-transform: {{ bs.hdr_case }};{% endif -%}
+    {%- if bs.hdr_ls > 0 %} letter-spacing: {{ bs.hdr_ls | divided_by: 100.0 }}em;{% endif -%}
+    {%- if bs.hdr_color != blank %} color: {{ bs.hdr_color }};{% endif -%}
+  }
+  #pdp-acc-{{ block.id }} > .pdp-acc__header .pdp-acc__icon svg {
+    {%- if bs.icon_color != blank %}color: {{ bs.icon_color }};{% endif -%}
+    {%- if bs.icon_size > 0 %}width: {{ bs.icon_size }}px; height: {{ bs.icon_size }}px;{% endif -%}
+  }
+  #pdp-acc-{{ block.id }} > .pdp-acc__panel > .pdp-acc__panel-inner > .pdp-acc__grid {
+    {%- if bs.content_gap_col > 0 %}column-gap: {{ bs.content_gap_col }}px;{% endif -%}
+    {%- if bs.content_gap_row > 0 %}row-gap: {{ bs.content_gap_row }}px;{% endif -%}
+    padding-bottom: {{ bs.content_pad_bottom }}px;
+  }
+  /* desktop column count (mobile is always 1 — see structural CSS) */
+  @media (min-width: 750px) {
+    #pdp-acc-{{ block.id }} > .pdp-acc__panel > .pdp-acc__panel-inner > .pdp-acc__grid {
+      grid-template-columns: repeat({{ ncols }}, minmax(0, 1fr));
+    }
+    {%- if ncols == '1' -%}
+      #pdp-acc-{{ block.id }} > .pdp-acc__panel > .pdp-acc__panel-inner > .pdp-acc__grid > * { grid-column: 1 / -1; }
+    {%- elsif ncols == '3' -%}
+      #pdp-acc-{{ block.id }} > .pdp-acc__panel > .pdp-acc__panel-inner > .pdp-acc__grid > *:not(.pdp-acc__col--full) { grid-column: auto; }
+    {%- endif -%}
+  }
+  {%- if bs.hdr_size_m > 0 or bs.mb_m > 0 -%}
+    @media (max-width: 749px) {
+      {%- if bs.hdr_size_m > 0 -%}
+        #pdp-acc-{{ block.id }} > .pdp-acc__header .pdp-acc__title { font-size: {{ bs.hdr_size_m }}px; }
+      {%- endif -%}
+      {%- if bs.mb_m > 0 -%}
+        #pdp-acc-{{ block.id }} { margin-bottom: {{ bs.mb_m }}px; }
+      {%- endif -%}
+    }
+  {%- endif -%}
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Accordion / dropdown",
+  "settings": [
+    { "type": "header", "content": "Content" },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "info": "Connect a product metafield with the dynamic-source icon.",
+      "default": "Accordion title"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_open",
+      "label": "Open by default",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "column",
+      "label": "Placement",
+      "info": "Applies only when this accordion is nested inside another accordion's two-column area.",
+      "options": [
+        { "value": "full", "label": "Full width" },
+        { "value": "left", "label": "Left column" },
+        { "value": "right", "label": "Right column" }
+      ],
+      "default": "full"
+    },
+
+    { "type": "header", "content": "Title typography" },
+    {
+      "type": "select",
+      "id": "hdr_font",
+      "label": "Font",
+      "options": [
+        { "value": "", "label": "Theme default" },
+        { "value": "body", "label": "Body (Forma DJR)" },
+        { "value": "heading", "label": "Heading (PP Right Grotesk)" },
+        { "value": "handwritten", "label": "Handwritten" }
+      ],
+      "default": ""
+    },
+    { "type": "range", "id": "hdr_size_d", "label": "Size — desktop (px)", "info": "0 = theme default.", "min": 0, "max": 40, "step": 1, "default": 16 },
+    { "type": "range", "id": "hdr_size_m", "label": "Size — mobile (px)", "info": "0 = theme default.", "min": 0, "max": 32, "step": 1, "default": 0 },
+    {
+      "type": "select",
+      "id": "hdr_weight",
+      "label": "Weight",
+      "options": [
+        { "value": "", "label": "Theme default" },
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "select",
+      "id": "hdr_case",
+      "label": "Case",
+      "options": [
+        { "value": "", "label": "Theme default" },
+        { "value": "none", "label": "Normal" },
+        { "value": "uppercase", "label": "UPPERCASE" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": ""
+    },
+    { "type": "range", "id": "hdr_ls", "label": "Letter spacing", "info": "In hundredths of an em — 5 = 0.05em, 40 = 0.40em. Goes far wider than the old presets.", "min": 0, "max": 60, "step": 1, "default": 5 },
+    { "type": "color", "id": "hdr_color", "label": "Title color" },
+
+    { "type": "header", "content": "Expand icon" },
+    { "type": "color", "id": "icon_color", "label": "Icon color" },
+    { "type": "range", "id": "icon_size", "label": "Icon size (px)", "info": "0 = default (22px).", "min": 0, "max": 40, "step": 1, "default": 0 },
+
+    { "type": "header", "content": "Divider" },
+    { "type": "range", "id": "divider_width", "label": "Top divider thickness (px)", "info": "0 = no divider.", "min": 0, "max": 4, "step": 1, "default": 1 },
+    { "type": "color", "id": "divider_color", "label": "Divider color", "default": "#e7e7e7" },
+
+    { "type": "header", "content": "Content area" },
+    {
+      "type": "select",
+      "id": "content_columns",
+      "label": "Content columns",
+      "info": "Columns the blocks inside this dropdown sit across on desktop. Mobile is always 1 column.",
+      "options": [
+        { "value": "1", "label": "1 column" },
+        { "value": "2", "label": "2 columns" },
+        { "value": "3", "label": "3 columns" }
+      ],
+      "default": "2"
+    },
+    { "type": "range", "id": "content_gap_col", "label": "Column gap (px)", "info": "Space between columns. 0 = default (40px).", "min": 0, "max": 96, "step": 4, "default": 0 },
+    { "type": "range", "id": "content_gap_row", "label": "Row gap (px)", "info": "Vertical space between stacked blocks. 0 = default (32px).", "min": 0, "max": 64, "step": 4, "default": 0 },
+    { "type": "range", "id": "content_pad_bottom", "label": "Padding below content (px)", "min": 0, "max": 80, "step": 4, "default": 32 },
+    { "type": "color", "id": "bg_color", "label": "Background color" },
+
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "hdr_pad_v", "label": "Header vertical padding (px)", "info": "Sets the height of the dropdown header row.", "min": 4, "max": 48, "step": 2, "default": 18 },
+    { "type": "range", "id": "mb_d", "label": "Margin bottom — desktop (px)", "min": 0, "max": 80, "step": 2, "default": 0 },
+    { "type": "range", "id": "mb_m", "label": "Margin bottom — mobile (px)", "min": 0, "max": 80, "step": 2, "default": 0 }
+  ],
+  "blocks": [
+    { "type": "accordion_text" },
+    { "type": "accordion_media" },
+    { "type": "accordion_reviews" },
+    { "type": "accordion_row" }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,22 @@
+<!-- sections/recent-card.liquid -->
+{% comment %}
+  Section Rendering API helper — renders ONE standard product card for
+  the product page it's requested against. Used by sections/recent-grid
+  .liquid, which fetches /products/<handle>?section_id=recent-card for
+  each recently-viewed handle and injects the returned card into its
+  grid. Because this goes through component__product-item, the
+  recently-viewed cards are pixel-identical to the collection grid
+  cards and automatically pick up every Product card theme setting.
+
+  Not meant to be added to a template in the customizer.
+{% endcomment %}
+<div data-recent-card>
+  {% render 'component__product-item', product: product, source: 'recent_grid' %}
+</div>
+
+{% schema %}
+{
+  "name": "Recent card (API helper)",
+  "settings": []
+}
+{% endschema %}

@@ -1,0 +1,89 @@
+{% comment %}
+  Renders ONE wizard step (one slot's UI).
+
+  Inputs:
+    - block: the slot section block
+    - slot_index: 0-based block index (matches factory's slots[slot_index])
+
+  Factory state used:
+    - slots[slot_index].silhouettes / silhouetteIndex / selectedHandle / locked
+    - currentSilhouette(slotIdx), selectSilhouette(slotIdx, sIdx), selectColor(slotIdx, handle)
+    - visibleProducts(slotIdx), hasMore(slotIdx), showMore(slotIdx)
+    - formatMoney(cents)
+{% endcomment %}
+
+<h3 class="bundle-wizard__step-title">
+  Step {{ slot_index | plus: 1 }}: <span x-text="slots[{{ slot_index }}].label"></span>
+</h3>
+
+{%- comment -%} silhouette toggle pills {%- endcomment -%}
+<div class="bundle-wizard__silhouettes" role="radiogroup" aria-label="Style">
+  <template x-for="(silhouette, sIdx) in slots[{{ slot_index }}].silhouettes" :key="sIdx">
+    <button
+      type="button"
+      role="radio"
+      :aria-checked="slots[{{ slot_index }}].silhouetteIndex === sIdx"
+      :disabled="slots[{{ slot_index }}].locked"
+      class="bundle-builder__silhouette-btn"
+      :class="{
+        'is-selected': slots[{{ slot_index }}].silhouetteIndex === sIdx,
+        'is-locked': slots[{{ slot_index }}].locked
+      }"
+      @click="selectSilhouette({{ slot_index }}, sIdx)">
+      <span x-text="silhouette.label"></span>
+    </button>
+  </template>
+</div>
+
+{%- comment -%} 3-column product grid {%- endcomment -%}
+<div class="bundle-wizard__grid" role="radiogroup" aria-label="Color">
+  <template x-for="product in visibleProducts({{ slot_index }})" :key="product.handle">
+    <button
+      type="button"
+      role="radio"
+      :aria-checked="slots[{{ slot_index }}].selectedHandle === product.handle"
+      :aria-label="product.title"
+      :disabled="!product.available || slots[{{ slot_index }}].locked"
+      class="bundle-wizard__tile"
+      :class="{
+        'is-selected': slots[{{ slot_index }}].selectedHandle === product.handle,
+        'is-unavailable': !product.available,
+        'is-locked': slots[{{ slot_index }}].locked
+      }"
+      @click="product.available && selectColor({{ slot_index }}, product.handle)">
+      <div class="bundle-wizard__tile-img">
+        <img
+          :src="product.swatchImage"
+          :srcset="(product.swatchImage400 || '') + ' 400w, ' + (product.swatchImage600 || '') + ' 600w, ' + (product.swatchImage900 || '') + ' 900w'"
+          sizes="(min-width: 750px) 25vw, 33vw"
+          :alt="product.title"
+          loading="lazy" />
+        <span
+          class="bundle-wizard__tile-check"
+          x-show="slots[{{ slot_index }}].selectedHandle === product.handle"
+          aria-hidden="true">✓</span>
+      </div>
+      <p class="bundle-wizard__tile-title" x-text="product.title"></p>
+      <p class="bundle-wizard__tile-price" x-text="formatMoney(product.price)"></p>
+    </button>
+  </template>
+</div>
+
+{%- comment -%} empty silhouette state {%- endcomment -%}
+<p
+  class="type--small italic text-center"
+  style="padding: 24px 16px;"
+  x-show="(currentSilhouette({{ slot_index }})?.products || []).length === 0"
+  x-cloak>
+  No styles available for this option.
+</p>
+
+{%- comment -%} show more {%- endcomment -%}
+<div class="bundle-wizard__load-more" x-show="hasMore({{ slot_index }})" x-cloak>
+  <button
+    type="button"
+    class="btn btn--secondary"
+    @click="showMore({{ slot_index }})">
+    {{ 'general.pagination.load_more' | t | default: 'Show more' }}
+  </button>
+</div>

@@ -1,0 +1,147 @@
+{% comment %}
+  snippets/footer__newsletter-form.liquid
+
+  Single-field email form with an in-field submit button that only appears
+  once the user types. The label acts as a centered placeholder that hides
+  when the user starts typing — typed text occupies the exact same centered
+  position as the label. Mobile: input font-size locked at ≥16px so iOS
+  doesn't auto-zoom on focus.
+
+  On submit:
+    1. ftNewsletterSubmit triggers Attentive.
+    2. The whole newsletter body (heading + description + form +
+       disclaimer) hides, and a sibling "success" panel with an optional
+       image/GIF, icon/emoji, title, and richtext message replaces it.
+
+  Expected context:
+    - block       (required) — the footer newsletter block
+    - breakpoint  (required) — 'mobile' | 'desktop'
+{% endcomment %}
+
+{%- assign _bp = breakpoint | default: 'mobile' -%}
+{%- if _bp == 'desktop' -%}{%- assign _bp_suffix = 'd' -%}{%- else -%}{%- assign _bp_suffix = 'm' -%}{%- endif -%}
+{%- assign _fid = 'nl-' | append: block.id | append: '-' | append: _bp_suffix -%}
+
+{%- capture _input_fam  -%}var(--type-font-{% if block.settings.input_font == 'heading' %}header{% else %}{{ block.settings.input_font | default: 'body' }}{% endif %}-family){%- endcapture -%}
+{%- capture _label_fam  -%}var(--type-font-{% if block.settings.label_font == 'heading' %}header{% else %}{{ block.settings.label_font | default: 'body' }}{% endif %}-family){%- endcapture -%}
+
+{%- assign _field_height   = block.settings.field_height   | default: 64 -%}
+{%- assign _field_radius   = block.settings.input_radius   | default: 28 -%}
+{%- assign _field_border_w = block.settings.input_border_width | default: 1 -%}
+{%- assign _field_border_c = block.settings.input_border_color | default: 'var(--thread-ink)' -%}
+{%- assign _field_bg       = block.settings.input_bg       | default: '#ffffff' -%}
+{%- assign _field_pad_l    = block.settings.field_pad_l    | default: 20 -%}
+
+{%- assign _btn_size   = block.settings.button_size_px | default: 44 -%}
+{%- assign _btn_radius = block.settings.button_radius  | default: 12 -%}
+{%- assign _btn_inset  = block.settings.button_inset   | default: 8 -%}
+{%- assign _input_pad_r = _btn_size | plus: _btn_inset | plus: 8 -%}
+
+{%- comment -%} iOS refuses to auto-zoom on focus only when the input's
+   computed font-size is >= 16px. Desktop can still use whatever the
+   merchant sets. {%- endcomment -%}
+{%- assign _input_size      = block.settings.input_size      | default: 16 -%}
+{%- assign _input_size_m    = block.settings.input_size_mobile | default: 16 -%}
+{%- if _input_size_m < 16 -%}{%- assign _input_size_m = 16 -%}{%- endif -%}
+
+<form id="{{ _fid }}"
+  class="wp-nl"
+  onsubmit="return ftNewsletterSubmit('{{ block.id }}', '{{ _bp_suffix }}', event)"
+  novalidate
+  style="margin-top:{{ block.settings.form_mt | default: 0 }}px;margin-bottom:{{ block.settings.form_mb | default: 0 }}px;">
+
+  <div class="wp-nl-field" data-nl-fields data-nl-field
+    style="position:relative;background:{{ _field_bg }};border:{{ _field_border_w }}px solid {{ _field_border_c }};border-radius:{{ _field_radius }}px;height:{{ _field_height }}px;{% if block.settings.form_max_width and block.settings.form_max_width > 0 %}max-width:{{ block.settings.form_max_width }}px;{% endif %}">
+
+    <input id="{{ _fid }}-email"
+      data-nl-email
+      type="email" name="email" required
+      autocomplete="email"
+      inputmode="email"
+      aria-label="{{ block.settings.placeholder | default: 'Email address' }}"
+      style="position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent;outline:none;-webkit-appearance:none;appearance:none;padding:0 {{ _input_pad_r }}px 0 {{ _field_pad_l }}px;font-family:{{ _input_fam }};font-size:{{ _input_size }}px;color:{{ block.settings.input_text_color | default: 'var(--thread-ink)' }};line-height:{{ _field_height }}px;">
+
+    <label for="{{ _fid }}-email" class="wp-nl-label"
+      style="position:absolute;left:{{ _field_pad_l }}px;top:50%;transform:translateY(-50%);font-family:{{ _label_fam }};font-size:{{ block.settings.label_size | default: 16 }}px;color:{{ block.settings.label_color | default: 'var(--thread-grey)' }};pointer-events:none;transition:opacity 0.12s ease;">
+      {{ block.settings.placeholder | default: 'Email address' }}
+    </label>
+
+    <button type="submit" aria-label="Submit" class="wp-nl-btn"
+      style="position:absolute;right:{{ _btn_inset }}px;top:50%;transform:translateY(-50%);width:{{ _btn_size }}px;height:{{ _btn_size }}px;border:0;border-radius:{{ _btn_radius }}px;background:{{ block.settings.button_bg | default: '#1e7db3' }};color:{{ block.settings.button_text_color | default: '#ffffff' }};cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.15s ease;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:{{ block.settings.button_icon_size | default: 20 }}px;height:{{ block.settings.button_icon_size | default: 20 }}px;display:block;">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </button>
+  </div>
+
+  <p data-nl-error class="ft-body" style="display:none;margin:{{ block.settings.message_mt | default: 10 }}px 0 0;font-size:{{ block.settings.message_size | default: 13 }}px;color:{{ block.settings.error_color | default: '#b00020' }};">
+    {{ block.settings.error_message | default: 'Please enter a valid email.' }}
+  </p>
+</form>
+
+<style>
+  /* Drive label visibility and button visibility with a `has-value` class
+     set by JS (input listener). `!important` beats the inline opacity:0
+     that the button ships with for its hidden default state. */
+  #{{ _fid }} .wp-nl-field.has-value .wp-nl-label { opacity: 0 !important; }
+  #{{ _fid }} .wp-nl-field.has-value .wp-nl-btn  { opacity: 1 !important; pointer-events: auto !important; }
+  #{{ _fid }} .wp-nl-btn:hover { filter: brightness(1.1); }
+
+  /* Mobile: lock input size at >=16px to prevent iOS zoom on focus. */
+  @media (max-width: 767.98px) {
+    #{{ _fid }} [data-nl-email] { font-size: {{ _input_size_m }}px !important; }
+  }
+
+  /* Focus ring matches the field shape. */
+  #{{ _fid }} .wp-nl-field:focus-within {
+    border-color: {{ block.settings.input_border_focus | default: block.settings.input_border_color | default: 'var(--thread-ink)' }};
+    {% if block.settings.input_focus_ring and block.settings.input_focus_ring > 0 %}
+      box-shadow: 0 0 0 {{ block.settings.input_focus_ring }}px {{ block.settings.input_border_focus | default: 'var(--thread-ink)' }}22;
+    {% endif %}
+  }
+
+  /* Browser autofill override: Chrome / Safari paint a yellow background
+     + an inner rectangle on fields they autofilled. Paint over the yellow
+     with a 1000px inset box-shadow (the standard Chrome fix) and kill any
+     outline/border so nothing shows through the rounded field border. */
+  #{{ _fid }} [data-nl-email]:-webkit-autofill,
+  #{{ _fid }} [data-nl-email]:-webkit-autofill:hover,
+  #{{ _fid }} [data-nl-email]:-webkit-autofill:focus,
+  #{{ _fid }} [data-nl-email]:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px {{ block.settings.input_bg | default: '#ffffff' }} inset !important;
+    box-shadow:         0 0 0 1000px {{ block.settings.input_bg | default: '#ffffff' }} inset !important;
+    -webkit-text-fill-color: {{ block.settings.input_text_color | default: 'var(--thread-ink)' }} !important;
+    caret-color:             {{ block.settings.input_text_color | default: 'var(--thread-ink)' }} !important;
+    /* Freeze the autofill transition so Chrome can't flash yellow on load. */
+    transition: background-color 99999s ease-in-out 0s !important;
+    border: 0 !important;
+    outline: 0 !important;
+    border-radius: inherit;
+  }
+  /* Kill any UA focus outline/border on the input itself — some browsers
+     paint a square ring even when `outline:none` is inline. */
+  #{{ _fid }} [data-nl-email]:focus,
+  #{{ _fid }} [data-nl-email]:focus-visible {
+    outline: 0 !important;
+    box-shadow: none !important;
+  }
+</style>
+
+<script>
+  (function () {
+    var f = document.getElementById('{{ _fid }}');
+    if (!f || f.__wpNlWired) return;
+    f.__wpNlWired = true;
+    var field = f.querySelector('[data-nl-field]');
+    var input = f.querySelector('[data-nl-email]');
+    if (!field || !input) return;
+    function sync() {
+      if ((input.value || '').trim().length > 0) field.classList.add('has-value');
+      else field.classList.remove('has-value');
+    }
+    input.addEventListener('input', sync);
+    input.addEventListener('change', sync);
+    sync();
+  })();
+</script>

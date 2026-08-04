@@ -1,0 +1,252 @@
+<!-- snippets/collection__filter-bodies.liquid -->
+{% comment %}
+  Filter accordion bodies — shared between the mobile filter drawer
+  (collection__filter-drawer.liquid) and the desktop sidebar (rendered
+  inline by collection__sidebar.liquid). Does NOT emit a <form>; the
+  caller owns the form id and the @change handler.
+
+  Accepts:
+    - form_id_suffix: string used to namespace checkbox/radio `id`
+      attributes so the two consumers can coexist on the same page
+      without DOM id collisions. e.g. 'drawer' or 'sidebar'.
+    - include_active_pills: when true, renders the sticky bottom row of
+      "remove filter" pills. The mobile drawer uses this; the desktop
+      sidebar doesn't need it because filters are removed by unchecking.
+
+  Globals:
+    - Globally-scoped Alpine state filter_min_price, filter_max_price,
+      filter_min, filter_max, filter_min_thumb, filter_max_thumb (seeded
+      from window.__initialData by theme__scripts.liquid and refreshed
+      below per-page by the <script> at the bottom of this snippet).
+{% endcomment %}
+
+{%- assign _afc_local = 0 -%}
+{%- for filter in collection.filters -%}
+  {%- if filter.active_values.size > 0 -%}{%- assign _afc_local = _afc_local | plus: filter.active_values.size -%}{%- endif -%}
+  {%- if filter.type == 'price_range' -%}
+    {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}{%- assign _afc_local = _afc_local | plus: 1 -%}{%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- assign is_collegiate = false -%}
+{%- if collection.handle contains 'collegiate' -%}{%- assign is_collegiate = true -%}{%- endif -%}
+
+{%- comment -%}
+  Preserve the active School filter across submissions of this form
+  (collegiate collections keep the School filter outside the accordion
+  list — see the "Back to school selection" affordance in
+  collection__sidebar.liquid).
+{%- endcomment -%}
+{%- if is_collegiate -%}
+  {%- for filter in collection.filters -%}
+    {%- if filter.label == 'School' -%}
+      {%- for filter_value in filter.values -%}
+        {%- if filter_value.active -%}
+          <input type="hidden" name="{{ filter_value.param_name }}" value="{{ filter_value.value }}">
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- for filter in collection.filters -%}
+  {%- if is_collegiate and filter.label == 'School' -%}{%- continue -%}{%- endif -%}
+
+  {%- assign has_values = false -%}
+  {%- for filter_value in filter.values -%}
+    {%- if filter_value.count > 0 -%}{%- assign has_values = true -%}{%- endif -%}
+  {%- endfor -%}
+  {%- if filter.type == 'price_range' -%}{%- assign has_values = true -%}{%- endif -%}
+  {%- unless has_values -%}{%- continue -%}{%- endunless -%}
+
+  {%- capture accordion_content -%}
+    <div>
+      {%- case filter.type -%}
+
+        {%- when 'boolean' or 'list' -%}
+          <div class="py-4">
+            {%- for filter_value in filter.values -%}
+              {%- assign _fid = 'Filter-' | append: form_id_suffix | append: '-' | append: filter.param_name | append: '-' | append: forloop.index -%}
+              {%- if filter.label == 'Color' -%}
+                {%- capture colorFilterImage -%}filter-{{ filter_value.label | handle }}.jpg{%- endcapture -%}
+                <label class="flex items-center mb-4" for="{{ _fid }}">
+                  <input type="checkbox"
+                    name="{{ filter_value.param_name }}"
+                    value="{{ filter_value.value }}"
+                    id="{{ _fid }}"
+                    {% if filter_value.active %}checked{% endif %}
+                    {% if filter_value.count == 0 and filter_value.active == false %}disabled{% endif %}>
+                  <span class="type--base ml-2">{{ filter_value.label }}</span>
+                  <span class="type--base ml-1 opacity-75">({{ filter_value.count }})</span>
+                  <span class="w-4 h-4 rounded-full absolute right-4" style="background-image:url('{{ colorFilterImage | file_img_url: '32x32' }}');"></span>
+                </label>
+              {%- else -%}
+                <label class="flex items-center mb-4" for="{{ _fid }}">
+                  <input type="checkbox"
+                    name="{{ filter_value.param_name }}"
+                    value="{{ filter_value.value }}"
+                    id="{{ _fid }}"
+                    {% if filter_value.active %}checked{% endif %}
+                    {% if filter_value.count == 0 and filter_value.active == false %}disabled{% endif %}>
+                  <span class="type--base ml-2">{{ filter_value.label }}</span>
+                  <span class="type--base ml-1 opacity-75">({{ filter_value.count }})</span>
+                </label>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+
+        {%- when 'price_range' -%}
+          <div class="flex items-center justify-center py-4">
+            <div x-init="handleMinPriceFilter(); handleMaxPriceFilter()" class="relative w-full max-w-xl">
+              <div class="pb-4">
+                <input type="range" step="1"
+                  x-bind:min="filter_min" x-bind:max="filter_max"
+                  x-on:input="handleMinPriceFilter"
+                  x-model="filter_min_price"
+                  class="absolute z-20 w-full h-2 opacity-0 appearance-none cursor-pointer pointer-events-none">
+                <input type="range" step="1"
+                  x-bind:min="filter_min" x-bind:max="filter_max"
+                  x-on:input="handleMaxPriceFilter"
+                  x-model="filter_max_price"
+                  class="absolute z-20 w-full h-2 opacity-0 appearance-none cursor-pointer pointer-events-none">
+                <div class="relative z-10 h-2">
+                  <div class="color__bg-overlay-1 border--radius absolute top-0 bottom-0 left-0 right-0 z-10"></div>
+                  <div class="relative w-full h-2 overflow-hidden">
+                    <div class="border--radius color__bg-secondary absolute top-0 bottom-0 z-20" x-bind:style="'right:'+filter_max_thumb+'%; left:'+filter_min_thumb+'%'"></div>
+                  </div>
+                  <div class="color__bg-body border--width color__border-selected-1 top-1/2 absolute left-0 z-30 w-4 h-4 -ml-2 -translate-y-1/2 rounded-full" x-bind:style="'left: '+filter_min_thumb+'%'"></div>
+                  <div class="color__bg-body border--width color__border-selected-1 top-1/2 absolute right-0 z-30 w-4 h-4 -mr-2 -translate-y-1/2 rounded-full" x-bind:style="'right: '+filter_max_thumb+'%'"></div>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap items-center justify-between -mx-4">
+                <div class="flex flex-row flex-wrap items-center w-2/5 px-4">
+                  <div class="relative w-full">
+                    <span class="z-10 inline-flex absolute !flex items-center top-0 left-2 h-full type--smaller" aria-hidden="true">{{ cart.currency.symbol }}</span>
+                    <input class="!pl-8"
+                      maxlength="5"
+                      x-on:input="handleMinPriceFilter" x-model="filter_min_price"
+                      name="{{ filter.min_value.param_name }}"
+                      id="Filter-{{ form_id_suffix }}-{{ filter.min_value.param_name }}"
+                      {% if filter.min_value.value %}value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"{% endif %}
+                      type="number" placeholder="0" min="0"
+                      max="{{ filter.range_max | money_without_currency | replace: ',', '' }}">
+                  </div>
+                </div>
+                <div class="flex flex-row flex-wrap items-center justify-center w-1/5 px-4">—</div>
+                <div class="flex flex-row flex-wrap items-center w-2/5 px-4">
+                  <div class="relative w-full">
+                    <span class="z-10 inline-flex absolute !flex items-center top-0 left-2 h-full type--smaller" aria-hidden="true">{{ cart.currency.symbol }}</span>
+                    <input class="!pl-8"
+                      maxlength="5"
+                      x-on:input="handleMaxPriceFilter" x-model="filter_max_price"
+                      name="{{ filter.max_value.param_name }}"
+                      id="Filter-{{ form_id_suffix }}-{{ filter.max_value.param_name }}"
+                      {% if filter.max_value.value %}value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"{% endif %}
+                      type="number"
+                      placeholder="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                      min="0"
+                      max="{{ filter.range_max | money_without_currency | replace: ',', '' }}">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+      {%- endcase -%}
+    </div>
+  {%- endcapture -%}
+
+  {%- capture accordion_title -%}
+    {%- if filter.type == 'price_range' -%}
+      {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+        <strong>{{ filter.label }}</strong>
+      {%- else -%}
+        {{ filter.label }}
+      {%- endif -%}
+    {%- else -%}
+      {%- if filter.active_values.size > 0 -%}
+        <strong>{{ filter.label }}</strong><span class="ml-1">({{ filter.active_values.size }})</span>
+      {%- else -%}
+        {{ filter.label }}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endcapture -%}
+
+  {%- capture accordion_class -%}
+    {% if forloop.last == false %}border--b-width {% endif %}color__border-divider-1
+  {%- endcapture -%}
+
+  {% render 'component__accordion',
+    container_class: accordion_class,
+    inner_class: 'px-4',
+    button_class: 'type--smaller',
+    button_label: accordion_title,
+    content: accordion_content %}
+{%- endfor -%}
+
+{%- if include_active_pills and _afc_local > 0 -%}
+  <div class="color__bg-body border--t-width color__border-divider-1 sticky bottom-0 z-10 p-4">
+    <div class="relative w-full">
+      <div class="whitespace-nowrap inline-flex w-full overflow-x-auto">
+
+        <div class="flex justify-center flex-none mr-2">
+          <a href="{{ collection.url }}?sort_by={{ collection.sort_by }}" class="btn btn--small btn--secondary"
+            @click.prevent="handleFilterDeleteAll();">
+            {% render 'component__icon', icon: 'x', size: '16', class: 'mr-1' %} {{ 'collections.sorting.remove_all_filters' | t }}
+          </a>
+        </div>
+
+        {%- for filter in collection.filters -%}
+          {%- if is_collegiate and filter.label == 'School' -%}{%- continue -%}{%- endif -%}
+          {%- if filter.type == 'price_range' -%}
+            {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+              <div class="flex justify-center flex-none mr-2">
+                <a class="btn btn--smaller btn--plain" href="{{ filter.url_to_remove }}"
+                  @click.prevent="handleFilterDelete('{{ filter.param_name }}');">
+                  {%- assign min_value = filter.min_value.value | default: 0 -%}
+                  {%- assign max_value = filter.max_value.value | default: filter.range_max -%}
+                  {% render 'component__icon', icon: 'x', size: '16', class: 'mr-1' %}
+                  {{ min_value | money }} - {{ max_value | money }}
+                </a>
+              </div>
+            {%- endif -%}
+          {%- else -%}
+            {%- for filter_value in filter.active_values -%}
+              <div class="flex justify-center flex-none mr-2">
+                <a class="btn btn--smaller btn--plain" href="{{ filter_value.url_to_remove }}"
+                  @click.prevent="handleFilterDelete('{{ filter.param_name }}');">
+                  {% render 'component__icon', icon: 'x', size: '16', class: 'mr-1' %}
+                  {{ filter.label }}: {{ filter_value.label }}
+                </a>
+              </div>
+            {%- endfor -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+{%- comment -%}
+  Seed window.__initialData with the price-range slider's current
+  values. Idempotent — Object.assign overwrites the same keys with the
+  same values if the script runs twice (e.g. when both the drawer and
+  the sidebar render bodies on the same page).
+{%- endcomment -%}
+{%- for filter in collection.filters -%}
+  {%- if filter.type == 'price_range' -%}
+    <script>
+      window.__initialData = window.__initialData || {};
+      Object.assign(window.__initialData, {
+        filter_min_price: {% if filter.min_value.value %}{{ filter.min_value.value | money_without_currency | replace: ',', '' }}{% else %}0{% endif %},
+        filter_max_price: {% if filter.max_value.value %}{{ filter.max_value.value | money_without_currency | replace: ',', '' }}{% else %}{{ filter.range_max | money_without_currency | replace: ',', '' }}{% endif %},
+        filter_min: 0,
+        filter_max: {{ filter.range_max | money_without_currency | replace: ',', '' }},
+        filter_min_thumb: 0,
+        filter_max_thumb: 0,
+      });
+    </script>
+  {%- endif -%}
+{%- endfor -%}

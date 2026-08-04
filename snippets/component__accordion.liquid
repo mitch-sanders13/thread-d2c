@@ -1,0 +1,75 @@
+<!-- snippets/component__accordion.liquid -->
+{% comment %} 
+  Dropdown accordion that can be opened and closed.
+
+  Accepts: 
+    - open: boolean to show accordion open by, default false
+    - index: forloop.index (if inside liquid forloop)
+    - container_class: string of classes to add to the container
+    - inner_class: string of classes for the inner container
+    - button_class: string of classes to add to the button
+    - button_label: string of text for the accordion button
+    - content: content to display
+
+  Usage:
+    {% render 'component__accordion',
+      open: true,
+      index: forloop.index, (add x-data to rendering parent container)
+      container_class: accordion_container_class,
+      icon_class: string of icon classes
+      inner_class: accordion_inner_class
+      button_class: "px-4",
+      button_label: link.title, 
+      content: accordion_content %}
+
+  Possible enhancements:
+    - Consider setting the button to bold for better hierarchy.
+{% endcomment %}
+
+<div id='accordion-{{ index }}' class="{{ container_class }}" {% if index %} x-data="{ accordion: null }"{% elsif open %} x-data="{ accordion: true }"{% else %} x-data="{ accordion: null }"{% endif %}>
+  <button type="button" class="flex items-center justify-between w-full p-4 {{ button_class }}"
+    {% if index %}
+    @click="accordion !== {{ index }} ? accordion = {{ index }} : accordion = null"
+    {% else %}
+    @click="accordion !== true ? accordion = true : accordion = null"
+    {% endif %}>
+
+    <span class="type__nav text-left">
+      {{ button_label }}
+    </span>
+
+    <div class="{{ icon_class }}" 
+      {% if index %}
+      x-show="accordion !== {{ index }}"
+      {% else %}
+      x-show="accordion !== true"
+      {% endif %}>
+        {% render 'component__icon', icon: 'plus', size: '24', class: '' %}
+    </div>
+
+    <div class="{{ icon_class }}" 
+      {% if index %}
+      x-show="accordion === {{ index }}" x-cloak
+      {% else %}
+      x-show="accordion === true" x-cloak
+      {% endif %}>
+        {% render 'component__icon', icon: 'minus', size: '24', class: '' %}
+    </div>
+
+  </button>
+  <div
+    class="accordion-content {{ inner_class }}"
+    {% if index %}x-show="accordion === {{index}}"{% else %}x-show="accordion === true"{% endif %}
+
+    {% if settings.enable_animations %}
+      x-transition:enter="animation-100"
+      x-transition:enter-start="opacity-0"
+      x-transition:enter-end="opacity-100"
+      x-transition:leave="animation-100"
+      x-transition:leave-start="opacity-100"
+      x-transition:leave-end="opacity-0"
+    {% endif %}
+    x-cloak>
+    {{ content }}
+  </div>
+</div>

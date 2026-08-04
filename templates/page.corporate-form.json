@@ -1,0 +1,266 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "85e51c5f-313e-4e16-9da2-e1432f774e2f": {
+      "type": "content-grid",
+      "blocks": {
+        "template--15941214404746__85e51c5f-313e-4e16-9da2-e1432f774e2f-content-1": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/Halo-elastic.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "466f7833-805f-4c2b-9007-b3f027a3ef44": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/Halo-vw.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "3f531dd0-8728-4c3c-9c9a-47a1ba0b81e2": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/Halo-bifold.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "9e23e862-dcc6-4946-89db-b6eb6c965621": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/Halo-lbh_3.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "30fe74b8-328b-48d8-887a-7d7d104bbdf5": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/Halo-wl_1.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "73c48d4f-48a5-4a2f-beb9-765cddcfc3bc": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/Halo-nl_1.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        }
+      },
+      "block_order": [
+        "template--15941214404746__85e51c5f-313e-4e16-9da2-e1432f774e2f-content-1",
+        "466f7833-805f-4c2b-9007-b3f027a3ef44",
+        "3f531dd0-8728-4c3c-9c9a-47a1ba0b81e2",
+        "9e23e862-dcc6-4946-89db-b6eb6c965621",
+        "30fe74b8-328b-48d8-887a-7d7d104bbdf5",
+        "73c48d4f-48a5-4a2f-beb9-765cddcfc3bc"
+      ],
+      "settings": {
+        "heading": "",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 20,
+        "spacing_bottom": 20,
+        "color_scheme": "color__bg-neutral color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "",
+        "row_size_desktop": "md:grid-cols-3",
+        "row_size_mobile": "grid-cols-1",
+        "layout_x_alignment": "justify-between",
+        "layout_horizontal": "window--full",
+        "visibility": ""
+      }
+    },
+    "f075619a-7a24-4146-a5fe-9eba4af1e905": {
+      "type": "marquee",
+      "blocks": {
+        "1dd73a74-0d48-41e0-a9f8-0a49f5d30fa3": {
+          "type": "heading",
+          "settings": {
+            "content": "Select your carry!"
+          }
+        },
+        "9b8c436b-a86b-4404-ba42-de6b60871db8": {
+          "type": "heading",
+          "settings": {
+            "content": "Select your carry!"
+          }
+        },
+        "8c0bc78e-5dbf-4c8d-84df-fd2cb0a6726f": {
+          "type": "heading",
+          "settings": {
+            "content": "Select your carry!"
+          }
+        },
+        "2ed99af0-14ad-48de-aaf6-edba235170f7": {
+          "type": "heading",
+          "settings": {
+            "content": "Select your carry!"
+          }
+        }
+      },
+      "block_order": [
+        "1dd73a74-0d48-41e0-a9f8-0a49f5d30fa3",
+        "9b8c436b-a86b-4404-ba42-de6b60871db8",
+        "8c0bc78e-5dbf-4c8d-84df-fd2cb0a6726f",
+        "2ed99af0-14ad-48de-aaf6-edba235170f7"
+      ],
+      "settings": {
+        "spacing_top": 40,
+        "spacing_bottom": 50,
+        "color_background": "#d6298d",
+        "color_text": "color__light",
+        "color_border": "color__border-divider-1",
+        "style_border": "",
+        "visibility": ""
+      }
+    },
+    "47ecc23c-418a-4701-b5dd-9d4ed884d2fb": {
+      "type": "page__corporate-form",
+      "settings": {
+        "color_scheme": "color__bg-neutral color__text"
+      }
+    }
+  },
+  "order": [
+    "85e51c5f-313e-4e16-9da2-e1432f774e2f",
+    "f075619a-7a24-4146-a5fe-9eba4af1e905",
+    "47ecc23c-418a-4701-b5dd-9d4ed884d2fb"
+  ]
+}

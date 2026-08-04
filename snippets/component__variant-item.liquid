@@ -1,0 +1,134 @@
+<!-- snippets/component__variant-item.liquid -->
+{% comment %}
+  Variant-broken-out card for collection grids.
+
+  Accepts:
+    - product: parent product object
+    - variant: a Shopify variant object
+    - source: optional accessibility source name
+
+  Usage:
+    {% render 'component__variant-item', product: product, variant: variant %}
+
+  Notes:
+    - Image: variant.image, fallback to product.featured_image.
+    - Title: variant.title (e.g. "Black"). The product title is shown as a small
+      prefix above (matches typical "category — color" reading order).
+    - Price: variant.price + compare_at_price (Sale state per-variant).
+    - Sold-out state per-variant (variant.available).
+    - Click destination: product.url?variant={id} so the master PDP opens
+      with the right variant pre-selected.
+
+  Visual style mirrors component__product-item using the same theme tokens.
+{% endcomment %}
+
+{%- assign v_url = product.url | append: '?variant=' | append: variant.id -%}
+{%- assign v_image = variant.image | default: product.featured_image -%}
+{%- assign v_available = variant.available -%}
+{%- assign v_on_sale = false -%}
+{%- if variant.compare_at_price and variant.compare_at_price > variant.price -%}
+  {%- assign v_on_sale = true -%}
+{%- endif -%}
+
+{%- assign hide_sale = false -%}
+{% if product.tags contains 'hide_sale' %}{% assign hide_sale = true %}{% endif %}
+
+<div class="group relative w-full {% if settings.thumbnails_border_style == 'thumbnail' %}border--radius overflow-hidden{% endif %}">
+
+  {%- comment -%} Badges {%- endcomment -%}
+  {%- capture badge_background -%}
+    {%- if settings.product-cards_badge_scheme == "light_outline" or settings.product-cards_badge_scheme == "dark_outline" -%}
+      transparent
+    {%- else -%}
+      {{ settings.product-cards_badge_scheme }}
+    {%- endif -%}
+  {%- endcapture -%}
+  {%- capture badge_foreground -%}
+    {%- if settings.product-cards_badge_scheme == "light_outline" -%}light
+    {%- elsif settings.product-cards_badge_scheme == "dark_outline" -%}dark
+    {%- else -%}{{ settings.product-cards_badge_scheme }}{%- endif -%}
+  {%- endcapture -%}
+
+  <div class="js-product-card-badges absolute top-0 left-0 z-[5] flex flex-wrap w-full gap-1 p-2 whitespace-normal">
+    {%- if v_on_sale and hide_sale == false -%}
+      {%- capture badge_content -%}Sale{%- endcapture -%}
+      {% render 'component__badge', background: badge_background, text: badge_foreground, border: badge_foreground, icon: '', content: badge_content %}
+    {%- endif -%}
+    {%- unless v_available -%}
+      {%- capture badge_content -%}{{ 'products.general.sold_out' | t }}{%- endcapture -%}
+      {% render 'component__badge', background: badge_background, text: badge_foreground, border: badge_foreground, icon: '', content: badge_content %}
+    {%- endunless -%}
+    {%- assign metafield = product.metafields.custom.badge -%}
+    {%- if metafield -%}
+      {%- capture badge_content -%}{{ metafield }}{%- endcapture -%}
+      {% render 'component__badge', background: badge_background, text: badge_foreground, border: badge_foreground, icon: '', content: badge_content %}
+    {%- endif -%}
+  </div>
+
+  {%- comment -%} Image {%- endcomment -%}
+  {%- if settings['thumbnails_object-sizing'] == 'cover' -%}
+    {%- assign v_object_cls = 'object-cover' -%}
+  {%- else -%}
+    {%- assign v_object_cls = 'object-contain' -%}
+  {%- endif -%}
+
+  <div class="pc-media {% if settings.thumbnails_border_style == 'image' %}border--radius overflow-hidden{% endif %}">
+    <div class="pc-media__frame {{ settings.thumbnails_ratio }} color__bg-overlay-1">
+      <a class="pc-media__slide block w-full h-full" href="{{ v_url }}">
+        {%- if v_image -%}
+          <img
+            class="pc-media__img w-full h-full {{ v_object_cls }}"
+            src="{{ v_image | image_url: width: 600 }}"
+            srcset="{{ v_image | image_url: width: 400 }} 400w, {{ v_image | image_url: width: 600 }} 600w, {{ v_image | image_url: width: 900 }} 900w, {{ v_image | image_url: width: 1200 }} 1200w"
+            sizes="(min-width: 768px) 33vw, 50vw"
+            alt="{{ v_image.alt | default: product.title | append: ' — ' | append: variant.title | escape }}"
+            loading="lazy"
+            width="{{ v_image.width }}"
+            height="{{ v_image.height }}"
+          >
+        {%- endif -%}
+      </a>
+    </div>
+  </div>
+
+  {%- comment -%} Title + price (desktop) {%- endcomment -%}
+  <a href="{{ v_url }}" class="hidden md:block hover:no-underline no-underline whitespace-normal relative flex flex-col justify-end {{ settings.thumbnails_alignment }}"
+    style="padding: {{ settings.product_card_content_pad_v | default: 8 }}px {{ settings.product_card_content_pad_h | default: 8 }}px 0;">
+    <h3 class="!leading-tight" aria-level="2"
+      style="margin: 0 0 {{ settings.product_card_title_mb | default: 4 }}px 0; padding: 0 {{ settings.product_card_title_pad_h | default: 0 }}px; font-family: var({{ settings.product_card_title_font | default: '--type-font-body-family' }}); font-size: {{ settings.product_card_title_size_desktop | default: 16 }}px; font-weight: {{ settings.product_card_title_weight | default: '500' }}; text-transform: {{ settings.product_card_title_case | default: 'none' }}; letter-spacing: {{ settings.product_card_title_ls | default: '0em' }};{% if settings.product_card_title_color %} color: {{ settings.product_card_title_color }};{% endif %}">
+      {{ variant.title }}
+    </h3>
+
+    {%- assign _pf = settings.product_card_price_font | default: '--type-font-body-family' -%}
+    {%- assign _ps = settings.product_card_price_size | default: 12 -%}
+    {%- assign _pw = settings.product_card_price_weight | default: '700' -%}
+    {%- assign _pcase = settings.product_card_price_case | default: 'none' -%}
+    {%- assign _pls = settings.product_card_price_ls | default: '0em' -%}
+    {%- assign _popacity = settings.product_card_price_opacity | default: 75 | divided_by: 100.0 -%}
+    <div style="font-family: var({{ _pf }}); font-size: {{ _ps }}px; font-weight: {{ _pw }}; text-transform: {{ _pcase }}; letter-spacing: {{ _pls }}; opacity: {{ _popacity }};">
+      {%- if v_on_sale and hide_sale == false -%}
+        <span style="text-decoration: line-through; opacity: 0.6; margin-right: 6px;">{{ variant.compare_at_price | money }}</span>
+        <span>{{ variant.price | money }}</span>
+      {%- else -%}
+        {{ variant.price | money }}
+      {%- endif -%}
+    </div>
+  </a>
+
+  {%- comment -%} Title + price (mobile) {%- endcomment -%}
+  <a href="{{ v_url }}" class="md:hidden block hover:no-underline no-underline whitespace-normal relative flex flex-col justify-end {{ settings.thumbnails_alignment }}"
+    style="padding: {{ settings.product_card_content_pad_v_mobile | default: 6 }}px {{ settings.product_card_content_pad_h_mobile | default: 6 }}px 0;">
+    <h3 class="!leading-tight" aria-level="2"
+      style="margin: 0 0 {{ settings.product_card_title_mb | default: 4 }}px 0; padding: 0 {{ settings.product_card_title_pad_h | default: 0 }}px; font-family: var({{ settings.product_card_title_font | default: '--type-font-body-family' }}); font-size: {{ settings.product_card_title_size_mobile | default: 14 }}px; font-weight: {{ settings.product_card_title_weight | default: '500' }}; text-transform: {{ settings.product_card_title_case | default: 'none' }}; letter-spacing: {{ settings.product_card_title_ls | default: '0em' }};{% if settings.product_card_title_color %} color: {{ settings.product_card_title_color }};{% endif %}">
+      {{ variant.title }}
+    </h3>
+    <div style="font-family: var({{ _pf }}); font-size: {{ _ps }}px; font-weight: {{ _pw }}; opacity: {{ _popacity }};">
+      {%- if v_on_sale and hide_sale == false -%}
+        <span style="text-decoration: line-through; opacity: 0.6; margin-right: 6px;">{{ variant.compare_at_price | money }}</span>
+        <span>{{ variant.price | money }}</span>
+      {%- else -%}
+        {{ variant.price | money }}
+      {%- endif -%}
+    </div>
+  </a>
+</div>

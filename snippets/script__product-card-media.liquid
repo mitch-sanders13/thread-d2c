@@ -1,0 +1,502 @@
+{% comment %}
+  snippets/script__product-card-media.liquid
+
+  One inline script (rendered once from the layout) powering the product-card
+  image carousel + swatch interactions. Pure event delegation — a single
+  document-level handler services every card on the page.
+
+  Responsibilities:
+    1. Seamless loop: clone first/last slides at the opposite ends so
+       scrolling past the last image shows the first and vice versa.
+       When a scroll settles on a clone, silently jump to its real
+       counterpart — same image, so the user never sees a glitch.
+    2. Arrow clicks → scroll ±1 DOM slide. Wrap is handled by (1).
+    3. Scroll → update --pc-active on .pc-media so the mobile progress dot
+       tracks the currently-visible real image, not the clone position.
+    4. Swatch hover (desktop) → overlay the swatch's featured image on the
+       current slide via .pc-media__preview. Mouseleave → hide.
+    5. Swatch tap (touch) → fetch the variant's product JSON and rewrite
+       the track's real slides in-place (images + hrefs), then rebuild
+       the loop around the new set. No absolute-positioned overlay, so
+       the scroll track remains the topmost touch surface.
+
+  Render once from layout/theme.liquid (there's a window-level guard so extra
+  renders are no-ops).
+{% endcomment %}
+
+<script>
+(function () {
+  if (window.__pcMediaInit) return;
+  window.__pcMediaInit = true;
+
+  var TOUCH = window.matchMedia('(hover: none)').matches || !window.matchMedia('(pointer: fine)').matches;
+
+  function q(sel, root) { return (root || document).querySelector(sel); }
+
+  // ---------- Image track (arrows + progress) ----------
+
+  function updateArrowState(/* media */) {
+    // Carousel loops — arrows are never disabled; they just wrap around.
+    // Kept as a stub so code paths referencing it still work.
+  }
+
+  function updateProgress(media) {
+    var track = q('[data-pc-track]', media);
+    var progress = q('[data-pc-progress]', media);
+    if (!track || !progress) return;
+    var total = parseInt(media.dataset.pcCount, 10) || 1;
+    if (total < 2) return;
+    var slideW = track.clientWidth;
+    var domIndex = slideW > 0 ? Math.round(track.scrollLeft / slideW) : 0;
+    // DOM layout with clones: [clone_last, 0..total-1, clone_first].
+    // Map DOM index → real index so the progress dot tracks the image
+    // the user actually sees, not the clone position.
+    var active;
+    if (domIndex <= 0)             active = total - 1;
+    else if (domIndex >= total + 1) active = 0;
+    else                            active = domIndex - 1;
+    setProgressActive(progress, active);
+  }
+
+  /* Position the dot by writing the transform directly on it. The old
+     approach set only the --pc-active custom property on the parent and
+     let CSS compute translateX(calc(100% * var(--pc-active))) — iOS
+     Safari often fails to recompute a descendant's transform when only
+     an inherited custom property changes, so the images scrolled but
+     the dot never moved. The variable is still written for the CSS
+     fallback/initial paint. */
+  function setProgressActive(progress, active) {
+    progress.style.setProperty('--pc-active', active);
+    var dot = q('[data-pc-progress-dot]', progress);
+    if (dot) dot.style.transform = 'translateX(' + (active * 100) + '%)';
+  }
+
+  // Seamless loop: clone last slide before the first, clone first slide
+  // after the last. After a scroll settles on a clone we instantly
+  // (scroll-behavior: auto) jump to its real counterpart — same image,
+  // so the user sees no glitch.
+  //
+  // "Real" slides exclude clones AND any slides hidden via display:none
+  // (hidden slides come from restoring a smaller original set after a
+  // swatch swap to a variant with more images).
+  function getRealSlides(track) {
+    var candidates = track.querySelectorAll('.pc-media__slide:not([data-pc-clone])');
+    var out = [];
+    for (var i = 0; i < candidates.length; i++) {
+      if (candidates[i].style.display !== 'none') out.push(candidates[i]);
+    }
+    return out;
+  }
+
+  function setupLoop(media) {
+    var track = q('[data-pc-track]', media);
+    if (!track) return;
+    if (track.__pcLooped) return;
+    var realSlides = getRealSlides(track);
+    var total = realSlides.length;
+    if (total < 2) return;
+    track.__pcLooped = true;
+
+    var cloneLast  = realSlides[total - 1].cloneNode(true);
+    var cloneFirst = realSlides[0].cloneNode(true);
+    cloneLast.setAttribute('data-pc-clone', 'last');
+    cloneFirst.setAttribute('data-pc-clone', 'first');
+    // Prevent duplicate eager-loads from clones.
+    var cLastImg = cloneLast.querySelector('img');
+    if (cLastImg) cLastImg.setAttribute('loading', 'lazy');
+    var cFirstImg = cloneFirst.querySelector('img');
+    if (cFirstImg) cFirstImg.setAttribute('loading', 'lazy');
+
+    track.insertBefore(cloneLast, realSlides[0]);
+    track.appendChild(cloneFirst);
+
+    // Land on real slide 0 (DOM index 1) instantly.
+    var prev = track.style.scrollBehavior;
+    track.style.scrollBehavior = 'auto';
+    track.scrollLeft = track.clientWidth;
+    requestAnimationFrame(function () { track.style.scrollBehavior = prev; });
+  }
+
+  function teardownLoop(media) {
+    var track = q('[data-pc-track]', media);
+    if (!track) return;
+    var clones = track.querySelectorAll('[data-pc-clone]');
+    for (var i = 0; i < clones.length; i++) clones[i].remove();
+    track.__pcLooped = false;
+  }
+
+  function handleScrollEnd(media) {
+    var track = q('[data-pc-track]', media);
+    if (!track || !track.__pcLooped) return;
+    var total = parseInt(media.dataset.pcCount, 10) || 0;
+    if (total < 2) return;
+    var slideW = track.clientWidth;
+    if (!slideW) return;
+    var domIndex = Math.round(track.scrollLeft / slideW);
+    // clone_last is at DOM 0 → jump to real last at DOM total.
+    // clone_first is at DOM total+1 → jump to real first at DOM 1.
+    if (domIndex <= 0) {
+      var prev = track.style.scrollBehavior;
+      track.style.scrollBehavior = 'auto';
+      track.scrollLeft = total * slideW;
+      requestAnimationFrame(function () { track.style.scrollBehavior = prev; });
+    } else if (domIndex >= total + 1) {
+      var prev2 = track.style.scrollBehavior;
+      track.style.scrollBehavior = 'auto';
+      track.scrollLeft = slideW;
+      requestAnimationFrame(function () { track.style.scrollBehavior = prev2; });
+    }
+  }
+
+  function wireMedia(media) {
+    if (media.__pcWired) return;
+    media.__pcWired = true;
+
+    var track = q('[data-pc-track]', media);
+    if (!track) return;
+
+    var scrollEndTimer;
+    track.addEventListener('scroll', function () {
+      updateArrowState(media);
+      updateProgress(media);
+      /* The progress bar is now always visible (CSS in
+         theme__styles.liquid) — the old show-on-scroll /
+         hide-after-900ms dataset toggling was removed so the swipe
+         affordance stays discoverable. */
+      clearTimeout(scrollEndTimer);
+      scrollEndTimer = setTimeout(function () { handleScrollEnd(media); }, 90);
+    }, { passive: true });
+
+    setupLoop(media);
+
+    // After fonts/images settle, reassert real-slide-0 position in case layout
+    // nudged the snap point.
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        var prev = track.style.scrollBehavior;
+        track.style.scrollBehavior = 'auto';
+        track.scrollLeft = track.__pcLooped ? track.clientWidth : 0;
+        track.style.scrollBehavior = prev;
+        updateArrowState(media);
+        var progress = q('[data-pc-progress]', media);
+        if (progress) setProgressActive(progress, 0);
+      });
+    });
+  }
+
+  // Delegated click for arrow buttons. With clones in place the click just
+  // scrolls ±1 DOM slide; if that lands on a clone, handleScrollEnd will
+  // jump instantly to the matching real slide after the smooth scroll
+  // settles. So wrapping from slide N-1 → 0 or 0 → N-1 feels continuous.
+  document.addEventListener('click', function (e) {
+    var arrow = e.target.closest && e.target.closest('.pc-media__arrow');
+    if (!arrow) return;
+    var media = arrow.closest('.pc-media');
+    if (!media) return;
+    var track = q('[data-pc-track]', media);
+    if (!track) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var total = parseInt(media.dataset.pcCount, 10) || 1;
+    var slideW = track.clientWidth;
+    if (!slideW || total < 2) return;
+    var currentDom = Math.round(track.scrollLeft / slideW);
+    var dir = arrow.hasAttribute('data-pc-prev') ? -1 : 1;
+    var nextDom = currentDom + dir;
+    track.scrollTo({ left: nextDom * slideW, behavior: 'smooth' });
+  });
+
+  // ---------- Swatch hover / tap → card preview swap ----------
+
+  function setPreview(media, imageUrl, swatchUrl) {
+    var previewImg  = q('[data-pc-preview]', media);
+    var previewLink = q('[data-pc-preview-link]', media);
+    if (!previewImg || !previewLink) return;
+    if (imageUrl) {
+      previewImg.src = imageUrl;
+      previewLink.removeAttribute('hidden');
+      media.dataset.pcPreviewActive = 'true';
+    }
+    if (swatchUrl) previewLink.setAttribute('href', swatchUrl);
+  }
+
+  function clearPreview(media) {
+    var previewImg  = q('[data-pc-preview]', media);
+    var previewLink = q('[data-pc-preview-link]', media);
+    if (!previewImg || !previewLink) return;
+    previewImg.removeAttribute('src');
+    previewLink.setAttribute('hidden', '');
+    media.dataset.pcPreviewActive = 'false';
+    var base = media.dataset.pcBaseHref;
+    if (base) previewLink.setAttribute('href', base);
+    delete media.dataset.pcStickySwatch;
+  }
+
+  function cardRootFromSwatch(swatch) {
+    // The swatch list sits inside the same product-card root as .pc-media.
+    // Walk up to find the nearest card container with a .pc-media inside.
+    var node = swatch;
+    for (var depth = 0; node && depth < 15; depth++) {
+      var media = node.querySelector && node.querySelector('.pc-media');
+      if (media) return { media: media, root: node };
+      node = node.parentElement;
+    }
+    return null;
+  }
+
+  function cardRootFromSwatchWrap(wrap) {
+    var node = wrap;
+    for (var depth = 0; node && depth < 15; depth++) {
+      var media = node.querySelector && node.querySelector('.pc-media');
+      if (media) return { media: media, root: node };
+      node = node.parentElement;
+    }
+    return null;
+  }
+
+  // Desktop hover: update preview when entering a swatch. Persist while the
+  // mouse moves over whitespace INSIDE the swatch wrap. Only clear when the
+  // mouse leaves the entire swatch wrap.
+  document.addEventListener('mouseenter', function (e) {
+    if (TOUCH) return;
+    var t = e.target;
+    if (!t || !t.classList || !t.classList.contains('tw-swatch')) return;
+    var ctx = cardRootFromSwatch(t);
+    if (!ctx) return;
+    if (ctx.media.dataset.pcStickySwatch === 'true') return;
+    setPreview(ctx.media, t.getAttribute('data-swatch-image'), t.getAttribute('data-swatch-url'));
+  }, true);
+
+  document.addEventListener('mouseleave', function (e) {
+    if (TOUCH) return;
+    var t = e.target;
+    if (!t || !t.classList || !t.classList.contains('tw-swatch-wrap')) return;
+    var ctx = cardRootFromSwatchWrap(t);
+    if (!ctx) return;
+    if (ctx.media.dataset.pcStickySwatch === 'true') return;
+    clearPreview(ctx.media);
+  }, true);
+
+  // ---------- Touch: swap the track's images in-place to the variant ----------
+  // On mobile we don't use the absolute-positioned overlay (it blocks the
+  // carousel scroll track). Instead we rewrite each slide's <img src> and
+  // <a href> to the selected swatch's product, reset scroll to 0, and let
+  // the normal touch carousel continue to work on the new image set.
+
+  var productCache = {};
+
+  function getHandleFromUrl(url) {
+    var m = url && url.match(/\/products\/([^/?#]+)/);
+    return m ? m[1] : null;
+  }
+
+  function loadProduct(handle) {
+    if (!handle) return Promise.reject();
+    if (productCache[handle]) return productCache[handle];
+    var p = fetch('/products/' + handle + '.js', { credentials: 'same-origin' })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .catch(function (err) { delete productCache[handle]; throw err; });
+    productCache[handle] = p;
+    return p;
+  }
+
+  function rememberOriginal(media) {
+    if (media.__pcOriginalCaptured) return;
+    media.__pcOriginalCaptured = true;
+    var track = q('[data-pc-track]', media);
+    if (!track) return;
+    // Only capture real slides (skip clones added by setupLoop).
+    var slides = track.querySelectorAll('.pc-media__slide:not([data-pc-clone])');
+    var saved = [];
+    for (var i = 0; i < slides.length; i++) {
+      var img = slides[i].querySelector('.pc-media__img');
+      saved.push({
+        href: slides[i].getAttribute('href'),
+        src: img ? img.getAttribute('src') : null,
+        srcset: img ? img.getAttribute('srcset') : null,
+        alt: img ? img.getAttribute('alt') : null,
+        hidden: slides[i].style.display === 'none'
+      });
+    }
+    media.__pcOriginalSlides = saved;
+    media.__pcOriginalCount = parseInt(media.dataset.pcCount, 10) || slides.length;
+    media.__pcOriginalBaseHref = media.dataset.pcBaseHref || '';
+  }
+
+  function applySlideImages(media, imageUrls, baseHref, altText) {
+    var track = q('[data-pc-track]', media);
+    if (!track) return;
+    // Rip out clones before mutating real slides so we're not operating
+    // on stale cloned DOM. setupLoop rebuilds them at the end.
+    teardownLoop(media);
+    var slides = track.querySelectorAll('.pc-media__slide:not([data-pc-clone])');
+    var max = Math.min(slides.length, imageUrls.length);
+    for (var i = 0; i < max; i++) {
+      var slide = slides[i];
+      slide.style.display = '';
+      if (baseHref) slide.setAttribute('href', baseHref);
+      var img = slide.querySelector('.pc-media__img');
+      if (img) {
+        var raw = imageUrls[i];
+        var src = typeof raw === 'string' ? (raw.split('?')[0] + '?width=600') : raw;
+        img.removeAttribute('srcset');
+        img.setAttribute('src', src);
+        if (altText) img.setAttribute('alt', altText);
+      }
+    }
+    for (var j = max; j < slides.length; j++) { slides[j].style.display = 'none'; }
+    media.dataset.pcCount = String(max);
+    if (baseHref) media.dataset.pcBaseHref = baseHref;
+    setupLoop(media);
+    // setupLoop snaps to real-slide-0 when looped; otherwise reset manually.
+    if (!track.__pcLooped) {
+      var prev = track.style.scrollBehavior;
+      track.style.scrollBehavior = 'auto';
+      track.scrollLeft = 0;
+      requestAnimationFrame(function () { track.style.scrollBehavior = prev; });
+    }
+    var progress = q('[data-pc-progress]', media);
+    if (progress) {
+      setProgressActive(progress, 0);
+      progress.style.setProperty('--pc-total', max);
+    }
+  }
+
+  function restoreOriginalSlides(media) {
+    var saved = media.__pcOriginalSlides;
+    if (!saved) return;
+    var track = q('[data-pc-track]', media);
+    if (!track) return;
+    teardownLoop(media);
+    var slides = track.querySelectorAll('.pc-media__slide:not([data-pc-clone])');
+    for (var i = 0; i < slides.length; i++) {
+      var s = saved[i];
+      if (!s) { slides[i].style.display = 'none'; continue; }
+      slides[i].style.display = s.hidden ? 'none' : '';
+      if (s.href) slides[i].setAttribute('href', s.href);
+      var img = slides[i].querySelector('.pc-media__img');
+      if (img) {
+        if (s.src) img.setAttribute('src', s.src); else img.removeAttribute('src');
+        if (s.srcset) img.setAttribute('srcset', s.srcset); else img.removeAttribute('srcset');
+        if (s.alt != null) img.setAttribute('alt', s.alt);
+      }
+    }
+    media.dataset.pcCount = String(media.__pcOriginalCount);
+    media.dataset.pcBaseHref = media.__pcOriginalBaseHref || '';
+    setupLoop(media);
+    if (!track.__pcLooped) {
+      var prev = track.style.scrollBehavior;
+      track.style.scrollBehavior = 'auto';
+      track.scrollLeft = 0;
+      requestAnimationFrame(function () { track.style.scrollBehavior = prev; });
+    }
+    var progress = q('[data-pc-progress]', media);
+    if (progress) {
+      setProgressActive(progress, 0);
+      progress.style.setProperty('--pc-total', media.__pcOriginalCount);
+    }
+  }
+
+  document.addEventListener('click', function (e) {
+    if (!TOUCH) return;
+    var t = e.target && e.target.closest && e.target.closest('.tw-swatch');
+    if (!t) return;
+    var ctx = cardRootFromSwatch(t);
+    if (!ctx) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Visual selection cue (within this swatch row only).
+    var sibs = t.parentElement ? t.parentElement.querySelectorAll('.tw-swatch') : [];
+    for (var i = 0; i < sibs.length; i++) sibs[i].classList.remove('tw-swatch--current');
+    t.classList.add('tw-swatch--current');
+
+    rememberOriginal(ctx.media);
+
+    var swatchUrl = t.getAttribute('data-swatch-url');
+    var handle = getHandleFromUrl(swatchUrl);
+    var originalHandle = getHandleFromUrl(ctx.media.__pcOriginalBaseHref || '');
+
+    if (handle && handle === originalHandle) {
+      restoreOriginalSlides(ctx.media);
+      return;
+    }
+
+    if (!handle) return;
+
+    loadProduct(handle).then(function (product) {
+      if (!product || !product.images || !product.images.length) return;
+      applySlideImages(ctx.media, product.images, swatchUrl, product.title || '');
+    }).catch(function () {
+      // Network/parse failure — leave the carousel untouched rather than
+      // leaving the user stranded.
+    });
+  });
+
+  // ---------- Card hover → second-image crossfade (desktop) ----------
+  // Reuses the swatch preview overlay. Active only when the card rendered
+  // with data-pc-hover-src (theme setting on + 2 or more images), the
+  // pointer is fine, and no swatch preview owns the overlay. The overlay
+  // fades via the existing .pc-media__preview-link opacity transition.
+
+  var REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.addEventListener('mouseenter', function (e) {
+    if (TOUCH || REDUCED_MOTION) return;
+    var t = e.target;
+    if (!t || !t.classList || !t.classList.contains('pc-media')) return;
+    var src = t.dataset.pcHoverSrc;
+    if (!src) return;
+    if (t.dataset.pcPreviewActive === 'true') return; // swatch preview owns the overlay
+    if (t.dataset.pcStickySwatch === 'true') return;
+    setPreview(t, src, null);
+    t.dataset.pcHoverPreview = 'true';
+  }, true);
+
+  document.addEventListener('mouseleave', function (e) {
+    if (TOUCH) return;
+    var t = e.target;
+    if (!t || !t.classList || !t.classList.contains('pc-media')) return;
+    if (t.dataset.pcHoverPreview !== 'true') return;
+    delete t.dataset.pcHoverPreview;
+    if (t.dataset.pcStickySwatch === 'true') return;
+    clearPreview(t);
+  }, true);
+
+  // Arrow clicks browse the carousel underneath — drop the crossfade so
+  // the user actually sees the slides change.
+  document.addEventListener('click', function (e) {
+    var arrow = e.target.closest && e.target.closest('[data-pc-prev], [data-pc-next]');
+    if (!arrow) return;
+    var media = arrow.closest('.pc-media');
+    if (!media || media.dataset.pcHoverPreview !== 'true') return;
+    delete media.dataset.pcHoverPreview;
+    clearPreview(media);
+  }, true);
+
+  // ---------- Initial scan + observer for dynamic DOM ----------
+
+  function scan(root) {
+    var list = (root || document).querySelectorAll('.pc-media');
+    for (var i = 0; i < list.length; i++) wireMedia(list[i]);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { scan(document); });
+  } else {
+    scan(document);
+  }
+
+  new MutationObserver(function (mutations) {
+    for (var i = 0; i < mutations.length; i++) {
+      var added = mutations[i].addedNodes;
+      for (var j = 0; j < added.length; j++) {
+        var n = added[j];
+        if (n.nodeType !== 1) continue;
+        if (n.classList && n.classList.contains('pc-media')) { wireMedia(n); continue; }
+        if (n.querySelectorAll) scan(n);
+      }
+    }
+  }).observe(document.body, { childList: true, subtree: true });
+})();
+</script>

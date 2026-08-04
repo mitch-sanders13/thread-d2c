@@ -1,0 +1,166 @@
+<!-- snippets/product__upsell.liquid -->
+{% comment %} 
+  Block to display a upsell within product block loop.
+
+  Accepts:
+    - blocksettings: liquid object of block settings
+
+  Usage:
+    {% render 'product__upsell', 
+      blocksettings: block.settings %}
+
+  Globals:
+    - settings.thumbmails_color_scheme: color scheme of thumbnails
+
+  Possible enhancements: 
+    - Fix for duplicate IDs - quantity
+  
+  Pro tips:
+    - Use the Search and Discovery app to update and set custom upsells.
+    - Upsells can be set to related or complimentary products.
+{% endcomment %}
+
+<section 
+  x-data="{
+    initialLoad: true,
+    loadingRecomendations: false,
+    complementary_products: [],
+    getRecomendations(){
+      fetch(window.Shopify.routes.root + 'recommendations/products.json?product_id={{ product.id }}&limit=' + ({{ blocksettings.products_count }} + 4) + '&intent={{ blocksettings.intent }}')
+        .then(response => response.json())
+        .then(({ products }) => {
+          const visibleProducts = (products || [])
+            .filter(p => p && p.available && p.url)
+            .filter(p => !(p.tags || []).includes('hiderecommendation'));
+          this.complementary_products = visibleProducts.slice(0, {{ blocksettings.products_count }});
+          this.loadingRecomendations = this.complementary_products.length > 0;
+          this.initialLoad = false;
+        });
+    }
+  }"
+  x-init="getRecomendations();"
+  x-show="complementary_products.length > 0">
+
+  <div x-show="initialLoad">
+    <div class="pdp-upsell-title type__nav text-left p-4">
+      {{ blocksettings.title }}
+    </div>
+    <div class="flex flex-col pb-2 px-4">
+      <template x-for=" i in {{ blocksettings.products_count }}">
+        {% render 'component__skeleton-upsell-item' %}
+      </template>
+    </div>
+  </div>
+  
+  <div x-init="getRecomendations();"
+    x-show="complementary_products.length > 0"
+    x-cloak>
+    <div class="pdp-upsell-title type__nav text-left p-4">
+      {{ blocksettings.title }}
+    </div>
+    <div class="flex flex-col pb-2 px-4">
+      <template x-for="(item, index) in complementary_products">
+        <div :class="'relative snap-center mb-2 flex justify-center flex-none whitespace-normal border--width border--radius overflow-hidden color__border-divider-1 upsell upsell--' + item.id"
+        x-show="item && item.available && item.url && !(item.tags || []).includes('hiderecommendation')">
+
+          <div class="color__bg-body color__text flex items-center w-full">
+
+            <div class="w-[25%] h-full">
+              <div class="object-cover flex items-center aspect-[1/1] aspect-w-1 aspect-h-1 h-full
+                {{ settings.thumbmails_color_scheme }}">
+                <a :href="item && item.url ? `${ item.url }` : '#'">
+                  <img class="w-full h-full object-cover aspect-[1/1] {{ settings.thumbmails_color_scheme }}"
+                    width="200"
+                    loading="lazy"
+                    :src="`${ item.featured_image }`" 
+                    :alt="`${ item.title }`" />
+                </a>
+              </div>
+            </div>
+
+            <div class="flex flex-row items-center justify-between flex-grow gap-2 p-4 text-left">
+              <a class="no-underline hover:no-underline" :href="`${ item.url }`">   
+                <div class="grow" x-bind:data-product-id="`${ item.id }`">
+                  <p class="mb-0 type--small !leading-tight type__heading"
+                    x-text="`${item.title}`"></p>
+                  <p class="type--small mb-0 !leading-tight" 
+                    x-text="Shopify.formatMoney(item.price,'{{ cart.currency.symbol }}')"></p>
+                </div>
+              </a>
+
+              <div>
+                <form class="flex flex-wrap" 
+                  action="/cart/add" 
+                  method="post" 
+                  enctype="multipart/form-data"
+                  x-data="{
+                    defaultVariantId: item.variants[0].id,
+                    defaultSellingPlanId: 0,
+                    quantity: 1,
+                    button_loading: false
+                  }"
+                  @submit.prevent="
+                    addCartItem(defaultVariantId, defaultSellingPlanId, quantity, true); 
+                    button_loading = true; 
+                    setTimeout(function(){ button_loading = false}, 500);
+                  ">                      
+                    <div class="!w-full" 
+                      x-show="item.variants.length == 1"> 
+                      <input name="id" 
+                        type="hidden"
+                        value="item.variants[0].id">
+                      <label 
+                        :for="'upsell_item_quantity_' + item.variants[0].id" class="sr-only">{{ 'products.general.quantity' | t }}</label>
+                      <input :id="'upsell_item_quantity_' + item.variants[0].id"
+                        class="!hidden" 
+                        type="text" 
+                        name="quantity" 
+                        value="1" 
+                        min="1"
+                        max="" 
+                        x-model="quantity">
+                      <button type="submit" 
+                        role="button"   
+                        class="btn btn--secondary btn--small btn--load"
+                        :class="{ 'btn--loading' : cart_loading && button_loading }"
+                        :disabled="button_loading">
+                        <div class="btn__content">{{ 'products.general.short_add_label' | t }}</div>
+                        <div class="btn__spinner">
+                          {% render 'component__icon', icon: 'spinner', size: '24', class: '' %}
+                        </div>
+                      </button>
+                    </div>
+              
+                    <div>
+                      <button type="button" 
+                        role="button"
+                        class="btn btn--secondary btn--small btn--load" 
+                        :class="{ 'btn--loading' : button_loading }" 
+                        :disabled="button_loading"
+                        @click="
+                          button_loading = true; 
+                          fetchAndRenderQuickAdd(item.handle, 'upsell');
+                          setTimeout(function(){ button_loading = false}, 500);"
+                        x-show="item.variants.length !== 1">
+        
+                        <div class="btn__content">{{ 'products.general.short_add_label' | t }}</div>
+                        <div class="btn__spinner">
+                          {% render 'component__icon', icon: 'spinner', size: '24', class: '' %}
+                        </div>
+                      </button>
+                    </div>
+
+                </form>
+              </div>
+            </div>
+
+          </div>
+  
+          {%- comment -%}quick add popup{%- endcomment -%}
+          <div :id="'js:quickAdd-upsell-' + item.handle"></div>
+  
+        </div>
+      </template>
+    </div>
+  </div>
+</section>

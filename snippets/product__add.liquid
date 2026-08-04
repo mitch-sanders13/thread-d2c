@@ -1,0 +1,481 @@
+<!-- snippets/product__add.liquid -->
+{% comment %}
+  Add to cart block for product sections. Includes quantity selector, variant picker, subscription options and addtional content.
+
+  Accepts:
+    - blocksettings: liquid object of block settings
+    - featured: boolean to assign product object from section settings, set this to true if block is used within a section rather than product template
+
+  Usage:
+    {% render 'product__add',
+      blocksettings: block.settings,
+      featured: true %}
+
+  Globals:
+    - settings.product_variant_selection: set variants style to dropdown or buttons
+    - settings.product_color_selection: set color option picker style to dropdown, buttons or swatches
+    - settings.type_seperator: setting to pick the type of seperator between text
+
+  Possible enhancements:
+    - Include nesting container within snippet.
+{% endcomment %}
+
+{% if featured %}
+  {%- assign product = section.settings.product -%}
+{% endif %}
+
+{%- comment -%}add{%- endcomment -%}
+<div class="pdp-atc-sticky-wrap">
+<div class="pdp-atc-content">
+<div class="pdp-atc-wrap flex items-stretch" data-pdp-block{% if blocksettings.enable_sticky_mobile %} data-pdp-atc-anchor{% endif %}>
+  <div class="pdp-atc-main px-4 grow">
+    {% comment %} Old attentive BIS {% endcomment %}
+    {% comment %}
+      <div
+        x-show="!defaultAvailable && defaultVariantExists"
+        x-cloak>
+        <script
+          id="attn-waitlist-eligibility"
+          type="application/json">
+          {
+          {%- liquid
+          for variant in product.variants
+          assign eligibility = 'false'
+          if variant.inventory_quantity <= 0
+          assign eligibility = 'true'
+          endif
+          assign entry = '"' | append: variant.id | append: '":' | append: eligibility
+          unless forloop.last
+          assign entry = entry | append: ','
+          endunless
+
+          echo entry
+          endfor
+          -%}
+          }
+        </script>
+        <div id="attn-waitlist-trigger" class="btn btn--load !w-full h-full max-w-[350px]"></div>
+      </div>
+    {% endcomment %}
+
+    {% comment %} Choose options {% endcomment %}
+    <button
+      class="btn btn--load !w-full btn--plain h-full"
+      :class="{ 'btn--loading' : cart_loading && button_loading }"
+      type="button"
+      role="button"
+      disabled
+      :disabled="button_loading"
+      @click="choosing = true"
+      x-show="buttonDisabled && defaultAvailable"
+      x-cloak
+    >
+      <div class="btn__content">
+        {{ 'products.general.choose_options' | t }}
+      </div>
+    </button>
+
+    {% comment %} Sold Out - Original Position {% endcomment %}
+    <div
+      class="btn !w-full h-full cursor-default"
+      style="border: 2px solid {{ settings.foreground_disabled_light }} !important; background-color: {{ settings.background_body_light }} !important; color: {{ settings.foreground_disabled_light }} !important;"
+      x-show="!defaultAvailable && defaultVariantExists"
+      x-cloak
+    >
+      <div class="btn__content" style="color: {{ settings.foreground_disabled_light }} !important;">
+        {{ 'products.general.sold_out' | t }}
+      </div>
+    </div>
+
+    {% comment %} Unavailable {% endcomment %}
+    <button
+      class="btn btn--load !w-full btn--plain h-full"
+      :class="{ 'btn--loading' : cart_loading && button_loading }"
+      type="button"
+      role="button"
+      disabled
+      :disabled="button_loading"
+      x-show="!defaultVariantExists && allOptionsSelected"
+      x-cloak
+    >
+      <div class="btn__content">
+        {{ 'products.general.unavailable' | t }}
+      </div>
+    </button>
+
+    {% comment %} Add to cart
+      Click handler calls addCartItem directly — same pattern as the
+      sticky bar's ATC. Avoids relying on the form-submit handler that
+      gets attached via setAttribute + Alpine's MutationObserver (which
+      has proven flaky on this PDP after the bundle preview work).
+    {% endcomment %}
+    <button
+      class="pdp-atc-btn btn btn--primary btn--load h-full !w-full"
+      type="button"
+      role="button"
+      :class="{ 'btn--loading' : cart_loading && button_loading }"
+      :disabled="button_loading || incomplete_fields"
+      @click.prevent="
+        if (cart_behavior === 'drawer') cart_drawer = true;
+        addCartItem(defaultVariantId, defaultSellingPlanId, quantity, true);
+        button_loading = true;
+        setTimeout(function(){ button_loading = false }, 500);"
+      x-show="!buttonDisabled && defaultVariantExists && defaultAvailable"
+    >
+      <div class="btn__content">
+        {% if product.metafields.custom.button_text %}
+          {{ product.metafields.custom.button_text }}
+        {% else %}
+          {{ 'products.general.add_to_cart' | t }}
+        {% endif %}
+      </div>
+      <div class="btn__spinner">
+        {% render 'component__icon', icon: 'spinner', size: '24', class: '' %}
+      </div>
+    </button>
+  </div>
+
+  {% if blocksettings.enable_quantity %}
+    <div class="pdp-qty-wrap shrink-[2] pr-4 w-2/5">
+      <div
+        class="pdp-qty-box relative flex w-full overflow-hidden color__text color__border-divider-1 border--width hover:color__border-selected-1 border__input--radius"
+        x-data="
+          {
+            button_loading: false
+          }
+        "
+      >
+        <button
+          class="btn--smaller shrink-0 !rounded-none border--r-width color__border-divider-1"
+          title="{{ 'cart.general.decrease' | t }}"
+          :disabled="button_loading"
+          @click="
+            quantity--;
+            handleForm();
+            button_loading = true;
+            setTimeout(function(){ button_loading = false}, 500);
+          "
+        >
+          {% render 'component__icon', icon: 'minus', size: '14', class: '' %}
+        </button>
+        <input
+          id="{{ product.id }}-quantity"
+          class="pdp-qty-input form-input !border-0 text-center !rounded-none"
+          type="text"
+          name="quantity"
+          value="1"
+          placeholder="1"
+          min="1"
+          x-model="quantity"
+          @change.debounce="
+            button_loading = true;
+            handleForm();
+            setTimeout(function(){ button_loading = false}, 500);
+          "
+        >
+        <div
+          class="btn__spinner btn--smaller !w-auto !color__bg-body"
+          :class="{ '!visible color__bg-overlay-1 z-10' : button_loading }"
+        >
+          {% render 'component__icon', icon: 'spinner', size: '16', class: '' %}
+        </div>
+        <button
+          class="btn--smaller shrink-0 !rounded-none border--l-width color__border-divider-1"
+          title="{{ 'cart.general.increase' | t }}"
+          :disabled="button_loading"
+          @click="
+            quantity++;
+            handleForm();
+            button_loading = true;
+            setTimeout(function(){ button_loading = false}, 500);
+          "
+        >
+          {% render 'component__icon', icon: 'plus', size: '14', class: '' %}
+        </button>
+      </div>
+    </div>
+  {% endif %}
+
+  {% unless blocksettings.enable_quantity %}
+    <input
+      class="hidden"
+      type="number"
+      name="quantity"
+      placeholder="1"
+      min="1"
+      value="1"
+      x-model="quantity"
+      hidden
+    >
+  {% endunless %}
+
+  {% comment %} Express checkout (Buy It Now) — INSIDE .pdp-atc-main so it
+     inherits the same px-4 horizontal padding as the ATC (a previous
+     placement outside this container rendered it full-bleed). `form` is
+     passed in from product__main.liquid's {% form %} scope (render tags
+     don't inherit it). The hidden name=id input is kept in sync by the
+     style-swap handler in product__related-styles.liquid so Buy It Now
+     always buys the style the customer actually picked. The inline
+     script copies the primary ATC's measured height and corner radius
+     onto the wallet button so the two match exactly, whatever the
+     merchant's button settings are. {% endcomment %}
+  {% if enable_express and form %}
+    <div class="mt-2 pdp-express" data-pdp-express>
+      <input type="hidden" name="id" data-pdp-express-variant value="{{ product.selected_or_first_available_variant.id }}">
+      {{ form | payment_button }}
+    </div>
+    <script>
+      (function () {
+        function matchExpressToAtc() {
+          var atc = document.querySelector('.pdp-atc-btn');
+          var wraps = document.querySelectorAll('[data-pdp-express]');
+          if (!atc || !wraps.length) return;
+          var cs = window.getComputedStyle(atc);
+          var h = atc.offsetHeight;
+          wraps.forEach(function (wrap) {
+            wrap.querySelectorAll('.shopify-payment-button__button').forEach(function (btn) {
+              if (h > 0) {
+                btn.style.minHeight = h + 'px';
+                btn.style.height = h + 'px';
+              }
+              btn.style.borderRadius = cs.borderRadius;
+              btn.style.overflow = 'hidden';
+              btn.style.width = '100%';
+            });
+          });
+        }
+        /* Shopify swaps in the branded wallet button asynchronously —
+           run now, after load, and once more after the payment button
+           script settles. */
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', matchExpressToAtc);
+        } else {
+          matchExpressToAtc();
+        }
+        window.addEventListener('load', function () {
+          matchExpressToAtc();
+          setTimeout(matchExpressToAtc, 1000);
+        });
+      })();
+    </script>
+  {% endif %}
+</div>
+
+{% comment %} Trust icons row — renders inside pdp-atc-content so it follows the sticky bar.
+   Each of the 4 slots accepts a Lucide library icon (preferred when set)
+   OR an uploaded image as fallback. Sizing/color come from the
+   trust_icons_* CSS rules in sections/product__main.liquid. {% endcomment %}
+{% if blocksettings.enable_trust_icons %}
+  {%- assign _trust_size = blocksettings.trust_icons_size | default: 18 -%}
+  <div class="pdp-trust-icons" data-pdp-trust-icons>
+    {% for i in (1..4) %}
+      {%- assign icon_img_key    = 'trust_icon_' | append: i | append: '_img' -%}
+      {%- assign icon_lucide_key = 'trust_icon_' | append: i | append: '_lucide' -%}
+      {%- assign icon_label_key  = 'trust_icon_' | append: i | append: '_label' -%}
+      {%- assign icon_img    = blocksettings[icon_img_key] -%}
+      {%- assign icon_lucide = blocksettings[icon_lucide_key] -%}
+      {%- assign icon_label  = blocksettings[icon_label_key] -%}
+      {% if icon_img != blank or icon_lucide != blank or icon_label != blank %}
+        <div class="pdp-trust-icon">
+          {% if icon_lucide != blank %}
+            <span class="pdp-trust-icon-glyph" aria-hidden="true">
+              {% render 'component__icon', icon: icon_lucide, size: _trust_size, class: '' %}
+            </span>
+          {% elsif icon_img != blank %}
+            <img class="pdp-trust-icon-img" src="{{ icon_img | image_url: width: 96 }}" alt="{{ icon_label | escape }}" loading="lazy" width="48" height="48">
+          {% endif %}
+          {% if icon_label != blank %}
+            <span class="pdp-trust-icon-label">{{ icon_label }}</span>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endif %}
+
+</div>
+</div>
+
+{% if blocksettings.enable_sticky_mobile %}
+{%- comment -%}
+  Sticky ATC bar: a fixed-position clone of the Add to Cart button that
+  appears whenever the native ATC button is outside the viewport (above
+  or below). Uses IntersectionObserver for smooth, scroll-jank-free
+  toggling, and lives inside the same Alpine x-data scope as the native
+  button so variant / loading state stays in sync automatically.
+{%- endcomment -%}
+<div class="pdp-sticky-bar" data-pdp-sticky-bar aria-hidden="true">
+  <div class="pdp-sticky-bar__inner">
+    <button
+      type="button"
+      class="btn btn--load !w-full btn--plain h-full"
+      :class="{ 'btn--loading' : cart_loading && button_loading }"
+      :disabled="button_loading"
+      @click="choosing = true; document.querySelector('.options') && document.querySelector('.options').scrollIntoView({ behavior: 'smooth', block: 'center' });"
+      x-show="buttonDisabled && defaultAvailable"
+      x-cloak
+    >
+      <div class="btn__content">
+        {{ 'products.general.choose_options' | t }}
+      </div>
+    </button>
+
+    <div
+      class="btn !w-full h-full cursor-default"
+      style="border: 2px solid {{ settings.foreground_disabled_light }} !important; background-color: {{ settings.background_body_light }} !important; color: {{ settings.foreground_disabled_light }} !important;"
+      x-show="!defaultAvailable && defaultVariantExists"
+      x-cloak
+    >
+      <div class="btn__content" style="color: {{ settings.foreground_disabled_light }} !important;">
+        {{ 'products.general.sold_out' | t }}
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="pdp-atc-btn btn btn--primary btn--load h-full !w-full"
+      :class="{ 'btn--loading' : cart_loading && button_loading }"
+      :disabled="button_loading || incomplete_fields"
+      @click.prevent="
+        if (cart_behavior === 'drawer') cart_drawer = true;
+        addCartItem(defaultVariantId, defaultSellingPlanId, quantity, true);
+        button_loading = true;
+        setTimeout(function(){ button_loading = false }, 500);
+      "
+      x-show="!buttonDisabled && defaultVariantExists && defaultAvailable"
+      x-cloak
+    >
+      <div class="btn__content">
+        {% if product.metafields.custom.button_text %}
+          {{ product.metafields.custom.button_text }}
+        {% else %}
+          {{ 'products.general.add_to_cart' | t }}
+        {% endif %}
+      </div>
+      <div class="btn__spinner">
+        {% render 'component__icon', icon: 'spinner', size: '24', class: '' %}
+      </div>
+    </button>
+  </div>
+</div>
+
+<script>
+  (function(){
+    function init(){
+      var anchors = document.querySelectorAll('[data-pdp-atc-anchor]');
+      anchors.forEach(function(anchor){
+        if (anchor.dataset.pdpStickyReady) return;
+        anchor.dataset.pdpStickyReady = '1';
+        var section = anchor.closest('section') || document;
+        var bar = section.querySelector('[data-pdp-sticky-bar]');
+        if (!bar) return;
+        // The bundle widget — if it exists on this PDP — should hide the
+        // sticky bar while it's in viewport, regardless of whether the
+        // main ATC anchor is in view. Avoids two "Add ... to Cart" CTAs
+        // showing simultaneously when the customer is interacting with
+        // the bundle.
+        var bundleEl = section.querySelector('.bundle-pdp-preview');
+
+        var mql = window.matchMedia('(max-width: 749px)');
+        var anchorObserver = null;
+        var bundleObserver = null;
+        var atcInView = false;
+        var bundleInView = false;
+
+        function show(){ bar.classList.add('is-visible'); bar.setAttribute('aria-hidden', 'false'); }
+        function hide(){ bar.classList.remove('is-visible'); bar.setAttribute('aria-hidden', 'true'); }
+        function applyVisibility(){
+          if (!mql.matches) { hide(); return; }
+          if (atcInView || bundleInView) { hide(); } else { show(); }
+        }
+
+        function evaluate(){
+          if (!mql.matches) { hide(); return; }
+          var vh = window.innerHeight || document.documentElement.clientHeight;
+          var aRect = anchor.getBoundingClientRect();
+          atcInView = aRect.bottom > 0 && aRect.top < vh;
+          if (bundleEl) {
+            var bRect = bundleEl.getBoundingClientRect();
+            bundleInView = bRect.bottom > 0 && bRect.top < vh;
+          } else {
+            bundleInView = false;
+          }
+          applyVisibility();
+        }
+
+        function attach(){
+          if (!anchorObserver) {
+            anchorObserver = new IntersectionObserver(function(entries){
+              entries.forEach(function(entry){
+                atcInView = entry.isIntersecting;
+              });
+              applyVisibility();
+            }, { threshold: 0, rootMargin: '0px 0px -1px 0px' });
+            anchorObserver.observe(anchor);
+          }
+          if (bundleEl && !bundleObserver) {
+            bundleObserver = new IntersectionObserver(function(entries){
+              entries.forEach(function(entry){
+                bundleInView = entry.isIntersecting;
+              });
+              applyVisibility();
+            }, { threshold: 0, rootMargin: '0px 0px -1px 0px' });
+            bundleObserver.observe(bundleEl);
+          }
+          evaluate();
+        }
+        function detach(){
+          if (anchorObserver) { anchorObserver.disconnect(); anchorObserver = null; }
+          if (bundleObserver) { bundleObserver.disconnect(); bundleObserver = null; }
+          atcInView = false;
+          bundleInView = false;
+          hide();
+        }
+
+        function syncToViewport(){
+          if (mql.matches) attach(); else detach();
+        }
+
+        syncToViewport();
+        if (mql.addEventListener) mql.addEventListener('change', syncToViewport);
+        else if (mql.addListener) mql.addListener(syncToViewport);
+      });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+  })();
+</script>
+{% endif %}
+
+{% comment %} Attentive Back in Stock - Full Width {% endcomment %}
+<div
+  x-show="!defaultAvailable && defaultVariantExists"
+  x-cloak
+  class="mt-4 px-4"
+>
+  <!-- Attentive Back in Stock Button -->
+  <script
+    id="attn-waitlist-eligibility"
+    type="application/json">
+    {
+    {%- liquid
+    for variant in product.variants
+    assign eligibility = 'false'
+    if variant.inventory_quantity <= 0
+    assign eligibility = 'true'
+    endif
+    assign entry = '"' | append: variant.id | append: '":' | append: eligibility
+    unless forloop.last
+    assign entry = entry | append: ','
+    endunless
+
+    echo entry
+    endfor
+    -%}
+    }
+  </script>
+  <div 
+    id="attn-waitlist-trigger" 
+    class="btn btn--primary btn--load w-full min-h-12 [&_button]:indent-[-9999px] [&_button]:uppercase [&_button]:relative [&_button]:before:content-['notify_me_when_back_in_stock'] [&_button]:before:absolute [&_button]:before:left-1/2 [&_button]:before:top-1/2 [&_button]:before:-translate-x-1/2 [&_button]:before:-translate-y-1/2 [&_button]:before:indent-0 [&_button]:before:font-black [&_button]:before:tracking-widest [&_button]:before:whitespace-nowrap">
+  </div>
+</div>

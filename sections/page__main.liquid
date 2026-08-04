@@ -1,0 +1,117 @@
+<!-- sections/page__main.liquid -->
+{% comment %} 
+  Empty page section for page template
+
+  Globals:
+    - settings.layout_horizontal: horizontaly margin
+
+  Possible enhancements:
+    - Add setting to set width of page and alignment.
+
+  Pro tips:
+    - Create custom templates to use additional sections.
+{% endcomment %}
+
+<section class="{{ section.settings.color_scheme }}">
+
+  <div class="flex flex-col justify-center items-center py-8 border--b-width color__border-divider-1">
+    <h1 class="mb-0 type--big">
+      {{ page.title | escape }}
+    </h1>
+  </div>
+  
+  <div class="py-24 
+    {{ section.settings.layout_horizontal }}    
+    {{ settings.layout_alignment }}">
+    <div class="w-full">
+      <div class="rte">
+        {{ page.content }}
+      </div>
+    </div>
+    
+  </div>
+</section>
+
+{% schema %}
+{
+  "name":"t:sections.page_main.name",
+  "settings":[
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__1.content"
+    },
+    {
+      "type":"select",
+      "id":"color_scheme",
+      "label":"t:sections.all.colors.settings.color_scheme.label",
+      "options":[
+        {
+          "value":"color__bg-body color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value":"color__bg-neutral color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value":"color__bg-overlay-1 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value":"color__bg-overlay-2 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value":"color__bg-overlay-3 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value":"color__bg-primary color__primary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value":"color__bg-secondary color__secondary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value":"color__bg-tertiary color__tertiary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default":"color__bg-body color__text"
+    },
+    {
+      "type": "select",
+      "id": "layout_horizontal",
+      "label": "t:settings_schema.layout.settings.layout_horizontal.label",
+      "options": [
+        {
+          "value": "window--narrow",
+          "label": "t:settings_schema.layout.settings.layout_horizontal.options__1.label"
+        },
+        {
+          "value": "window",
+          "label": "t:settings_schema.layout.settings.layout_horizontal.options__2.label"
+        },
+        {
+          "value": "window--wide",
+          "label": "t:settings_schema.layout.settings.layout_horizontal.options__3.label"
+        },
+        {
+          "value": "window--full",
+          "label": "t:settings_schema.layout.settings.layout_horizontal.options__4.label"
+        }
+      ],
+      "default": "window"
+    }
+  ],
+  "presets":[
+    {
+      "name":"t:sections.page_main.name"
+    }
+  ],
+  "templates":[
+    "page"
+  ]
+}
+{% endschema %}

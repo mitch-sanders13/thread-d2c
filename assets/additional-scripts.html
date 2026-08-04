@@ -1,0 +1,93 @@
+<!-- Global site tag (gtag.js) - Google Ads: 995352447 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-995352447">
+</script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-995352447', {'allow_enhanced_conversions': true});
+</script>
+
+<!-- Google conversion event -->
+{% if first_time_accessed %}
+  <script>
+    gtag('event', 'conversion', {
+      'send_to': 'AW-995352447/JWppCMGd9GMQ_77P2gM',
+      'value': {{ checkout.total_price | divided_by: 100.0 }},
+      'currency': '{{ currency }}',
+      'transaction_id': '{{ order_number }}',
+    });
+  </script>
+{% endif %}
+
+<!-- Google remarketing -->
+<script type="text/javascript">
+  var id = new Array();
+  {% for line_item in order.line_items %} 
+    id.push('shopify_US_{{line_item.product.id}}_{{line_item.variant.id}}');
+   {% endfor %}
+   var google_tag_params = {
+    ecomm_prodid: id,
+    ecomm_pagetype: 'purchase',
+    ecomm_totalvalue: parseFloat('{{ subtotal_price | money_without_currency | remove: ","}}')
+  };
+</script>
+<script>
+  gtag('event', 'page_view', {
+    'send_to': 'AW-995352447',
+    'ecomm_prodid':window.google_tag_params.ecomm_prodid,
+    'ecomm_pagetype': window.google_tag_params.ecomm_pagetype,
+    'ecomm_totalvalue':window.google_tag_params.ecomm_totalvalue
+  });
+</script>
+
+<!-- Enhanced conversion data - Google Ads: 995352447 -->
+<script>
+  var enhanced_conversion_data = {
+    "first_name": "{{ checkout.billing_address.first_name }}",
+    "last_name": "{{ checkout.billing_address.last_name }}",
+    "home_address": {
+      "street": "{{ checkout.billing_address.street }}",
+      "city": "{{ checkout.billing_address.city }}",
+      "region": "{{ checkout.billing_address.province }}",
+      "postal_code": "{{ checkout.billing_address.zip }}",
+      "country": "{{ checkout.billing_address.country_code }}"
+    }
+  }
+  if("{{ checkout.email }}"){
+    enhanced_conversion_data.email = "{{ checkout.email }}";
+  }
+  if("{{ checkout.billing_address.phone }}"){
+    enhanced_conversion_data.phone_number = "{{ checkout.billing_address.phone }}";
+  }
+</script>
+
+ <!-- Shareasale -->
+<meta name="referrer"content="unsafe-url"><script>function
+ shareasaleShopifyGetCookie(cname){var name=cname+"=";var decodedCookie=decodeURIComponent(document.cookie);var ca=decodedCookie.split(';');for(var i=0;i<ca.length;i++){var c=ca[i];while(c.charAt(0)==' '){c=c.substring(1);} if(c.indexOf(name)==0){return c.substring(name.length,c.length);}}
+ return"";} {%if first_time_accessed%} var shareasaleShopifySSCID=shareasaleShopifyGetCookie('shareasaleShopifySSCID');var shareasaleShopifyUrl="https://shareasale.com/sale.cfm?v=3%2E2&{% assign
+ giftamount = checkout.gift_cards_amount|money_without_currency | remove: ',' %}{% assign subtotal = subtotal_price | money_without_currency | remove: ',' %}{% assign total = subtotal | minus: giftamount %}amount={{total}}&tracking={{order_name|handleize}}&transtype=sale&merchantID=93731&currency={{
+ shop.currency }}&skulist={% for line_item in line_items %}{% if forloop.last == true %}{{ line_item.sku }}{% else %}{{ line_item.sku | append: ','}}{% endif %}{% endfor %}{% if giftamount %}{% if checkout.discounts %}{% assign discount_total = checkout.discounts_amount
+ | divided_by: 100 | plus: giftamount %}{% else %}{% assign discount_total = giftamount %}{% endif %}{% else %}{% assign discount_total = checkout.discounts_amount %}{% endif %}{% assign dtotal = discount_total | times: 100 %}&pricelist={% if checkout.discounts
+ %}{% for line_item in line_items %}{% if line_item.price > 0 %}{% assign total_cartprice = checkout.subtotal_price | plus: checkout.discounts_amount %}{% assign ratio = dtotal | divided_by: total_cartprice %}{% assign ratioless = 1 | minus: ratio %}{% assign
+ final_item_price = line_item.price | times: ratioless %}{% if forloop.last == true %}{{ final_item_price | money_without_currency | remove: ','}}{% else %}{{ final_item_price | money_without_currency | remove: ',' | append: ','}}{% endif %}{% else %}{% if
+ forloop.last == true %}{{ line_item.price | money_without_currency | remove: ','}}{% else %}{{ line_item.price | money_without_currency | remove: ',' | append: ','}}{% endif %}{% endif %}{% endfor %}{% else %}{% for item in line_items %}{% assign total_cartprice
+ = checkout.subtotal_price %}{% assign ratio = dtotal | divided_by: total_cartprice %}{% assign ratioless = 1 | minus: ratio %}{% assign final_item_price = line_item.price | times: ratioless %}{% if forloop.last == true %}{{ final_item_price | money_without_currency
+ | remove: ',' }}{% else %}{{final_item_price | money_without_currency | remove: ',' | append: ','}}{% endif %}{% endfor %}{% endif %}&quantitylist={% for line_item in line_items %}{% if forloop.last == true %}{{ line_item.quantity }}{% else %}{{ line_item.quantity
+ | append: ','}}{% endif %}{% endfor %}&couponcode={% for discount in checkout.discounts %}{% if forloop.last == true %}{{ discount.code }}{% else %}{{ discount.code | append: ',' }}{% endif %}{% endfor %}{% if customer.orders_count > 1 %}&newcustomer=0{% elsif
+ customer.orders_count <= 1 %}&newcustomer=1{% else %}&newcustomer={% endif %}&sscidmode=6&sscid="+shareasaleShopifySSCID;var shareasaleShopifyPixelImg=new Image();shareasaleShopifyPixelImg.id="_SHRSL_img_1";shareasaleShopifyPixelImg.src=shareasaleShopifyUrl;shareasaleShopifyPixelImg.width=1;shareasaleShopifyPixelImg.height=1;document.body.appendChild(shareasaleShopifyPixelImg);var
+ shareasaleShopifyPixelImgFound=document.querySelector('#_SHRSL_img_1');var shareasaleShopifyPixelSecondChance=document.createElement('script');shareasaleShopifyPixelSecondChance.setAttribute('type','text/javascript');shareasaleShopifyPixelSecondChance.src='https://shareasale-analytics.com/j.js';shareasaleShopifyPixelSecondChance.setAttribute('defer',1);shareasaleShopifyPixelSecondChance.setAttribute('async',1);shareasaleShopifyPixelImgFound.parentNode.insertBefore(shareasaleShopifyPixelSecondChance,shareasaleShopifyPixelImgFound.nextSibling);{%endif%}</script><meta
+ name="referrer"content="origin">
+ <img src="https://www.shareasale.com/sale.cfm?tracking={{ order.order_number }}&amount=
+{{ subtotal_price | money_without_currency }}&merchantID=134992&transtype=sale" width="1" height="1">
+<script src="https://www.dwin1.com/40786.js" type="text/javascript"
+defer="defer"></script>
+
+<!-- Attentive script -->
+<script src="https://cdn.attn.tv/threadwallets/dtag.js"></script>
+
+<!-- Grin -->
+<script>Grin = window.Grin || (window.Grin = []);var order_number = '{{ order_number }}', order_name = '{{ name }}', amount = '{{ subtotal_price | money_without_currency }}', currency = '{{ currency }}';Grin.push(['conversion', amount, {order_number: order_number, name: order_name, currency: currency}]);</script>
+
+<!-- Order edit -->
+<script>window.cffOrderEditOrderStatusPageOrderId = '{{order.id}}'</script>

@@ -1,0 +1,35 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "collegiate_schools_main": {
+      "type": "page__collegiate-schools",
+      "settings": {
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "style_border": "",
+        "row_size_desktop": "md:grid-cols-4",
+        "row_size_mobile": "grid-cols-2",
+        "spacing_top": 80,
+        "spacing_bottom": 80,
+        "enable_search": true,
+        "search_placeholder": "Search schools...",
+        "heading": "Shop Your School",
+        "description": "Find your school and explore exclusive collegiate wallet designs.",
+        "enable_heading": true,
+        "enable_description": true
+      }
+    }
+  },
+  "order": [
+    "collegiate_schools_main"
+  ]
+}
+

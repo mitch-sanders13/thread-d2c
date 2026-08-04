@@ -1,0 +1,508 @@
+<!-- sections/newsletter.liquid -->
+{% comment %} 
+  Email newsletter signup form.
+
+  Globals:
+    - settings.layout_horizontal: horizontaly margin
+    - settings.thumbnails_color_scheme: set color of items
+    - settings.thumbnails_color_border: set border of cards
+
+  Recommendations:
+    - Connect your customer emails to a email service like Klaviyo to send automatic welcome emails.
+{% endcomment %}
+
+<section class="
+  {{ section.settings.visibility }}
+  {{ section.settings.color_border }}
+  {{ section.settings.style_border }}"
+  x-intersect.half="
+    body_background_color = '{{ section.settings.color_background }}';
+    body_text_color = '{{ section.settings.color_text }}';
+  ">
+  <div class="{{ settings.layout_horizontal }}"
+    style="
+      padding-top:{{ section.settings.spacing_top }}px;
+      padding-bottom:{{ section.settings.spacing_bottom }}px;" >
+
+    <div class="flex flex-row flex-wrap -mx-4
+      {{ section.settings.layout_y_alignment }}
+      {{ section.settings.layout_x_alignment }}">
+
+      {% for block in section.blocks %}
+        {% case block.type %}
+
+        {% when 'newsletter' %}
+          <div class="p-4
+            {{ block.settings.layout_x_alignment }}
+            {% if block.settings.layout_desktop_width == 12 %}
+              md:w-full
+            {% else %}
+              md:w-{{ block.settings.layout_desktop_width }}/12
+            {% endif %}
+            {% if block.settings.layout_mobile_width == 12 %}
+              w-full
+            {% else %}
+              w-{{ block.settings.layout_mobile_width }}/12
+            {% endif %}">
+
+            {% form 'customer' %}
+
+              {% unless block.settings.heading == blank %}
+                <h3 class="mb-2">{{ block.settings.heading }}</h3>
+              {% endunless %}
+              {% if form.posted_successfully? %}
+                <div class="m-0--clear mb-2">
+                  {{ block.settings.success }}
+                </div>
+              {% else %}
+                {% unless block.settings.content == blank %}
+                  <div class="m-0--clear mb-2">
+                    {{ block.settings.content }}
+                  </div>
+                {% endunless %}
+                {% if form.errors %}
+                  <div class="color__bg-overlay-1 type--small border--radius p-2 mt-2 mb-4">
+                    {{ form.errors | default_errors }}
+                  </div>
+                {% endif %}
+                <div class="flex w-full">
+                  <label for="customer_email" class="sr-only">{{ 'contact.form.email' | t }}</label>
+                  <input id="customer_email" class="form-input flex-grow -mr-8"
+                    name="contact[email]"
+                    type="email"
+                    placeholder="{{ 'contact.form.email_placeholder' | t }}"
+                    autocorrect="off"
+                    autocapitalize="off"/>
+                  <button type="submit" class="btn btn--small {{ section.settings.color_button }} whitespace-nowrap shrink-0">
+                    <span class="btn__content">{{ block.settings.button_label }}</span>
+                  </button>
+                </div>
+                <div class="m-0--clear type--smaller mt-2 opacity-75">
+                  {{ block.settings.disclaimer }}
+                </div>
+              {% endif %}
+
+            {% endform %}
+
+          </div>
+
+        {% when 'image' %}
+          <div class="px-4
+            {% if block.settings.layout_desktop_width == 12 %}
+              md:w-full
+            {% else %}
+              md:w-{{ block.settings.layout_desktop_width }}/12
+            {% endif %}
+            {% if block.settings.layout_mobile_width == 12 %}
+              w-full
+            {% else %}
+              w-{{ block.settings.layout_mobile_width }}/12
+            {% endif %}">
+            {% if block.settings.image_featured == blank %}
+              <div class="border--radius relative w-full overflow-hidden 
+                {{ settings.thumbnails_color_scheme }}
+                {{ settings.thumbnails_color_border }}">
+                {{ 'image' | placeholder_svg_tag: 'w-full' }}
+              </div>
+            {% else %}
+              <div class="border--radius relative w-full overflow-hidden
+                {{ settings.thumbnails_color_scheme }}">
+                {{ block.settings.image_featured | image_url: width: 1400 | image_tag: style: 'object-fit:cover', class: 'w-full', loading: 'lazy', alt: block.settings.image_featured.alt }}
+              </div>
+            {% endif %}
+          </div>
+
+        {% endcase %}
+      {% endfor -%}
+
+    </div>
+    
+  </div>
+</section>
+
+{% schema %}
+{
+  "name":"t:sections.newsletter.name",
+  "settings":[
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__22.content"
+    },
+    {
+      "type": "range",
+      "id": "spacing_top",
+      "min": 0,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "label": "t:sections.all.spacing.settings.spacing.label_top",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "spacing_bottom",
+      "min": 0,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "label": "t:sections.all.spacing.settings.spacing.label_bottom",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__1.content"
+    },
+    {
+      "type": "color",
+      "id": "color_background",
+      "label": "t:sections.all.colors.settings.color_scheme.label",
+      "default": "#ffffff"
+    },
+    {
+      "type":"select",
+      "id":"color_text",
+      "label":"t:sections.all.colors.settings.color_text.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.colors.settings.color_text.options__1.label"
+        },
+        {
+          "value":"color__light",
+          "label":"t:sections.all.colors.settings.color_text.options__2.label"
+        },
+        {
+          "value":"color__dark",
+          "label":"t:sections.all.colors.settings.color_text.options__3.label"
+        }
+      ],
+      "default":""
+    },
+    {
+      "type":"select",
+      "id":"color_border",
+      "label":"t:sections.all.colors.settings.color_border.label",
+      "options":[
+        {
+          "value":"color__border-divider-1",
+          "label":"t:sections.all.colors.settings.color_border.options__1.label"
+        },
+        {
+          "value":"color__border-selected-1",
+          "label":"t:sections.all.colors.settings.color_border.options__2.label"
+        }
+      ],
+      "default":"color__border-divider-1"
+    },
+    {
+      "type":"select",
+      "id":"color_button",
+      "label":"t:sections.all.colors.settings.color_button.label",
+      "options":[
+        {
+          "value":"btn",
+          "label":"t:sections.all.colors.settings.color_button.options__1.label"
+        },
+        {
+          "value":"btn btn--secondary",
+          "label":"t:sections.all.colors.settings.color_button.options__2.label"
+        },
+        {
+          "value":"btn btn--tertiary",
+          "label":"t:sections.all.colors.settings.color_button.options__5.label"
+        },
+        {
+          "value":"btn btn--neutral",
+          "label":"t:sections.all.colors.settings.color_button.options__3.label"
+        },
+        {
+          "value":"btn btn--plain",
+          "label":"t:sections.all.colors.settings.color_button.options__4.label"
+        }
+      ],
+      "default":"btn btn--secondary"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__2.content"
+    },
+    {
+      "type":"select",
+      "id":"style_border",
+      "label":"t:sections.all.styles.settings.style_border.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.styles.settings.style_border.options__1.label"
+        },
+        {
+          "value":"border--t-width",
+          "label":"t:sections.all.styles.settings.style_border.options__2.label"
+        },
+        {
+          "value":"border--b-width",
+          "label":"t:sections.all.styles.settings.style_border.options__3.label"
+        },
+        {
+          "value":"border--b-width border--t-width",
+          "label":"t:sections.all.styles.settings.style_border.options__4.label"
+        }
+      ],
+      "default":"border--b-width"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__3.content"
+    },
+    {
+      "type":"select",
+      "id":"layout_y_alignment",
+      "label":"t:sections.all.layout.settings.layout_y_alignment.label",
+      "options":[
+        {
+          "value":"items-start",
+          "label":"t:sections.all.layout.settings.layout_y_alignment.options__1.label"
+        },
+        {
+          "value":"items-center",
+          "label":"t:sections.all.layout.settings.layout_y_alignment.options__2.label"
+        },
+        {
+          "value":"items-end",
+          "label":"t:sections.all.layout.settings.layout_y_alignment.options__3.label"
+        }
+      ],
+      "default":"items-end"
+    },
+    {
+      "type":"select",
+      "id":"layout_x_alignment",
+      "label":"t:sections.all.layout.settings.layout_x_alignment.label",
+      "options":[
+        {
+          "value":"justify-start",
+          "label":"t:sections.all.layout.settings.layout_x_alignment.options__1.label"
+        },
+        {
+          "value":"justify-center",
+          "label":"t:sections.all.layout.settings.layout_x_alignment.options__2.label"
+        },
+        {
+          "value":"justify-end",
+          "label":"t:sections.all.layout.settings.layout_x_alignment.options__3.label"
+        }
+      ],
+      "default":"justify-start"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__8.content"
+    },
+    {
+      "type":"select",
+      "id":"visibility",
+      "label":"t:sections.all.display.settings.visibility.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.display.settings.visibility.options__1.label"
+        },
+        {
+          "value":"md:hidden",
+          "label":"t:sections.all.display.settings.visibility.options__2.label"
+        },
+        {
+          "value":"hidden md:block",
+          "label":"t:sections.all.display.settings.visibility.options__3.label"
+        }
+      ],
+      "default":""
+    }
+  ],
+  "blocks":[
+    {
+      "type":"newsletter",
+      "name":"t:sections.newsletter.blocks.newsletter.name",
+      "limit":1,
+      "settings":[
+        {
+          "type":"header",
+          "content":"t:sections.all.headers.header__4.content"
+        },
+        {
+          "type":"text",
+          "id":"heading",
+          "label":"t:sections.all.content.settings.heading.label",
+          "default":{
+            "en":"Block heading",
+            "es": "Encabezado de bloque",
+            "it": "Intestazione del blocco",
+            "de": "Blocküberschrift",
+            "fr": "En-tête de bloc"
+          }
+        },
+        {
+          "type":"richtext",
+          "id":"content",
+          "label":"t:sections.all.content.settings.content.label",
+          "default":{
+            "en":"<p>Tell customers why they should subscribe to your newsletter.</p>",
+            "es": "<p>Dígales a los clientes por qué deberían suscribirse a su boletín informativo.</p>",
+            "it": "<p>Dì ai clienti perché dovrebbero iscriversi alla tua newsletter.</p>",
+            "de": "<p>Teilen Sie Ihren Kunden mit, warum sie Ihren Newsletter abonnieren sollten.</p>",
+            "fr": "<p>Expliquez aux clients pourquoi ils devraient s’abonner à votre newsletter.</p>"
+          }
+        },
+        {
+          "type":"text",
+          "id":"button_label",
+          "label":"t:sections.all.content.settings.button_label.label",
+          "default":{
+            "en":"Subscribe",
+            "es": "Subscribir",
+            "it": "Abbonarsi",
+            "de": "Abonnieren",
+            "fr": "S’inscrire"
+          }
+        },
+        {
+          "type":"richtext",
+          "id":"disclaimer",
+          "label":"t:sections.newsletter.blocks.newsletter.settings.disclaimer.label"
+        },
+        {
+          "type":"richtext",
+          "id":"success",
+          "label":"t:sections.newsletter.blocks.newsletter.settings.success.label",
+          "default":{
+            "en":"<p>Success! You’ve been subscribed.</p>",
+            "es": "<p>Gracias por suscribirte</p>",
+            "it": "<p>Grazie per esserti iscritto</p>",
+            "de": "<p>Vielen Dank für Ihre Anmeldung</p>",
+            "fr": "<p>Merci de vous être abonné</p>"
+          }
+        },
+        {
+          "type":"header",
+          "content":"t:sections.all.headers.header__3.content"
+        },
+        {
+          "type":"range",
+          "id":"layout_desktop_width",
+          "min":1,
+          "max":12,
+          "step":1,
+          "unit":"/12",
+          "label":"t:sections.newsletter.blocks.newsletter.settings.layout_desktop_width.label",
+          "default":5
+        },
+        {
+          "type":"range",
+          "id":"layout_mobile_width",
+          "min":1,
+          "max":12,
+          "step":1,
+          "unit":"/12",
+          "label":"t:sections.newsletter.blocks.newsletter.settings.layout_mobile_width.label",
+          "default":12
+        },
+        {
+          "type": "select",
+          "id": "layout_x_alignment",
+          "label": "t:sections.all.layout.settings.layout_x_alignment.label",
+          "options": [
+            {
+              "value": "justify-between",
+              "label": "t:sections.all.layout.settings.layout_x_alignment.options__1.label"
+            },
+            {
+              "value": "text-center justify-center flex-col items-center",
+              "label": "t:sections.all.layout.settings.layout_x_alignment.options__2.label"
+            },
+            {
+              "value": "text-right justify-end flex-col items-end",
+              "label": "t:sections.all.layout.settings.layout_x_alignment.options__3.label"
+            }
+          ],
+          "default": "justify-between"
+        }
+      ]
+    },
+    {
+      "type":"image",
+      "name":"t:sections.newsletter.blocks.image.name",
+      "limit":1,
+      "settings":[
+        {
+          "type":"header",
+          "content":"t:sections.all.headers.header__4.content"
+        },
+        {
+          "type":"image_picker",
+          "id":"image_featured",
+          "label":"t:sections.newsletter.blocks.image.settings.image_featured.label"
+        },
+        {
+          "type":"header",
+          "content":"t:sections.all.headers.header__3.content"
+        },
+        {
+          "type":"range",
+          "id":"layout_desktop_width",
+          "min":1,
+          "max":12,
+          "step":1,
+          "unit":"/12",
+          "label":"t:sections.newsletter.blocks.image.settings.layout_desktop_width.label",
+          "default":6
+        },
+        {
+          "type":"range",
+          "id":"layout_mobile_width",
+          "min":1,
+          "max":12,
+          "step":1,
+          "unit":"/12",
+          "label":"t:sections.newsletter.blocks.image.settings.layout_mobile_width.label",
+          "default":12
+        }
+      ]
+    }
+  ],
+  "presets":[
+    {
+      "name":"t:sections.newsletter.name",
+      "settings": {
+        "spacing_top": 100,
+        "spacing_bottom": 100,
+        "color_background": "#e7e7e7",
+        "color_text": "",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--b-width",
+        "layout_y_alignment": "items-center",
+        "layout_x_alignment": "justify-center",
+        "visibility": ""
+      },
+      "blocks":[
+        {
+          "type":"newsletter",
+          "settings":{
+            "heading": "Email sign-up",
+            "content": "<p>Tell customers why they should subscribe to your newsletter.<\/p>",
+            "button_label": "Subscribe",
+            "disclaimer": "",
+            "success": "<p>Success! You’ve been subscribed.<\/p>",
+            "layout_desktop_width": 6,
+            "layout_mobile_width": 12,
+            "layout_x_alignment": "text-center justify-center flex-col items-center"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["custom.overlay"]
+  }
+}
+{% endschema %}

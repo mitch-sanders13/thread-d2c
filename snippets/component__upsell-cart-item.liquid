@@ -1,0 +1,222 @@
+<!-- snippets/component__upsell-cart-item.liquid -->
+{% comment %}
+  Upsell slider item displayed in cart slide-out drawer.
+
+  Accepts:
+    - product: liquid product object
+    - index: optional index of animation order
+    - vertical: boolean to render in vertical list instead of slider
+    - inner_class: inner class string for vertical layout
+    - content_class: inner class string for content
+    - button_class: custom class for the add button
+    - title_class: custom class for the product title
+    - is_free: boolean to display FREE instead of price
+
+
+  Usage:
+    {% render 'component__cart-item',
+      product: product,
+      index: forloop.index0 %}
+
+  Globals:
+    - settings.thumbmails_color_scheme: color scheme of thumbnails
+
+  Possible enhancements:
+    - Refactor so this can be used in non-slider placements.
+
+  Pro tips:
+    - Use cart upsells to increase AOV. Highlight products that are an easy upsell.
+{% endcomment %}
+
+<div
+  id="upsell_{{ product.variants[0].id }}"
+  class="    js:cartUpsell color__bg-body color__text flex items-center w-full {{ inner_class }}"
+  x-data="
+    {
+      button_loading: false
+    }
+  "
+>
+  {% comment %} Images {% endcomment %}
+  <div class="w-[20%] h-full">
+    <div
+      class="
+        object-cover flex items-center aspect-[1/1] h-full w-full
+        {{ settings.thumbmails_color_scheme }}
+      "
+    >
+      {%- unless product.featured_image == blank %}
+        {% capture image_class %}w-full h-full object-cover aspect-[1/1] {{ settings.thumbmails_color_scheme }}{% endcapture %}
+        {{
+          product.featured_image
+          | image_url: width: 200
+          | image_tag: style: 'object-fit:cover', class: image_class, loading: 'lazy', alt: product.title
+        }}
+      {%- endunless -%}
+    </div>
+  </div>
+
+  {%- comment -%} Content {%- endcomment -%}
+  <div class="flex flex-row items-center justify-between flex-grow gap-2 p-4 pl-6 text-left {{ content_class }}">
+    <div class="grow flex flex-col">
+      <p class="mb-0 !leading-tight {% if title_class %}{{ title_class }}{% else %}type__nav{% endif %}">
+        {{ product.title }}
+      </p>
+      {% if settings.enable_tagline and product.metafields.descriptors.subtitle %}
+        <span class="type--small !leading-tight">
+          {{ product.metafields.descriptors.subtitle }}
+        </span>
+      {% endif %}
+      <p class="type--small mb-0 !leading-tight" data-product-id="{{ product.id }}">
+        {% if is_free %}
+          <span class="font-bold">FREE</span>
+          <span class="line-through pl-2 !text-black" data-product-id="{{ product.id }}">
+            {{- product.price | money_without_trailing_zeros -}}
+          </span>
+        {% else %}
+          <span>
+            {{ 'products.inventory.only' | t }}
+            {{ product.price | money_without_trailing_zeros -}}
+          </span>
+          <span class="line-through pl-2 !text-black" data-product-id="{{ product.id }}">
+            {{- product.compare_at_price | money_without_trailing_zeros -}}
+          </span>
+        {% endif %}
+      </p>
+    </div>
+
+    <div>
+      <form
+        class="flex flex-wrap"
+        action="/cart/add"
+        method="post"
+        enctype="multipart/form-data"
+        x-data="
+          {
+            defaultVariantId: {{ product.variants[0].id }},
+            defaultSellingPlanId: 0,
+            quantity: 1,
+          }
+        "
+        @submit.prevent="
+          addCartItem(defaultVariantId, defaultSellingPlanId, quantity, false,
+          {% if product.tags contains 'sale' %}
+            { 'SALE': 'ALL SALES ARE FINAL ON ITEM' }
+          {% endif %}
+          );
+          button_loading = true;
+          setTimeout(function(){ button_loading = false}, 500);
+        "
+      >
+        {% if product.variants.size == 1 %}
+          <input
+            type="hidden"
+            name="id"
+            value="{{ product.variants[0].id }}"
+          >
+          <label
+            class="sr-only"
+            for="upsell_item_quantity_{{ product.variants[0].id }}"
+          >
+            {{- 'products.general.quantity' | t -}}
+          </label>
+          <input
+            id="upsell_item_quantity_{{ product.variants[0].id }}"
+            class="!hidden"
+            type="text"
+            name="quantity"
+            value="1"
+            min="1"
+            max=""
+            x-model="quantity"
+          >
+          <button
+            type="submit"
+            role="button"
+            class="btn btn--load {% if button_class %}{{ button_class }}{% else %}btn--secondary{% endif %}"
+            :class="{ 'btn--loading' : cart_loading && button_loading }"
+            :disabled="button_loading"
+          >
+            <div class="btn__content">{{ 'products.general.short_add_label' | t }}</div>
+            <div class="btn__spinner">
+              {% render 'component__icon', icon: 'spinner', size: '24', class: '' %}
+            </div>
+          </button>
+        {% else %}
+          <div>
+            <button
+              type="button"
+              id="add-button-{{ product.id }}"
+              popovertarget="size-picker-{{ product.id }}"
+              role="button"
+              class="btn btn--load {% if button_class %}{{ button_class }}{% else %}btn--secondary{% endif %}"
+              :class="{ 'btn--loading' : button_loading }"
+              :disabled="button_loading"
+            >
+              <div class="btn__content">{{ 'products.general.short_add_label' | t }}</div>
+              <div class="btn__spinner">
+                {% render 'component__icon', icon: 'spinner', size: '24', class: '' %}
+              </div>
+            </button>
+
+            <div
+              id="size-picker-{{ product.id }}"
+              popover
+              class="border right-0 z-999 left-auto max-width fixed w-screen max-w-full md:max-w-md h-full bg-black bg-opacity-25 p-0"
+              ontoggle=""
+              popovertarget="size-picker-{{ product.id }}"
+              popovertargetaction="hide"
+            >
+              <button
+                class="absolute h-full w-full bg-black bg-opacity-25"
+                type="button"
+                popovertarget="size-picker-{{ product.id }}"
+                popovertargetaction="hide"
+                @click="$el.hidePopover()"
+              ></button>
+              <div class="relative p-4 bg-white m-4">
+                <div class="flex justify-between items-center mb-4">
+                  <button
+                    type="button"
+                    popovertarget="size-picker-{{ product.id }}"
+                    popovertargetaction="hide"
+                    class="text-black hover:opacity-75 absolute right-4 px-2 text-xl font-light"
+                    style="height: 24px; line-height: 22px;"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                  {% for variant in product.variants %}
+                    <button
+                      type="button"
+                      popovertarget="size-picker-{{ product.id }}"
+                      popovertargetaction="hide"
+                      class="w-full text-center bg-black text-white py-1.5 px-2 hover:opacity-90 transition-opacity text-sm"
+                      @click="
+                        selectedVariantId = {{ variant.id }};
+                        addCartItem(selectedVariantId, 0, 1, false,
+                        {% if product.tags contains 'sale' %}
+                          { 'SALE': 'ALL SALES ARE FINAL ON ITEM' }
+                        {% endif %}
+                        );
+                        button_loading = true;
+                        setTimeout(function(){ button_loading = false; }, 500);
+                      "
+                    >
+                      {{ variant.title }}
+                    </button>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+</div>
+
+{%- comment -%} Quick add popup {%- endcomment -%}
+<div id="js:quickAdd-upsell-{{ product.handle }}"></div>

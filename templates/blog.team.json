@@ -1,0 +1,375 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "d527e832-641d-4417-84cc-609e015baca1": {
+      "type": "text",
+      "settings": {
+        "heading": "THREADHEADS",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 40,
+        "spacing_bottom": 40,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--b-width",
+        "layout_x_alignment": "text-center justify-center",
+        "content_x_alignment": "text-center justify-center",
+        "visibility": ""
+      }
+    },
+    "40fee175-53af-4541-b20e-176599d53a39": {
+      "type": "content-slider",
+      "blocks": {
+        "template--16154058031242__40fee175-53af-4541-b20e-176599d53a39-content-1": {
+          "type": "content",
+          "settings": {
+            "heading": "Ace Pelka",
+            "content": "<h6><\/h6><h6><em>Favorite product and why:<\/em><\/h6><p>My favorite product from Thread would of course be the Mini Backpack! For me this is the perfect day travel pack because ti fits all of my needs and is so light and compact. I take it with me for all of my daily adventures!<\/p><h6><\/h6><h6><em>What does Carry On mean to you:<\/em> <\/h6><p>Carrying On means to persevere and push through the hard times and the adversity. Remembering that without darkness there’d be no light.<\/p><h6><\/h6><p><a href=\"https:\/\/www.instagram.com\/slappyredz\/\" target=\"_blank\" title=\"https:\/\/www.instagram.com\/slappyredz\/\">@slappyredz<\/a><\/p>",
+            "image_featured": "shopify:\/\/shop_images\/IMG_0919_230d8daf-fb77-418d-9432-82e0c6e40216.jpg",
+            "button_label": "Button",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 8,
+            "enable_padding": true
+          }
+        },
+        "7448fed2-4aeb-42f6-947c-c3f49f46778b": {
+          "type": "content",
+          "settings": {
+            "heading": "Mary Rand",
+            "content": "<h6><em>Favorite product and why:<\/em><\/h6><p>So, almost everything is my favorite product and daily driver. I use the Vertical Wallet with a Wrist Lanyard to hold all my cards, I put my car keys on the Neck Lanyard. I put all of that in the Fanny Pack and wear it as a cross body, and then I use the Tote for bigger stuff like my computer, water bottle, sweatshirt, & farmers market goods. I basically don’t leave the house without all of the above.<\/p><h6><\/h6><h6><em>What does Carry On mean to you:<\/em> <\/h6><p>Carry On means to practicing the ability to move through life with connection, compassion, confidence & clarity given the different obstacles that we all face. Key word there is practice.<\/p><h6><\/h6><p><a href=\"https:\/\/www.instagram.com\/bigairmare\/\" target=\"_blank\" title=\"https:\/\/www.instagram.com\/bigairmare\/\">@bigairmare<\/a><\/p>",
+            "image_featured": "shopify:\/\/shop_images\/image0_1.jpg",
+            "button_label": "Button",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 8,
+            "enable_padding": true
+          }
+        },
+        "00663d99-ddbb-4ba0-908e-6b2473297a46": {
+          "type": "content",
+          "settings": {
+            "heading": "Ethan Jones",
+            "content": "<h6><em>Favorite product and why:<\/em><\/h6><p>My favorite Thread product would be the Crossbody Bag, perfect for being a photographer and always on the go. It’s nice to have an effortless way to carry extra film & a small camera.<\/p><h6><\/h6><h6><em>What does Carry On mean to you:<\/em> <\/h6><p>Surfing and Running! I believe it’s so important to have a good work-life balance. Getting out in the water or out for a run really keeps me sane, that’s how I Carry On!<\/p><h6><\/h6><p><a href=\"https:\/\/www.instagram.com\/ethanjones.co\/\" target=\"_blank\" title=\"https:\/\/www.instagram.com\/ethanjones.co\/\">@ethanjones.co<\/a><\/p>",
+            "image_featured": "shopify:\/\/shop_images\/SP002246-25A_5964ff10-b338-41ca-8209-ef8cafdb045a.jpg",
+            "button_label": "Button",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 8,
+            "enable_padding": true
+          }
+        },
+        "8fd9c3da-f36b-499f-a110-c28c3f1f2ec8": {
+          "type": "content",
+          "settings": {
+            "heading": "Ivy Miller",
+            "content": "<h6><em>Favorite product and why:<\/em><\/h6><p>I love the Mini Backpack, I can fit just about everything in it. I've taken it on the plane and to events. It's so versatile & perfect for everything!<\/p><h6><\/h6><h6><em>What does Carry On mean to you:<\/em> <\/h6><p>Carry On means to accept the roller-coaster of good and bad, light and dark, fun and boring, learning and celebrating—polarity of life. To not get fixated on one emotion for too long because that's the beauty of life: it changes and that's growing. Thread has made me feel confident in knowing I have community besides me. Regardless of the current hole or mountain I'm dealing with internally, I know I can turn to my friends and family at Thread and lean on them in any state.<\/p><h6><\/h6><p><a href=\"https:\/\/www.instagram.com\/ivuss\/\" target=\"_blank\" title=\"https:\/\/www.instagram.com\/ivuss\/\">@ivuss<\/a><\/p>",
+            "image_featured": "shopify:\/\/shop_images\/image0_1_25566dfc-d1ca-4d74-be7e-3a406f1acd1c.jpg",
+            "button_label": "Button",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 8,
+            "enable_padding": true
+          }
+        },
+        "8e6a3ac1-991f-48e1-b5b4-2b643b638b51": {
+          "type": "content",
+          "settings": {
+            "heading": "Jack Soren",
+            "content": "<h6><em>Favorite product and why:<\/em><\/h6><p>I dig the Crossbody, I like to keep all my nicknacks on me. Always got the small essentials on me.<\/p><h6><\/h6><h6><em>What does Carry On mean to you:<\/em> <\/h6><p>Win or lose, I'll still be doing my thing. No matter what comes, keep pushing, keep moving forward.<\/p>",
+            "image_featured": "shopify:\/\/shop_images\/IMG_3738.jpg",
+            "button_label": "Button",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 8,
+            "enable_padding": true
+          }
+        },
+        "9432b773-8165-4c19-92eb-e95f402bc337": {
+          "type": "content",
+          "disabled": true,
+          "settings": {
+            "heading": "Janthavy Norton",
+            "content": "<h6><em>Favorite product and why:<\/em><\/h6><p>My favorite Thread product is the Keychain Clip because it is nice and compact. It's convenient for quick bike rides, skating, and traveling.<\/p><h6><\/h6><h6><em>What does Carry On mean to you:<\/em> <\/h6><p>Carry On means to keep pushing yourself to be your best; to see the positive in everything even when times get tough.<\/p>",
+            "image_featured": "shopify:\/\/shop_images\/image_6483441.jpg",
+            "button_label": "Button",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 8,
+            "enable_padding": true
+          }
+        },
+        "8065b7f5-9a80-43b3-b055-433d419c41d6": {
+          "type": "content",
+          "disabled": true,
+          "settings": {
+            "heading": "Rob Roethler",
+            "content": "<h6><em>Favorite product and why:<\/em><\/h6><p>Favorite Thread product is the Crossbody Bag—so convenient to have all the essentials on you.<\/p><h6><\/h6><h6><em>What does Carry On mean to you:<\/em> <\/h6><p>Carry On to me means to snowboard, skateboard, golf, or just get active—to stay focused on the things that make me happy is how I am able to Carry On. I can get pretty beat down, mentally, physically, and emotionally, but having those outlets reminds me why I keep pushing.<\/p>",
+            "image_featured": "shopify:\/\/shop_images\/IMG_0217.jpg",
+            "button_label": "Button",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 7,
+            "enable_padding": true
+          }
+        },
+        "6f72bbf8-437c-40c4-ae5b-99420d06c422": {
+          "type": "content",
+          "disabled": true,
+          "settings": {
+            "heading": "Keani Canullo",
+            "content": "<h6><em>Favorite product and why:<\/em><\/h6><p>My favorite Thread product is the Crossbody Bag! They come in so many colors & they're the best to travel with.<\/p><h6><\/h6><h6><em>What does Carry On mean to you:<\/em> <\/h6><p>Carrying On means to not give up when things get tough but to also recognize when its time to ask for help. I'm grateful to be supported by a brand that helps their athletes when it comes to mental health. It is an important subject that every brand should talk about.<\/p>",
+            "image_featured": "shopify:\/\/shop_images\/sp001511-37.jpg",
+            "button_label": "Button",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 8,
+            "enable_padding": true
+          }
+        },
+        "f8aea7d4-3da5-41d9-af93-9d82e358e9d0": {
+          "type": "content",
+          "disabled": true,
+          "settings": {
+            "heading": "Sawyer Lindblad",
+            "content": "<h6><em>Favorite product and why:<\/em><\/h6><p>My favorite Thread product is the Tote Bag.<\/p><h6><\/h6><h6><em>What does Carry On mean to you:<\/em> <\/h6><p>Carry on means to me to live every day to the fullest.<\/p>",
+            "image_featured": "shopify:\/\/shop_images\/alihuxmansummer23-288_b9f6856e-805b-48e8-963c-a67b3dca9033.jpg",
+            "button_label": "",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 8,
+            "enable_padding": true
+          }
+        },
+        "5d6e0917-13c7-41a0-b495-9c021656f460": {
+          "type": "content",
+          "disabled": true,
+          "settings": {
+            "heading": "Kelis Kaleopa'a",
+            "content": "<h6><em>Favorite product and why:<\/em><\/h6><p>My favorite Thread product is the Fanny Pack; I catch myself using it the most just because it is so useful, cute, and practical. It holds all my goodies: phone, wallet, keys, lip gloss, and protein bars.<\/p><h6><\/h6><h6><em>What does Carry On mean to you:<\/em> <\/h6><p>Carry On is exactly what it stands for—carrying about mental health. Being a part of a company that puts mental health first has been amazing and helped my own well being a lot. To Carry On is to surround yourself with the ones you love and doing what you love.<\/p>",
+            "image_featured": "shopify:\/\/shop_images\/Screenshot_2023-10-16_at_2.29.14_PM.png",
+            "button_label": "",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 8,
+            "enable_padding": true
+          }
+        },
+        "4d754c88-56c0-4fe8-b06e-164542aeea85": {
+          "type": "content",
+          "disabled": true,
+          "settings": {
+            "heading": "Nate Miceli",
+            "content": "<h6><em>Favorite product and why:<\/em><\/h6><p>My favorite Thread product is the Bifold. I'm a big fan of the traditional wallet style, but they were always way too bulky to keep on me while skiing. The Bifold fits everything I need while allowing me to forget I even have it.<\/p><h6><\/h6><h6><em>What does Carry On mean to you:<\/em> <\/h6><p>Carry On to me means to keep pushing in whatever it is you're doing. Don't get caught up in the small stuff. Live in the moment and trust you'll be able to find your way.<\/p>",
+            "image_featured": "shopify:\/\/shop_images\/image002.jpg",
+            "button_label": "",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 8,
+            "enable_padding": true
+          }
+        },
+        "97166e97-54e9-4f3e-a076-2861220a83cd": {
+          "type": "content",
+          "disabled": true,
+          "settings": {
+            "heading": "Poe Pinson",
+            "content": "<h6><em>Favorite product and why:<\/em><\/h6><p>My favorite Thread product is the Crossbody Bag because they help me stay organized and keep track of my items in style<\/p><h6><\/h6><h6><em>What does Carry On mean to you:<\/em> <\/h6><p>Carry On to me is a reminder to always view the world in the most positive way I can. Throughout any hardship or challenge there is a light at the end of the tunnel. It helps me remember how important mental health is, and to treat yourself and those around you with kindness and love because you never know what somebody might be struggling with.<\/p>",
+            "image_featured": "shopify:\/\/shop_images\/MC5A5946.jpg",
+            "button_label": "",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 8,
+            "enable_padding": true
+          }
+        },
+        "3ece06e5-7747-4aaa-a4d5-0135b20f7c64": {
+          "type": "content",
+          "disabled": true,
+          "settings": {
+            "heading": "Rex Hennings",
+            "content": "<h6><em>Favorite product and why:<\/em><\/h6><p>My favorite Thread product is the Elastic Wallet. I love it because I can keep my car keys with my cards at all times. I love having my keys look sick with a super cool wallet<\/p><h6><\/h6><h6><em>What does Carry On mean to you:<\/em> <\/h6><p>Carry On means to move forward with great attitude. It may seem like it's hard to keep a good attitude, but you have to remember to Carry On.<\/p>",
+            "image_featured": "shopify:\/\/shop_images\/rexhennings_1.jpg",
+            "button_label": "",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 8,
+            "enable_padding": true
+          }
+        }
+      },
+      "block_order": [
+        "template--16154058031242__40fee175-53af-4541-b20e-176599d53a39-content-1",
+        "7448fed2-4aeb-42f6-947c-c3f49f46778b",
+        "00663d99-ddbb-4ba0-908e-6b2473297a46",
+        "8fd9c3da-f36b-499f-a110-c28c3f1f2ec8",
+        "8e6a3ac1-991f-48e1-b5b4-2b643b638b51",
+        "9432b773-8165-4c19-92eb-e95f402bc337",
+        "8065b7f5-9a80-43b3-b055-433d419c41d6",
+        "6f72bbf8-437c-40c4-ae5b-99420d06c422",
+        "f8aea7d4-3da5-41d9-af93-9d82e358e9d0",
+        "5d6e0917-13c7-41a0-b495-9c021656f460",
+        "4d754c88-56c0-4fe8-b06e-164542aeea85",
+        "97166e97-54e9-4f3e-a076-2861220a83cd",
+        "3ece06e5-7747-4aaa-a4d5-0135b20f7c64"
+      ],
+      "settings": {
+        "heading": "",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 20,
+        "spacing_bottom": 20,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "",
+        "layout_x_alignment": "justify-between",
+        "layout_horizontal": "window--full",
+        "visibility": ""
+      }
+    },
+    "main": {
+      "type": "blog__team",
+      "settings": {
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "row_size_desktop": "md:grid-cols-4",
+        "row_size_mobile": "grid grid-cols-1",
+        "items_per_page": 12
+      }
+    }
+  },
+  "order": [
+    "d527e832-641d-4417-84cc-609e015baca1",
+    "40fee175-53af-4541-b20e-176599d53a39",
+    "main"
+  ]
+}

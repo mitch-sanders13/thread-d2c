@@ -1,0 +1,199 @@
+{% comment %}
+  snippets/banner__block.liquid
+  Renders a single Banner block with full typography, spacing, color, and layout control.
+
+  Accepts:
+    block   — the block object
+    section — the section object
+{% endcomment %}
+
+{% comment %} Check if using a typography token {% endcomment %}
+{% assign use_token = false %}
+{% assign token_class = '' %}
+{% if block.settings.font_family contains 'token-' %}
+  {% assign use_token = true %}
+  {% assign token_class = block.settings.font_family | replace: 'token-', 'type-' %}
+{% endif %}
+
+{% comment %} Resolve font-family — custom name overrides dropdown {% endcomment %}
+{% assign resolved_font = '' %}
+{% unless use_token %}
+  {% if block.settings.font_family_custom != blank %}
+    {% assign resolved_font = block.settings.font_family_custom | prepend: "'" | append: "', sans-serif" %}
+  {% elsif block.settings.font_family == 'body' %}
+    {% assign resolved_font = 'var(--type-font-body-family)' %}
+  {% elsif block.settings.font_family == 'heading' %}
+    {% assign resolved_font = 'var(--type-font-header-family)' %}
+  {% elsif block.settings.font_family == 'nav' %}
+    {% assign resolved_font = 'var(--type-font-nav-family)' %}
+  {% elsif block.settings.font_family == 'handwritten' %}
+    {% assign resolved_font = 'var(--type-font-handwritten-family)' %}
+  {% elsif block.settings.font_family == 'inherit' or block.settings.font_family == blank %}
+    {% assign resolved_font = '' %}
+  {% else %}
+    {% assign resolved_font = block.settings.font_family %}
+  {% endif %}
+{% endunless %}
+
+{% comment %} Resolve custom text color {% endcomment %}
+{% if block.settings.custom_color != blank %}
+  {% assign color_style = 'color:' | append: block.settings.custom_color | append: ';' %}
+  {% assign use_theme_color = false %}
+{% else %}
+  {% assign color_style = '' %}
+  {% assign use_theme_color = true %}
+{% endif %}
+
+{% comment %} Build shared inline style — when token is used, only apply spacing + color overrides {% endcomment %}
+{% capture block_style %}padding-top:{{ block.settings.spacing_top }}px; padding-bottom:{{ block.settings.spacing_bottom }}px; padding-left:{{ block.settings.spacing_left }}px; padding-right:{{ block.settings.spacing_right }}px;{% unless use_token %}{% if resolved_font != '' %} font-family:{{ resolved_font }} !important;{% endif %}{% if block.settings.font_size > 0 %} font-size:{{ block.settings.font_size }}px !important;{% endif %}{% if block.settings.font_weight != blank %} font-weight:{{ block.settings.font_weight }} !important;{% endif %}{% if block.settings.text_transform != blank %} text-transform:{{ block.settings.text_transform }} !important;{% endif %}{% if block.settings.letter_spacing != blank %} letter-spacing:{{ block.settings.letter_spacing }} !important;{% endif %}{% if block.type == 'heading' and block.settings.line_height > 0 %} line-height:{{ block.settings.line_height | divided_by: 100.0 }};{% endif %}{% endunless %} {{ color_style }}{% endcapture %}
+
+{% comment %} Load Google Font if custom font name is provided {% endcomment %}
+{% if block.settings.font_family_custom != blank %}
+  {% assign gf_name = block.settings.font_family_custom | replace: ' ', '+' %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family={{ gf_name }}:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+{% endif %}
+
+{%- case block.type -%}
+
+  {%- when 'eyebrow' -%}
+    <p class="m-0{% if use_theme_color %} {{ section.settings.color_text }}{% endif %}{% if use_token %} {{ token_class }}{% endif %}"
+      style="{{ block_style }}"
+      {{ block.shopify_attributes }}>{{ block.settings.content }}</p>
+
+  {%- when 'heading' -%}
+    {%- assign _h_outline = false -%}
+    {%- if block.settings.outline_last_word and block.settings.content contains ' ' -%}
+      {%- assign _h_outline = true -%}
+    {%- endif -%}
+    {%- if _h_outline -%}
+      {%- assign _h_words = block.settings.content | split: ' ' -%}
+      {%- assign _h_last = _h_words | last -%}
+      {%- assign _h_lead_count = _h_words.size | minus: 1 -%}
+      <style>
+        /* Outline accent — transparent fill, 2px stroke in the heading's
+           own color. @supports-guarded so browsers without text-stroke
+           show the word filled instead of invisible. */
+        @supports (-webkit-text-stroke-width: 2px) {
+          .banner-outline-{{ block.id }} {
+            -webkit-text-fill-color: transparent;
+            -webkit-text-stroke-width: 2px;
+          }
+        }
+      </style>
+      <h1 class="m-0{% if use_theme_color %} {{ section.settings.color_text }}{% endif %}{% if use_token %} {{ token_class }}{% endif %}"
+        style="{{ block_style }}"
+        {{ block.shopify_attributes }}>{% for _h_w in _h_words limit: _h_lead_count %}{{ _h_w }} {% endfor %}<span class="banner-outline-{{ block.id }}">{{ _h_last }}</span></h1>
+    {%- else -%}
+      <h1 class="m-0{% if use_theme_color %} {{ section.settings.color_text }}{% endif %}{% if use_token %} {{ token_class }}{% endif %}"
+        style="{{ block_style }}"
+        {{ block.shopify_attributes }}>{{ block.settings.content }}</h1>
+    {%- endif -%}
+
+  {%- when 'content' -%}
+    {% if resolved_font != '' or block.settings.custom_color != blank %}
+      <style>
+        [data-block-id="{{ block.id }}"] p,
+        [data-block-id="{{ block.id }}"] span,
+        [data-block-id="{{ block.id }}"] a {
+          {% if resolved_font != '' %}font-family:{{ resolved_font }} !important;{% endif %}
+          {% if block.settings.font_size > 0 %}font-size:{{ block.settings.font_size }}px !important;{% endif %}
+          {% if block.settings.font_weight != blank %}font-weight:{{ block.settings.font_weight }} !important;{% endif %}
+          {% if block.settings.text_transform != blank %}text-transform:{{ block.settings.text_transform }} !important;{% endif %}
+          {% if block.settings.letter_spacing != blank %}letter-spacing:{{ block.settings.letter_spacing }} !important;{% endif %}
+          {% if block.settings.custom_color != blank %}color:{{ block.settings.custom_color }} !important;{% endif %}
+        }
+      </style>
+    {% endif %}
+    <div class="m-0--clear{% if use_theme_color %} {{ section.settings.color_text }}{% endif %}{% if use_token %} {{ token_class }}{% endif %}"
+      data-block-id="{{ block.id }}"
+      style="{{ block_style }}"
+      {{ block.shopify_attributes }}>{{ block.settings.content }}</div>
+
+  {%- when 'buttons' -%}
+    {% comment %} Shared typography across all three buttons. Emitted with
+      !important because the .btn--* classes use !important themselves. {% endcomment %}
+    {%- assign _bf = block.settings.btns_font | default: 'inherit' -%}
+    {%- capture _btns_font_style -%}
+      {%- case _bf -%}
+        {%- when 'body'        -%}font-family:var(--type-font-body-family) !important;
+        {%- when 'heading'     -%}font-family:var(--type-font-header-family) !important;
+        {%- when 'nav'         -%}font-family:var(--type-font-nav-family) !important;
+        {%- when 'handwritten' -%}font-family:var(--type-font-handwritten-family) !important;
+      {%- endcase -%}
+      {%- if block.settings.btns_size and block.settings.btns_size > 0 -%} font-size:{{ block.settings.btns_size }}px !important;{%- endif -%}
+      {%- if block.settings.btns_weight != blank -%} font-weight:{{ block.settings.btns_weight }} !important;{%- endif -%}
+      {%- if block.settings.btns_case   != blank -%} text-transform:{{ block.settings.btns_case }} !important;{%- endif -%}
+      {%- if block.settings.btns_ls     != blank -%} letter-spacing:{{ block.settings.btns_ls }} !important;{%- endif -%}
+      {%- if block.settings.btns_style  != blank -%} font-style:{{ block.settings.btns_style }} !important;{%- endif -%}
+    {%- endcapture -%}
+
+    {% comment %} Build custom styles for each button {% endcomment %}
+    {% capture btn1_style %}{% unless block.settings.button_color contains 'glass' %}{% if block.settings.button_custom_bg != blank %}background-color:{{ block.settings.button_custom_bg }}; border-color:{{ block.settings.button_custom_bg }};{% endif %}{% if block.settings.button_custom_text != blank %} color:{{ block.settings.button_custom_text }};{% endif %}{% endunless %}{{ _btns_font_style }}{% endcapture %}
+    {% capture btn2_style %}{% unless block.settings.secondary_button_color contains 'glass' %}{% if block.settings.secondary_button_custom_bg != blank %}background-color:{{ block.settings.secondary_button_custom_bg }}; border-color:{{ block.settings.secondary_button_custom_bg }};{% endif %}{% if block.settings.secondary_button_custom_text != blank %} color:{{ block.settings.secondary_button_custom_text }};{% endif %}{% endunless %}{{ _btns_font_style }}{% endcapture %}
+
+    <div class="flex flex-wrap gap-2{% if section.settings.layout_x_alignment contains 'text-center' %} justify-center{% endif %}{% if section.settings.layout_x_alignment contains 'text-right' %} justify-end{% endif %}"
+      style="padding-top:{{ block.settings.spacing_top }}px; padding-bottom:{{ block.settings.spacing_bottom }}px; padding-left:{{ block.settings.spacing_left }}px; padding-right:{{ block.settings.spacing_right }}px;{% if resolved_font != '' %} font-family:{{ resolved_font }} !important;{% endif %}"
+      {{ block.shopify_attributes }}>
+      {%- unless block.settings.button_label == blank -%}
+        <a href="{{ block.settings.button_url }}"
+          class="{{ block.settings.button_color }}"
+          {% if btn1_style != blank %}style="{{ btn1_style }}"{% endif %}>
+          {{ block.settings.button_label }}
+          {%- if block.settings.button_show_arrow -%}
+            {%- comment -%}
+              Stroke pinned inline with !important: the arrow must match the
+              button's text color exactly, and the .btn--* classes set colors
+              with !important that beat the svg's currentColor attribute.
+            {%- endcomment -%}
+            {%- assign _btn_arrow_color = 'currentColor' -%}
+            {%- unless block.settings.button_color contains 'glass' -%}
+              {%- if block.settings.button_custom_text != blank -%}
+                {%- assign _btn_arrow_color = block.settings.button_custom_text -%}
+              {%- endif -%}
+            {%- endunless -%}
+            <svg viewBox="0 0 24 24" width="1.25em" height="1.25em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-0.28em;margin-left:8px;stroke:{{ _btn_arrow_color }} !important;color:{{ _btn_arrow_color }} !important;"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+          {%- endif -%}
+        </a>
+      {%- endunless -%}
+      {%- unless block.settings.secondary_button_label == blank -%}
+        <a href="{{ block.settings.secondary_button_url }}"
+          class="{{ block.settings.secondary_button_color }}"
+          {% if btn2_style != blank %}style="{{ btn2_style }}"{% endif %}>
+          {{ block.settings.secondary_button_label }}
+        </a>
+      {%- endunless -%}
+      {%- unless block.settings.tertiary_button_label == blank -%}
+        {% capture btn3_style %}{% unless block.settings.tertiary_button_color contains 'glass' %}{% if block.settings.tertiary_button_custom_bg != blank %}background-color:{{ block.settings.tertiary_button_custom_bg }}; border-color:{{ block.settings.tertiary_button_custom_bg }};{% endif %}{% if block.settings.tertiary_button_custom_text != blank %} color:{{ block.settings.tertiary_button_custom_text }};{% endif %}{% endunless %}{{ _btns_font_style }}{% endcapture %}
+        <a href="{{ block.settings.tertiary_button_url }}"
+          class="{{ block.settings.tertiary_button_color }}"
+          {% if btn3_style != blank %}style="{{ btn3_style }}"{% endif %}>
+          {{ block.settings.tertiary_button_label }}
+        </a>
+      {%- endunless -%}
+    </div>
+
+  {%- when 'button' -%}
+    {% comment %} Single button — rendered inline, grouped in a row by the section {% endcomment %}
+    {% capture single_btn_style %}
+      {%- unless block.settings.btn_style contains 'glass' -%}
+      {% if block.settings.btn_custom_bg != blank %}background-color:{{ block.settings.btn_custom_bg }}; border-color:{{ block.settings.btn_custom_bg }};{% endif %}
+      {% if block.settings.btn_custom_text != blank %} color:{{ block.settings.btn_custom_text }};{% endif %}
+      {% if block.settings.btn_font_size > 0 %} font-size:{{ block.settings.btn_font_size }}px;{% endif %}
+      {% if block.settings.btn_custom_border_color != blank %} border-color:{{ block.settings.btn_custom_border_color }};{% endif %}
+      {% if block.settings.btn_border_width != blank %} border-width:{{ block.settings.btn_border_width }}px; border-style:solid;{% endif %}
+      {% if block.settings.btn_radius != blank %} border-radius:{{ block.settings.btn_radius }}px;{% endif %}
+      {% if block.settings.btn_pad_v > 0 or block.settings.btn_pad_h > 0 %} padding:{{ block.settings.btn_pad_v }}px {{ block.settings.btn_pad_h }}px;{% endif %}
+      {%- endunless -%}
+    {% endcapture %}
+    {%- unless block.settings.btn_label == blank -%}
+      <a href="{{ block.settings.btn_url }}"
+        class="{{ block.settings.btn_style }}"
+        style="{{ single_btn_style }}"
+        {{ block.shopify_attributes }}>
+        {{ block.settings.btn_label }}
+      </a>
+    {%- endunless -%}
+
+{%- endcase -%}

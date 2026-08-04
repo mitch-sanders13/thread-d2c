@@ -1,0 +1,1187 @@
+<!-- snippets/theme__styles.liquid -->
+{% comment %} 
+  All CSS for theme comes in through here.
+
+  Usage:
+    {% render 'theme__styles' %}
+
+  Globals: 
+    - settings.type_font_body: set font family for body text
+    - settings.type_font_heading: set font family for heading text
+    - settings.background_body_light: set the body background color for light mode
+    - settings.background_body_dark: set the body background color for dark mode
+    - settings.foreground_body_light: set the body foreground for light mode (used for text color)
+    - settings.foreground_body_dark: set the body foreground for dark mode (used for text color)
+    - settings.background_primary_light: set the primary background color for light mode
+    - settings.background_primary_dark: set the primary background color for dark mode
+    - settings.foreground_primary_light: set the primary foreground for light mode
+    - settings.foreground_primary_dark: set the primary foreground for dark mode
+    - settings.background_secondary_light: set the secondary background color for light mode
+    - settings.background_secondary_dark: set the secondary background color for dark mode
+    - settings.foreground_secondary_light: set the secondary foreground for light mode
+    - settings.foreground_secondary_dark: set the secondary foreground for dark mode
+    - settings.border_button_radius: set the border radius for buttons
+    - settings.border_input_radius: set the border radius for input elements
+    - settings.border_element_radius: set the border radius for secondary elements
+    - settings.border_width: set the border width
+    - settings.border_light: set the border color for light mode
+    - settings.border_dark: set the border color for dark mode
+    - settings.type_base_size: set base size for font size
+    - settings.type_button_capitilization: set capitilization for button text
+{% endcomment %}
+
+<noscript><style>
+  .js\:animation.opacity-0 {
+    opacity: 100 !important;
+  }
+  .js\:animation.translate-y-4,
+  .js\:animation.translate-y-8 {
+    transform: translateY(0px) !important;
+  }
+  .no-js--hide {
+    display: none !important;
+  }
+  .no-js--block {
+    display: block !important;
+  }
+</style></noscript>
+
+{%- liquid
+  assign type_font_body = settings.type_font_body
+  assign type_font_body_bold = settings.type_font_body | font_modify: 'weight', 'bold'
+  assign type_font_body_italic = settings.type_font_body | font_modify: 'style', 'italic'
+  assign type_font_body_bold_italic = type_font_body_bold | font_modify: 'style', 'italic'
+  assign type_font_heading = settings.type_font_heading
+%}
+
+{% style %}
+
+  /* PP Right Grotesk — Tight variants (primary heading font).
+   * font-display: optional on the weights that get preloaded — if the
+   * font is available within ~100ms it renders directly; otherwise the
+   * page sticks with the system fallback for this session (no mid-paint
+   * swap = no FOUT). Cached on first visit, so repeat visits render the
+   * brand font from the start. */
+  @font-face {
+    font-family: "PP Right Grotesk";
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+    src:
+      url("{{ 'RightGrotesk-TightMedium.woff2' | asset_url }}") format("woff2"),
+      url("{{ 'RightGrotesk-TightMedium.otf' | asset_url }}") format("opentype");
+  }
+  @font-face {
+    font-family: "PP Right Grotesk";
+    font-weight: 700;
+    font-style: normal;
+    font-display: optional;
+    src:
+      url("https://cdn.shopify.com/s/files/1/1030/4291/files/PPRightGrotesk-TightBold.woff2?v=1712089722") format("woff2"),
+      url("https://cdn.shopify.com/s/files/1/1030/4291/files/PPRightGrotesk-TightBold.woff?v=1712089722") format("woff"),
+      url("https://cdn.shopify.com/s/files/1/1030/4291/files/PPRightGrotesk-TightBold.otf?v=1712089722") format("opentype");
+  }
+
+  /* Thread Handwritten — custom font */
+  @font-face {
+    font-family: "Thread Handwritten";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("{{ 'Handwritten.ttf' | asset_url }}") format("truetype");
+  }
+
+  /* Forma DJR Display — all weights */
+  @font-face {
+    font-family: "FormaDJR";
+    font-style: normal;
+    font-weight: 300;
+    font-display: optional;
+    src:
+      url("{{ 'FormaDJRDisplay-Light.woff2' | asset_url }}") format("woff2"),
+      url("{{ 'FormaDJRDisplay-Light-Testing.otf' | asset_url }}") format("opentype");
+  }
+  @font-face {
+    font-family: "FormaDJR";
+    font-style: italic;
+    font-weight: 300;
+    font-display: swap;
+    src: url("{{ 'FormaDJRDisplay-LightItalic-Testing.otf' | asset_url }}") format("opentype");
+  }
+  @font-face {
+    font-family: "FormaDJR";
+    font-style: normal;
+    font-weight: 400;
+    font-display: optional;
+    src: url("{{ 'FormaDJRDisplay-Regular-Testing.woff2' | file_url }}") format("woff2");
+  }
+  @font-face {
+    font-family: "FormaDJR";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src:
+      url("{{ 'FormaDJRDisplay-Medium.woff2' | asset_url }}") format("woff2"),
+      url("{{ 'FormaDJRDisplay-Medium-Testing.otf' | asset_url }}") format("opentype");
+  }
+  @font-face {
+    font-family: "FormaDJR";
+    font-style: italic;
+    font-weight: 500;
+    font-display: swap;
+    src: url("{{ 'FormaDJRDisplay-MediumItalic-Testing.otf' | asset_url }}") format("opentype");
+  }
+  @font-face {
+    font-family: "FormaDJR";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src:
+      url("{{ 'FormaDJRDisplay-Bold.woff2' | asset_url }}") format("woff2"),
+      url("{{ 'FormaDJRDisplay-Bold-Testing.otf' | asset_url }}") format("opentype");
+  }
+  @font-face {
+    font-family: "FormaDJR";
+    font-style: italic;
+    font-weight: 700;
+    font-display: swap;
+    src: url("{{ 'FormaDJRDisplay-BoldItalic-Testing.otf' | asset_url }}") format("opentype");
+  }
+  @font-face {
+    font-family: "FormaDJR";
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url("{{ 'FormaDJRDisplay-ExtraBold-Testing.otf' | asset_url }}") format("opentype");
+  }
+  @font-face {
+    font-family: "FormaDJR";
+    font-style: italic;
+    font-weight: 800;
+    font-display: swap;
+    src: url("{{ 'FormaDJRDisplay-ExtraBoldItalic-Testing.otf' | asset_url }}") format("opentype");
+  }
+  @font-face {
+    font-family: "FormaDJR";
+    font-style: normal;
+    font-weight: 900;
+    font-display: swap;
+    src: url("{{ 'FormaDJRDisplay-Black-Testing.otf' | asset_url }}") format("opentype");
+  }
+  @font-face {
+    font-family: "FormaDJR";
+    font-style: italic;
+    font-weight: 900;
+    font-display: swap;
+    src: url("{{ 'FormaDJRDisplay-BlackItalic-Testing.otf' | asset_url }}") format("opentype");
+  }
+
+  {{ type_font_body | font_face: font_display: 'optional' }}
+  {{ type_font_body_bold | font_face: font_display: 'swap' }}
+  {{ type_font_body_italic | font_face: font_display: 'swap' }}
+  {{ type_font_body_bold_italic | font_face: font_display: 'swap' }}
+  {{ type_font_heading | font_face: font_display: 'optional' }}
+
+  :root {
+    --oke-button-backgroundColor: {{ settings.background_primary_light }} !important;
+    --oke-button-backgroundColorHover: {{ settings.background_primary_light }} !important;
+    --oke-button-backgroundColorActive: {{ settings.background_primary_light }} !important;
+    --oke-button-borderColor: {{ settings.background_primary_light }} !important;
+    --oke-button-borderColorHover: {{ settings.background_primary_light }} !important;
+    --oke-button-borderColorActive: {{ settings.background_primary_light }} !important;
+    --oke-avatar-backgroundColor: {{ settings.background_primary_light }} !important;
+    --oke-highlightColor: {{ settings.background_primary_light }} !important;
+    --oke-attributeBar-markerColor: {{ settings.background_primary_light }} !important;
+    --oke-filter-backgroundColorActive: {{ settings.background_primary_light }} !important;
+    --oke-filter-borderColor: {{ settings.background_primary_light }} !important;
+    --oke-filter-borderColorActive: {{ settings.background_primary_light }} !important;
+    --oke-filter-textColor: {{ settings.background_primary_light }} !important;
+    --oke-stars-foregroundColor: {{ settings.background_primary_light }} !important;
+    
+    --color__bg-body-light: {{ settings.background_body_light }};
+    --color__bg-overlay-light-1: #f5f5f5;
+    --color__bg-overlay-light-2: {{ settings.background_body_light | color_darken: 12 }};
+    --color__bg-overlay-light-3: {{ settings.background_body_light | color_darken: 24 }};
+
+    --color__text-light: {{ settings.foreground_body_light }};
+    --color__link-light: {{ settings.background_primary_light }};
+
+    --color__text-dark: {{ settings.foreground_body_dark }};
+
+    --color__border-divider-light-1: {{ settings.border_light }};
+    --color__border-divider-light-2: {{ settings.border_light | color_darken: 15 }};
+    --color__border-divider-light-3: {{ settings.border_light | color_darken: 30 }};
+    --color__border-selected-light-1: {{ settings.border_light | color_darken: 45 }};
+    --color__border-selected-light-2: {{ settings.border_light | color_darken: 60 }};
+
+    {%- assign _neutral_default = settings.background_body_light | color_darken: 5 | color_mix: settings.background_primary_light, 94 -%}
+    {%- assign _plain_default = settings.background_body_light | color_darken: 6 -%}
+
+    --color-primary-button-background-light: {{ settings.btn_primary_bg | default: settings.background_primary_light }};
+    --color-primary-button-border-light: {{ settings.btn_primary_border | default: settings.background_primary_light }};
+    --color-primary-button-text-light: {{ settings.btn_primary_text | default: settings.foreground_primary_light }};
+
+    --color-secondary-button-background-light: {{ settings.btn_secondary_bg | default: settings.background_secondary_light }};
+    --color-secondary-button-border-light: {{ settings.btn_secondary_border | default: settings.background_secondary_light }};
+    --color-secondary-button-text-light: {{ settings.btn_secondary_text | default: settings.foreground_secondary_light }};
+
+    --color-tertiary-button-background-light: {{ settings.btn_tertiary_bg | default: settings.background_tertiary_light }};
+    --color-tertiary-button-border-light: {{ settings.btn_tertiary_border | default: settings.background_tertiary_light }};
+    --color-tertiary-button-text-light: {{ settings.btn_tertiary_text | default: settings.foreground_tertiary_light }};
+
+    --color-neutral-button-background-light: {{ settings.btn_neutral_bg | default: _neutral_default }};
+    --color-neutral-button-border-light: {{ settings.btn_neutral_border | default: _neutral_default }};
+    --color-neutral-button-text-light: {{ settings.btn_neutral_text | default: settings.foreground_body_light }};
+
+    --color-plain-button-background-light: {{ settings.btn_plain_bg | default: _plain_default }};
+    --color-plain-button-border-light: {{ settings.btn_plain_border | default: _plain_default }};
+    --color-plain-button-text-light: {{ settings.btn_plain_text | default: settings.foreground_body_light }};
+
+    --color-minimal-button-background-transparent: rgb(0,0,0,0);
+    --color-minimal-button-border-light: {{ settings.btn_minimal_light_border | default: settings.foreground_minimal_light }};
+    --color-minimal-button-text-light: {{ settings.btn_minimal_light_text | default: settings.foreground_minimal_light }};
+
+    --color-minimal-button-border-dark: {{ settings.btn_minimal_dark_border | default: settings.foreground_minimal_dark }};
+    --color-minimal-button-text-dark: {{ settings.btn_minimal_dark_text | default: settings.foreground_minimal_dark }};
+
+    --sizes-border-button-radius: {{ settings.border_button_radius }}px;
+    --sizes-border-input-radius: {{ settings.border_input_radius }}px;
+    --sizes-border-element-radius: {{ settings.border_element_radius }}px;
+    --sizes-border-width: {{ settings.border_width }}px;
+    --sizes-gap-width: {{ settings.layout_gap_size }}px;
+
+    /* ============================================================
+       Thread brand tokens — the single source of truth for the
+       design system (see docs/design-system.md). Sections consume
+       these variables; never hardcode the underlying values.
+       Colors are merchant-editable in Theme settings → Brand tokens.
+       ============================================================ */
+    /* Alias: some stored settings say "heading", the real var is
+       --type-font-header-family — without this alias those silently
+       fall back to the body font (the Shop by Category bug). */
+    --type-font-heading-family: var(--type-font-header-family);
+    /* Eyebrows track wide — distinct from the 0.085em label role. */
+    --thread-ls-eyebrow: 0.16em;
+    --thread-blue: {{ settings.brand_blue | default: '#1e7db3' }};
+    --thread-ink: {{ settings.brand_ink | default: '#1c1c1c' }};
+    --thread-gold: {{ settings.brand_gold | default: '#eebc2c' }};
+    --thread-bronze: {{ settings.brand_bronze | default: '#c08951' }};
+    --thread-bone: {{ settings.brand_bone | default: '#f4f1ea' }};
+    --thread-putty: {{ settings.brand_putty | default: '#e0ddd8' }};
+    --thread-hairline: {{ settings.brand_hairline | default: '#e3ded2' }};
+    --thread-grey: {{ settings.brand_grey | default: '#888888' }};
+    --thread-radius-pill: 999px;
+    --thread-btn-height: 52px;
+    --thread-ls-label: 0.085em;
+    --thread-ls-body: 0.07em;
+    --thread-ease: cubic-bezier(0, 0, 0.3, 1);
+    --thread-dur-reveal: 0.55s;
+    --thread-dur-hover: 0.3s;
+
+    --type-font-body-family: "FormaDJR", {{ settings.type_font_body.fallback_families }};
+    --type-font-body-style: {{ settings.type_font_body.style }};
+    --type-font-body-weight: 300;
+    --type-font-body-letter-spacing: var(--thread-ls-body);
+    --type-font-header-family: "PP Right Grotesk", {{ settings.type_font_heading.fallback_families }};
+    --type-font-header-style: {{ settings.type_font_heading.style }};
+    --type-font-header-weight: {{ settings.type_font_heading.weight }};
+    /* Nav font retired: Source Sans Pro removed. Anything still referencing --type-font-nav-* resolves to the body font (Forma DJR). */
+    --type-font-nav-family: {{ settings.type_font_body.family }}, {{ settings.type_font_body.fallback_families }};
+    --type-font-nav-style: {{ settings.type_font_body.style }};
+    --type-font-nav-weight: {{ settings.type_font_body.weight }};
+    --type-font-handwritten-family: "Thread Handwritten", cursive;
+    --type-font-base-size: {{ settings.type_base_size }}px;
+  }
+
+  /* --- Pre-launch pass: global CTA/hover/focus rules --- */
+
+  /* The compiled base stylesheet fades EVERY anchor to 50% on hover.
+     Primary CTAs and header links must not fade — they have their own
+     hover language (lift/sweep/arrow-nudge). */
+  .ts-cta:hover,
+  .ugc-gallery__cta:hover,
+  [class*="ig-headlink"]:hover,
+  a.thread-pill:hover,
+  .bs-cta:hover {
+    opacity: 1 !important;
+  }
+
+  /* Product cards: one hover language sitewide — lift + soft shadow,
+     slow 1.03 zoom on the image. Hover-capable devices only. */
+  @media (prefers-reduced-motion: no-preference) and (hover: hover) {
+    .bs-product-item {
+      transition: transform 0.3s cubic-bezier(0,0,.3,1), box-shadow 0.3s cubic-bezier(0,0,.3,1);
+    }
+    .bs-product-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 30px rgba(28,28,28,0.08);
+    }
+    .pc-media__frame { overflow: hidden; }
+    .pc-media__frame img {
+      transition: transform 0.9s cubic-bezier(0,0,.3,1);
+    }
+    .bs-product-item:hover .pc-media__frame img,
+    .pc-media:hover .pc-media__frame img {
+      transform: scale(1.03);
+    }
+  }
+
+  /* Keyboard focus: visible ring on all custom interactive elements. */
+  [class*="bs-filter-btn"]:focus-visible,
+  .hp-qf-bar__chip:focus-visible,
+  .pc-quick-add:focus-visible,
+  .pc-media__slide:focus-visible,
+  .ts-cta:focus-visible,
+  .bs-cta:focus-visible,
+  [class*="ig-headlink"]:focus-visible {
+    outline: 2px solid var(--thread-blue);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+{% endstyle %}
+
+<style>
+  /* ========================================
+     Typography tokens — fluid clamp() classes
+     Change in Theme Settings > Typography tokens
+     ======================================== */
+
+  .type-display {
+    font-family: var(--type-font-{{ settings.token_display_font }}-family) !important;
+    font-size: clamp({{ settings.token_display_min }}px, {{ settings.token_display_min | plus: settings.token_display_max | divided_by: 2 | divided_by: 16.0 | times: 1.0 }}vw + 1rem, {{ settings.token_display_max }}px) !important;
+    font-weight: {{ settings.token_display_weight }} !important;
+    text-transform: {{ settings.token_display_transform }} !important;
+    letter-spacing: {{ settings.token_display_spacing }} !important;
+    line-height: {{ settings.token_display_lh }} !important;
+    {% if settings.token_display_color != blank %}color: {{ settings.token_display_color }} !important;{% endif %}
+  }
+
+  .type-h1 {
+    font-family: var(--type-font-{{ settings.token_h1_font }}-family) !important;
+    font-size: clamp({{ settings.token_h1_min }}px, {{ settings.token_h1_min | plus: settings.token_h1_max | divided_by: 2 | divided_by: 16.0 | times: 1.0 }}vw + 1rem, {{ settings.token_h1_max }}px) !important;
+    font-weight: {{ settings.token_h1_weight }} !important;
+    text-transform: {{ settings.token_h1_transform }} !important;
+    letter-spacing: {{ settings.token_h1_spacing }} !important;
+    line-height: {{ settings.token_h1_lh }} !important;
+    {% if settings.token_h1_color != blank %}color: {{ settings.token_h1_color }} !important;{% endif %}
+  }
+
+  .type-h2 {
+    font-family: var(--type-font-{{ settings.token_h2_font }}-family) !important;
+    font-size: clamp({{ settings.token_h2_min }}px, {{ settings.token_h2_min | plus: settings.token_h2_max | divided_by: 2 | divided_by: 16.0 | times: 1.0 }}vw + 1rem, {{ settings.token_h2_max }}px) !important;
+    font-weight: {{ settings.token_h2_weight }} !important;
+    text-transform: {{ settings.token_h2_transform }} !important;
+    letter-spacing: {{ settings.token_h2_spacing }} !important;
+    line-height: {{ settings.token_h2_lh }} !important;
+    {% if settings.token_h2_color != blank %}color: {{ settings.token_h2_color }} !important;{% endif %}
+  }
+
+  .type-h3 {
+    font-family: var(--type-font-{{ settings.token_h3_font }}-family) !important;
+    font-size: clamp({{ settings.token_h3_min }}px, {{ settings.token_h3_min | plus: settings.token_h3_max | divided_by: 2 | divided_by: 16.0 | times: 1.0 }}vw + 1rem, {{ settings.token_h3_max }}px) !important;
+    font-weight: {{ settings.token_h3_weight }} !important;
+    text-transform: {{ settings.token_h3_transform }} !important;
+    letter-spacing: {{ settings.token_h3_spacing }} !important;
+    line-height: {{ settings.token_h3_lh }} !important;
+    {% if settings.token_h3_color != blank %}color: {{ settings.token_h3_color }} !important;{% endif %}
+  }
+
+  .type-body {
+    font-family: var(--type-font-{{ settings.token_body_font }}-family) !important;
+    font-size: clamp({{ settings.token_body_min }}px, {{ settings.token_body_min | plus: settings.token_body_max | divided_by: 2 | divided_by: 16.0 | times: 1.0 }}vw + 0.5rem, {{ settings.token_body_max }}px) !important;
+    font-weight: {{ settings.token_body_weight }} !important;
+    letter-spacing: {{ settings.token_body_spacing }} !important;
+    line-height: {{ settings.token_body_lh }} !important;
+    {% if settings.token_body_color != blank %}color: {{ settings.token_body_color }} !important;{% endif %}
+  }
+
+  .type-small {
+    font-family: var(--type-font-{{ settings.token_small_font }}-family) !important;
+    font-size: clamp({{ settings.token_small_min }}px, {{ settings.token_small_min | plus: settings.token_small_max | divided_by: 2 | divided_by: 16.0 | times: 1.0 }}vw + 0.25rem, {{ settings.token_small_max }}px) !important;
+    font-weight: {{ settings.token_small_weight }} !important;
+    letter-spacing: {{ settings.token_small_spacing }} !important;
+    line-height: {{ settings.token_small_lh }} !important;
+    {% if settings.token_small_color != blank %}color: {{ settings.token_small_color }} !important;{% endif %}
+  }
+
+  .type-label {
+    font-family: var(--type-font-{{ settings.token_label_font }}-family) !important;
+    font-size: clamp({{ settings.token_label_min }}px, {{ settings.token_label_min | plus: settings.token_label_max | divided_by: 2 | divided_by: 16.0 | times: 1.0 }}vw + 0.25rem, {{ settings.token_label_max }}px) !important;
+    font-weight: {{ settings.token_label_weight }} !important;
+    text-transform: {{ settings.token_label_transform }} !important;
+    letter-spacing: {{ settings.token_label_spacing }} !important;
+    line-height: {{ settings.token_label_lh }} !important;
+    {% if settings.token_label_color != blank %}color: {{ settings.token_label_color }} !important;{% endif %}
+  }
+
+  /* Global spacing tokens */
+  .spacing-global {
+    padding-left: {{ settings.token_padding_sides_mobile }}px !important;
+    padding-right: {{ settings.token_padding_sides_mobile }}px !important;
+    padding-top: {{ settings.token_padding_top_mobile }}px;
+    padding-bottom: {{ settings.token_padding_bottom_mobile }}px;
+  }
+  @media (min-width: 768px) {
+    .spacing-global {
+      padding-left: {{ settings.token_padding_sides_desktop }}px !important;
+      padding-right: {{ settings.token_padding_sides_desktop }}px !important;
+      padding-top: {{ settings.token_padding_top_desktop }}px;
+      padding-bottom: {{ settings.token_padding_bottom_desktop }}px;
+    }
+  }
+  /* Side padding only (for sections that control top/bottom independently) */
+  .spacing-sides {
+    padding-left: {{ settings.token_padding_sides_mobile }}px !important;
+    padding-right: {{ settings.token_padding_sides_mobile }}px !important;
+  }
+  @media (min-width: 768px) {
+    .spacing-sides {
+      padding-left: {{ settings.token_padding_sides_desktop }}px !important;
+      padding-right: {{ settings.token_padding_sides_desktop }}px !important;
+    }
+  }
+
+  /* ======================================== */
+
+  .btn {
+    border-width: var(--sizes-border-width) !important;
+    border-radius: var(--sizes-border-button-radius) !important;
+  }
+
+  {%- assign _btn_variants = 'primary,secondary,tertiary,neutral,plain,minimal_light,minimal_dark' | split: ',' -%}
+  {%- for _v in _btn_variants -%}
+    {%- case _v -%}
+      {%- when 'minimal_light' -%}{%- assign _sel = '.btn--minimal-light' -%}
+      {%- when 'minimal_dark'  -%}{%- assign _sel = '.btn--minimal-dark'  -%}
+      {%- else -%}{%- assign _sel = '.btn--' | append: _v -%}
+    {%- endcase -%}
+    {%- assign _kp = 'btn_' | append: _v -%}
+    {%- assign _font_key = _kp | append: '_font' -%}
+    {%- assign _pv_key   = _kp | append: '_padding_v' -%}
+    {%- assign _ph_key   = _kp | append: '_padding_h' -%}
+    {%- assign _fs_key   = _kp | append: '_font_size' -%}
+    {%- assign _fsm_key  = _kp | append: '_font_size_mobile' -%}
+    {%- assign _fw_key   = _kp | append: '_font_weight' -%}
+    {%- assign _tt_key   = _kp | append: '_text_transform' -%}
+    {%- assign _ls_key   = _kp | append: '_letter_spacing' -%}
+    {%- assign _font = settings[_font_key] | default: 'inherit' -%}
+    {%- assign _pv   = settings[_pv_key]   | default: 8 -%}
+    {%- assign _ph   = settings[_ph_key]   | default: 24 -%}
+    {%- assign _fs   = settings[_fs_key]   | default: 14 -%}
+    {%- assign _fsm  = settings[_fsm_key]  | default: 14 -%}
+    {%- assign _fw   = settings[_fw_key]   | default: '800' -%}
+    {%- assign _tt   = settings[_tt_key]   | default: 'uppercase' -%}
+    {%- assign _ls   = settings[_ls_key]   | default: '0.1em' -%}
+
+    {{ _sel }} {
+      padding: {{ _pv }}px {{ _ph }}px !important;
+      font-size: {{ _fs }}px !important;
+      font-weight: {{ _fw }} !important;
+      text-transform: {{ _tt }} !important;
+      letter-spacing: {{ _ls }} !important;
+      {% if _font == 'body' %}font-family: var(--type-font-body-family) !important;{% endif %}
+      {% if _font == 'heading' %}font-family: var(--type-font-header-family) !important;{% endif %}
+      {% if _font == 'nav' %}font-family: var(--type-font-nav-family) !important;{% endif %}
+      {% if _font == 'handwritten' %}font-family: var(--type-font-handwritten-family) !important;{% endif %}
+    }
+    {{ _sel }} * {
+      font-size: {{ _fs }}px !important;
+      font-weight: {{ _fw }} !important;
+      text-transform: {{ _tt }} !important;
+      letter-spacing: {{ _ls }} !important;
+      {% if _font == 'body' %}font-family: var(--type-font-body-family) !important;{% endif %}
+      {% if _font == 'heading' %}font-family: var(--type-font-header-family) !important;{% endif %}
+      {% if _font == 'nav' %}font-family: var(--type-font-nav-family) !important;{% endif %}
+      {% if _font == 'handwritten' %}font-family: var(--type-font-handwritten-family) !important;{% endif %}
+    }
+    @media (max-width: 749px) {
+      {{ _sel }} { font-size: {{ _fsm }}px !important; }
+      {{ _sel }} * { font-size: {{ _fsm }}px !important; }
+    }
+  {%- endfor -%}
+
+  {%- comment -%} Underline controls for plain / minimal-light / minimal-dark {%- endcomment -%}
+  {%- assign _ul_variants = 'plain,minimal_light,minimal_dark' | split: ',' -%}
+  {%- for _v in _ul_variants -%}
+    {%- case _v -%}
+      {%- when 'minimal_light' -%}{%- assign _sel = '.btn--minimal-light' -%}
+      {%- when 'minimal_dark'  -%}{%- assign _sel = '.btn--minimal-dark'  -%}
+      {%- else -%}{%- assign _sel = '.btn--' | append: _v -%}
+    {%- endcase -%}
+    {%- assign _ukp = 'btn_' | append: _v -%}
+    {%- assign _us_key = _ukp | append: '_underline_show' -%}
+    {%- assign _ut_key = _ukp | append: '_underline_thickness' -%}
+    {%- assign _uw_key = _ukp | append: '_underline_width' -%}
+    {%- assign _uo_key = _ukp | append: '_underline_offset' -%}
+    {%- assign _upv_key = _ukp | append: '_padding_v' -%}
+    {%- assign _u_show   = settings[_us_key] -%}
+    {%- assign _u_thick  = settings[_ut_key]  | default: 1 -%}
+    {%- assign _u_width  = settings[_uw_key]  | default: 'text' -%}
+    {%- assign _u_offset = settings[_uo_key]  | default: 3 -%}
+    {%- assign _u_pv     = settings[_upv_key] | default: 8 -%}
+    {%- assign _u_pb_full = _u_pv | plus: _u_offset -%}
+
+    {%- if _u_show -%}
+      {%- if _u_width == 'full' -%}
+        {{ _sel }} {
+          text-decoration: none !important;
+          border-bottom: {{ _u_thick }}px solid currentColor !important;
+          padding-bottom: {{ _u_pb_full }}px !important;
+        }
+      {%- else -%}
+        {{ _sel }} {
+          text-decoration: underline !important;
+          text-decoration-thickness: {{ _u_thick }}px !important;
+          text-underline-offset: {{ _u_offset }}px !important;
+          text-decoration-color: currentColor !important;
+          border-bottom: 0 !important;
+        }
+      {%- endif -%}
+    {%- else -%}
+      {{ _sel }} {
+        text-decoration: none !important;
+        border-bottom: 0 !important;
+      }
+    {%- endif -%}
+  {%- endfor -%}
+
+  /* Glass (light) button — customizable via Theme Settings > Buttons */
+  .btn--glass,
+  a.btn--glass,
+  a.btn--glass:link,
+  a.btn--glass:visited,
+  a.btn--glass:active,
+  a.btn--glass:hover {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: {{ settings.btn_glass_pad_v }}px {{ settings.btn_glass_pad_h }}px !important;
+    {% assign gl_r = settings.btn_glass_bg | color_extract: 'red' %}
+    {% assign gl_g = settings.btn_glass_bg | color_extract: 'green' %}
+    {% assign gl_b = settings.btn_glass_bg | color_extract: 'blue' %}
+    {% assign gl_a = settings.btn_glass_opacity | divided_by: 100.0 %}
+    background-color: rgba({{ gl_r }}, {{ gl_g }}, {{ gl_b }}, {{ gl_a }}) !important;
+    {% if settings.btn_glass_blur > 0 %}
+      backdrop-filter: blur({{ settings.btn_glass_blur }}px) !important;
+      -webkit-backdrop-filter: blur({{ settings.btn_glass_blur }}px) !important;
+    {% endif %}
+    border: {{ settings.border_width }}px solid {{ settings.btn_glass_border_color }} !important;
+    border-bottom: {{ settings.border_width }}px solid {{ settings.btn_glass_border_color }} !important;
+    border-radius: var(--sizes-border-button-radius) !important;
+    color: {{ settings.btn_glass_text }} !important;
+    font-family: var(--type-font-{{ settings.btn_glass_font }}-family) !important;
+    font-weight: {{ settings.btn_glass_weight }} !important;
+    font-size: {{ settings.btn_glass_size }}px !important;
+    letter-spacing: {{ settings.btn_glass_letter_spacing }} !important;
+    text-transform: {{ settings.btn_glass_transform }} !important;
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+    line-height: 1.4 !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+    transition: background-color 0.2s ease !important;
+  }
+  a.btn--glass:hover {
+    {% assign gl_a_hover = settings.btn_glass_opacity | plus: 15 | at_most: 100 | divided_by: 100.0 %}
+    background-color: rgba({{ gl_r }}, {{ gl_g }}, {{ gl_b }}, {{ gl_a_hover }}) !important;
+  }
+  .btn--glass *, a.btn--glass * {
+    color: {{ settings.btn_glass_text }} !important;
+    text-decoration: none !important;
+  }
+
+  /* Glass (dark) button */
+  .btn--glass-dark,
+  a.btn--glass-dark,
+  a.btn--glass-dark:link,
+  a.btn--glass-dark:visited,
+  a.btn--glass-dark:active,
+  a.btn--glass-dark:hover {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: {{ settings.btn_glassd_pad_v }}px {{ settings.btn_glassd_pad_h }}px !important;
+    {% assign gd_r = settings.btn_glassd_bg | color_extract: 'red' %}
+    {% assign gd_g = settings.btn_glassd_bg | color_extract: 'green' %}
+    {% assign gd_b = settings.btn_glassd_bg | color_extract: 'blue' %}
+    {% assign gd_a = settings.btn_glassd_opacity | divided_by: 100.0 %}
+    background-color: rgba({{ gd_r }}, {{ gd_g }}, {{ gd_b }}, {{ gd_a }}) !important;
+    {% if settings.btn_glassd_blur > 0 %}
+      backdrop-filter: blur({{ settings.btn_glassd_blur }}px) !important;
+      -webkit-backdrop-filter: blur({{ settings.btn_glassd_blur }}px) !important;
+    {% endif %}
+    border: {{ settings.border_width }}px solid {{ settings.btn_glassd_border_color }} !important;
+    border-bottom: {{ settings.border_width }}px solid {{ settings.btn_glassd_border_color }} !important;
+    border-radius: var(--sizes-border-button-radius) !important;
+    color: {{ settings.btn_glassd_text }} !important;
+    font-family: var(--type-font-{{ settings.btn_glassd_font }}-family) !important;
+    font-weight: {{ settings.btn_glassd_weight }} !important;
+    font-size: {{ settings.btn_glassd_size }}px !important;
+    letter-spacing: {{ settings.btn_glassd_letter_spacing }} !important;
+    text-transform: {{ settings.btn_glassd_transform }} !important;
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+    line-height: 1.4 !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+    transition: background-color 0.2s ease !important;
+  }
+  a.btn--glass-dark:hover {
+    {% assign gd_a_hover = settings.btn_glassd_opacity | plus: 15 | at_most: 100 | divided_by: 100.0 %}
+    background-color: rgba({{ gd_r }}, {{ gd_g }}, {{ gd_b }}, {{ gd_a_hover }}) !important;
+  }
+  .btn--glass-dark *, a.btn--glass-dark * {
+    color: {{ settings.btn_glassd_text }} !important;
+    text-decoration: none !important;
+  }
+
+
+
+
+  /* Subtle top-down gradient behind the transparent header to improve white-text contrast
+     over the hero. Fades out once the user scrolls (header--scrolled). */
+  {% if settings.header_gradient_enable %}
+    {%- assign _hg_color = settings.header_gradient_color | default: '#000000' -%}
+    {%- assign _hg_r = _hg_color | color_extract: 'red' -%}
+    {%- assign _hg_g = _hg_color | color_extract: 'green' -%}
+    {%- assign _hg_b = _hg_color | color_extract: 'blue' -%}
+    {%- assign _hg_alpha = settings.header_gradient_opacity | default: 35 | divided_by: 100.0 -%}
+    .header--transparent::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: {{ settings.header_gradient_height | default: 80 }}px;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba({{ _hg_r }}, {{ _hg_g }}, {{ _hg_b }}, {{ _hg_alpha }}) 0%, rgba({{ _hg_r }}, {{ _hg_g }}, {{ _hg_b }}, 0) 100%);
+      z-index: -1;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+    .header--transparent.header--scrolled::before {
+      opacity: 0;
+    }
+  {% endif %}
+
+  /* Transparent header on homepage — fixed at top; the opaque bar slides down from above
+     behind the logo and links as the user scrolls past 10px. Driven by `html.is-scrolled`. */
+  .header--transparent {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+  }
+  .header--transparent nav {
+    position: relative;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    isolation: isolate;
+  }
+  .header--transparent nav::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: var(--color-body-background-light, #ffffff);
+    border-bottom: 1px solid var(--color-border-divider-1, #e5e5e5);
+    transform: translateY(-100%);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: -1;
+    pointer-events: none;
+  }
+  html.is-scrolled .header--transparent nav::before {
+    transform: translateY(0);
+  }
+  /* Hover opens the bar early when unscrolled */
+  html:not(.is-scrolled) .header--transparent nav:hover::before {
+    transform: translateY(0);
+  }
+  /* Announcement bar — protected by its own !important styles */
+  /* Dropdown always keeps its own colors */
+  .header--transparent .header__dropdown,
+  .header--transparent .header__dropdown * {
+    color: inherit !important;
+    stroke: currentColor !important;
+    filter: none !important;
+  }
+  /* Light text mode — only top-level bar elements, NOT dropdowns.
+
+     IMPORTANT: the nav link's text lives in an inner
+     <span class="header__link-text">, and the header section's nav
+     typography rule (#shopify-section-X .header__nav-link *) sets
+     `color` DIRECTLY on that span when the merchant has picked a
+     nav text color. A direct declaration always beats an inherited
+     value — even an !important one on the parent — so the rules
+     here must target the span (and any other descendants) directly,
+     not rely on inheritance from the <a>. */
+  .header--transparent:not(.header--scrolled).header--text-light > * > nav > div > div > a,
+  .header--transparent:not(.header--scrolled).header--text-light > * > nav > div > div > div > a,
+  .header--transparent:not(.header--scrolled).header--text-light > * > nav > div > div > div > button,
+  .header--transparent:not(.header--scrolled).header--text-light > * > nav > div > div > div > div > a,
+  .header--transparent:not(.header--scrolled).header--text-light > * > nav > div > div > div > div > span,
+  .header--transparent:not(.header--scrolled).header--text-light .header__link,
+  .header--transparent:not(.header--scrolled).header--text-light .header__link *:not(.cart-count-badge),
+  .header--transparent:not(.header--scrolled).header--text-light .header__nav-link,
+  .header--transparent:not(.header--scrolled).header--text-light .header__nav-link *:not(.cart-count-badge),
+  .header--transparent:not(.header--scrolled).header--text-light .header__link-text {
+    color: #ffffff !important;
+  }
+  .header--transparent:not(.header--scrolled).header--text-light > * > nav > div > div svg,
+  .header--transparent:not(.header--scrolled).header--text-light > * > nav > div > div > div svg {
+    stroke: #ffffff !important;
+  }
+  .header--transparent:not(.header--scrolled).header--text-light > * > nav > div > div img {
+    filter: brightness(0) invert(1);
+  }
+  /* Dark text mode — only top-level bar elements. Same direct-span
+     coverage as light mode above. */
+  .header--transparent:not(.header--scrolled).header--text-dark .header__link,
+  .header--transparent:not(.header--scrolled).header--text-dark .header__link *:not(.cart-count-badge),
+  .header--transparent:not(.header--scrolled).header--text-dark .header__nav-link,
+  .header--transparent:not(.header--scrolled).header--text-dark .header__nav-link *:not(.cart-count-badge),
+  .header--transparent:not(.header--scrolled).header--text-dark .header__link-text {
+    color: var(--thread-ink) !important;
+  }
+  /* Reset colors on hover (transparent state) — the white bar slides
+     down on nav hover even before scrolling, so the text must flip to
+     dark here too. Must match (or beat) the specificity of the
+     .header--text-light rules above: those target inner spans directly
+     (.header__nav-link *:not(...)), so this reset needs the same
+     direct-descendant selectors or the white wins the !important tie. */
+  .header--transparent:not(.header--scrolled):hover .header__link,
+  .header--transparent:not(.header--scrolled):hover .header__link *:not(.cart-count-badge),
+  .header--transparent:not(.header--scrolled):hover .header__nav-link,
+  .header--transparent:not(.header--scrolled):hover .header__nav-link *:not(.cart-count-badge),
+  .header--transparent:not(.header--scrolled):hover .header__link-text,
+  .header--transparent:not(.header--scrolled):hover a,
+  .header--transparent:not(.header--scrolled):hover button,
+  .header--transparent:not(.header--scrolled):hover span:not(.cart-count-badge) {
+    color: var(--thread-ink) !important;
+  }
+  .header--transparent:not(.header--scrolled):hover svg,
+  .header--transparent:not(.header--scrolled):hover > * > nav svg,
+  .header--transparent:not(.header--scrolled):hover > * > nav > div > div svg,
+  .header--transparent:not(.header--scrolled):hover > * > nav > div > div > div svg {
+    stroke: var(--thread-ink) !important;
+  }
+  .header--transparent:not(.header--scrolled):hover img,
+  .header--transparent:not(.header--scrolled):hover > * > nav > div > div img {
+    filter: none !important;
+  }
+  /* Reset colors when scrolled */
+  .header--transparent.header--scrolled .header__link,
+  .header--transparent.header--scrolled .header__nav-link,
+  .header--transparent.header--scrolled a,
+  .header--transparent.header--scrolled button,
+  .header--transparent.header--scrolled span:not(.cart-count-badge) {
+    color: var(--thread-ink) !important;
+  }
+  .header--transparent.header--scrolled svg,
+  .header--transparent.header--scrolled > * > nav svg,
+  .header--transparent.header--scrolled > * > nav > div > div svg,
+  .header--transparent.header--scrolled > * > nav > div > div > div svg {
+    stroke: var(--thread-ink) !important;
+  }
+  .header--transparent.header--scrolled img {
+    filter: none !important;
+  }
+  /* Protect badge text — always keep white */
+  .header--transparent .cart-count-badge,
+  .header--transparent.header--scrolled .cart-count-badge,
+  .header--transparent:hover .cart-count-badge {
+    color: var(--color-primary-button-text-light, #ffffff) !important;
+    filter: none !important;
+  }
+  .header--transparent .border__button--radius,
+  .header--transparent .border__button--radius span {
+    filter: none !important;
+  }
+
+  /* Nav hover underline — thin, text-width only */
+  .header__link:hover,
+  .header__link--hover {
+    box-shadow: none !important;
+  }
+  .header__link .header__link-text {
+    padding-bottom: 4px;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+  }
+  .header__link:hover .header__link-text,
+  .header__link--hover .header__link-text {
+    border-bottom-color: var(--thread-ink);
+  }
+
+  /* Kill hover dropdown on product cards */
+  .group:hover .group-hover\:flex { display: none !important; }
+  .group:hover .group-hover\:invisible { visibility: visible !important; }
+  .group:hover { border-color: transparent !important; }
+  .group { border: none !important; }
+
+  /* Product card badges — merchant-controlled size */
+  .js-product-card-badges > div {
+    padding: {{ settings.product_card_badge_pad_v | default: 4 }}px {{ settings.product_card_badge_pad_h | default: 8 }}px !important;
+  }
+  .js-product-card-badges > div > .type--smaller {
+    font-size: {{ settings.product_card_badge_font_size | default: 12 }}px !important;
+    line-height: 1.2 !important;
+  }
+  .js-product-card-badges {
+    gap: {{ settings.product_card_badge_gap | default: 4 }}px !important;
+  }
+
+  /* Bigger swatches on desktop */
+  [class*="js\:swatchList"] .btn.btn--plain.btn--small {
+    width: {{ settings.product_card_swatch_size | default: 20 }}px !important;
+    height: {{ settings.product_card_swatch_size | default: 20 }}px !important;
+    min-width: {{ settings.product_card_swatch_size | default: 20 }}px !important;
+    min-height: {{ settings.product_card_swatch_size | default: 20 }}px !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+  [class*="js\:swatchList"] .flex.flex-wrap {
+    gap: {{ settings.product_card_swatch_gap | default: 6 }}px !important;
+  }
+
+  /* ============================================================
+     Server-rendered swatch carousel (component__swatch-list.liquid)
+     All siblings drag-scroll horizontally in one track. Size/gap/padding/
+     margin values are viewport-specific via --tw-*-d (desktop) / --tw-*-m (mobile)
+     custom properties set inline on .tw-swatch-wrap.
+     ============================================================ */
+  .tw-swatch-wrap {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin-bottom: var(--tw-mb-m, 6px);
+    padding: 0 var(--tw-pad-m, 0px);
+  }
+  .tw-swatch-track {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    column-gap: var(--tw-gap-m, 4px);
+    min-width: 0;
+    max-width: 100%;
+    min-height: calc(var(--tw-size-m, 18px) + 6px);
+    /* 2px horizontal padding so the 1.5px selected-swatch ring (box-shadow)
+       on the first/last swatch isn't clipped by overflow-x. */
+    padding-left: 2px;
+    padding-right: 2px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    /* pan-x pan-y lets the browser route horizontal drags to the track
+       (overflow-x:auto) and vertical drags up to the page (overflow-y:hidden). */
+    touch-action: pan-x pan-y;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+  }
+  .tw-swatch-track::-webkit-scrollbar { display: none; }
+  .tw-swatch {
+    display: block;
+    flex-shrink: 0;
+    width: var(--tw-size-m, 18px);
+    height: var(--tw-size-m, 18px);
+    min-width: var(--tw-size-m, 18px);
+    border-radius: 50%;
+    background: #e8e8e8 center/cover no-repeat;
+    transition: transform 0.15s ease;
+    scroll-snap-align: start;
+  }
+  .tw-swatch:hover { transform: scale(1.08); }
+  /* Selected-state ring drawn INSIDE the swatch circle so the first/last
+     item in the scroll track can't clip it against overflow-x: auto. */
+  .tw-swatch--current { box-shadow: inset 0 0 0 1.5px currentColor; }
+  /* "+N" overflow count after the capped swatch row */
+  .tw-swatch-more {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--tw-size-m, 18px);
+    min-width: var(--tw-size-m, 18px);
+    padding: 0 5px;
+    border-radius: var(--thread-radius-pill);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--thread-grey);
+    background: #f0ede6;
+    text-decoration: none;
+    scroll-snap-align: start;
+  }
+
+  @media (min-width: 768px) {
+    .tw-swatch-wrap {
+      margin-bottom: var(--tw-mb-d, 8px);
+      padding: 0 var(--tw-pad-d, 0px);
+    }
+    .tw-swatch-track {
+      column-gap: var(--tw-gap-d, 6px);
+      min-height: calc(var(--tw-size-d, 24px) + 6px);
+    }
+    .tw-swatch {
+      width: var(--tw-size-d, 24px);
+      height: var(--tw-size-d, 24px);
+      min-width: var(--tw-size-d, 24px);
+    }
+    .tw-swatch-more {
+      height: var(--tw-size-d, 24px);
+      min-width: var(--tw-size-d, 24px);
+      font-size: 11px;
+    }
+  }
+
+  /* ============================================================
+     Product-card image carousel (.pc-media)
+     Desktop: hover reveals left/right arrows; click arrows to cycle
+              through product.images (scrollBy a full viewport).
+     Mobile:  native touch swipe via scroll-snap; thin progress bar
+              at the bottom indicates current position.
+     Swatch overlay: absolute <img> layered on top of the track, shown
+              by the script layer when a swatch is hovered or tapped.
+     ============================================================ */
+  /* Collection sidebar — desktop edge-padding override (mobile is inline). */
+  @media (min-width: 768px) {
+    .cs-grid-edge {
+      padding-left: var(--cs-pad-d, 16px) !important;
+      padding-right: var(--cs-pad-d, 16px) !important;
+    }
+  }
+
+  .pc-media {
+    position: relative;
+    width: 100%;
+  }
+  /* .pc-media__frame carries the aspect-ratio class (aspect-w-*/aspect-h-*)
+     which forces its sole direct child — the track — to absolute inset:0.
+     We isolate the aspect-ratio wrapper to avoid the Tailwind plugin's
+     `> *` rule stacking every slide on top of each other. */
+  .pc-media__frame {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    /* Paint containment: prevents sub-pixel render of the neighboring
+       slide from bleeding past the frame edges during iOS snap/bounce. */
+    contain: paint;
+  }
+  .pc-media__track {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    /* pan-x pan-y: horizontal drag → track scroll, vertical drag → page scroll. */
+    touch-action: pan-x pan-y;
+    /* `none` (not `contain`) disables the inner rubber-band bounce on iOS
+       so the next slide can't peek past the edge during overshoot. */
+    overscroll-behavior-x: none;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    width: 100%;
+    height: 100%;
+  }
+  .pc-media__track::-webkit-scrollbar { display: none; }
+  .pc-media__slide {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    position: relative;
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+  .pc-media__img { display: block; width: 100%; height: 100%; }
+
+  .pc-media__preview-link {
+    position: absolute;
+    inset: 0;
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity 0.18s ease;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .pc-media[data-pc-preview-active="true"] .pc-media__preview-link {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .pc-media__preview-link[hidden] { display: none; }
+  .pc-media__preview {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: transparent;
+  }
+
+  /* Keep product images at full opacity on hover/tap — overrides the
+     global a:hover { opacity: 0.5 } rule that otherwise washes them out. */
+  .pc-media__slide,
+  .pc-media__slide:hover,
+  .pc-media__slide:focus,
+  .pc-media__slide:active,
+  .pc-media__preview-link:hover,
+  .pc-media__preview-link:focus,
+  .pc-media__preview-link:active {
+    opacity: 1 !important;
+  }
+  .pc-media__slide img { transition: none; }
+
+  /* Global guard: any anchor wrapping a raster image or <picture> should
+     not fade on hover/focus/tap. Covers banners, image grids, cards,
+     announcement images, featured-collection tiles, etc. — anywhere the
+     base a:hover { opacity: 0.5 } would otherwise wash the media out. */
+  a:has(img):hover,
+  a:has(img):focus,
+  a:has(img):active,
+  a:has(picture):hover,
+  a:has(picture):focus,
+  a:has(picture):active {
+    opacity: 1 !important;
+  }
+
+  /* Arrows — visible on desktop hover over the media container */
+  .pc-media__arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 1px solid #4a4a4a;
+    border-radius: 50%;
+    color: var(--thread-ink);
+    cursor: pointer;
+    padding: 0;
+    opacity: 0;
+    transition: opacity 0.18s ease, background-color 0.15s ease;
+    z-index: 3;
+  }
+  .pc-media__arrow:hover { background: #fff; }
+  .pc-media__arrow svg { width: 16px; height: 16px; display: block; }
+  .pc-media__arrow--left  { left: 12px; }
+  .pc-media__arrow--right { right: 12px; }
+  /* Carousel loops — no disabled state. */
+
+  /* Hover capability reveals arrows (desktop) */
+  @media (hover: hover) and (pointer: fine) {
+    .pc-media:hover .pc-media__arrow { opacity: 1; }
+  }
+  /* No-hover devices (touch) never show arrows */
+  @media (hover: none), (pointer: coarse) {
+    .pc-media__arrow { display: none !important; }
+  }
+
+  /* ============================================================
+     .thread-pill — canonical pill-button hover (design system).
+     Lift + shadow + slight darken; works on any markup/background.
+     (The full bottom-fill sweep needs the label wrapped in a span —
+     see .ts-cta in trifecta-spotlight for that variant.)
+     ============================================================ */
+  @media (prefers-reduced-motion: no-preference) {
+    .thread-pill,
+    a.btn--glass,
+    a.btn--glass-dark {
+      transition:
+        transform var(--thread-dur-hover) var(--thread-ease),
+        box-shadow var(--thread-dur-hover) var(--thread-ease),
+        filter var(--thread-dur-hover) var(--thread-ease),
+        background-color var(--thread-dur-hover) var(--thread-ease);
+    }
+    .thread-pill:hover,
+    a.btn--glass:hover,
+    a.btn--glass-dark:hover {
+    opacity: 1; /* beat the base a:hover{opacity:.5} fade */
+      transform: translateY(-3px);
+      box-shadow: 0 10px 24px rgba(28, 28, 28, 0.18);
+      filter: brightness(0.96);
+    }
+    .thread-pill:active,
+    a.btn--glass:active,
+    a.btn--glass-dark:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+  }
+
+  /* ============================================================
+     Product-card review stars (.pc-rating)
+     Self-contained text-star fill — a muted base row of ★★★★★ with
+     a color overlay clipped to the rating percentage. No Okendo SVG
+     symbol dependency (those are only guaranteed on the PDP).
+     Rendered by component__product-item.liquid when
+     settings.product_card_show_rating is on and the product has
+     reviews. Fill color matches the PDP title stars (var(--thread-bronze)).
+     ============================================================ */
+  .pc-rating {
+    margin: 0 0 4px 0;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .pc-stars {
+    position: relative;
+    display: inline-block;
+    line-height: 1;
+    letter-spacing: 1px;
+    color: var(--thread-hairline);
+  }
+  .pc-stars__fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    color: var(--thread-bronze);
+    pointer-events: none;
+  }
+  .pc-rating-count {
+    color: var(--thread-grey);
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  /* Progress bar — mobile only. Always visible (merchant request:
+     signal the swipe affordance persistently), full image width and
+     flush to the image's bottom edge. */
+  .pc-media__progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .pc-media__progress-dot {
+    height: 100%;
+    width: calc(100% / var(--pc-total, 1));
+    background: rgba(0, 0, 0, 0.82);
+    transform: translateX(calc(100% * var(--pc-active, 0)));
+    transition: transform 0.18s ease-out;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .pc-media__progress { display: none; }
+  }
+</style>

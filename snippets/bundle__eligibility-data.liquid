@@ -1,0 +1,141 @@
+{% comment %}
+  Emits a global JSON map of bundle-eligible product IDs grouped by slot,
+  read by the cart drawer's upsell logic to detect when a customer has a
+  partial trifecta in their cart.
+
+  Renders nothing when the trifecta upsell is disabled in theme settings
+  or when none of the three eligibility collections are configured.
+
+  Outputs:
+    <script type="application/json" id="trifecta-eligibility-data">
+    { "Wallet": [123, 456], "Lanyard": [...], "Chapstick": [...] }
+    </script>
+
+  IDs are integers (matches cart line item .product_id, which Shopify
+  returns as a number from /cart.js).
+
+  Each collection is read up to 250 products. If a slot's collection
+  exceeds that, additional products won't be detected for the upsell
+  (still selectable manually from the wizard).
+
+  Loaded once from layout/theme.liquid so every page has the map
+  available before the cart drawer scope evaluates its bundle status.
+{% endcomment %}
+
+{%- if settings.trifecta_upsell_enable -%}
+  {%- assign _wallet = settings.trifecta_wallet_collection -%}
+  {%- assign _lanyard = settings.trifecta_lanyard_collection -%}
+  {%- assign _chapstick = settings.trifecta_chapstick_collection -%}
+
+  {%- if _wallet != blank or _lanyard != blank or _chapstick != blank -%}
+    <script type="application/json" id="trifecta-eligibility-data">
+    {
+      "Wallet": [
+        {%- for p in _wallet.products limit: 250 -%}
+          {{ p.id }}{%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      ],
+      "Lanyard": [
+        {%- for p in _lanyard.products limit: 250 -%}
+          {{ p.id }}{%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      ],
+      "Chapstick": [
+        {%- for p in _chapstick.products limit: 250 -%}
+          {{ p.id }}{%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      ],
+      "collectionHandles": {
+        "Wallet": {{ _wallet.handle | json }},
+        "Lanyard": {{ _lanyard.handle | json }},
+        "Chapstick": {{ _chapstick.handle | json }}
+      },
+      "discountCode": {{ settings.trifecta_discount_code | default: '' | json }}
+    }
+    </script>
+    <script>
+    (function(){
+      // Client-side augmentation: Liquid caps collection.products at 50 in
+      // snippets, but the actual collections can have 1000+ products. Fetch
+      // ALL products from each collection via the storefront products.json
+      // endpoint and build a comprehensive handle-to-slot lookup map.
+      // Cart upsell logic reads window.__trifectaEligibility to decide
+      // whether a cart item counts toward filling a bundle slot.
+      //
+      // The fetches themselves are deferred to requestIdleCallback (or
+      // window.load on iOS Safari without rIC) — there's no need to
+      // burn bandwidth + CPU on a ~3MB JSON parse during the initial
+      // render. The seeded byProductId map (from the Liquid for-loop
+      // above, capped at 250 per slot) is built synchronously, so the
+      // cart upsell logic has a usable fallback the instant the page
+      // is interactive; the full map upgrades it in the background.
+      if (window.__trifectaEligibility) return;
+      var el = document.getElementById('trifecta-eligibility-data');
+      if (!el) return;
+      var data;
+      try { data = JSON.parse(el.textContent || '{}'); } catch (e) { return; }
+      var handles = data.collectionHandles || {};
+      var eligibility = {
+        Wallet: { byHandle: {}, byProductId: {} },
+        Lanyard: { byHandle: {}, byProductId: {} },
+        Chapstick: { byHandle: {}, byProductId: {} },
+        ready: false,
+        discountCode: data.discountCode || ''
+      };
+      // Seed with the initial Liquid product IDs so we have something usable
+      // even before the async fetches resolve.
+      ['Wallet', 'Lanyard', 'Chapstick'].forEach(function(slot){
+        (data[slot] || []).forEach(function(pid){
+          eligibility[slot].byProductId[pid] = true;
+        });
+      });
+      window.__trifectaEligibility = eligibility;
+
+      var MAX_PAGES = 6, PAGE_SIZE = 250;
+      var routeRoot = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+
+      function fetchAllPages(handle, slot) {
+        function page(p){
+          if (p > MAX_PAGES) return Promise.resolve();
+          var url = routeRoot + 'collections/' + encodeURIComponent(handle)
+            + '/products.json?limit=' + PAGE_SIZE + '&page=' + p;
+          return fetch(url, { credentials: 'same-origin' })
+            .then(function(r){ return r.ok ? r.json() : { products: [] }; })
+            .then(function(d){
+              var products = (d && d.products) || [];
+              if (products.length === 0) return;
+              products.forEach(function(prod){
+                eligibility[slot].byHandle[prod.handle] = prod.id;
+                eligibility[slot].byProductId[prod.id] = true;
+              });
+              if (products.length >= PAGE_SIZE) return page(p + 1);
+            })
+            .catch(function(){});
+        }
+        return handle ? page(1) : Promise.resolve();
+      }
+
+      function hydrate() {
+        Promise.all([
+          fetchAllPages(handles.Wallet, 'Wallet'),
+          fetchAllPages(handles.Lanyard, 'Lanyard'),
+          fetchAllPages(handles.Chapstick, 'Chapstick')
+        ]).then(function(){
+          eligibility.ready = true;
+          try {
+            window.dispatchEvent(new CustomEvent('trifecta-eligibility-ready'));
+          } catch (_) {}
+        });
+      }
+
+      if (typeof window.requestIdleCallback === 'function') {
+        window.requestIdleCallback(hydrate, { timeout: 4000 });
+      } else if (document.readyState === 'complete') {
+        setTimeout(hydrate, 0);
+      } else {
+        window.addEventListener('load', function(){ setTimeout(hydrate, 0); }, { once: true });
+      }
+    })();
+    </script>
+  {%- endif -%}
+{%- endif -%}

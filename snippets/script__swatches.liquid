@@ -1,0 +1,7 @@
+{% unless request.design_mode %}
+  {% comment %} Render swatches {% endcomment %}
+  <div
+    class="hidden"
+    x-init="fetchAndRenderSwatchList();"
+  ></div>
+{% endunless %}

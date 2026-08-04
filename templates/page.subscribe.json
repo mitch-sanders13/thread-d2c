@@ -1,0 +1,62 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "afca52a8-f921-488f-a713-614a88e5ce87": {
+      "type": "banner-subscribe",
+      "blocks": {
+        "template--15912723021962__afca52a8-f921-488f-a713-614a88e5ce87-1689674982f0ccc70e-0": {
+          "type": "heading",
+          "settings": {
+            "content": "HOLDING ONTO SUMMER GIVEAWAY"
+          }
+        },
+        "template--15912723021962__afca52a8-f921-488f-a713-614a88e5ce87-1689674982f0ccc70e-1": {
+          "type": "content",
+          "settings": {
+            "content": "<p>TWO winners will receive a $250 travel voucher, a $100 gift card to @thread_wallets, $150 gift card to @midoribikinis, and two pairs of sun glasses from @otiseyewear. Giveaway ends 9\/23 at Midnight MST. By entering, you are subscribing to receive communication from all brands listed above.<\/p>"
+          }
+        },
+        "38c2e917-72c9-4848-96a9-3eb235acb83d": {
+          "type": "email",
+          "settings": {
+            "klaviyo_list": "Rkcdfb",
+            "klaviyo_source": "Embed page"
+          }
+        }
+      },
+      "block_order": [
+        "template--15912723021962__afca52a8-f921-488f-a713-614a88e5ce87-1689674982f0ccc70e-0",
+        "template--15912723021962__afca52a8-f921-488f-a713-614a88e5ce87-1689674982f0ccc70e-1",
+        "38c2e917-72c9-4848-96a9-3eb235acb83d"
+      ],
+      "settings": {
+        "url": "",
+        "image_background_desktop": "shopify:\/\/shop_images\/Holding_Onto_Summer_Giveaway.webp",
+        "image_background_mobile": "shopify:\/\/shop_images\/Holding_Onto_Summer_Giveaway.jpg",
+        "show_entire_image": false,
+        "enable_lazy_loading": false,
+        "show_video_background_mobile": true,
+        "color_scheme": "color__bg-overlay-1 color__text",
+        "color_text": "",
+        "color_border": "color__border-divider-1",
+        "enable_gradient": false,
+        "style_border": "",
+        "layout_y_spacing": "min-h-[550px] max-h-[75vh] md:min-h-[60vh]",
+        "layout_y_alignment": "items-center",
+        "layout_x_alignment": "justify-center text-center",
+        "visibility": ""
+      }
+    }
+  },
+  "order": [
+    "afca52a8-f921-488f-a713-614a88e5ce87"
+  ]
+}

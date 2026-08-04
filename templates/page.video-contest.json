@@ -1,0 +1,220 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "thread_campaign_zMgFcM": {
+      "type": "thread-campaign",
+      "blocks": {
+        "vibe_item_pky9Qg": {
+          "type": "vibe_item",
+          "settings": {
+            "icon": "",
+            "label": "Real, not polished",
+            "description": "Phone quality is perfect"
+          }
+        },
+        "vibe_item_Lfqt6b": {
+          "type": "vibe_item",
+          "settings": {
+            "icon": "",
+            "label": "Story-driven, not curated",
+            "description": "We want your life, not a mood board"
+          }
+        },
+        "vibe_item_4A9bbm": {
+          "type": "vibe_item",
+          "settings": {
+            "icon": "",
+            "label": "Simple and clear",
+            "description": "Not overproduced"
+          }
+        },
+        "vibe_item_a6Ab6r": {
+          "type": "vibe_item",
+          "settings": {
+            "icon": "",
+            "label": "You and your life",
+            "description": "Not a brand selling you something"
+          }
+        },
+        "prompt_7g8YtL": {
+          "type": "prompt",
+          "settings": {
+            "prompt_title": "What Connects You?",
+            "prompt_description": "Tell a quick story about something that makes you feel alive and connected. Pick your thing: a person, place, ritual, hobby, community, or moment — and show why it matters.",
+            "hook_examples": "\"This is what connects me…\"\n\"I found my people when…\"\n\"The best part of my week is…\"\n\"I almost didn't go, but I did — and it changed everything.\""
+          }
+        },
+        "prompt_EAjAQe": {
+          "type": "prompt",
+          "settings": {
+            "prompt_title": "What Do You Carry?",
+            "prompt_description": "Show your everyday essentials and how Thread makes it easier. Quick pack-with-me, product feature, or 'what's in my bag' style video.",
+            "hook_examples": "\"Things I never leave the house without…\"\n\"This is the one thing I use every day…\"\n\"Here's why I switched to Thread…\""
+          }
+        },
+        "prompt_gXxB67": {
+          "type": "prompt",
+          "settings": {
+            "prompt_title": "Humor Connects",
+            "prompt_description": "Make us laugh. Prove Thread goes everywhere. Low pressure, high shareability.",
+            "hook_examples": "\"POV: you brought Thread somewhere it absolutely didn't need to go…\"\n\"I took my Thread to ____ and here's what happened…\"\n\"Things that should NOT fit in a wallet…\""
+          }
+        },
+        "rule_6zLJLc": {
+          "type": "rule",
+          "settings": {
+            "icon": "✓",
+            "rule_text": "Shoot vertical (9:16)"
+          }
+        },
+        "rule_kmkEnQ": {
+          "type": "rule",
+          "settings": {
+            "icon": "✓",
+            "rule_text": "10–30 seconds (45 if enganging)"
+          }
+        },
+        "rule_6QPqtQ": {
+          "type": "rule",
+          "settings": {
+            "icon": "✓",
+            "rule_text": "Hook in the first 1–2 seconds"
+          }
+        },
+        "rule_w9dWW9": {
+          "type": "rule",
+          "settings": {
+            "icon": "✓",
+            "rule_text": "Show Thread product naturally"
+          }
+        },
+        "rule_8DyMiH": {
+          "type": "rule",
+          "settings": {
+            "icon": "✓",
+            "rule_text": "Good lighting + clear audio"
+          }
+        },
+        "rule_PQjHhV": {
+          "type": "rule",
+          "settings": {
+            "icon": "✓",
+            "rule_text": "Use #DoWhatConnectsYou"
+          }
+        },
+        "rule_zLhk49": {
+          "type": "rule",
+          "settings": {
+            "icon": "✓",
+            "rule_text": "Tag @thread_wallets"
+          }
+        },
+        "award_VM9ft7": {
+          "type": "award",
+          "settings": {
+            "emoji": "⚡",
+            "category_name": "Best Hook",
+            "award_description": "Stopped us cold in the first 2 seconds.",
+            "prize_detail": "$150 Gift Card"
+          }
+        },
+        "award_RCMd7c": {
+          "type": "award",
+          "settings": {
+            "emoji": "✨",
+            "category_name": "Most Inspiring",
+            "award_description": "Made us feel something real.",
+            "prize_detail": "$150 Gift Card"
+          }
+        },
+        "award_AiPjBq": {
+          "type": "award",
+          "settings": {
+            "emoji": "😂",
+            "category_name": "Funniest",
+            "award_description": "We couldn't stop watching (or laughing).",
+            "prize_detail": "$150 Gift Card"
+          }
+        },
+        "award_apw7id": {
+          "type": "award",
+          "settings": {
+            "emoji": "🔥",
+            "category_name": "Boldest",
+            "award_description": "Biggest swing. Most original. Unforgettable.",
+            "prize_detail": "$150 Gift Card"
+          }
+        },
+        "award_EDawkw": {
+          "type": "award",
+          "settings": {
+            "emoji": "💛",
+            "category_name": "Most Heartfelt",
+            "award_description": "The one that gave us all the feels.",
+            "prize_detail": "$150 Gift Card"
+          }
+        }
+      },
+      "block_order": [
+        "vibe_item_pky9Qg",
+        "vibe_item_Lfqt6b",
+        "vibe_item_4A9bbm",
+        "vibe_item_a6Ab6r",
+        "prompt_7g8YtL",
+        "prompt_EAjAQe",
+        "prompt_gXxB67",
+        "rule_6zLJLc",
+        "rule_kmkEnQ",
+        "rule_6QPqtQ",
+        "rule_w9dWW9",
+        "rule_8DyMiH",
+        "rule_PQjHhV",
+        "rule_zLhk49",
+        "award_VM9ft7",
+        "award_RCMd7c",
+        "award_AiPjBq",
+        "award_apw7id",
+        "award_EDawkw"
+      ],
+      "name": "Thread Campaign",
+      "settings": {
+        "show_hero": true,
+        "eyebrow": "DO WHAT CONNECTS YOU",
+        "hero_title": "Video Contest",
+        "hero_subtitle": "Send us a 15-30 sec video showing how you stay connected with friends, family, yourself, a team, community and/or the world around you. Oh... and there will be prizes.",
+        "hero_cta": "Submit Your Video",
+        "hero_image": "shopify://shop_images/Spring.jpg",
+        "hero_video": "",
+        "show_intro": true,
+        "intro_title": "\"Do What Connects You\"",
+        "intro_body": "<p>We're not just a brand that cares about making wallets and bags. We care about the people who carry them.</p><p>We believe everyone has a unique story, a way of showing up that is entirely their own. When we connect and celebrate this, something remarkable happens. We are woven together making up the beautiful tapestry of the human family.</p><p>So get out there. Find your people. Chase the moments that make you feel alive. Do the things that bring you closer to the world around you. <em>Do what connects you!</em></p>",
+        "intro_deadline": "APRIL 15TH",
+        "vibe_title": "The Vibe",
+        "vibe_subtitle": "Don't overthink it, just be you! We want to see raw and real stories of connection!",
+        "prompts_title": "Prompts",
+        "prompts_subtitle": "Get creative! This content will be used across social media, so we’re looking for videos that are interesting, honest, and easy to watch.",
+        "rules_title": "Quick Rules",
+        "rules_subtitle": "You need to follow ALL of these rules. If not, you will not be qualified to win.",
+        "awards_title": "Awards & Prizes",
+        "awards_subtitle": "Everyone who enters will receive a $25 Gift Card but we will also pick our favorite video in the following categories to win an extra little something!",
+        "show_submission_form": true,
+        "form_title": "Submit Your Video",
+        "form_subtitle": "Fill out the form below to enter.",
+        "show_contact": true,
+        "contact_email": "mckenzie@threadwallets.com",
+        "contact_text": "Contact us if you have any questions."
+      }
+    }
+  },
+  "order": [
+    "thread_campaign_zMgFcM"
+  ]
+}

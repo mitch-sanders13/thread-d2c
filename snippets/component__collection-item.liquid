@@ -1,0 +1,104 @@
+<!-- snippets/component__collection-item.liquid -->
+{% comment %} 
+  Thumbnail of a collection. Featured image and collection title shown.
+  
+  Accepts:
+  - collection: {object} Liquid object for collection values.
+  
+  Globals:
+  - settings.collection_cards_border_style: {string} Set the border style (image, thumbnail).
+  - settings.collection_cards_ratio: {string} Class string to set image ratio.
+  - settings.collection_cards_object: {string} Class string to set image crop.
+  - settings.collection_cards_title_font: {string} Class string to set font family.
+  - settings.collection_cards_title_capitlization: {string} Class string to capitilization
+  - settings.enable_animations: {boolean} Indicates if the animations should be used.
+
+  Usage:
+    {% render 'component__collection-item', 
+      collection: block.settings.collection 
+    %}
+{% endcomment %}
+
+<div 
+  class="
+    group/collection relative w-full focus-within:border--focus
+    border--width border--radius border-gray-300 border-opacity-0 hover:border-opacity-100
+    {% if settings.collection_cards_border_style == 'thumbnail' %}
+      border--radius overflow-hidden
+    {% endif %}
+  ">
+
+  {% comment %} Image + overlay {% endcomment %}
+  <a 
+    href="{{ collection.url }}"
+    class="
+      hover:opacity-100 relative block mb-2 color__bg-overlay-1
+    ">
+    
+    {% comment %} Image {% endcomment %}
+    <div 
+      class="
+        w-full overflow-hidden
+        {{ settings.collection_cards_color_scheme }} 
+        {% if settings.collection_cards_border_style == 'image' %}
+          border--radius
+        {% endif %}
+      ">
+      <div 
+        class="
+          overflow-hidden
+          {{ settings.collection_cards_ratio }}
+        ">
+        {% unless collection.featured_image == blank %}
+          {% if settings.collection_cards_object-sizing == "cover" %}
+            {% render 'component__image', 
+              image: collection.featured_image ,
+              aspect_ratio: '',
+              background: 'color__bg-overlay-1',
+              crop: 'object-cover',
+              container_class: 'h-full',
+              image_class: '',
+              max_width: 900,
+              enable_lazy_load: true,
+              include_2x: true
+            %}
+          {% else %}
+            {% render 'component__image', 
+              image: collection.featured_image ,
+              aspect_ratio: '',
+              background: 'color__bg-overlay-1',
+              crop: 'object-contain',
+              container_class: 'h-full',
+              image_class: '',
+              max_width: 900,
+              enable_lazy_load: true,
+              include_2x: true
+            %}
+          {% endif %}
+        {% endunless %}
+      </div>
+    </div>
+    
+  </a>
+
+  {% comment %} Content {% endcomment %}
+  <a 
+    href="{{ collection.url }}" 
+    class="
+      hover:no-underline no-underline whitespace-normal flex flex-col pb-2
+      {{ settings.collection_cards_alignment }}
+      {% if settings.collection_cards_border_style == "thumbnail" %}
+        px-4
+      {% endif %}
+    "
+    tabindex="-1">
+    <h3 
+      class="type--base !leading-tight mb-0.5 type__heading">
+      {{ collection.title }}
+    </h3>
+    {% if settings.collection_cards_enable_size %}
+      <span class="type--small p-0 opacity-75 mb-0.5">{{ collection.products_count }} {{ 'collections.general.collection_items' | t }}</span>
+    {% endif %}
+  </a>
+
+</div>

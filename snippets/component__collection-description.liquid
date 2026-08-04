@@ -1,0 +1,38 @@
+{% comment %} Collection description {% endcomment %}
+<section 
+  class="
+    {% if section.settings.visibility %}{{ section.settings.visibility }}{% endif %} 
+    {{ section.settings.color_scheme }} 
+    {{ section.settings.color_border }} 
+    {{ section.settings.style_border }}
+  ">
+  <div 
+    style="
+      padding-top:{{ section.settings.spacing_top }}px; 
+      padding-bottom:{{ section.settings.spacing_bottom }}px;
+    " 
+    class="window--wide">
+
+    {% comment %} Collection description {% endcomment %}
+    {%- unless section.settings.collection_enable_description -%}
+      {% assign collection_image = collection.metafields.custom.description_image %}
+      {% assign collection_body = collection.metafields.sf_global.collection_description_body %}
+      {% if collection_image != blank or collection_body != blank %}
+        <div class="py-4">
+          <div class="grid md:grid-cols-3"
+            style="gap: {{ settings.layout_gap_size }}px;">
+            <div>
+              <h3 class="type--big">{{ collection.title }}</h3>
+              <div class="opacity-75 type--small">{{ collection_body }}</div>
+            </div>
+            {%- unless collection_image == blank -%}
+              <div class="md:col-span-2">
+                {{ collection_image | image_url: width: 1200 | image_tag: class: 'w-full', loading: lazy_loading }}
+              </div>
+            {%- endunless -%}
+          </div>
+        </div>
+      {% endif %}
+    {%- endunless -%}
+  </div>
+</section>

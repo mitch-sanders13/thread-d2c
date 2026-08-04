@@ -1,0 +1,54 @@
+<!-- snippets/script__recent-view.liquid -->
+{% comment %} 
+  Script to add product IDs to the recently viewed local storage in the correct order.
+      
+  Usage:
+    {% render 'script__recent-view' %}
+
+  Possible enhancements:
+    - Move this to recent-slider.liquid so script can be disabled if slider is disabled. 
+
+  Pro tips:
+    - Recently viewed products are stored in local storage, with the most recent first. 
+{% endcomment %}
+
+<script>
+  let productHandle = "{{ product.handle }}"
+
+  {% comment %} check if local storage for viewed products exists, if not create it {% endcomment %}
+  if(localStorage.getItem('recentlyViewedProducts')) {
+    let recentlyViewedProducts = JSON.parse(localStorage.getItem('recentlyViewedProducts'))
+
+    {% comment %} if product is already on the list, don't add it. If it's not, add it {% endcomment %}
+    if(!recentlyViewedProducts.find((prod) => prod.handle === productHandle)) {
+
+      {% comment %} also need to check if the list is longer than max length (4) {% endcomment %}
+      {% comment %} if over limit, remove the last (oldest) entry to make room {% endcomment %}
+      let newProduct;
+      fetch(`/products/${productHandle}.js`)
+        .then(response => response.json())
+        .then(data => {
+          newProduct = data;
+          // If the list is at max length, remove the last (oldest) entry
+          if(recentlyViewedProducts.length >= 4) {
+            recentlyViewedProducts.pop(); // Change here to pop instead of shift
+          }
+          // Prepend the new product to the beginning of the list to maintain the correct order
+          recentlyViewedProducts.unshift(newProduct); // Change here to unshift instead of push
+          localStorage.setItem("recentlyViewedProducts", JSON.stringify(recentlyViewedProducts));
+        })
+        .catch(err => console.log(err));
+    }
+  } 
+  {% comment %} Fetch product object by id and initialize the storage if it doesn't exist {% endcomment %}
+  else {
+    fetch(`/products/${productHandle}.js`)
+      .then(response => response.json())
+      .then(newProduct => {
+        let newProducts = [newProduct];
+        localStorage.setItem("recentlyViewedProducts", JSON.stringify(newProducts));
+      })
+      .catch(err => console.log(err));
+  }
+
+</script>

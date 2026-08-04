@@ -1,0 +1,1628 @@
+/* sections/bundle-builder.liquid + cart bundle group styles.
+ *
+ * Loaded from sections/bundle-builder.liquid via {{ 'bundle-builder.css' | asset_url | stylesheet_tag }}.
+ * Mobile-first; all colors use existing theme tokens (--color-bg-body, --color-divider, --color-overlay-1).
+ *
+ * Last touched: 2026-05-17 (re-trigger Shopify GitHub sync).
+ */
+
+/* ============ wizard shell ============ */
+.bundle-wizard {
+  --bw-tile-gap: 10px;
+  --bw-step-size: 28px;
+  position: relative;
+}
+
+.bundle-wizard__savings-strip {
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 10px 16px;
+  background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.04));
+  border-radius: 999px;
+  margin: 0 16px 16px;
+}
+
+/* ============ progress + back header ============ */
+.bundle-wizard__header {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px 12px;
+}
+
+.bundle-wizard__back {
+  background: none;
+  border: 0;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 6px 4px;
+  justify-self: start;
+}
+.bundle-wizard__back:disabled {
+  opacity: 0.35;
+  cursor: default;
+  text-decoration: none;
+}
+
+.bundle-wizard__progress {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+}
+
+.bundle-wizard__step-dot {
+  position: relative;
+  width: var(--bw-step-size);
+  height: var(--bw-step-size);
+  border-radius: 50%;
+  border: 2px solid var(--color-divider, #ddd);
+  background: var(--color-bg-body, #fff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: default;
+  user-select: none;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+.bundle-wizard__step-dot.is-current {
+  border-color: currentColor;
+}
+.bundle-wizard__step-dot.is-complete {
+  background: #16a34a;
+  border-color: #16a34a;
+  color: #fff;
+  cursor: pointer;
+}
+.bundle-wizard__step-dot.is-complete .bundle-wizard__step-num {
+  display: none;
+}
+.bundle-wizard__step-check {
+  display: none;
+  width: 16px;
+  height: 16px;
+}
+.bundle-wizard__step-dot.is-complete .bundle-wizard__step-check {
+  display: block;
+}
+
+/* connecting line between dots */
+.bundle-wizard__progress li + li::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: calc(-18px);
+  width: 18px;
+  height: 2px;
+  background: var(--color-divider, #ddd);
+}
+
+/* ============ step body ============ */
+.bundle-wizard__step-title {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 0 16px;
+}
+
+.bundle-wizard__silhouettes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 14px;
+  padding: 0 16px;
+}
+
+.bundle-wizard__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--bw-tile-gap);
+  padding: 0 16px;
+}
+
+.bundle-wizard__tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 120ms ease, transform 120ms ease;
+}
+.bundle-wizard__tile:hover:not(.is-unavailable) {
+  transform: translateY(-2px);
+}
+.bundle-wizard__tile.is-selected {
+  border-color: currentColor;
+}
+.bundle-wizard__tile.is-unavailable {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.bundle-wizard__tile-img {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.04));
+  overflow: hidden;
+  border-radius: 6px;
+}
+.bundle-wizard__tile-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.bundle-wizard__tile.is-unavailable .bundle-wizard__tile-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 1px),
+    currentColor calc(50% - 1px),
+    currentColor calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
+}
+
+.bundle-wizard__tile-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #16a34a;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.bundle-wizard__tile-title {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bundle-wizard__tile-price {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.bundle-wizard__load-more {
+  display: flex;
+  justify-content: center;
+  margin: 18px 16px 0;
+}
+
+/* ============ sticky footer ============ */
+.bundle-wizard__footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  background: var(--color-bg-body, #fff);
+  border-top: 1px solid var(--color-divider, #eee);
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+.bundle-wizard__footer-price {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  flex: 0 0 auto;
+}
+.bundle-wizard__footer .btn {
+  flex: 1 1 auto;
+  min-height: 44px;
+}
+
+/* ============ review screen ============ */
+.bundle-wizard__review-title {
+  margin: 0 16px 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.bundle-wizard__review-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bundle-wizard__review-item {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--color-divider, #eee);
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  background: var(--color-bg-body, #fff);
+}
+.bundle-wizard__review-item:hover {
+  background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.02));
+}
+.bundle-wizard__review-item img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.04));
+}
+.bundle-wizard__review-item p {
+  margin: 0;
+}
+.bundle-wizard__review-edit {
+  font-size: 0.85rem;
+  text-decoration: underline;
+  opacity: 0.7;
+}
+
+.bundle-wizard__automatch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 16px 0;
+  font-size: 0.85rem;
+}
+
+.bundle-wizard__review-cta {
+  margin: 16px;
+}
+
+/* ============ PDP inline preview ============ */
+.bundle-pdp-preview {
+  /* Margins, padding, and the top/bottom divider borders are
+   * controlled by the inline <style> block in bundle__pdp-cta.liquid
+   * (driven by the Trifecta-bundle theme settings). This block keeps
+   * only the static visual defaults — no border, no rounded corners,
+   * no background — to match the accordion divider aesthetic. */
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  /* Offset for the fixed mobile header when scrolled into view */
+  scroll-margin-top: 96px;
+  /* Disable scroll anchoring inside the widget. Without this, iOS
+     Safari adjusts the viewport scroll position when the dropdown
+     collapses (1800px → 0) to keep "visual content stable" — but
+     since the visual content was the swatches (now disappearing),
+     the browser falls back to whatever was below the dropdown,
+     landing the viewport on the product description section. */
+  overflow-anchor: none;
+}
+
+.bundle-pdp-preview__heading {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.bundle-pdp-preview__items {
+  list-style: none;
+  margin: 0 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  align-items: stretch;
+}
+
+.bundle-pdp-preview__item {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  transition: opacity 0.15s ease;
+}
+.bundle-pdp-preview__item.is-unchecked {
+  opacity: 0.45;
+}
+
+/* Checkbox in the top-right corner. Sits OUTSIDE the main card button
+   (the card itself toggles the dropdown), absolutely positioned over
+   the card. Hit target stays 24px on mobile for accessibility. */
+.bundle-pdp-preview__item-checkbox {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-body, #fff);
+  border: 1.5px solid var(--color-divider, #c4c4c4);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--foreground_primary_light, #fff);
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.bundle-pdp-preview__item-checkbox:hover {
+  border-color: rgba(0, 0, 0, 0.55);
+}
+.bundle-pdp-preview__item-checkbox[aria-checked="true"] {
+  background: var(--background_primary_light, #1e7db3);
+  border-color: var(--background_primary_light, #1e7db3);
+}
+.bundle-pdp-preview__item-checkbox:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+.bundle-pdp-preview__item-checkbox-mark {
+  display: block;
+}
+
+.bundle-pdp-preview__item-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+  width: 100%;
+  min-width: 0;
+  /* No top/side padding — the image expands edge-to-edge of the
+   * card. Text elements below get their own horizontal padding so
+   * they don't kiss the border. Card overflow: hidden clips the
+   * image to the card's border-radius. */
+  padding: 0 0 8px;
+  background: var(--color-bg-body, #fff);
+  border: 1px solid var(--color-divider, #e5e5e5);
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  color: inherit;
+  font: inherit;
+}
+.bundle-pdp-preview__item-card:hover:not(:disabled) {
+  border-color: rgba(0, 0, 0, 0.4);
+  background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.02));
+}
+.bundle-pdp-preview__item-card:disabled {
+  cursor: default;
+}
+.bundle-pdp-preview__item.is-active-dropdown .bundle-pdp-preview__item-card {
+  border-color: currentColor;
+  border-width: 2px;
+  /* Match the new no-side-padding baseline; bottom stays at 7px to
+   * compensate for the 2px border vs 1px in resting state. */
+  padding: 0 0 7px;
+}
+/* Per merchant request the 'current' card no longer darkens its
+ * border — all three cards keep the same border treatment so the
+ * row reads as a uniform set. The is-this class still drives the
+ * slot label emphasis below, that's intentional. */
+.bundle-pdp-preview__item-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.04));
+  /* No border-radius here — the card's overflow:hidden + border-
+   * radius clips the image to the card's top corners. */
+  border-radius: 0;
+  margin-bottom: 4px;
+  overflow: hidden;
+}
+.bundle-pdp-preview__item-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Text rows below the (edge-to-edge) image get their own
+ * horizontal padding so they don't touch the card border. */
+.bundle-pdp-preview__item-slot,
+.bundle-pdp-preview__item-title,
+.bundle-pdp-preview__item-price,
+.bundle-pdp-preview__item-change-hint {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+.bundle-pdp-preview__item-slot {
+  margin: 4px 0 0;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.55;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.bundle-pdp-preview__item.is-this .bundle-pdp-preview__item-slot {
+  opacity: 1;
+  color: currentColor;
+}
+.bundle-pdp-preview__item-title {
+  margin: 1px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  /* Single line + ellipsis so all three cards in the row are the
+   * same height regardless of how long each product's title is. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.bundle-pdp-preview__item-price {
+  margin: 1px 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.bundle-pdp-preview__item-change-hint {
+  margin-top: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  opacity: 0.65;
+}
+.bundle-pdp-preview__item-card:hover .bundle-pdp-preview__item-change-hint { opacity: 1; }
+.bundle-pdp-preview__item-caret {
+  display: inline-block;
+  transition: transform 0.2s ease;
+  font-size: 0.6rem;
+}
+.bundle-pdp-preview__item.is-active-dropdown .bundle-pdp-preview__item-caret {
+  transform: rotate(180deg);
+}
+
+.bundle-pdp-preview__summary {
+  text-align: center;
+  margin: 0 0 12px;
+}
+.bundle-pdp-preview__summary-total {
+  margin: 0;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.bundle-pdp-preview__summary-label {
+  opacity: 0.7;
+}
+.bundle-pdp-preview__summary-now {
+  /* Inherits color / size / weight from .pdp-price-regular so it
+   * matches the rest of the PDP. Anchored display so the inline-
+   * flex parent lays it out cleanly with the strikethrough. */
+  display: inline-flex;
+  align-items: baseline;
+}
+.bundle-pdp-preview__summary-was {
+  /* Inherits compare-price color/size from .pdp-price-compare. The
+   * <s> tag handles the strikethrough so we don't add it twice. */
+  display: inline-flex;
+  align-items: baseline;
+  opacity: 0.7;
+}
+
+.bundle-pdp-preview__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.bundle-pdp-preview__error {
+  margin: 4px 0 0;
+  text-align: center;
+}
+
+/* ===== per-product dropdown panel ===== */
+.bundle-pdp-preview__dropdown {
+  position: relative;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  /* Background removed per merchant request — the faint gray panel
+   * was reading as a 'gray bar' above the filter pills. The dropdown
+   * now sits flush with the surrounding bundle widget. */
+  background: transparent;
+  transition: max-height 0.32s ease, opacity 0.2s ease, padding 0.32s ease, margin 0.32s ease, border-color 0.32s ease;
+  scroll-margin-top: 96px;
+  /* Disable scroll anchoring inside the widget. Without this, iOS
+     Safari adjusts the viewport scroll position when the dropdown
+     collapses (1800px → 0) to keep "visual content stable" — but
+     since the visual content was the swatches (now disappearing),
+     the browser falls back to whatever was below the dropdown,
+     landing the viewport on the product description section. */
+  overflow-anchor: none;
+}
+.bundle-pdp-preview__dropdown.is-open {
+  /* max-height needs to comfortably exceed the natural content height
+   * for the open transition to fully reveal the swatch grid. With up
+   * to productsPerSlot=200 swatches in 3 columns, 67 rows × ~92px
+   * ≈ 6200px — older 1800px cap was clipping the bottom rows for any
+   * large collection. The browser still animates over the full range
+   * but reaches content height early so the reveal stays snappy. */
+  max-height: 9000px;
+  opacity: 1;
+  margin-top: 0;
+  padding: 12px;
+  /* Border stays transparent in the open state too — was a hairline
+   * grey ring around the dropdown that read as a 'panel' instead of
+   * blending into the bundle widget. */
+  border-color: transparent;
+}
+.bundle-pdp-preview__dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 0.8rem;
+}
+.bundle-pdp-preview__dropdown-header strong {
+  font-weight: 700;
+}
+.bundle-pdp-preview__dropdown-close {
+  background: transparent;
+  border: 0;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.55;
+  transition: opacity 0.15s ease;
+}
+.bundle-pdp-preview__dropdown-close:hover { opacity: 1; }
+/* Toolbar above the dropdown panel — holds the filter pills on the
+ * left and the close X on the right, on one row. The pills take the
+ * remaining width and scroll horizontally; the X stays pinned right
+ * and never overlaps the pills. */
+.bundle-pdp-preview__dropdown-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0 0;
+}
+.bundle-pdp-preview__dropdown-toolbar .bundle-pdp-preview__type-tabs {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.bundle-pdp-preview__dropdown-toolbar .bundle-pdp-preview__dropdown-close {
+  /* Slightly bigger hit target now that it has its own row. */
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 1.1rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.04);
+  opacity: 0.7;
+}
+.bundle-pdp-preview__dropdown-toolbar .bundle-pdp-preview__dropdown-close:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+}
+/* Legacy floating-corner modifier kept for safety in case other
+ * surfaces still reference it; the trifecta dropdown no longer
+ * uses this — the toolbar above replaces it. */
+.bundle-pdp-preview__dropdown-close--floating {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+}
+
+/* Filter pills now mirror the PDP swatch grid tab pills
+ * (.rs-tabbed-tab): same gap, padding, font, border treatment, and
+ * black-on-white active state — per merchant request the two pill
+ * rows should read as a single design system. */
+.bundle-pdp-preview__type-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 2px 0 2px 2px;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  /* Hide the horizontal scrollbar — it was overlapping the pills.
+   * Scrolling still works via touch / trackpad. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.bundle-pdp-preview__type-tabs::-webkit-scrollbar {
+  display: none;
+}
+.bundle-pdp-preview__type-tab {
+  /* Font + padding + gap are driven by the merchant settings via the
+   * inline <style> in bundle__pdp-cta.liquid (with !important). The
+   * static rule here just provides the shape (background, border,
+   * radius, transition) so the pill still looks correct before
+   * settings load. */
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid #c4c4c4;
+  border-radius: 999px;
+  cursor: pointer;
+  color: inherit;
+  white-space: nowrap;
+  line-height: 1.2;
+  flex: 0 0 auto;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+.bundle-pdp-preview__type-tab:hover {
+  border-color: #1a1a1a;
+}
+.bundle-pdp-preview__type-tab.is-active {
+  background: #1a1a1a;
+  border-color: #1a1a1a;
+  color: #fff;
+  transform: scale(1.03);
+}
+
+/* Dropdown grid now mirrors the PDP related-styles .rs-grid: 3-row
+ * horizontal-scroll layout with each column sized to ~30% of the
+ * stage so 3 full columns plus a peek of the 4th are visible at
+ * once. Matches the swatch grid above the trifecta bundle on the
+ * PDP per merchant request. */
+.bundle-pdp-preview__dropdown-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, auto);
+  grid-auto-columns: calc((100% - (3 * 4px)) / 3.3);
+  gap: 8px 4px;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-top: 8px;
+  padding-bottom: 2px;
+}
+.bundle-pdp-preview__dropdown-grid::-webkit-scrollbar { display: none; }
+
+.bundle-pdp-preview__dropdown-swatch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+  text-align: center;
+  scroll-snap-align: start;
+  min-width: 0;
+  outline: none;
+}
+.bundle-pdp-preview__dropdown-swatch-img {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 6px;
+  background: #f5f5f5;
+  border: 2px solid transparent;
+  transition: transform 0.12s ease, border-color 0.2s ease;
+}
+.bundle-pdp-preview__dropdown-swatch-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: inherit;
+}
+.bundle-pdp-preview__dropdown-swatch:hover .bundle-pdp-preview__dropdown-swatch-img { transform: scale(1.04); }
+.bundle-pdp-preview__dropdown-swatch-name {
+  width: 100%;
+  text-align: center;
+  line-height: 1.15;
+  opacity: 0.85;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  font-size: 0.7rem;
+}
+.bundle-pdp-preview__dropdown-swatch.is-selected .bundle-pdp-preview__dropdown-swatch-img {
+  border-color: currentColor;
+}
+.bundle-pdp-preview__dropdown-swatch.is-selected .bundle-pdp-preview__dropdown-swatch-name {
+  opacity: 1;
+  font-weight: 700;
+}
+.bundle-pdp-preview__dropdown-swatch.is-unavailable {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+.bundle-pdp-preview__dropdown-swatch.is-unavailable .bundle-pdp-preview__dropdown-swatch-img::after {
+  content: '';
+  position: absolute;
+  inset: 50% 8% auto;
+  height: 1px;
+  background: currentColor;
+  transform: rotate(-12deg);
+  opacity: 0.6;
+}
+.bundle-pdp-preview__dropdown-empty {
+  margin: 12px 0 0;
+  padding: 8px;
+  font-size: 0.78rem;
+  text-align: center;
+  opacity: 0.6;
+}
+
+/* ============ PDP sticky-bar trifecta upgrade strip ============ */
+.bundle-sticky-upgrade {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0 auto 10px;
+  padding: 8px 12px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.16));
+  color: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.bundle-sticky-upgrade:hover {
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.16), rgba(34, 197, 94, 0.28));
+}
+.bundle-sticky-upgrade:active {
+  transform: scale(0.99);
+}
+.bundle-sticky-upgrade:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+.bundle-sticky-upgrade__icon {
+  font-size: 1rem;
+  color: #16a34a;
+}
+.bundle-sticky-upgrade__text {
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bundle-sticky-upgrade__arrow {
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+/* ============ cart drawer trifecta upsell (partial bundle) ============ */
+.cart__trifecta-upsell {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  margin: 8px 12px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.03));
+}
+.cart__trifecta-upsell-status {
+  margin: 0;
+  font-size: 0.85rem;
+}
+.cart__trifecta-upsell-copy {
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+.cart__trifecta-upsell-copy > * { margin: 0; }
+.cart__trifecta-upsell-missing {
+  margin: 0;
+}
+.cart__trifecta-upsell-cta {
+  align-self: flex-start;
+  min-height: 40px;
+}
+
+/* ============ cart drawer bundle group (inline-edit widget) ============ */
+.cart__bundle-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--color-divider, #e5e5e5);
+  background: var(--color-bg-body, #fff);
+}
+
+.cart__bundle-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.cart__bundle-header-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  /* No font-size here — the inner .cart__item-title element drives
+   * font properties from the merchant's cart product-title settings
+   * (sections/theme__cart.liquid). Old `strong` child rule removed
+   * since the markup is now <p class="cart__item-title"> not <strong>. */
+}
+/* .cart__bundle-badge and .cart__bundle-savings rules removed —
+ * the green 'save 10%' pill and 'You save $X' paragraph are no
+ * longer rendered. The discount is communicated entirely by the
+ * total + crossed-out subtotal, matching every other discounted
+ * line in the cart. Colors come from .cart__item-price /
+ * .cart__item-compare (the merchant's existing cart settings). */
+.cart__bundle-total {
+  /* Layout only; font + color come from .cart__item-price. */
+  white-space: nowrap;
+}
+.cart__bundle-total-wrap {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.cart__bundle-total-was {
+  /* Strikethrough via the <s> tag; the .cart__item-compare class
+   * handles color/font. Keep layout-only properties here. */
+  white-space: nowrap;
+}
+
+/* Cart bundle items now mirror the PDP bundle-builder layout:
+ * 3 cards side-by-side, each with image on top and slot label +
+ * product name + price stacked below. */
+.cart__bundle-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  align-items: stretch;
+}
+.cart__bundle-item {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+/* Item card mirrors the PDP bundle card: image expands edge-to-
+ * edge inside the card border, text rows have their own 6px
+ * horizontal padding, and the bottom of the card keeps 8px of
+ * breathing room. The card's own overflow:hidden + border-radius
+ * clips the image into rounded top corners. */
+.cart__bundle-item-button {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+  padding: 0 0 8px;
+  background: transparent;
+  border: 1px solid var(--color-divider, #e5e5e5);
+  border-radius: 8px;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  text-decoration: none;
+  overflow: hidden;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.cart__bundle-item-button:hover:not(:disabled) {
+  border-color: rgba(0, 0, 0, 0.4);
+}
+.cart__bundle-item-button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+.cart__bundle-item.is-active-dropdown .cart__bundle-item-button {
+  border-color: currentColor;
+  border-width: 2px;
+  padding: 0 0 7px;
+}
+.cart__bundle-item--readonly .cart__bundle-item-button {
+  cursor: default;
+  border-color: transparent;
+}
+.cart__bundle-item-img-wrap {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.04));
+  border-radius: 0;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.cart__bundle-item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cart__bundle-item-body {
+  min-width: 0;
+}
+/* Text rows below the (edge-to-edge) image get their own 6px
+ * horizontal padding so they don't touch the card border now
+ * that the card has no horizontal padding of its own. */
+.cart__bundle-item-slot,
+.cart__bundle-item-title,
+.cart__bundle-item-price,
+.cart__bundle-item-change {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+.cart__bundle-item-slot {
+  margin: 4px 0 0;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.55;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.cart__bundle-item-title {
+  margin: 1px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  font-weight: 500;
+  /* One-line truncation keeps all three cards the same height
+   * regardless of the longest product title. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cart__bundle-item-price {
+  margin: 1px 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.cart__bundle-item-change {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  margin-top: 4px;
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  color: inherit;
+  white-space: nowrap;
+  opacity: 0.65;
+}
+.cart__bundle-item-button:hover .cart__bundle-item-change { opacity: 1; }
+.cart__bundle-item-caret {
+  font-size: 0.6rem;
+  transition: transform 0.2s ease;
+}
+.cart__bundle-item.is-active-dropdown .cart__bundle-item-caret {
+  transform: rotate(180deg);
+}
+/* Remove button is anchored top-right of each card — out of the
+ * way of the centered card content but still tappable. */
+.cart__bundle-item-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-body, #fff);
+  border: 1px solid var(--color-divider, #e5e5e5);
+  border-radius: 50%;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.55);
+  padding: 0;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.cart__bundle-item-remove:hover:not(:disabled) {
+  color: #b00020;
+  border-color: #b00020;
+  background: rgba(176, 0, 32, 0.05);
+}
+.cart__bundle-item-remove:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+.cart__bundle-item--readonly .cart__bundle-item-remove { display: none; }
+
+/* Dropdown panel (shared visual pattern with PDP preview but scoped
+   to the cart widget classes so cart-specific tweaks don't bleed). */
+/* Dropdown panel mirrors the PDP trifecta panel — no gray
+ * background, no border, just a collapsible container. */
+.cart__bundle-dropdown {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  transition: max-height 0.32s ease, opacity 0.2s ease, padding 0.32s ease, margin 0.32s ease, border-color 0.32s ease;
+}
+.cart__bundle-dropdown.is-open {
+  max-height: 5000px;
+  opacity: 1;
+  margin-top: 0;
+  padding: 12px;
+  border-color: transparent;
+}
+/* Toolbar that holds the close X above the dropdown. Sits in the
+ * white space between the cards and the filter pills so the X is
+ * easy to see / tap. */
+.cart__bundle-dropdown-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0 0;
+  margin-bottom: 0;
+}
+.cart__bundle-dropdown-toolbar .cart__bundle-type-tabs {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.cart__bundle-dropdown-toolbar .cart__bundle-dropdown-close {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 1.1rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.04);
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.7;
+  line-height: 1;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+.cart__bundle-dropdown-toolbar .cart__bundle-dropdown-close:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+}
+.cart__bundle-dropdown-close {
+  background: transparent;
+  border: 0;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.55;
+  transition: opacity 0.15s ease;
+}
+.cart__bundle-dropdown-close:hover { opacity: 1; }
+
+.cart__bundle-type-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 0 2px 2px;
+  -webkit-overflow-scrolling: touch;
+  /* Hide the horizontal scrollbar — it was overlapping the pills.
+   * Scrolling still works via touch / trackpad. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.cart__bundle-type-tabs::-webkit-scrollbar {
+  display: none;
+}
+/* Pills match the PDP filter-pill design: black active state,
+ * 12px font, padding 8px 12px, letter-spacing 0.08em. */
+.cart__bundle-type-tab {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid #c4c4c4;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  color: inherit;
+  white-space: nowrap;
+  line-height: 1.2;
+  flex: 0 0 auto;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+.cart__bundle-type-tab:hover { border-color: #1a1a1a; }
+.cart__bundle-type-tab.is-active {
+  background: #1a1a1a;
+  border-color: #1a1a1a;
+  color: #fff;
+  transform: scale(1.03);
+}
+
+/* Swatch grid mirrors the PDP related-styles .rs-grid: 3 rows,
+ * horizontal scroll, each column ~30% of the panel so 3 columns
+ * plus a peek of the 4th show at once. Image + style name below. */
+.cart__bundle-swatches {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, auto);
+  grid-auto-columns: calc((100% - (3 * 4px)) / 3.3);
+  gap: 8px 4px;
+  width: calc(100% + 12px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-top: 8px;
+  padding-bottom: 2px;
+}
+.cart__bundle-swatches::-webkit-scrollbar { display: none; }
+.cart__bundle-swatch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+  text-align: center;
+  scroll-snap-align: start;
+  min-width: 0;
+  outline: none;
+}
+.cart__bundle-swatch-img {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 6px;
+  background: #f5f5f5;
+  border: 2px solid transparent;
+  transition: transform 0.12s ease, border-color 0.2s ease;
+}
+.cart__bundle-swatch-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: inherit;
+}
+.cart__bundle-swatch:hover:not(:disabled) .cart__bundle-swatch-img { transform: scale(1.04); }
+.cart__bundle-swatch-name {
+  width: 100%;
+  text-align: center;
+  line-height: 1.15;
+  opacity: 0.85;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  font-size: 0.7rem;
+}
+.cart__bundle-swatch.is-selected .cart__bundle-swatch-img {
+  border-color: currentColor;
+}
+.cart__bundle-swatch.is-selected .cart__bundle-swatch-name {
+  opacity: 1;
+  font-weight: 700;
+}
+.cart__bundle-swatch.is-unavailable {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+.cart__bundle-swatch.is-unavailable .cart__bundle-swatch-img::after {
+  content: '';
+  position: absolute;
+  inset: 50% 8% auto;
+  height: 1px;
+  background: currentColor;
+  transform: rotate(-12deg);
+  opacity: 0.6;
+}
+
+.cart__bundle-status {
+  margin: 0;
+  padding: 6px 8px;
+  font-size: 0.75rem;
+  text-align: center;
+  border-radius: 6px;
+}
+.cart__bundle-status--loading {
+  background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.04));
+  opacity: 0.8;
+}
+.cart__bundle-status--error {
+  background: rgba(220, 38, 38, 0.08);
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+/* Bundle actions row holds only a trash icon button, anchored
+ * bottom-right. Padding-right was 14px to nominally match the
+ * .cart__item-row inner row's pr-[14px] but visually the bundle
+ * trash ended up further left than the regular cart-line trash —
+ * the cart line's trash button sits inside an Alpine wrapper div
+ * with its own implicit alignment, so the visual right edge there
+ * lands closer to the cart drawer's outer right than the math
+ * suggests. Dropping the bundle's right padding to 0 + relying on
+ * the parent .cart__bundle-group's 16px padding gets the trash to
+ * the same on-screen X as the cart-line trash. Negative margin-top
+ * pulls the icon up into the bundle group's 12px flex-gap so the
+ * whitespace between the card row and the trash isn't tall. */
+.cart__bundle-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -8px;
+  padding-right: 0;
+}
+.cart__bundle-trash {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  /* No opacity dimming — the cart-line trash icons render at full
+   * inherited color, this should match. Hover still goes red. */
+  color: inherit;
+  transition: color 0.15s ease;
+}
+.cart__bundle-trash:hover:not(:disabled) {
+  color: #b00020;
+}
+.cart__bundle-trash:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+/* Legacy .cart__bundle-action rules below — kept as inert fallbacks
+ * in case any cart-upsell or third-party snippet still references the
+ * old class. Safe to delete in a future cleanup. */
+.cart__bundle-action {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  border-radius: 6px;
+  cursor: pointer;
+  line-height: 1;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+.cart__bundle-action--ghost {
+  background: transparent;
+  color: inherit;
+  border: 1px solid var(--color-divider, #d4d4d4);
+  opacity: 0.75;
+}
+.cart__bundle-action--ghost:hover {
+  opacity: 1;
+  background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.04));
+}
+.cart__bundle-action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ============ bundle drawer (PDP CTA + cart edit reuse) ============ */
+.bundle-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+.bundle-drawer__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+}
+.bundle-drawer__panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(100vw, 560px);
+  background: var(--color-bg-body, #fff);
+  color: var(--color-text, #111);
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+}
+.bundle-drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-divider, #eee);
+}
+.bundle-drawer__close {
+  background: none;
+  border: 0;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.bundle-drawer__body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ============ PDP swatch sections — tabbed mode ============ */
+/* Mirrors .bundle-pdp-preview__type-tab styling so the PDP feels
+   consistent with the bundle widget's filter pills. The .pdp-swatches-
+   tabs row is empty on render and populated by the inline script in
+   snippets/product__options.liquid once the bundled JS has rendered
+   the swatch groups. */
+
+/* No-FOUC: while the bundled main-*.js is still fetching/rendering the
+   swatch groups, hide every group heading and every group AFTER the
+   first one. Customer sees a single group of swatches on first paint
+   instead of the stacked-headings flash. Once the inline script in
+   product__options.liquid finishes init, it adds `.is-ready` to the
+   wrapper and these pre-init rules stop applying — the script's own
+   inline display:none/'' rules take over. */
+.pdp-swatches-tabbed:not(.is-ready) :is(.js\:pdp-swatches, .js\:pdp-collegiate-swatches) > div > p,
+.pdp-swatches-tabbed:not(.is-ready) :is(.js\:pdp-swatches, .js\:pdp-collegiate-swatches) > div ~ div {
+  display: none;
+}
+
+.pdp-swatches-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 2px 0 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.pdp-swatches-tabs:empty {
+  /* No groups rendered yet → don't reserve space. */
+  display: none;
+}
+.pdp-swatches-tab {
+  background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.04));
+  border: 1.5px solid var(--color-divider, #c4c4c4);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: inherit;
+  white-space: nowrap;
+  line-height: 1.2;
+  flex: 0 0 auto;
+  min-height: 32px;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+.pdp-swatches-tab:hover {
+  border-color: var(--background_primary_light, #1e7db3);
+}
+.pdp-swatches-tab.is-active {
+  background: var(--background_primary_light, #1e7db3);
+  border-color: var(--background_primary_light, #1e7db3);
+  color: var(--foreground_primary_light, #fff);
+  transform: scale(1.03);
+}
+
+/* "Color: <selected style>" header above the pills. Updates live on
+   swatch hover. Falls back to the current product's title on
+   mouseleave or when nothing is hovered. */
+/* Section title above the swatch grid — matches the "Colors" header
+   in the Adidas reference. Bold, slightly larger than body. The
+   merchant can override size/weight/color/transform/letter-spacing
+   via the options block's "Select Style title" settings; an inline
+   <style> in product__options.liquid provides those overrides. */
+.pdp-swatches-title {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: left;
+}
+
+/* Thin divider that sits between the title/price/review block and
+   the swatch picker. Desktop only — toggled in markup via
+   hidden md:block. Tucked inside the 16px side margin so it lines
+   up with the rest of the PDP content. */
+.pdp-section-divider {
+  margin: 0 16px 16px;
+  border: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Header row above the swatch grid: tab pills on the left + the
+   currently-selected / hover-preview style name on the right.
+   Tabs fill the remaining width and stay horizontally scrollable
+   when the merchant has many swatch groups. */
+.pdp-swatches-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  min-width: 0;
+}
+.pdp-swatches-header .pdp-swatches-tabs {
+  /* Re-scope the tabs container inside the header — strip its old
+   * margin-bottom (header owns the gap now) and let it shrink so
+   * the name on the right is never pushed off-screen. */
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-bottom: 0;
+}
+.pdp-swatches-current-name {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  color: #4a4a4a;
+  font-weight: 500;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+/* Footer row below the swatch grid: only the desktop pagination
+   arrows, right-aligned. Mobile hides them — the peek of the next
+   column is enough swipe affordance. */
+.pdp-swatches-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+  min-height: 22px;
+}
+
+/* Stage takes the full width of the swatch column now that arrows
+   are no longer flanking it. Overflow hidden keeps the horizontal-
+   scroll grid from leaking outside the column. */
+.pdp-swatches-stage {
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Arrows: hidden by default (mobile) and only revealed on desktop
+   when the grid actually overflows (has-pagination class is added
+   by the inline JS). Compact 24x24 ghost buttons that sit unobtrusive
+   in the footer row. */
+.pdp-swatches-arrows {
+  display: none;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+@media (min-width: 750px) {
+  .pdp-swatches-tabbed.has-pagination .pdp-swatches-arrows {
+    display: inline-flex;
+  }
+}
+.pdp-swatches-arrow {
+  /* Visual styling (size, bg, border, shadow) comes from the shared
+   * .btn .btn--plain .btn--small .shadow-sm classes so these arrows
+   * match the PDP product-gallery carousel arrows exactly. Only
+   * layout + disabled state is customized here. */
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.pdp-swatches-arrow:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* 3-column grid with horizontal overflow. The column width is sized
+   to ~30% of the stage so 3 full columns plus a 30% peek of the 4th
+   column are visible at once — the peek is the swipe affordance. We
+   keep the grid as a single row internally (grid-auto-flow: column)
+   and let the customer page through with the arrow buttons or by
+   horizontal scroll on touch. */
+.pdp-swatches-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, auto);
+  /* Each column ~30% of stage; 3.3 columns fit per page. */
+  grid-auto-columns: calc((100% - (3 * 8px)) / 3.3);
+  gap: 12px 8px;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 2px;
+}
+.pdp-swatches-grid::-webkit-scrollbar { display: none; }
+
+.pdp-swatch-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+.pdp-swatch-cell > a {
+  flex: 0 0 auto;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.pdp-swatch-cell:hover > a {
+  transform: scale(1.08);
+}
+.pdp-swatch-cell.is-current > a,
+.pdp-swatch-cell > a.border--focus-outline {
+  box-shadow: 0 0 0 2px var(--color-bg-body, #fff), 0 0 0 4px var(--background_primary_light, #1e7db3);
+}
+.pdp-swatch-name {
+  font-size: 0.65rem;
+  line-height: 1.15;
+  text-align: center;
+  opacity: 0.75;
+  width: 100%;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+.pdp-swatch-cell.is-current .pdp-swatch-name {
+  opacity: 1;
+  font-weight: 700;
+}

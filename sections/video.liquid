@@ -1,0 +1,335 @@
+<!-- sections/video.liquid -->
+{% comment %} 
+  Video that can autoplay or play on click.
+
+  Globals:
+    - settings.layout_horizontal: horizontaly margin
+
+  Pro tips:
+    - Use a background image from the video as a placeholder.
+{% endcomment %}
+
+<section class="
+  {{ section.settings.visibility }}
+  {{ section.settings.color_scheme }} 
+  {{ section.settings.color_border }}
+  {{ section.settings.style_border }}">
+  <div class="{{ settings.layout_horizontal }}" 
+    style="
+      padding-top:{{ section.settings.spacing_top }}px;
+      padding-bottom:{{ section.settings.spacing_bottom }}px;">
+
+      {% render 'component__section-header' %} 
+        <div 
+          class="relative w-full overflow-hidden"
+          style="aspect-ratio:{{ section.settings.video.aspect_ratio | default: 2 }};">
+          <video x-ref="video" class="border--radius"
+            style="position: absolute; height: 100%; width: 100%; left: 0px; top: 0px; object-fit:cover;"
+            {% if section.settings.auto_play %} autoplay {% endif %} 
+            {% if section.settings.auto_play %} muted {% endif %}
+            poster="
+            {% if section.settings.image_background == blank %}
+              {{ section.settings.video.preview_image | image_url: width: 1200 }}
+              {% else %}
+              {{ section.settings.image_background | image_url: width: 1200 }}
+            {% endif %}">
+            {% for source in section.settings.video.sources %}
+              <source src="{{ source.url }}" type="{{ source.mime_type }}">
+            {% endfor %}
+          </video>
+          <button x-ref="playBtn" class="hover:cursor-default border--width border--radius relative z-10 flex items-center justify-center w-full h-full overflow-hidden">
+            <span 
+              class="{{ section.settings.color_button }} hover:cursor-pointer absolute mt-2"
+              @click='{% if section.settings.auto_play %}
+                $refs.video.currentTime = 0;
+                $refs.video.controls = true;
+                $refs.video.muted = false;
+                $refs.playBtn.style.display = "none";
+              {% else %}
+                $refs.video.play();
+                $refs.video.controls = true;
+                $refs.playBtn.style.display = "none";
+              {% endif %}'>
+              {% render 'component__icon', icon: 'play', size: '20', class: 'mr-2' %}
+              {{ 'general.media.play' | t }}
+            </span>
+          </button> 
+        </div>
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name":"t:sections.video.name",
+  "settings":[
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__4.content"
+    },
+    {
+      "type":"image_picker",
+      "id":"image_background",
+      "label":"t:sections.video.settings.image_background.label"
+    },
+    {
+      "type":"video",
+      "id":"video",
+      "label":"t:sections.video.settings.video_background.label"
+    },
+    {
+      "type":"checkbox",
+      "id":"auto_play",
+      "label":"t:sections.video.settings.auto_play.label",
+      "info":"t:sections.video.settings.auto_play.info",
+      "default":false
+    },
+    {
+      "type":"text",
+      "id":"heading",
+      "label":"t:sections.all.content.settings.heading.label"
+    },
+    {
+      "type":"richtext",
+      "id":"content",
+      "label":"t:sections.all.content.settings.content.label"
+    },
+    {
+      "type":"text",
+      "id":"button_label",
+      "label":"t:sections.all.content.settings.button_label.label"
+    },
+    {
+      "type":"url",
+      "id":"button_url",
+      "label":"t:sections.all.content.settings.button_url.label"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__22.content"
+    },
+    {
+      "type":"range",
+      "id":"spacing_top",
+      "min":0,
+      "max":300,
+      "step":20,
+      "unit":"px",
+      "label":"t:sections.all.layout.settings.spacing.label_top",
+      "default":100
+    },
+    {
+      "type":"range",
+      "id":"spacing_bottom",
+      "min":0,
+      "max":300,
+      "step":20,
+      "unit":"px",
+      "label":"t:sections.all.layout.settings.spacing.label_bottom",
+      "default":100
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__1.content"
+    },
+    {
+      "type":"select",
+      "id":"color_scheme",
+      "label":"t:sections.all.colors.settings.color_scheme.label",
+      "options":[
+        {
+          "value":"color__bg-body color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value":"color__bg-neutral color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value":"color__bg-overlay-1 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value":"color__bg-overlay-2 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value":"color__bg-overlay-3 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value":"color__bg-primary color__primary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value":"color__bg-secondary color__secondary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value":"color__bg-tertiary color__tertiary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default":"color__bg-body color__text"
+    },
+    {
+      "type":"select",
+      "id":"color_text",
+      "label":"t:sections.all.colors.settings.color_text.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.colors.settings.color_text.options__1.label"
+        },
+        {
+          "value":"color__light",
+          "label":"t:sections.all.colors.settings.color_text.options__2.label"
+        },
+        {
+          "value":"color__dark",
+          "label":"t:sections.all.colors.settings.color_text.options__3.label"
+        }
+      ],
+      "default":""
+    },
+    {
+      "type":"select",
+      "id":"color_border",
+      "label":"t:sections.all.colors.settings.color_border.label",
+      "options":[
+        {
+          "value":"color__border-divider-1",
+          "label":"t:sections.all.colors.settings.color_border.options__1.label"
+        },
+        {
+          "value":"color__border-selected-1",
+          "label":"t:sections.all.colors.settings.color_border.options__2.label"
+        }
+      ],
+      "default":"color__border-divider-1"
+    },
+    {
+      "type":"select",
+      "id":"color_button",
+      "label":"t:sections.all.colors.settings.color_button.label",
+      "options":[
+        {
+          "value":"btn",
+          "label":"t:sections.all.colors.settings.color_button.options__1.label"
+        },
+        {
+          "value":"btn btn--secondary",
+          "label":"t:sections.all.colors.settings.color_button.options__2.label"
+        },
+        {
+          "value":"btn btn--tertiary",
+          "label":"t:sections.all.colors.settings.color_button.options__5.label"
+        },
+        {
+          "value":"btn btn--neutral",
+          "label":"t:sections.all.colors.settings.color_button.options__3.label"
+        },
+        {
+          "value":"btn btn--plain",
+          "label":"t:sections.all.colors.settings.color_button.options__4.label"
+        }
+      ],
+      "default":"btn btn--secondary"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__2.content"
+    },
+    {
+      "type":"select",
+      "id":"style_border",
+      "label":"t:sections.all.styles.settings.style_border.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.styles.settings.style_border.options__1.label"
+        },
+        {
+          "value":"border--t-width",
+          "label":"t:sections.all.styles.settings.style_border.options__2.label"
+        },
+        {
+          "value":"border--b-width",
+          "label":"t:sections.all.styles.settings.style_border.options__3.label"
+        },
+        {
+          "value":"border--b-width border--t-width",
+          "label":"t:sections.all.styles.settings.style_border.options__4.label"
+        }
+      ],
+      "default":"border--b-width"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__3.content"
+   },
+    {
+      "type": "select",
+      "id": "layout_x_alignment",
+      "label": "t:sections.all.layout.settings.layout_x_alignment.label",
+      "options": [
+        {
+          "value": "justify-between",
+          "label": "t:sections.all.layout.settings.layout_x_alignment.options__1.label"
+        },
+        {
+          "value": "text-center justify-center flex-col items-center",
+          "label": "t:sections.all.layout.settings.layout_x_alignment.options__2.label"
+        },
+        {
+          "value": "text-right justify-end flex-col items-end",
+          "label": "t:sections.all.layout.settings.layout_x_alignment.options__3.label"
+        }
+      ],
+      "default": "justify-between"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__8.content"
+    },
+    {
+      "type":"select",
+      "id":"visibility",
+      "label":"t:sections.all.visibility.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.visibility.options__1.label"
+        },
+        {
+          "value":"md:hidden",
+          "label":"t:sections.all.visibility.options__2.label"
+        },
+        {
+          "value":"hidden md:block",
+          "label":"t:sections.all.visibility.options__3.label"
+        }
+      ],
+      "default":""
+    }
+
+  ],
+  "presets":[
+    {
+      "name":"t:sections.video.name",
+      "settings":{
+        "color_border":"color__border-divider-1",
+        "color_button":"btn btn--secondary",
+        "style_border":"border--b-width",
+        "heading":"Video",
+        "content":"<p>Give customers a summary of the video you want to share.</p>",
+        "button_label":"Button",
+        "button_url":"/"
+      }
+    }
+  ],
+  "disabled_on": {
+    "groups": ["custom.overlay"]
+  }
+}
+{% endschema %}

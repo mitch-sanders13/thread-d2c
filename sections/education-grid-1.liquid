@@ -1,0 +1,1110 @@
+<!-- sections/content-grid.liquid -->
+{% comment %} 
+  Grid of content cards. 
+
+  Globals:
+    - settings.layout_horizontal: horizontaly margin
+    - settings.enable_animations: boolean to enable animations
+    - settings.thumbnails_color_border: set border of cards
+  
+  Possible enhancements:
+    - Update and use component__card for blocks here.
+
+  Pro tips:
+    - Can be used to show a variety of different content.
+{% endcomment %}
+
+
+{% if product.metafields.education.title_1 %}
+<section class="
+  {{ section.settings.visibility }}
+  {{ section.settings.color_scheme }} 
+  {{ section.settings.color_border }}
+  {{ section.settings.style_border }}">
+	<div class="{{ section.settings.layout_horizontal }}" 
+		 style="
+		 padding-top:{{ section.settings.spacing_top }}px;
+		 padding-bottom:{{ section.settings.spacing_bottom }}px;">
+
+			{% render 'component__section-header' %}
+
+			<div class="grid
+				 {{ section.settings.row_size_desktop }}
+				 {{ section.settings.row_size_mobile }}"
+				 style="gap: {{ settings.layout_gap_size }}px;">
+
+         {% comment %} Mobile only {% endcomment %}
+         {% for block in section.blocks %}
+          {% assign show_first = false %}
+          {% if block.settings.enable_show_first %}
+            {% assign show_first = true %}
+          {% endif %}
+          {% if show_first %}
+            {% if block.settings.enable_linked %}<a{% else %}<div{% endif %}
+              href="{{ block.settings.button_url }}"
+              class="h-full no-underline hover:no-underline md:hidden
+                {{ block.settings.visibility }}
+              {{ block.settings.layout_row_span }}
+              {{ block.settings.layout_col_span }}">
+              
+              <div
+                class="h-full w-full animation-500 flex flex-wrap overflow-hidden relative group flex-col justify-start
+                border--width border--radius no-underline whitespace-normal hover:no-underline
+                {{ block.settings.color_scheme }} 
+                {{ block.settings.color_border }}
+                {{ block.settings.color_text }}
+                {{ block.settings.layout_x_alignment }}
+                {{ block.settings.layout_y_alignment }}
+                {% unless block.settings.image_featured == blank %}
+                !content-between
+                {% endunless %}"
+                style="
+                padding-top:{{ block.settings.spacing_top }}px;
+                padding-bottom:{{ block.settings.spacing_bottom }}px;">
+
+                {%- unless block.settings.image_background == blank -%}
+                  {{ block.settings.image_background | image_url: width: 1400 | image_tag: class: 'w-full top-0 h-full absolute object-cover', loading: 'lazy' }}
+                {%- endunless -%}
+          
+                {%- unless block.settings.video_background == blank %}
+                  <div class="relative w-full overflow-hidden" 
+                    style="height:256px;"
+                    x-data="{
+                    video_muted: true,
+                    video_playing: {% if block.settings.enable_autoplay %} true {% else %} false {% endif %}
+                    }">
+                    <video 
+                    class="border--radius"
+                    style="position: absolute; height: 100%; width: 100%; left: 0px; top: 0px; object-fit:cover;"
+                    x-ref="video" 
+                    muted
+                    {% if block.settings.enable_autoplay %} autoplay {% endif %}
+                    {% if block.settings.enable_loop %} loop {% endif %}
+                    {% if block.settings.image_background %}
+                      poster="{{ block.settings.image_background | image_url: width: 1200 }}
+                    {% endif %}
+                    ">
+                    {% for source in block.settings.video_background.sources %}
+                      <source src="{{ source.url }}" type="{{ source.mime_type }}">
+                    {% endfor %}
+                    </video>
+                    <div class=" relative z-10 flex w-full h-full">
+                    <button x-ref="pauseBtn" 
+                      class="btn btn--secondary btn--smaller bottom-4 left-4 absolute z-10 flex items-center justify-center w-full overflow-hidden"
+                      x-show="video_playing"
+                      x-cloak
+                      @click='
+                      $refs.video.pause();
+                      video_playing = false;'>
+                      {% render 'component__icon', icon: 'pause', size: '16' %}
+                    </button> 
+                    <button x-ref="playBtn" 
+                      class="btn btn--secondary btn--smaller bottom-4 left-4 absolute z-10 flex items-center justify-center w-full overflow-hidden"
+                      x-show="!video_playing"
+                      x-cloak
+                      @click='
+                      $refs.video.play();
+                      video_playing = true;'>
+                      {% render 'component__icon', icon: 'play', size: '16' %}
+                    </button> 
+                    {% if block.settings.enable_mute_toggle %}
+                      <button class="btn btn--secondary btn--smaller bottom-4 right-4 absolute z-10 flex items-center justify-center w-full overflow-hidden"
+                      x-ref="muteBtn" 
+                      x-show="!video_muted"
+                      x-cloak
+                      @click='
+                        $refs.video.muted = true;
+                        video_muted = true;'>
+                      {% render 'component__icon', icon: 'volume', size: '16' %}
+                      </button> 
+                      <button class="btn btn--secondary btn--smaller bottom-4 right-4 absolute z-10 flex items-center justify-center w-full overflow-hidden"
+                      x-ref="unmuteBtn" 
+                      x-show="video_muted"
+                      x-cloak
+                      @click='
+                        $refs.video.muted = false;
+                        video_muted = false;'>
+                      {% render 'component__icon', icon: 'volume-x', size: '16' %}
+                      </button> 
+                    {% endif %}
+                    </div>
+                    
+                  
+                  </div>
+                {%- endunless -%}  
+
+                {%- unless block.settings.image_featured == blank -%}
+                  <div class="relative w-full">
+                    {{ block.settings.image_featured | image_url: width: 1400 | image_tag: class: 'w-full', loading: 'lazy', alt: block.settings.image_featured.alt }}
+                  </div>
+                {%- endunless -%}
+                
+                {% unless block.settings.heading == blank and block.settings.content == blank and block.settings.button_url == blank %}
+                  <div class="z-[1] w-full pt-4
+                  {% if block.settings.enable_padding %}p-4{% endif %}"
+                  style="
+                  {% if block.settings.enable_gradient %}
+                  background: linear-gradient( to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2) );
+                  {% endif %}">
+                    <div class="
+                      {% if block.settings.enable_shift %}
+                        group-hover:-translate-y-3 transition-transform duration-300
+                      {% endif %}">
+
+                    {%- unless block.settings.heading == blank -%}
+                      <h3 class="mb-2" aria-level="2">{{ block.settings.heading }}</h3>
+                    {%- endunless -%}
+
+                    {%- unless block.settings.content == blank -%}
+                      <div class="mb-2">
+                      {{ block.settings.content }}
+                      </div>
+                    {%- endunless -%}
+
+                    {%- unless block.settings.button_url == blank -%}
+                      {% if block.settings.enable_linked %}<button{% else %}<a{% endif %}
+                        class="{{ block.settings.color_button }}">
+                        {{ block.settings.button_label }}
+                      {% if block.settings.enable_linked %}</button>{% else %}</a>{% endif %}
+                    {%- endunless -%}
+                    
+                    </div>
+                  </div>
+                {% endunless %}
+              </div>
+            {% if block.settings.enable_linked %}</a>{% else %}</div>{% endif %}
+          {% endif %}
+				{% endfor %}
+        
+				{% for block in section.blocks %}
+          {% assign show_first = false %}
+          {% if block.settings.enable_show_first %}
+            {% assign show_first = true %}
+          {% endif %}
+          {% if block.settings.enable_linked %}<a{% else %}<div{% endif %}
+            href="{{ block.settings.button_url }}"
+            class="h-full no-underline hover:no-underline
+            {% if show_first %}hidden md:block{% endif %}
+            {{ block.settings.visibility }}
+						 {{ block.settings.layout_row_span }}
+						 {{ block.settings.layout_col_span }}">
+             
+						<div
+              class="h-full w-full animation-500 flex flex-wrap overflow-hidden relative group flex-col justify-start
+              border--width border--radius no-underline whitespace-normal hover:no-underline
+              {{ block.settings.color_scheme }} 
+              {{ block.settings.color_border }}
+              {{ block.settings.color_text }}
+              {{ block.settings.layout_x_alignment }}
+              {{ block.settings.layout_y_alignment }}
+              {% unless block.settings.image_featured == blank %}
+              !content-between
+              {% endunless %}"
+              style="
+              padding-top:{{ block.settings.spacing_top }}px;
+              padding-bottom:{{ block.settings.spacing_bottom }}px;">
+
+							{%- unless block.settings.image_background == blank -%}
+								{{ block.settings.image_background | image_url: width: 1400 | image_tag: class: 'w-full top-0 h-full absolute object-cover', loading: 'lazy' }}
+							{%- endunless -%}
+				
+							{%- unless block.settings.video_background == blank %}
+								<div class="relative w-full overflow-hidden" 
+									style="height:256px;"
+									x-data="{
+									video_muted: true,
+									video_playing: {% if block.settings.enable_autoplay %} true {% else %} false {% endif %}
+									}">
+									<video 
+									class="border--radius"
+									style="position: absolute; height: 100%; width: 100%; left: 0px; top: 0px; object-fit:cover;"
+									x-ref="video" 
+									muted
+									{% if block.settings.enable_autoplay %} autoplay {% endif %}
+									{% if block.settings.enable_loop %} loop {% endif %}
+									{% if block.settings.image_background %}
+										poster="{{ block.settings.image_background | image_url: width: 1200 }}
+									{% endif %}
+									">
+									{% for source in block.settings.video_background.sources %}
+										<source src="{{ source.url }}" type="{{ source.mime_type }}">
+									{% endfor %}
+									</video>
+									<div class=" relative z-10 flex w-full h-full">
+									<button x-ref="pauseBtn" 
+										class="btn btn--secondary btn--smaller bottom-4 left-4 absolute z-10 flex items-center justify-center w-full overflow-hidden"
+										x-show="video_playing"
+										x-cloak
+										@click='
+										$refs.video.pause();
+										video_playing = false;'>
+										{% render 'component__icon', icon: 'pause', size: '16' %}
+									</button> 
+									<button x-ref="playBtn" 
+										class="btn btn--secondary btn--smaller bottom-4 left-4 absolute z-10 flex items-center justify-center w-full overflow-hidden"
+										x-show="!video_playing"
+										x-cloak
+										@click='
+										$refs.video.play();
+										video_playing = true;'>
+										{% render 'component__icon', icon: 'play', size: '16' %}
+									</button> 
+									{% if block.settings.enable_mute_toggle %}
+										<button class="btn btn--secondary btn--smaller bottom-4 right-4 absolute z-10 flex items-center justify-center w-full overflow-hidden"
+										x-ref="muteBtn" 
+										x-show="!video_muted"
+										x-cloak
+										@click='
+											$refs.video.muted = true;
+											video_muted = true;'>
+										{% render 'component__icon', icon: 'volume', size: '16' %}
+										</button> 
+										<button class="btn btn--secondary btn--smaller bottom-4 right-4 absolute z-10 flex items-center justify-center w-full overflow-hidden"
+										x-ref="unmuteBtn" 
+										x-show="video_muted"
+										x-cloak
+										@click='
+											$refs.video.muted = false;
+											video_muted = false;'>
+										{% render 'component__icon', icon: 'volume-x', size: '16' %}
+										</button> 
+									{% endif %}
+									</div>
+									
+								
+								</div>
+							{%- endunless -%}  
+
+							{%- unless block.settings.image_featured == blank -%}
+								<div class="relative w-full">
+									{{ block.settings.image_featured | image_url: width: 1400 | image_tag: class: 'w-full', loading: 'lazy', alt: block.settings.image_featured.alt }}
+								</div>
+							{%- endunless -%}
+							
+							{% unless block.settings.heading == blank and block.settings.content == blank and block.settings.button_url == blank %}
+								<div class="z-[1] w-full pt-4
+								{% if block.settings.enable_padding %}p-4{% endif %}"
+								style="
+								{% if block.settings.enable_gradient %}
+								background: linear-gradient( to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2) );
+								{% endif %}">
+									<div class="
+                    {% if block.settings.enable_shift %}
+                      group-hover:-translate-y-3 transition-transform duration-300
+                    {% endif %}">
+
+									{%- unless block.settings.heading == blank -%}
+										<h3 class="mb-2" aria-level="2">{{ block.settings.heading }}</h3>
+									{%- endunless -%}
+
+									{%- unless block.settings.content == blank -%}
+										<div class="mb-2">
+										{{ block.settings.content }}
+										</div>
+									{%- endunless -%}
+
+									{%- unless block.settings.button_url == blank -%}
+                    {% if block.settings.enable_linked %}<button{% else %}<a{% endif %}
+                      class="{{ block.settings.color_button }}">
+                      {{ block.settings.button_label }}
+                    {% if block.settings.enable_linked %}</button>{% else %}</a>{% endif %}
+									{%- endunless -%}
+									
+									</div>
+								</div>
+							{% endunless %}
+						</div>
+          {% if block.settings.enable_linked %}</a>{% else %}</div>{% endif %}
+				{% endfor %}
+			
+			</div>
+	</div>
+</section>
+{% endif %}
+
+{% schema %}
+{
+  "name":"Education grid 1",
+  "settings":[
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__4.content"
+    },
+    {
+      "type":"text",
+      "id":"heading",
+      "label":"t:sections.all.content.settings.heading.label"
+    },
+    {
+      "type":"richtext",
+      "id":"content",
+      "label":"t:sections.all.content.settings.content.label"
+    },
+    {
+      "type":"text",
+      "id":"button_label",
+      "label":"t:sections.all.content.settings.button_label.label"
+    },
+    {
+      "type":"url",
+      "id":"button_url",
+      "label":"t:sections.all.content.settings.button_url.label"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__22.content"
+    },
+    {
+      "type":"range",
+      "id":"spacing_top",
+      "min":0,
+      "max":300,
+      "step":20,
+      "unit":"px",
+      "label":"t:sections.all.layout.settings.spacing.label_top",
+      "default":100
+    },
+    {
+      "type":"range",
+      "id":"spacing_bottom",
+      "min":0,
+      "max":300,
+      "step":20,
+      "unit":"px",
+      "label":"t:sections.all.layout.settings.spacing.label_bottom",
+      "default":100
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__1.content"
+    },
+    {
+      "type":"select",
+      "id":"color_scheme",
+      "label":"t:sections.all.colors.settings.color_scheme.label",
+      "options":[
+        {
+          "value":"color__bg-body color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value":"color__bg-neutral color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value":"color__bg-overlay-1 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value":"color__bg-overlay-2 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value":"color__bg-overlay-3 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value":"color__bg-primary color__primary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value":"color__bg-secondary color__secondary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value":"color__bg-tertiary color__tertiary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default":"color__bg-body color__text"
+    },
+    {
+      "type":"select",
+      "id":"color_border",
+      "label":"t:sections.all.colors.settings.color_border.label",
+      "options":[
+        {
+          "value":"color__border-divider-1",
+          "label":"t:sections.all.colors.settings.color_border.options__1.label"
+        },
+        {
+          "value":"color__border-selected-1",
+          "label":"t:sections.all.colors.settings.color_border.options__2.label"
+        }
+      ],
+      "default":"color__border-divider-1"
+    },
+    {
+      "type":"select",
+      "id":"color_button",
+      "label":"t:sections.all.colors.settings.color_button.label",
+      "options":[
+        {
+          "value":"btn",
+          "label":"t:sections.all.colors.settings.color_button.options__1.label"
+        },
+        {
+          "value":"btn btn--secondary",
+          "label":"t:sections.all.colors.settings.color_button.options__2.label"
+        },
+        {
+          "value":"btn btn--tertiary",
+          "label":"t:sections.all.colors.settings.color_button.options__5.label"
+        },
+        {
+          "value":"btn btn--neutral",
+          "label":"t:sections.all.colors.settings.color_button.options__3.label"
+        },
+        {
+          "value":"btn btn--plain",
+          "label":"t:sections.all.colors.settings.color_button.options__4.label"
+        },
+        {
+          "value":"btn--minimal-light",
+          "label":"t:sections.all.colors.settings.color_button.options__6.label"
+        },
+        {
+          "value":"btn--minimal-dark",
+          "label":"t:sections.all.colors.settings.color_button.options__7.label"
+        }
+      ],
+      "default":"btn btn--secondary"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__2.content"
+    },
+    {
+      "type":"select",
+      "id":"style_border",
+      "label":"t:sections.all.styles.settings.style_border.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.styles.settings.style_border.options__1.label"
+        },
+        {
+          "value":"border--t-width",
+          "label":"t:sections.all.styles.settings.style_border.options__2.label"
+        },
+        {
+          "value":"border--b-width",
+          "label":"t:sections.all.styles.settings.style_border.options__3.label"
+        },
+        {
+          "value":"border--b-width border--t-width",
+          "label":"t:sections.all.styles.settings.style_border.options__4.label"
+        }
+      ],
+      "default":"border--b-width"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__3.content"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:sections.all.layout.paragraph__1.content"
+    },
+    {
+      "type":"select",
+      "id":"row_size_desktop",
+      "label":"t:sections.content_grid.settings.row_size_desktop.label",
+      "options":[
+        {
+          "value":"md:grid-cols-1",
+          "label":"1"
+        },
+        {
+          "value":"md:grid-cols-2",
+          "label":"2"
+        },
+        {
+          "value":"md:grid-cols-3",
+          "label":"3"
+        },
+        {
+          "value":"md:grid-cols-4",
+          "label":"4"
+        },
+        {
+          "value":"md:grid-cols-5",
+          "label":"5"
+        },
+        {
+          "value":"md:grid-cols-6",
+          "label":"6"
+        }
+      ],
+      "default":"md:grid-cols-4"
+    },
+    {
+      "type":"select",
+      "id":"row_size_mobile",
+      "label":"t:sections.content_grid.settings.row_size_mobile.label",
+      "options":[
+        {
+          "value":"grid-cols-1",
+          "label":"1"
+        },
+        {
+          "value":"grid-cols-2",
+          "label":"2"
+        },
+        {
+          "value":"grid-cols-3",
+          "label":"3"
+        },
+        {
+          "value":"grid-cols-4",
+          "label":"4"
+        }
+      ],
+      "default":"grid-cols-2"
+    },
+    {
+      "type": "select",
+      "id": "layout_x_alignment",
+      "label": "t:sections.all.layout.settings.layout_x_alignment.label",
+      "options": [
+        {
+          "value": "justify-between",
+          "label": "t:sections.all.layout.settings.layout_x_alignment.options__1.label"
+        },
+        {
+          "value": "text-center justify-center flex-col items-center",
+          "label": "t:sections.all.layout.settings.layout_x_alignment.options__2.label"
+        },
+        {
+          "value": "text-right justify-end flex-col items-end",
+          "label": "t:sections.all.layout.settings.layout_x_alignment.options__3.label"
+        }
+      ],
+      "default": "justify-between"
+    },
+    {
+      "type": "select",
+      "id": "layout_horizontal",
+      "label": "t:settings_schema.layout.settings.layout_horizontal.label",
+      "options": [
+        {
+          "value": "window--narrow",
+          "label": "t:settings_schema.layout.settings.layout_horizontal.options__1.label"
+        },
+        {
+          "value": "window",
+          "label": "t:settings_schema.layout.settings.layout_horizontal.options__2.label"
+        },
+        {
+          "value": "window--wide",
+          "label": "t:settings_schema.layout.settings.layout_horizontal.options__3.label"
+        },
+        {
+          "value": "window--full",
+          "label": "t:settings_schema.layout.settings.layout_horizontal.options__4.label"
+        }
+      ],
+      "default": "window"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__8.content"
+    },
+    {
+      "type":"select",
+      "id":"visibility",
+      "label":"t:sections.all.visibility.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.visibility.options__1.label"
+        },
+        {
+          "value":"md:hidden",
+          "label":"t:sections.all.visibility.options__2.label"
+        },
+        {
+          "value":"hidden md:block",
+          "label":"t:sections.all.visibility.options__3.label"
+        }
+      ],
+      "default":""
+    }
+  ],
+  "blocks":[
+    {
+      "type":"content",
+      "name":"t:sections.content_grid.blocks.content.name",
+      "limit":20,
+      "settings":[
+        { 
+          "type":"checkbox", 
+          "id":"enable_show_first", 
+          "label":"Enable block to show in first position on mobile", 
+          "default":false 
+        }, 
+        {
+          "type":"header",
+          "content":"t:sections.all.headers.header__4.content"
+        },
+        {
+          "type":"text",
+          "id":"heading",
+          "label":"t:sections.content_grid.blocks.content.settings.heading.label",
+          "default":{
+            "en":"Block heading",
+            "es":"Encabezado de bloque",
+            "it":"Intestazione del blocco",
+            "de":"Blocküberschrift",
+            "fr":"En-tête de bloc"
+          }
+        },
+        {
+          "type":"richtext",
+          "id":"content",
+          "label":"t:sections.content_grid.blocks.content.settings.content.label",
+          "default":{
+            "en":"<p>Describe a product, make announcements, or inform customers about a promotion.</p>",
+            "es":"<p>Describa un producto, haga anuncios o informe a los clientes sobre una promoción.</p>",
+            "it":"<p>Descrivi un prodotto, fai annunci o informa i clienti su una promozione.</p>",
+            "de":"<p>Beschreiben Sie ein Produkt, machen Sie Ankündigungen oder informieren Sie Kunden über eine Werbeaktion.</p>",
+            "fr":"<p>Décrivez un produit, faites des annonces ou informez les clients d’une promotion.</p>"
+          }
+        },
+        {
+          "type":"text",
+          "id":"button_label",
+          "label":"t:sections.content_grid.blocks.content.settings.button_label.label",
+          "default":{
+            "en":"Button",
+            "es":"Botón",
+            "it":"Bottone",
+            "de":"Knopf",
+            "fr":"Bouton"
+          }
+        },
+        {
+          "type":"url",
+          "id":"button_url",
+          "label":"t:sections.content_grid.blocks.content.settings.button_url.label",
+          "default":"/collections/all"
+        },
+        {
+          "type":"image_picker",
+          "id":"image_featured",
+          "label":"t:sections.content_grid.blocks.content.settings.image_featured.label"
+        },
+        {
+          "type":"image_picker",
+          "id":"image_background",
+          "label":"t:sections.content_grid.blocks.content.settings.image_background.label"
+        },
+        { 
+          "type":"video", 
+          "id":"video_background", 
+          "label":"t:sections.video.settings.video_background.label" 
+        }, 
+        { 
+          "type":"checkbox", 
+          "id":"enable_autoplay", 
+          "label":"t:sections.content_grid.blocks.content.settings.enable_autoplay.label", 
+          "default":true 
+        }, 
+        { 
+          "type":"checkbox", 
+          "id":"enable_mute_toggle", 
+          "label":"t:sections.content_grid.blocks.content.settings.enable_mute_toggle.label", 
+          "default":true 
+        }, 
+        { 
+          "type":"checkbox", 
+          "id":"enable_loop", 
+          "label":"t:sections.content_grid.blocks.content.settings.enable_loop.label", 
+          "default":true 
+        },
+        { 
+          "type":"checkbox", 
+          "id":"enable_linked", 
+          "label":"Enable full linked block",
+          "info": "Check this if you want the entire block to be clickable.",
+          "default":true 
+        },
+        {
+          "type":"header",
+          "content":"t:sections.all.headers.header__22.content"
+        },
+        {
+          "type":"range",
+          "id":"spacing_top",
+          "min":0,
+          "max":300,
+          "step":20,
+          "unit":"px",
+          "label":"t:sections.all.layout.settings.spacing.label_top",
+          "default":80
+        },
+        {
+          "type":"range",
+          "id":"spacing_bottom",
+          "min":0,
+          "max":300,
+          "step":20,
+          "unit":"px",
+          "label":"t:sections.all.layout.settings.spacing.label_bottom",
+          "default":0
+        },
+        {
+          "type":"header",
+          "content":"t:sections.all.headers.header__1.content"
+        },
+        {
+          "type":"select",
+          "id":"color_scheme",
+          "label":"t:sections.all.colors.settings.color_scheme.label",
+          "options":[
+            {
+              "value":"color__bg-body color__text",
+              "label":"t:sections.all.colors.settings.color_scheme.options__1.label"
+            },
+            {
+              "value":"color__bg-neutral color__text",
+              "label":"t:sections.all.colors.settings.color_scheme.options__2.label"
+            },
+            {
+              "value":"color__bg-overlay-1 color__text",
+              "label":"t:sections.all.colors.settings.color_scheme.options__3.label"
+            },
+            {
+              "value":"color__bg-overlay-2 color__text",
+              "label":"t:sections.all.colors.settings.color_scheme.options__4.label"
+            },
+            {
+              "value":"color__bg-overlay-3 color__text",
+              "label":"t:sections.all.colors.settings.color_scheme.options__5.label"
+            },
+            {
+              "value":"color__bg-primary color__primary",
+              "label":"t:sections.all.colors.settings.color_scheme.options__6.label"
+            },
+            {
+              "value":"color__bg-secondary color__secondary",
+              "label":"t:sections.all.colors.settings.color_scheme.options__7.label"
+            }
+          ],
+          "default":"color__bg-body color__text"
+        },
+        {
+          "type":"select",
+          "id":"color_border",
+          "label":"t:sections.all.colors.settings.color_border.label",
+          "options":[
+            {
+              "value":"color__border-divider-1",
+              "label":"t:sections.all.colors.settings.color_border.options__1.label"
+            },
+            {
+              "value":"color__border-selected-1",
+              "label":"t:sections.all.colors.settings.color_border.options__2.label"
+            },
+            {
+              "value":"!color__border-transparent",
+              "label":"t:sections.all.colors.settings.color_border.options__3.label"
+            }
+          ],
+          "default":"color__border-divider-1"
+        },
+        {
+          "type":"select",
+          "id":"color_text",
+          "label":"t:sections.all.colors.settings.color_text.label",
+          "options":[
+            {
+              "value":"color__text",
+              "label":"t:sections.all.colors.settings.color_text.options__1.label"
+            },
+            {
+              "value":"color__light",
+              "label":"t:sections.all.colors.settings.color_text.options__2.label"
+            },
+            {
+              "value":"color__dark",
+              "label":"t:sections.all.colors.settings.color_text.options__3.label"
+            }
+          ],
+          "default":"color__text"
+        },
+        {
+          "type":"select",
+          "id":"color_button",
+          "label":"t:sections.all.colors.settings.color_button.label",
+          "options":[
+            {
+              "value":"btn",
+              "label":"t:sections.all.colors.settings.color_button.options__1.label"
+            },
+            {
+              "value":"btn btn--secondary",
+              "label":"t:sections.all.colors.settings.color_button.options__2.label"
+            },
+            {
+              "value":"btn btn--tertiary",
+              "label":"t:sections.all.colors.settings.color_button.options__5.label"
+            },
+            {
+              "value":"btn btn--neutral",
+              "label":"t:sections.all.colors.settings.color_button.options__3.label"
+            },
+            {
+              "value":"btn btn--plain",
+              "label":"t:sections.all.colors.settings.color_button.options__4.label"
+            },
+            {
+              "value":"btn--minimal-light",
+              "label":"t:sections.all.colors.settings.color_button.options__6.label"
+            },
+            {
+              "value":"btn--minimal-dark",
+              "label":"t:sections.all.colors.settings.color_button.options__7.label"
+            }
+          ],
+          "default":"btn btn--secondary"
+        },
+        {
+          "type":"checkbox",
+          "id":"enable_gradient",
+          "label":"t:sections.content_grid.blocks.content.settings.enable_gradient.label",
+          "default":false
+        },
+        {
+          "type":"header",
+          "content":"t:sections.all.headers.header__3.content"
+        },
+        {
+          "type":"select",
+          "id":"layout_y_alignment",
+          "label":"t:sections.all.layout.settings.layout_y_alignment.label",
+          "options":[
+            {
+              "value":"items-start",
+              "label":"t:sections.all.layout.settings.layout_y_alignment.options__1.label"
+            },
+            {
+              "value":"items-center",
+              "label":"t:sections.all.layout.settings.layout_y_alignment.options__2.label"
+            },
+            {
+              "value":"items-end",
+              "label":"t:sections.all.layout.settings.layout_y_alignment.options__3.label"
+            }
+          ],
+          "default":"items-end"
+        },
+        {
+          "type": "select",
+          "id": "layout_x_alignment",
+          "label": "t:sections.all.layout.settings.layout_x_alignment.label",
+          "options": [
+            {
+              "value": "",
+              "label": "t:sections.all.layout.settings.layout_x_alignment.options__1.label"
+            },
+            {
+              "value": "text-center justify-center",
+              "label": "t:sections.all.layout.settings.layout_x_alignment.options__2.label"
+            },
+            {
+              "value": "text-right justify-end",
+              "label": "t:sections.all.layout.settings.layout_x_alignment.options__3.label"
+            }
+          ],
+          "default": ""
+        },
+        {
+          "type":"select",
+          "id":"layout_row_span",
+          "label":"t:sections.all.layout.settings.layout_row_span.label",
+          "options":[
+            {
+              "value":"row-span-1",
+              "label":"1"
+            },
+            {
+              "value":"row-span-2",
+              "label":"2"
+            },
+            {
+              "value":"row-span-3",
+              "label":"3"
+            },
+            {
+              "value":"row-span-4",
+              "label":"4"
+            },
+            {
+              "value":"row-span-5",
+              "label":"5"
+            },
+            {
+              "value":"row-span-6",
+              "label":"6"
+            }
+          ],
+          "default":"row-span-1",
+          "info": "t:sections.all.layout.settings.layout_row_span.info"
+        },
+        {
+          "type":"select",
+          "id":"layout_col_span",
+          "label":"t:sections.all.layout.settings.layout_col_span.label",
+          "options":[
+            {
+              "value":"col-span-1 md: md:col-span-1",
+              "label":"1"
+            },
+            {
+              "value":"col-span-1 md: md:col-span-2",
+              "label":"2"
+            },
+            {
+              "value":"col-span-1 md: md:col-span-3",
+              "label":"3"
+            },
+            {
+              "value":"col-span-1 md: md:col-span-4",
+              "label":"4"
+            },
+            {
+              "value":"col-span-1 md: md:col-span-5",
+              "label":"5"
+            },
+            {
+              "value":"col-span-1 md: md:col-span-6",
+              "label":"6"
+            }
+          ],
+          "default":"col-span-1 md: md:col-span-1",
+          "info": "t:sections.all.layout.settings.layout_col_span.info"
+        },
+        {
+          "type":"checkbox",
+          "id":"enable_padding",
+          "label":"t:sections.content_grid.blocks.content.settings.enable_padding.label",
+          "default":true
+        },
+        {
+          "type":"checkbox",
+          "id":"enable_shift",
+          "label":"Enable shift on hover",
+          "default":true
+        },
+        {
+          "type":"header",
+          "content":"t:sections.all.headers.header__8.content"
+        },
+        {
+          "type":"select",
+          "id":"visibility",
+          "label":"t:sections.all.visibility.label",
+          "options":[
+            {
+              "value":"",
+              "label":"t:sections.all.visibility.options__1.label"
+            },
+            {
+              "value":"md:hidden",
+              "label":"t:sections.all.visibility.options__2.label"
+            },
+            {
+              "value":"hidden md:block",
+              "label":"t:sections.all.visibility.options__3.label"
+            }
+          ],
+          "default":""
+        }
+      ]
+    }
+  ],
+  "presets":[
+    {
+      "name":"Education grid 1",
+      "settings":{
+        "heading": "",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 100,
+        "spacing_bottom": 100,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--t-width",
+        "row_size_desktop": "md:grid-cols-3",
+        "row_size_mobile": "grid-cols-1",
+        "layout_x_alignment": "justify-between",
+        "layout_horizontal": "window--wide",
+        "visibility": ""
+      },
+      "blocks": [
+        {
+          "type": "content",
+          "settings": {
+            "heading": "{{ product.metafields.education.title_1.value }}",
+            "content": "<p><strong>{{ product.metafields.education.subtitle_1.value }}<\/strong><\/p><p>{{ product.metafields.education.description_1 | metafield_tag }}<\/p>",
+            "button_label": "",
+            "button_url": "",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": false,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "button_label": "",
+            "button_url": "",
+            "image_background": "{{ product.metafields.education.image_1.value }}",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 240,
+            "spacing_bottom": 240,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-2",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["custom.overlay"]
+  }
+}
+{% endschema %}

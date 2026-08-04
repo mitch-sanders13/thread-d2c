@@ -1,0 +1,41 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "page__main",
+      "custom_css": [
+        ".py-24.window--wide {display: none;}"
+      ],
+      "settings": {
+        "color_scheme": "color__bg-body color__text",
+        "layout_horizontal": "window--wide"
+      }
+    },
+    "liquid_KhHTPp": {
+      "type": "liquid",
+      "name": "t:sections.liquid.name",
+      "settings": {
+        "liquid": "<div class=\"embed-container\">\n          <div id=\"inksoftEmbed\" style=\"width: 100%; height: 720px; padding: 0; margin: 0; border: 0; max-height: 100%; width: 100%;\"></div>\n      </div>\n      <script type=\"text/javascript\">\n        (function() {\n          function init() {\n            let scriptElement = document.createElement('script');\n            scriptElement.type = 'text/javascript';\n            scriptElement.async = true;\n            scriptElement.src = 'https://cdn.inksoft.com/FrontendApps/storefront/assets/scripts/designer-embed.js';\n            scriptElement.onload = function() { launchDesignStudio() };\n            document.getElementsByTagName('body')[0].appendChild(scriptElement);\n          }\n\n          function launchDesignStudio() {\n            window.inksoftApi.launchEmbeddedDesignStudio({\n              targetElementId: 'inksoftEmbed',\n              domain: 'https://stores.inksoft.com',\n              cdnDomain: 'https://cdn.inksoft.com',\n              storeUri: 'DS869016107'\n            });\n          }\n\n          init();\n        })();\n      </script>",
+        "spacing_top": 0,
+        "spacing_bottom": 100,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "style_border": "border--b-width",
+        "layout_padding": true,
+        "visibility": ""
+      }
+    }
+  },
+  "order": [
+    "main",
+    "liquid_KhHTPp"
+  ]
+}

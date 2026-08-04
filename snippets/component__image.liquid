@@ -1,0 +1,131 @@
+<!-- snippets/component__image.liquid -->
+{% comment %} 
+  Responive image component
+
+  Accepts: 
+    - image: {Liquid Object} Image object to be displayed.
+    - aspect_ratio: {string} Classes to set the aspect ratio of the image.
+    - background: {string} Classes to set the background of the container.
+    - crop: {string} Classes to set object sizing for the image.
+    - container_class: {string} Additional classes to add to the image container.
+    - image_class: {string} Additional classes to add to the image itself.
+    - max_width: {number} Max width for the image. Default is 100% width.
+    - enable_lazy_load: {boolean} Enable lazy loading for the image. Default is true.
+    - include_2x: {boolean} Whether to include 2x image for high-resolution displays. Default is false.
+
+  Usage:
+    {% render 'component__image', 
+      image: image,
+      aspect_ratio: 'aspect-[1/1]',
+      background: 'color__bg-shade-2',
+      crop: 'object-cover',
+      container_class: 'my-class',
+      image_class: 'my-class',
+      max_width: 900,
+      enable_lazy_load: true,
+      include_2x: true
+    %}
+{% endcomment %}
+
+{% capture max_width_2x %}{{ max_width | times: 2 }}{% endcapture %}
+{% capture disable_animation %}{% if enable_animation == false %}loaded{% endif %}{% endcapture %}
+<div 
+  class="
+    js:picture relative w-full h-full overflow-hidden flex items-center
+    {{ disable_animation }}
+  ">
+  <picture 
+    class="w-full flex items-center justify-center overflow-hidden
+    {{ aspect_ratio }}
+    {{ background }}
+    {{ container_class }}">
+    <source
+      media="(min-width: 2500px)"
+      {% if max_width < 2500 %}
+        srcset="
+          {{ image | image_url: width: max_width }} 1x,
+          {% if include_2x %}
+            {{ image | image_url: width: max_width_2x }} 2x
+          {% endif %},"
+      {% else %}
+        srcset="
+          {{ image | image_url: width: 2500 }} 1x,
+          {% if include_2x %}
+            {{ image | image_url: width: 5000 }} 2x
+          {% endif %},"
+      {% endif %}>
+    <source
+      media="(min-width: 1000px)"
+      {% if max_width < 1000 %}
+        srcset="
+          {{ image | image_url: width: max_width }} 1x,
+          {% if include_2x %}
+            {{ image | image_url: width: max_width_2x }} 2x
+          {% endif %},"
+      {% else %}
+        srcset="
+          {{ image | image_url: width: 1000 }} 1x,
+          {% if include_2x %}
+            {{ image | image_url: width: 2000 }} 2x
+          {% endif %},"
+      {% endif %}>
+    <source
+      media="(min-width: 400px)"
+      {% if max_width < 400 %}
+        srcset="
+          {{ image | image_url: width: max_width }} 1x,
+          {% if include_2x %}
+            {{ image | image_url: width: max_width_2x }} 2x
+          {% endif %},"
+      {% else %}
+        srcset="
+          {{ image | image_url: width: 400 }} 1x,
+          {% if include_2x %}
+            {{ image | image_url: width: 800 }} 2x
+          {% endif %},"
+      {% endif %}>
+    <source
+      media="(min-width: 200px)"
+      {% if max_width < 200 %}
+        srcset="
+          {{ image | image_url: width: max_width }} 1x,
+          {% if include_2x %}
+            {{ image | image_url: width: max_width_2x }} 2x
+          {% endif %},"
+      {% else %}
+        srcset="
+          {{ image | image_url: width: 200 }} 1x,
+          {% if include_2x %}
+            {{ image | image_url: width: 400 }} 2x
+          {% endif %},"
+      {% endif %}>
+    {% capture adjusted_image_class %}
+      js:image 
+      {{ image_class }} {{ crop }} {{ disable_animation }}
+      {% if crop %}
+        min-h-full {{ crop }}
+      {% endif %}
+      {% if settings.enable_animations %}
+        animation-300
+      {% endif %}
+    {% endcapture %}
+    {% assign alt_text = image.alt | default: "" %}
+    {% if enable_lazy_load %}
+      {{ image 
+        | image_url: width: 5760
+        | image_tag: class: adjusted_image_class, loading: 'lazy', alt: alt_text }}
+    {% else %}
+      {{ image 
+        | image_url: width: 5760
+        | image_tag: class: adjusted_image_class, loading: 'eager', alt: image.alt | default: '' }}
+    {% endif %}
+  </picture>
+  {% if request.design_mode != true and settings.enable_animated_images %}
+    <img 
+      class="
+        js:placeholder animation-300 absolute inset-0 w-full h-full opacity-75 
+        {{ image_class }} {{ crop }} {{ disable_animation }}
+      "
+      src="{{ image | image_url: width: 16, height: 16, crop: 'center' }}">
+  {% endif %}
+</div>

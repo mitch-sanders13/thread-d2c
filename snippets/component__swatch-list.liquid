@@ -1,0 +1,86 @@
+{% comment %}
+  snippets/component__swatch-list.liquid
+
+  Server-rendered swatch carousel for product cards. All siblings render in
+  the track, sorted by tag priority (best sellers first). Overflow scrolls
+  horizontally — drag on mobile, native on desktop.
+
+  Parameters:
+    product     — the product whose sibling swatches we're rendering
+    breakpoint  — 'desktop' or 'mobile' — picks the responsive hide/show class
+
+  Styling lives in snippets/theme__styles.liquid (.tw-swatch-*).
+  Per-viewport size / gap / padding / margin values come from separate settings
+  (product_card_swatch_*_mobile / _desktop) — emitted as CSS custom props.
+{% endcomment %}
+
+{%- if product.metafields.custom.swatch_collection -%}
+
+  {%- assign _sw_products = product.metafields.custom.swatch_collection.value.products -%}
+  {%- assign _sw_total = _sw_products.size -%}
+
+  {%- if _sw_total > 0 -%}
+    {%- assign _sw_groups_raw = settings.swatch_order_groups | default: 'Best sellers,Seasonal,Sale' -%}
+    {%- assign _sw_groups = _sw_groups_raw | split: ',' -%}
+
+    {%- assign _size_d = settings.product_card_swatch_size_desktop | default: 24 -%}
+    {%- assign _size_m = settings.product_card_swatch_size_mobile  | default: 18 -%}
+    {%- assign _gap_d  = settings.product_card_swatch_gap_desktop  | default: 6  -%}
+    {%- assign _gap_m  = settings.product_card_swatch_gap_mobile   | default: 4  -%}
+    {%- assign _pad_d  = settings.product_card_swatch_pad_h_desktop | default: 0 -%}
+    {%- assign _pad_m  = settings.product_card_swatch_pad_h_mobile  | default: 0 -%}
+    {%- assign _mb_d   = settings.product_card_swatch_mb_desktop    | default: 8 -%}
+    {%- assign _mb_m   = settings.product_card_swatch_mb_mobile     | default: 6 -%}
+
+    {%- assign _viewport_class = 'tw-swatch-wrap--mobile' -%}
+    {%- if breakpoint == 'desktop' -%}{%- assign _viewport_class = 'tw-swatch-wrap--desktop' -%}{%- endif -%}
+
+    <div class="tw-swatch-wrap {{ _viewport_class }}"
+         style="--tw-size-d: {{ _size_d }}px; --tw-size-m: {{ _size_m }}px; --tw-gap-d: {{ _gap_d }}px; --tw-gap-m: {{ _gap_m }}px; --tw-pad-d: {{ _pad_d }}px; --tw-pad-m: {{ _pad_m }}px; --tw-mb-d: {{ _mb_d }}px; --tw-mb-m: {{ _mb_m }}px;">
+
+      <div class="tw-swatch-track">
+        {%- assign _sw_emitted = '|' -%}
+        {%- assign _sw_shown = 0 -%}
+        {%- assign _sw_max = settings.product_card_swatch_max | default: 0 -%}
+        {%- if _sw_max < 1 -%}{%- assign _sw_max = 99 -%}{%- endif -%}
+
+        {%- comment -%} Pass 1: tag-priority groups (best sellers first) {%- endcomment -%}
+        {%- for _group in _sw_groups -%}
+          {%- assign _gl = _group | strip | downcase -%}
+          {%- if _gl == blank -%}{%- continue -%}{%- endif -%}
+          {%- for _p in _sw_products -%}
+            {%- assign _key = '|' | append: _p.handle | append: '|' -%}
+            {%- unless _sw_emitted contains _key -%}
+              {%- assign _tags = _p.tags | join: ',' | downcase -%}
+              {%- if _tags contains _gl -%}
+                {%- assign _sw_emitted = _sw_emitted | append: _p.handle | append: '|' -%}
+                {%- assign _sw_shown = _sw_shown | plus: 1 -%}
+                {%- if _sw_shown <= _sw_max -%}
+                  {%- render 'component__swatch-list-anchor', p: _p, product: product -%}
+                {%- endif -%}
+              {%- endif -%}
+            {%- endunless -%}
+          {%- endfor -%}
+        {%- endfor -%}
+
+        {%- comment -%} Pass 2: anything not matched by a group, in collection order {%- endcomment -%}
+        {%- for _p in _sw_products -%}
+          {%- assign _key = '|' | append: _p.handle | append: '|' -%}
+          {%- unless _sw_emitted contains _key -%}
+            {%- assign _sw_emitted = _sw_emitted | append: _p.handle | append: '|' -%}
+            {%- assign _sw_shown = _sw_shown | plus: 1 -%}
+            {%- if _sw_shown <= _sw_max -%}
+              {%- render 'component__swatch-list-anchor', p: _p, product: product -%}
+            {%- endif -%}
+          {%- endunless -%}
+        {%- endfor -%}
+
+        {%- comment -%} "+N" overflow — links to the product page for the full range {%- endcomment -%}
+        {%- if _sw_shown > _sw_max -%}
+          {%- assign _sw_hidden = _sw_shown | minus: _sw_max -%}
+          <a class="tw-swatch-more" href="{{ product.url }}" aria-label="{{ _sw_hidden }} more colors">+{{ _sw_hidden }}</a>
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endif -%}
+{%- endif -%}

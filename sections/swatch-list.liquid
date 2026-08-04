@@ -1,0 +1,89 @@
+<!-- sections/swatch-list.liquid -->
+{% comment %}
+  Use section rendering API to load and inject slider of product swatches
+{% endcomment %}
+
+{% comment %} Swatch placeholders {% endcomment %}
+{% if product.metafields.custom.swatch_collection or is_collegiate_product %}
+  <section>
+    <div class="relative flex flex-wrap gap-2 px-2">
+      <div class="inline-flex items-center gap-2">
+        {% for i in (1..6) %}
+          <span
+            class="animate-pulse btn btn--plain btn--small bg-center !w-6 !h-6 !min-h-[1.5rem] !min-w-[1.5rem] bg-gray-200 !rounded-full !p-0"
+          ></span>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  {% comment %}
+    {% elsif false %}
+      {% comment %} Legacy Liquid-based system - now disabled in favor of unified JavaScript approach {% endcomment %}
+      {% comment %} This section is kept for reference but will not be rendered {% endcomment %}
+      {% if swatch_collection_handle == blank %}
+        {% comment %} No fallback needed - JavaScript handles all cases {% endcomment %}
+      {% endif %}
+
+      {% comment %} Swatch count - now handled by JavaScript {% endcomment %}
+      {% assign max_display = 6 %}
+      {% assign swatch_count = 0 %}
+      {% if swatch_collection_handle %}
+        {% assign swatch_count = collections[swatch_collection_handle].products.size %}
+      {% endif %}
+      {% assign remaining_count = swatch_count | minus: max_display %}
+
+      <section style="display: none;">
+        <div class="relative flex flex-wrap gap-2 px-2">
+          {% comment %} Default visible swatches {% endcomment %}
+          <div class="inline-flex items-center gap-2 overflow-hidden group-hover:invisible">
+            {% assign displayed_swatches = 0 %}
+
+            {% for linked_product in collections[swatch_collection_handle].products limit: max_display %}
+              {% comment %} If using main collegiate collection, only show products of same type {% endcomment %}
+              {% if swatch_collection_handle == 'collegiate' %}
+                {% unless linked_product.type == product.type %}
+                  {% continue %}
+                {% endunless %}
+              {% endif %}
+              {% capture swatch_image %}swatch-{{ linked_product.title | handle }}.jpg{% endcapture %}
+              <a
+                href="{{ linked_product.url }}"
+                title="{{ linked_product.title }}"
+                class="btn btn--plain btn--small bg-center !w-6 !h-6 !min-h-[1.5rem] !min-w-[1.5rem] bg-contain !rounded-full !p-0"
+                style="background-image: url('{{ swatch_image | file_img_url: '32x32', format: 'jpg', scale: 2 }}');"
+              >
+              </a>
+              {% assign displayed_swatches = displayed_swatches | plus: 1 %}
+            {% endfor %}
+
+            {% assign remaining_count = swatch_count | minus: displayed_swatches %}
+            {% if remaining_count > 0 %}
+              <span class="leading-none opacity-75 type--small">+{{ remaining_count -}}</span>
+            {% endif %}
+          </div>
+
+          {% comment %} All swatches on hover {% endcomment %}
+          <div class="absolute left-[-1px] right-[-1px] flex-wrap hidden gap-2 px-2 border-gray-300 group-hover:flex color__bg-body pb-2 border--width !border-t-0">
+            {% for linked_product in collections[swatch_collection_handle].products %}
+              {% comment %} If using main collegiate collection, only show products of same type {% endcomment %}
+              {% if swatch_collection_handle == 'collegiate' %}
+                {% unless linked_product.type == product.type %}
+                  {% continue %}
+                {% endunless %}
+              {% endif %}
+              {% capture swatch_image %}swatch-{{ linked_product.title | handle }}.jpg{% endcapture %}
+              <a
+                href="{{ linked_product.url }}"
+                title="{{ linked_product.title }}"
+                class="btn btn--plain btn--small bg-center !w-6 !h-6 !min-h-[1.5rem] !min-w-[1.5rem] bg-contain !rounded-full !p-0"
+                style="background-image: url('{{ swatch_image | file_img_url: '32x32', format: 'jpg', scale: 2 }}');"
+                @mouseover="second_image='{{ linked_product.featured_image | image_url: width: 1600 }}'"
+              >
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+  {% endcomment %}
+{% endif %}

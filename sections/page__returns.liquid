@@ -1,0 +1,54 @@
+<!-- sections/page__returns.liquid -->
+{% comment %} 
+  Return form.
+{% endcomment %}
+
+<section>
+	<header class="py-8 border border--b-width color__border-divider-1">
+		<div class="px-4 mx-auto max-w-5xl">
+			<div class="max-w-screen-lg px-4 flex flex-row flex-wrap mx-4 justify-center items-center mx-auto">
+				<div class="lg:flex-auto md:w-2/3 sm:w-full text-center min-h-0 min-w-0">
+					<h1 class="type--big mb-0">{{ page.title }}</h1>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<section class="max-w-screen-lg px-4 py-12 mx-auto">
+		<div class="flex flex-row flex-wrap">
+			<div class="w-full min-h-0 min-w-0 type__body">
+				{{ page.content }}
+				<style>
+					#customer-portal-content iframe {
+						width: 100%;
+						height: 700px;
+						border: none;
+					}
+				</style>
+				<div id="customer-portal-content"></div>
+				<script></script>
+				<script>
+					var returnLimit = 30; // Update max number of days for Returns
+					document.addEventListener("DOMContentLoaded", function() {
+						var endpointUrl = 'https://5427875.extforms.netsuite.com/app/site/hosting/scriptlet.nl?script=518&deploy=1&compid=5427875&h=5afe8f648d47935d4e31&name=Return-Search-NA&return_limit=' + returnLimit; // replace with client's suitelet endpoint
+						document.getElementById('customer-portal-content').innerHTML = '<iframe src="' + endpointUrl + '" />';
+					});
+				</script>
+			</div>
+		</div>
+	</section>
+</section>
+
+{% schema %}
+{
+	"name": "[custom] Returns",
+	"settings": [
+		
+	]
+}
+{% endschema %}
+
+
+
+
+

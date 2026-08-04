@@ -1,0 +1,487 @@
+<!-- sections/marquee.liquid -->
+{% comment %} 
+  Display different content in an horizontally scrolling bar.
+
+  Globals:
+    - settings.layout_horizontal: horizontaly margin
+
+  Possible enhancements:
+    -
+
+  Recommendations:
+    - 
+{% endcomment %}
+
+<section class="
+  {{ section.settings.visibility }}
+  {{ section.settings.color_border }}
+  {{ section.settings.style_border }}"
+  style="
+    background:{{ section.settings.color_background }};
+  ">
+  
+  <div class="overflow-hidden
+    {{ settings.layout_horizontal }}
+    md:hidden"
+    style="
+      padding-top:{{ section.settings.spacing_top }}px;
+      padding-bottom:{{ section.settings.spacing_bottom }}px;
+      padding-left: 0; padding-right: 0;" >
+    
+    <div class="relative inline-flex overflow-hidden">
+      <ul class="motion-safe:animate-marquee whitespace-nowrap inline-flex justify-around w-full p-0 mb-0 list-none
+        {{ section.settings.color_text }}">
+
+        {% for block in section.blocks %}
+          {% case block.type %}
+          {% when 'heading' %}
+            <li>
+              <h1 class="w-screen text-center mb-0">
+                {{ block.settings.content }}
+              </h1>
+            </li>
+
+          {% when 'content' %}
+            <li>
+              <div class="max-w-prose m-0--clear mb-0">
+                {{ block.settings.content }}
+              </div>
+            </li>
+
+          {% when 'buttons' %}
+            <li class="flex items-center">
+              <a href="{{ block.settings.button_url }}" 
+                class="{{ block.settings.button_color }}">
+                {{ block.settings.button_label }}
+              </a>
+            </li>
+            
+          {% when 'image' %}
+            <li class="w-64 min-w-[256px]">
+              {%- unless block.settings.image == blank -%}
+                {% render 'component__image',
+                  image: block.settings.image,
+                  aspect_ratio: '',
+                  background: 'transparent',
+                  crop: '',
+                  max_width: 600,
+                  container_class: '',
+                  image_class: '',
+                  enable_lazy_load: true,
+                  include_2x: true
+                %}
+              {%- endunless -%}
+            </li>
+            
+          {% endcase %}
+        {% endfor %}
+        
+      </ul>
+      <ul class="motion-safe:animate-marquee whitespace-nowrap inline-flex justify-around w-full gap-6 p-0 mb-0 list-none
+        {{ section.settings.color_text }}" 
+        aria-hidden="true">
+
+        {% for block in section.blocks %}
+          {% case block.type %}
+          {% when 'heading' %}
+            <li>
+              <h1 class="max-w-prose mb-0">
+                {{ block.settings.content }}
+              </h1>
+            </li>
+
+          {% when 'content' %}
+            <li>
+              <div class="max-w-prose m-0--clear mb-0">
+                {{ block.settings.content }}
+              </div>
+            </li>
+
+          {% when 'buttons' %}
+            <li class="flex items-center">
+              <a href="{{ block.settings.button_url }}" 
+                class="{{ block.settings.button_color }}">
+                {{ block.settings.button_label }}
+              </a>
+            </li>
+            
+          {% when 'image' %}
+            <li class="w-64 min-w-[256px]">
+              {%- unless block.settings.image == blank -%}
+                {% render 'component__image',
+                  image: block.settings.image,
+                  aspect_ratio: '',
+                  background: 'transparent',
+                  crop: '',
+                  max_width: 600,
+                  container_class: '',
+                  image_class: '',
+                  enable_lazy_load: true,
+                  include_2x: true
+                %}
+              {%- endunless -%}
+            </li>
+            
+          {% endcase %}
+        {% endfor %}
+        
+      </ul>
+    </div>
+
+  </div>
+  
+  
+  <div class="overflow-hidden
+    {{ settings.layout_horizontal }}
+    hidden
+    md:block"
+    style="
+      padding-top:{{ section.settings.spacing_top }}px;
+      padding-bottom:{{ section.settings.spacing_bottom }}px;" >
+    
+    <div class="relative inline-flex gap-12 overflow-hidden -ml-8">
+      <ul class="motion-safe:animate-marquee whitespace-nowrap inline-flex justify-around w-full gap-12 p-0 mb-0 list-none
+        {{ section.settings.color_text }}">
+
+        {% for block in section.blocks %}
+          {% case block.type %}
+          {% when 'heading' %}
+            <li>
+              <h1 class="max-w-prose mb-0">
+                {{ block.settings.content }}
+              </h1>
+            </li>
+
+          {% when 'content' %}
+            <li>
+              <div class="max-w-prose m-0--clear mb-0">
+                {{ block.settings.content }}
+              </div>
+            </li>
+
+          {% when 'buttons' %}
+            <li class="flex items-center">
+              <a href="{{ block.settings.button_url }}" 
+                class="{{ block.settings.button_color }}">
+                {{ block.settings.button_label }}
+              </a>
+            </li>
+            
+          {% when 'image' %}
+            <li class="w-64 min-w-[256px]">
+              {%- unless block.settings.image == blank -%}
+                {% render 'component__image',
+                  image: block.settings.image,
+                  aspect_ratio: '',
+                  background: 'transparent',
+                  crop: '',
+                  max_width: 600,
+                  container_class: '',
+                  image_class: '',
+                  enable_lazy_load: true,
+                  include_2x: true
+                %}
+              {%- endunless -%}
+            </li>
+            
+          {% endcase %}
+        {% endfor %}
+        
+      </ul>
+      <ul class="motion-safe:animate-marquee whitespace-nowrap inline-flex justify-around w-full gap-6 p-0 mb-0 list-none
+        {{ section.settings.color_text }}" 
+        aria-hidden="true">
+
+        {% for block in section.blocks %}
+          {% case block.type %}
+          {% when 'heading' %}
+            <li>
+              <h1 class="max-w-prose mb-0">
+                {{ block.settings.content }}
+              </h1>
+            </li>
+
+          {% when 'content' %}
+            <li>
+              <div class="max-w-prose m-0--clear mb-0">
+                {{ block.settings.content }}
+              </div>
+            </li>
+
+          {% when 'buttons' %}
+            <li class="flex items-center">
+              <a href="{{ block.settings.button_url }}" 
+                class="{{ block.settings.button_color }}">
+                {{ block.settings.button_label }}
+              </a>
+            </li>
+            
+          {% when 'image' %}
+            <li class="w-64 min-w-[256px]">
+              {%- unless block.settings.image == blank -%}
+                {% render 'component__image',
+                  image: block.settings.image,
+                  aspect_ratio: '',
+                  background: 'transparent',
+                  crop: '',
+                  max_width: 600,
+                  container_class: '',
+                  image_class: '',
+                  enable_lazy_load: true,
+                  include_2x: true
+                %}
+              {%- endunless -%}
+            </li>
+            
+          {% endcase %}
+        {% endfor %}
+        
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name":"Marquee",
+  "settings":[
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__22.content"
+    },
+    {
+      "type": "range",
+      "id": "spacing_top",
+      "min": 0,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "label": "t:sections.all.spacing.settings.spacing.label_top",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "spacing_bottom",
+      "min": 0,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "label": "t:sections.all.spacing.settings.spacing.label_bottom",
+      "default": 100
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__1.content"
+    },
+    {
+      "type": "color",
+      "id": "color_background",
+      "label": "t:sections.all.colors.settings.color_scheme.label",
+      "default": "#ffffff"
+    },
+    {
+      "type":"select",
+      "id":"color_text",
+      "label":"t:sections.all.colors.settings.color_text.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.colors.settings.color_text.options__1.label"
+        },
+        {
+          "value":"color__light",
+          "label":"t:sections.all.colors.settings.color_text.options__2.label"
+        },
+        {
+          "value":"color__dark",
+          "label":"t:sections.all.colors.settings.color_text.options__3.label"
+        }
+      ],
+      "default":""
+    },
+    {
+      "type":"select",
+      "id":"color_border",
+      "label":"t:sections.all.colors.settings.color_border.label",
+      "options":[
+        {
+          "value":"color__border-divider-1",
+          "label":"t:sections.all.colors.settings.color_border.options__1.label"
+        },
+        {
+          "value":"color__border-selected-1",
+          "label":"t:sections.all.colors.settings.color_border.options__2.label"
+        }
+      ],
+      "default":"color__border-divider-1"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__2.content"
+    },
+    {
+      "type":"select",
+      "id":"style_border",
+      "label":"t:sections.all.styles.settings.style_border.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.styles.settings.style_border.options__1.label"
+        },
+        {
+          "value":"border--t-width",
+          "label":"t:sections.all.styles.settings.style_border.options__2.label"
+        },
+        {
+          "value":"border--b-width",
+          "label":"t:sections.all.styles.settings.style_border.options__3.label"
+        },
+        {
+          "value":"border--b-width border--t-width",
+          "label":"t:sections.all.styles.settings.style_border.options__4.label"
+        }
+      ],
+      "default":"border--b-width"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__3.content"
+   },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__8.content"
+    },
+    {
+      "type":"select",
+      "id":"visibility",
+      "label":"t:sections.all.display.settings.visibility.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.display.settings.visibility.options__1.label"
+        },
+        {
+          "value":"md:hidden",
+          "label":"t:sections.all.display.settings.visibility.options__2.label"
+        },
+        {
+          "value":"hidden md:block",
+          "label":"t:sections.all.display.settings.visibility.options__3.label"
+        }
+      ],
+      "default":""
+    }
+  ],
+  "blocks":[
+    {
+      "type": "heading",
+      "name": "t:sections.banner.blocks.heading.name",
+      "settings": [
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__4.content"
+        },
+        {
+          "type": "text",
+          "id": "content",
+          "label": "t:sections.all.content.settings.content.label"
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "name": "t:sections.all.content.settings.content.label",
+      "settings": [
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__4.content"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "t:sections.all.content.settings.content.label",
+          "default": {
+            "en": "<p>Highlight key selling features of your product</p>"
+          }
+        }
+      ]
+    },
+    {
+      "type": "buttons",
+      "name": "t:sections.banner.blocks.buttons.name",
+      "settings": [
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__23.content"
+        },
+        {
+          "type":"select",
+          "id":"button_color",
+          "label":"t:sections.banner.blocks.buttons.button_color.label",
+          "options":[
+            {
+              "value":"btn",
+              "label":"t:sections.all.colors.settings.color_button.options__1.label"
+            },
+            {
+              "value":"btn btn--secondary",
+              "label":"t:sections.all.colors.settings.color_button.options__2.label"
+            },
+            {
+              "value":"btn btn--tertiary",
+              "label":"t:sections.all.colors.settings.color_button.options__5.label"
+            },
+            {
+              "value":"btn btn--neutral",
+              "label":"t:sections.all.colors.settings.color_button.options__3.label"
+            },
+            {
+              "value":"btn btn--plain",
+              "label":"t:sections.all.colors.settings.color_button.options__4.label"
+            }
+          ],
+          "default":"btn"
+        },
+        {
+          "type":"text",
+          "id":"button_label",
+          "label":"t:sections.banner.blocks.buttons.button_label.label",
+          "default":{
+            "en":"Button label"
+          }
+        },
+        {
+          "type":"url",
+          "id":"button_url",
+          "label":"t:sections.banner.blocks.buttons.button_url.label",
+          "default":"/collections/all"
+        }
+      ]
+    },
+    {
+      "type":"image",
+      "name":"Image",
+      "settings":[
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__4.content"
+        },
+        {
+          "type":"image_picker",
+          "id":"image",
+          "label":"t:sections.content_grid.blocks.content.settings.image_featured.label"
+        }
+      ]
+    }
+  ],
+  "presets":[
+    {
+      "name":"Marquee"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["custom.overlay"]
+  }
+}
+{% endschema %}

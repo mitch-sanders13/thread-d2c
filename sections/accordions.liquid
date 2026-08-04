@@ -1,0 +1,371 @@
+<!-- sections/accordions.liquid -->
+{% comment %} 
+  Display a list of accordions that can collapse and expand.
+
+  Globals:
+    - settings.layout_horizontal: horizontaly margin
+
+  Possible enhancements:
+    - Add alternative layout options
+
+  Pro tips:
+    - Can be used to show FAQs or other content that can be collapsed and expanded.
+{% endcomment %}
+
+<section class="
+  {{ section.settings.visibility }}
+  {{ section.settings.color_scheme }} 
+  {{ section.settings.color_border }}
+  {{ section.settings.style_border }}">
+  <div style="
+    padding-top:{{ section.settings.spacing_top }}px;
+    padding-bottom:{{ section.settings.spacing_bottom }}px;" 
+    class="{{ section.settings.layout_horizontal }}">
+
+    {% render 'component__section-header' %} 
+    {% for block in section.blocks %}
+      {% capture accordion_content %}
+        <div class="max-w-prose">
+          {{ block.settings.content }}
+        </div>
+      {% endcapture %}
+      {% render 'component__accordion', 
+        button_label: block.settings.title, 
+        button_class: "!px-0",
+        container_class: "border--b-width color__border-divider-1 w-full",
+        content: accordion_content,
+        inner_class: 'mb-4' %}
+    {% endfor %}
+    
+  </div>
+</section>
+
+{% schema %}
+{
+  "name":"t:sections.accordions.name",
+  "settings":[
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__4.content"
+    },
+    {
+      "type":"text",
+      "id":"heading",
+      "label":"t:sections.all.content.settings.heading.label"
+    },
+    {
+      "type":"richtext",
+      "id":"content",
+      "label":"t:sections.all.content.settings.content.label"
+    },
+    {
+      "type":"text",
+      "id":"button_label",
+      "label":"t:sections.all.content.settings.button_label.label"
+    },
+    {
+      "type":"url",
+      "id":"button_url",
+      "label":"t:sections.all.content.settings.button_url.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__22.content"
+    },
+    {
+      "type": "range",
+      "id": "spacing_top",
+      "min": 0,
+      "max": 300,
+      "step": 20,
+      "unit": "px",
+      "label": "t:sections.all.layout.settings.spacing.label_top",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "spacing_bottom",
+      "min": 0,
+      "max": 300,
+      "step": 20,
+      "unit": "px",
+      "label": "t:sections.all.layout.settings.spacing.label_bottom",
+      "default": 100
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__1.content"
+    },
+    {
+      "type":"select",
+      "id":"color_scheme",
+      "label":"t:sections.all.colors.settings.color_scheme.label",
+      "options":[
+        {
+          "value":"color__bg-body color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value":"color__bg-neutral color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value":"color__bg-overlay-1 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value":"color__bg-overlay-2 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value":"color__bg-overlay-3 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value":"color__bg-primary color__primary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value":"color__bg-secondary color__secondary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value":"color__bg-tertiary color__tertiary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default":"color__bg-body color__text"
+    },
+    {
+      "type":"select",
+      "id":"color_border",
+      "label":"t:sections.all.colors.settings.color_border.label",
+      "options":[
+        {
+          "value":"color__border-divider-1",
+          "label":"t:sections.all.colors.settings.color_border.options__1.label"
+        },
+        {
+          "value":"color__border-selected-1",
+          "label":"t:sections.all.colors.settings.color_border.options__2.label"
+        }
+      ],
+      "default":"color__border-divider-1"
+    },
+    {
+      "type":"select",
+      "id":"color_button",
+      "label":"t:sections.all.colors.settings.color_button.label",
+      "options":[
+        {
+          "value":"btn",
+          "label":"t:sections.all.colors.settings.color_button.options__1.label"
+        },
+        {
+          "value":"btn btn--secondary",
+          "label":"t:sections.all.colors.settings.color_button.options__2.label"
+        },
+        {
+          "value":"btn btn--tertiary",
+          "label":"t:sections.all.colors.settings.color_button.options__5.label"
+        },
+        {
+          "value":"btn btn--neutral",
+          "label":"t:sections.all.colors.settings.color_button.options__3.label"
+        },
+        {
+          "value":"btn btn--plain",
+          "label":"t:sections.all.colors.settings.color_button.options__4.label"
+        },
+        {
+          "value":"btn--minimal-light",
+          "label":"t:sections.all.colors.settings.color_button.options__6.label"
+        },
+        {
+          "value":"btn--minimal-dark",
+          "label":"t:sections.all.colors.settings.color_button.options__7.label"
+        }
+      ],
+      "default":"btn btn--secondary"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__2.content"
+    },
+    {
+      "type":"select",
+      "id":"style_border",
+      "label":"t:sections.all.styles.settings.style_border.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.styles.settings.style_border.options__1.label"
+        },
+        {
+          "value":"border--t-width",
+          "label":"t:sections.all.styles.settings.style_border.options__2.label"
+        },
+        {
+          "value":"border--b-width",
+          "label":"t:sections.all.styles.settings.style_border.options__3.label"
+        },
+        {
+          "value":"border--b-width border--t-width",
+          "label":"t:sections.all.styles.settings.style_border.options__4.label"
+        }
+      ],
+      "default":"border--b-width"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__3.content"
+   },
+    {
+      "type": "select",
+      "id": "layout_x_alignment",
+      "label": "t:sections.all.layout.settings.layout_x_alignment.label",
+      "options": [
+        {
+          "value": "justify-between",
+          "label": "t:sections.all.layout.settings.layout_x_alignment.options__1.label"
+        },
+        {
+          "value": "text-center justify-center flex-col items-center",
+          "label": "t:sections.all.layout.settings.layout_x_alignment.options__2.label"
+        },
+        {
+          "value": "text-right justify-end flex-col items-end",
+          "label": "t:sections.all.layout.settings.layout_x_alignment.options__3.label"
+        }
+      ],
+      "default": "justify-between"
+    },
+    {
+      "type": "select",
+      "id": "layout_horizontal",
+      "label": "t:settings_schema.layout.settings.layout_horizontal.label",
+      "options": [
+        {
+          "value": "window--narrow",
+          "label": "t:settings_schema.layout.settings.layout_horizontal.options__1.label"
+        },
+        {
+          "value": "window",
+          "label": "t:settings_schema.layout.settings.layout_horizontal.options__2.label"
+        },
+        {
+          "value": "window--wide",
+          "label": "t:settings_schema.layout.settings.layout_horizontal.options__3.label"
+        },
+        {
+          "value": "window--full",
+          "label": "t:settings_schema.layout.settings.layout_horizontal.options__4.label"
+        },
+        {
+          "value": "window--edge",
+          "label": "Edge to edge (no padding)"
+        }
+      ],
+      "default": "window"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__8.content"
+    },
+    {
+      "type":"select",
+      "id":"visibility",
+      "label":"t:sections.all.visibility.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.visibility.options__1.label"
+        },
+        {
+          "value":"md:hidden",
+          "label":"t:sections.all.visibility.options__2.label"
+        },
+        {
+          "value":"hidden md:block",
+          "label":"t:sections.all.visibility.options__3.label"
+        }
+      ],
+      "default":""
+    }
+  ],
+  "blocks":[
+    {
+      "type":"content",
+      "name":"t:sections.accordions.name",
+      "limit":50,
+      "settings":[
+        {
+          "type":"text",
+          "id":"title",
+          "label":"t:sections.accordions.blocks.content.settings.title.label",
+          "default":{
+            "en":"A question your customers are asking",
+            "es": "Una pregunta que hacen tus clientes",
+            "it": "Una domanda che i tuoi clienti stanno facendo",
+            "de": "Eine Frage, die Ihre Kunden stellen",
+            "fr": "Une question que vos clients se posent"
+          }
+        },
+        {
+          "type":"richtext",
+          "id":"content",
+          "label":"t:sections.accordions.blocks.content.settings.content.label",
+          "default":{
+            "en":"<p>Answer to help your customers feel more comfortable completing their purchase.</p>",
+            "es": "<p>Respuesta para ayudar a sus clientes a sentirse más cómodos completando su compra.</p>",
+            "it": "<p>Rispondi per aiutare i tuoi clienti a sentirsi più a proprio agio nel completare il loro acquisto.</p>",
+            "de": "<p>Antwort, damit sich Ihre Kunden beim Abschluss ihres Kaufs wohler fühlen.</p>",
+            "fr": "<p>Réponse pour aider vos clients à se sentir plus à l’aise de finaliser leur achat.</p>"
+          }
+        }
+      ]
+    }
+  ],
+  "presets":[
+    {
+      "name":"t:sections.accordions.name",
+      "settings":{
+        "color_scheme":"color__bg-body color__text",
+        "color_border":"color__border-divider-1",
+        "color_button":"btn btn--secondary",
+        "style_border":"border--b-width",
+        "heading":"Collapsible content",
+        "content":"",
+        "button_label":"Button",
+        "button_url":"/"
+      },
+      "blocks":[
+        {
+          "type":"content",
+          "settings":{
+            "title":"A question your customers are asking",
+            "content":"<p>Answer to help your customers feel more comfortable completing their purchase.</p>"
+          }
+        },
+        {
+          "type":"content",
+          "settings":{
+            "title":"A question your customers are asking",
+            "content":"<p>Answer to help your customers feel more comfortable completing their purchase.</p>"
+          }
+        },
+        {
+          "type":"content",
+          "settings":{
+            "title":"A question your customers are asking",
+            "content":"<p>Answer to help your customers feel more comfortable completing their purchase.</p>"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["custom.overlay"]
+  }
+}
+{% endschema %}

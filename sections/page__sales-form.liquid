@@ -1,0 +1,158 @@
+<!-- sections/page__warranty-form.liquid -->
+{% comment %}
+Form for sales form page.
+
+Globals:
+- settings.layout_horizontal: horizontally margin
+- settings.layout_alignment: vertically margin
+
+Possible enhancements:
+- Add setting so merchant can add more fields to sales form.
+
+Pro tips:
+- Update email address so form submissions are going to the right inbox.
+{% endcomment %}
+
+<section class="{{ section.settings.color_scheme }}">
+
+  <div class="flex flex-col items-center justify-center py-8 border--b-width color__border-divider-1">
+    <h1 class="mb-0 type--big">
+      {{ page.title | escape }}
+    </h1>
+  </div>
+
+  <div class="flex flex-col justify-center items-center 2 py-24
+    {{ settings.layout_horizontal }}
+    {{ settings.layout_alignment }}">
+    <div class="w-full max-w-prose xl:max-w-5xl">
+
+      <div class="mb-4 rte">
+        {{ page.content }}
+      </div>
+
+      <form
+        action="https://formspree.io/f/myzgqbqp"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+
+        <div class="mb-4">
+          <label class="type--base" for="SalesFormName">{{ 'customer.account.name' | t }}</label>
+          <input
+            required
+            type="text"
+            class="form-input"
+            name="contact[name]"
+            id="SalesFormName"
+            placeholder="{{ 'customer.account.name' | t }}"
+            value="{% if form.name %}{{ form.name }}{% endif %}">
+        </div>
+
+        <div class="mb-4">
+          <label class="type--base" for="SalesFormEmail">{{ 'contact.form.email' | t }}</label>
+          <input
+            required
+            type="email"
+            class="form-input"
+            name="email"
+            id="SalesFormEmail"
+            placeholder="{{ 'contact.form.email_placeholder' | t }}"
+            value="{% if form.email %}{{ form.email }}{% endif %}"
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off">
+        </div>
+
+        <div class="mb-4">
+          <label class="type--base" for="SalesFormCompany">Company</label>
+          <input
+            required
+            type="text"
+            class="form-input"
+            name="contact[company]"
+            id="SalesFormCompany"
+            placeholder="Enter your company name"
+            value="{% if form.company %}{{ form.company }}{% endif %}">
+        </div>
+
+        <div class="flex flex-col mb-4">
+          <label class="type--base" for="SalesFormDescription">{{ 'contact.form.message' | t }}:</label>
+          <textarea
+            required
+            rows="10"
+            class="border--radius"
+            name="contact[description]"
+            id="SalesFormDescription"
+            placeholder="{{ 'contact.form.dots' | t }}">{% if form.message %}{{ form.message }}{% endif %}</textarea> 
+        </div>
+
+        <div class="mb-4">
+          <button type="submit" class="btn btn--secondary !w-full">
+            {{ 'customer.account.submit' | t }}
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+</section>
+
+{% schema %}
+{
+  "name": "[custom] Sales form",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__1.content"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.settings.color_scheme.label",
+      "options": [
+        {
+          "value": "color__bg-body color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value": "color__bg-neutral color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value": "color__bg-overlay-1 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value": "color__bg-overlay-2 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value": "color__bg-overlay-3 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value": "color__bg-primary color__primary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value": "color__bg-secondary color__secondary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value": "color__bg-tertiary color__tertiary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default": "color__bg-body color__text"
+    }
+  ],
+  "presets": [
+    {
+      "name": "[custom] Sales form"
+    }
+  ],
+  "templates": ["page"]
+}
+{% endschema %}

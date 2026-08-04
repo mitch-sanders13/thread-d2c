@@ -1,0 +1,577 @@
+{% doc %}
+  @prompt
+    Create a clean, modern add-ons section for an event venue page called 241 Event Space. Match the existing Thread website style. Keep it minimal, polished, easy to scan, and mobile-friendly.
+    
+    Section title:
+    Optional Add-Ons
+    
+    Intro text:
+    Customize your event with optional rentals and support services.
+    
+    Use simple cards or grouped list items for these add-ons:
+    
+    Personalized Marquee — $25
+    Black Metal Sign Stand — $25
+    Couch — $50 each
+    Bar Cart — $50
+    Bar Cart with Soda Service — $400
+    Decor Package — $25
+    Personal Decorator — $50
+    Set Up & Take Down of Tables & Chairs — $50
+    On Site Coordinator — $50
+    
+    Keep descriptions short or omit them if needed. Focus on a clean layout and clear pricing., Create a clean, modern add-ons section for an event venue page called 241 Event Space. Match the existing Thread website style. Keep it minimal, polished, easy to scan, and mobile-friendly.
+    
+    Section title:
+    Optional Add-Ons
+    
+    Intro text:
+    Customize your event with optional rentals and support services.
+    
+    Use simple cards or grouped list items for these add-ons:
+    
+    Personalized Marquee — $25
+    Black Metal Sign Stand — $25
+    Couch — $50 each
+    Bar Cart — $50
+    Bar Cart with Soda Service — $400
+    Decor Package — $25
+    Personal Decorator — $50
+    Set Up & Take Down of Tables & Chairs — $50
+    On Site Coordinator — $50
+    
+    Keep descriptions short or omit them if needed. Focus on a clean layout and clear pricing.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-addons-section-{{ ai_gen_id }} {
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    padding: {{ block.settings.section_padding }}px 20px;
+    background-color: {{ block.settings.background_color }};
+    display: block;
+  }
+
+  .ai-addons-container-{{ ai_gen_id }} {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .ai-addons-header-{{ ai_gen_id }} {
+    text-align: {{ block.settings.text_alignment }};
+    margin-bottom: 48px;
+  }
+
+  .ai-addons-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.title_size }}px;
+    font-weight: 400;
+    color: {{ block.settings.text_color }};
+    margin: 0 0 16px 0;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .ai-addons-intro-{{ ai_gen_id }} {
+    font-size: {{ block.settings.intro_size }}px;
+    color: {{ block.settings.text_color }};
+    opacity: 0.75;
+    margin: 0;
+    line-height: 1.6;
+    max-width: 600px;
+    {% if block.settings.text_alignment == 'center' %}
+      margin-left: auto;
+      margin-right: auto;
+    {% elsif block.settings.text_alignment == 'right' %}
+      margin-left: auto;
+    {% endif %}
+  }
+
+  .ai-addons-grid-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: {{ block.settings.card_gap }}px;
+  }
+
+  .ai-addon-card-{{ ai_gen_id }} {
+    background-color: {{ block.settings.card_background }};
+    border: {{ block.settings.card_border_width }}px solid {{ block.settings.card_border_color }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    padding: {{ block.settings.card_padding }}px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: border-color 0.2s ease;
+  }
+
+  .ai-addon-card-{{ ai_gen_id }}:hover {
+    border-color: {{ block.settings.card_hover_border }};
+  }
+
+  .ai-addon-name-{{ ai_gen_id }} {
+    font-size: {{ block.settings.addon_name_size }}px;
+    font-weight: 400;
+    color: {{ block.settings.text_color }};
+    margin: 0 0 12px 0;
+    line-height: 1.4;
+  }
+
+  .ai-addon-price-{{ ai_gen_id }} {
+    font-size: {{ block.settings.addon_price_size }}px;
+    color: {{ block.settings.price_color }};
+    font-weight: 600;
+    margin: 0;
+  }
+
+  @media screen and (max-width: 768px) {
+    .ai-addons-section-{{ ai_gen_id }} {
+      padding: {{ block.settings.section_padding | times: 0.7 }}px 16px;
+    }
+
+    .ai-addons-header-{{ ai_gen_id }} {
+      margin-bottom: 32px;
+    }
+
+    .ai-addons-grid-{{ ai_gen_id }} {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: {{ block.settings.card_gap | times: 0.75 }}px;
+    }
+
+    .ai-addons-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 0.8 }}px;
+    }
+
+    .ai-addon-card-{{ ai_gen_id }} {
+      padding: {{ block.settings.card_padding | times: 0.85 }}px;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .ai-addons-grid-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-addons-section-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-addons-container-{{ ai_gen_id }}">
+    <div class="ai-addons-header-{{ ai_gen_id }}">
+      {% if block.settings.section_title != blank %}
+        <h2 class="ai-addons-title-{{ ai_gen_id }}">{{ block.settings.section_title }}</h2>
+      {% endif %}
+      {% if block.settings.intro_text != blank %}
+        <p class="ai-addons-intro-{{ ai_gen_id }}">{{ block.settings.intro_text }}</p>
+      {% endif %}
+    </div>
+
+    <div class="ai-addons-grid-{{ ai_gen_id }}">
+      {% if block.settings.addon_1_name != blank %}
+        <div class="ai-addon-card-{{ ai_gen_id }}">
+          <h3 class="ai-addon-name-{{ ai_gen_id }}">{{ block.settings.addon_1_name }}</h3>
+          <p class="ai-addon-price-{{ ai_gen_id }}">{{ block.settings.addon_1_price }}</p>
+        </div>
+      {% endif %}
+
+      {% if block.settings.addon_2_name != blank %}
+        <div class="ai-addon-card-{{ ai_gen_id }}">
+          <h3 class="ai-addon-name-{{ ai_gen_id }}">{{ block.settings.addon_2_name }}</h3>
+          <p class="ai-addon-price-{{ ai_gen_id }}">{{ block.settings.addon_2_price }}</p>
+        </div>
+      {% endif %}
+
+      {% if block.settings.addon_3_name != blank %}
+        <div class="ai-addon-card-{{ ai_gen_id }}">
+          <h3 class="ai-addon-name-{{ ai_gen_id }}">{{ block.settings.addon_3_name }}</h3>
+          <p class="ai-addon-price-{{ ai_gen_id }}">{{ block.settings.addon_3_price }}</p>
+        </div>
+      {% endif %}
+
+      {% if block.settings.addon_4_name != blank %}
+        <div class="ai-addon-card-{{ ai_gen_id }}">
+          <h3 class="ai-addon-name-{{ ai_gen_id }}">{{ block.settings.addon_4_name }}</h3>
+          <p class="ai-addon-price-{{ ai_gen_id }}">{{ block.settings.addon_4_price }}</p>
+        </div>
+      {% endif %}
+
+      {% if block.settings.addon_5_name != blank %}
+        <div class="ai-addon-card-{{ ai_gen_id }}">
+          <h3 class="ai-addon-name-{{ ai_gen_id }}">{{ block.settings.addon_5_name }}</h3>
+          <p class="ai-addon-price-{{ ai_gen_id }}">{{ block.settings.addon_5_price }}</p>
+        </div>
+      {% endif %}
+
+      {% if block.settings.addon_6_name != blank %}
+        <div class="ai-addon-card-{{ ai_gen_id }}">
+          <h3 class="ai-addon-name-{{ ai_gen_id }}">{{ block.settings.addon_6_name }}</h3>
+          <p class="ai-addon-price-{{ ai_gen_id }}">{{ block.settings.addon_6_price }}</p>
+        </div>
+      {% endif %}
+
+      {% if block.settings.addon_7_name != blank %}
+        <div class="ai-addon-card-{{ ai_gen_id }}">
+          <h3 class="ai-addon-name-{{ ai_gen_id }}">{{ block.settings.addon_7_name }}</h3>
+          <p class="ai-addon-price-{{ ai_gen_id }}">{{ block.settings.addon_7_price }}</p>
+        </div>
+      {% endif %}
+
+      {% if block.settings.addon_8_name != blank %}
+        <div class="ai-addon-card-{{ ai_gen_id }}">
+          <h3 class="ai-addon-name-{{ ai_gen_id }}">{{ block.settings.addon_8_name }}</h3>
+          <p class="ai-addon-price-{{ ai_gen_id }}">{{ block.settings.addon_8_price }}</p>
+        </div>
+      {% endif %}
+
+      {% if block.settings.addon_9_name != blank %}
+        <div class="ai-addon-card-{{ ai_gen_id }}">
+          <h3 class="ai-addon-name-{{ ai_gen_id }}">{{ block.settings.addon_9_name }}</h3>
+          <p class="ai-addon-price-{{ ai_gen_id }}">{{ block.settings.addon_9_price }}</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Event add-ons",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section header"
+    },
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Title",
+      "default": "Optional Add-Ons"
+    },
+    {
+      "type": "textarea",
+      "id": "intro_text",
+      "label": "Intro text",
+      "default": "Customize your event with optional rentals and support services."
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Add-on 1"
+    },
+    {
+      "type": "text",
+      "id": "addon_1_name",
+      "label": "Name",
+      "default": "Personalized Marquee"
+    },
+    {
+      "type": "text",
+      "id": "addon_1_price",
+      "label": "Price",
+      "default": "$25"
+    },
+    {
+      "type": "header",
+      "content": "Add-on 2"
+    },
+    {
+      "type": "text",
+      "id": "addon_2_name",
+      "label": "Name",
+      "default": "Black Metal Sign Stand"
+    },
+    {
+      "type": "text",
+      "id": "addon_2_price",
+      "label": "Price",
+      "default": "$25"
+    },
+    {
+      "type": "header",
+      "content": "Add-on 3"
+    },
+    {
+      "type": "text",
+      "id": "addon_3_name",
+      "label": "Name",
+      "default": "Couch"
+    },
+    {
+      "type": "text",
+      "id": "addon_3_price",
+      "label": "Price",
+      "default": "$50 each"
+    },
+    {
+      "type": "header",
+      "content": "Add-on 4"
+    },
+    {
+      "type": "text",
+      "id": "addon_4_name",
+      "label": "Name",
+      "default": "Bar Cart"
+    },
+    {
+      "type": "text",
+      "id": "addon_4_price",
+      "label": "Price",
+      "default": "$50"
+    },
+    {
+      "type": "header",
+      "content": "Add-on 5"
+    },
+    {
+      "type": "text",
+      "id": "addon_5_name",
+      "label": "Name",
+      "default": "Bar Cart with Soda Service"
+    },
+    {
+      "type": "text",
+      "id": "addon_5_price",
+      "label": "Price",
+      "default": "$400"
+    },
+    {
+      "type": "header",
+      "content": "Add-on 6"
+    },
+    {
+      "type": "text",
+      "id": "addon_6_name",
+      "label": "Name",
+      "default": "Decor Package"
+    },
+    {
+      "type": "text",
+      "id": "addon_6_price",
+      "label": "Price",
+      "default": "$25"
+    },
+    {
+      "type": "header",
+      "content": "Add-on 7"
+    },
+    {
+      "type": "text",
+      "id": "addon_7_name",
+      "label": "Name",
+      "default": "Personal Decorator"
+    },
+    {
+      "type": "text",
+      "id": "addon_7_price",
+      "label": "Price",
+      "default": "$50"
+    },
+    {
+      "type": "header",
+      "content": "Add-on 8"
+    },
+    {
+      "type": "text",
+      "id": "addon_8_name",
+      "label": "Name",
+      "default": "Set Up & Take Down of Tables & Chairs"
+    },
+    {
+      "type": "text",
+      "id": "addon_8_price",
+      "label": "Price",
+      "default": "$50"
+    },
+    {
+      "type": "header",
+      "content": "Add-on 9"
+    },
+    {
+      "type": "text",
+      "id": "addon_9_name",
+      "label": "Name",
+      "default": "On Site Coordinator"
+    },
+    {
+      "type": "text",
+      "id": "addon_9_price",
+      "label": "Price",
+      "default": "$50"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "Section padding",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Card spacing",
+      "min": 10,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "label": "Card padding",
+      "min": 15,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 25
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Card border",
+      "default": "#e7e7e7"
+    },
+    {
+      "type": "color",
+      "id": "card_hover_border",
+      "label": "Card hover border",
+      "default": "#83bed3"
+    },
+    {
+      "type": "range",
+      "id": "card_border_width",
+      "label": "Card border width",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Card border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#fdfdfd"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#212121"
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "Price",
+      "default": "#83bed3"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Title size",
+      "min": 20,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "intro_size",
+      "label": "Intro text size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "addon_name_size",
+      "label": "Add-on name size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "addon_price_size",
+      "label": "Price size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    }
+  ],
+  "presets": [
+    {
+      "name": "Event add-ons"
+    }
+  ]
+}
+{% endschema %}

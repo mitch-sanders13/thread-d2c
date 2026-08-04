@@ -1,0 +1,437 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "page__main",
+      "disabled": true,
+      "settings": {
+        "color_scheme": "color__bg-body color__text",
+        "layout_horizontal": "window"
+      }
+    },
+    "b087e870-c327-4462-bf21-3fef50c82ffc": {
+      "type": "content-grid",
+      "blocks": {
+        "template--15936552730762__b087e870-c327-4462-bf21-3fef50c82ffc-content-1": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "<h2>LET'S MAKE SOMETHING COOL TOGETHER!<\/h2><p>For your employees, loyal customers, an upcoming event.<\/p>",
+            "button_label": "Request a quote",
+            "button_url": "shopify:\/\/pages\/custom",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 100,
+            "spacing_bottom": 100,
+            "color_scheme": "color__bg-secondary color__secondary",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-center",
+            "layout_x_alignment": "text-center justify-center",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "template--15936552730762__b087e870-c327-4462-bf21-3fef50c82ffc-content-2": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/CUSTOM_IMAGES_0009_IMG_9845_629d7e46-77b8-4016-afaa-9432dc551c46.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": true,
+            "visibility": ""
+          }
+        }
+      },
+      "block_order": [
+        "template--15936552730762__b087e870-c327-4462-bf21-3fef50c82ffc-content-1",
+        "template--15936552730762__b087e870-c327-4462-bf21-3fef50c82ffc-content-2"
+      ],
+      "settings": {
+        "heading": "",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 20,
+        "spacing_bottom": 20,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "",
+        "row_size_desktop": "md:grid-cols-2",
+        "row_size_mobile": "grid-cols-1",
+        "layout_x_alignment": "justify-between",
+        "layout_horizontal": "window--full",
+        "visibility": ""
+      }
+    },
+    "f63820ef-b46e-4b54-bdc0-f6aa5eab4485": {
+      "type": "content-grid",
+      "blocks": {
+        "14ad15d5-7396-4ed4-9051-dbce38db8a5e": {
+          "type": "content",
+          "settings": {
+            "heading": "ELASTIC WALLET",
+            "content": "<p><\/p><p>Tight-knit Elastic, Holds 2-10 Cards and Bills<\/p>",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/CUSTOM_IMAGES_0004_IMG_9856_ad3940d0-5222-4862-bd83-62963d774a05.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 20,
+            "spacing_bottom": 40,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-start",
+            "layout_x_alignment": "text-center justify-center",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "2e49d175-670b-4b4b-9e66-9c3dbd6f9eb9": {
+          "type": "content",
+          "settings": {
+            "heading": "LANYARD",
+            "content": "<h2><\/h2><p>Durable Polyester Strap, Genuine Leather, Quality Clasp<\/p>",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/CUSTOM_IMAGES_0000_IMG_9863.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 20,
+            "spacing_bottom": 40,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-start",
+            "layout_x_alignment": "text-center justify-center",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        }
+      },
+      "block_order": [
+        "14ad15d5-7396-4ed4-9051-dbce38db8a5e",
+        "2e49d175-670b-4b4b-9e66-9c3dbd6f9eb9"
+      ],
+      "settings": {
+        "heading": "",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 0,
+        "spacing_bottom": 20,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "",
+        "row_size_desktop": "md:grid-cols-2",
+        "row_size_mobile": "grid-cols-1",
+        "layout_x_alignment": "justify-between",
+        "layout_horizontal": "window--full",
+        "visibility": ""
+      }
+    },
+    "7fcf460a-de7f-4ee0-ac76-f55193e21430": {
+      "type": "content-grid",
+      "blocks": {
+        "0f5162db-44b5-4fdd-810d-049a247f5608": {
+          "type": "content",
+          "settings": {
+            "heading": "VERTICAL WALLET",
+            "content": "<p>Genuine Leather, RFID Protected, Signature Elastic Pocket<\/p>",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/CUSTOM_IMAGES_0006_IMG_9851.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 20,
+            "spacing_bottom": 40,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-start",
+            "layout_x_alignment": "text-center justify-center",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "67b85560-76ca-4b1e-a20b-a54070ccb4c9": {
+          "type": "content",
+          "settings": {
+            "heading": "BIFOLD",
+            "content": "<p>Genuine Leather, Signature Elastic Pocket, Holds 4-10 Cards<\/p>",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/CUSTOM_IMAGES_0003_IMG_9858.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 20,
+            "spacing_bottom": 40,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-start",
+            "layout_x_alignment": "text-center justify-center",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "a0ffa719-bf5b-4e10-b552-05bbdfbd97c1": {
+          "type": "content",
+          "settings": {
+            "heading": "LIPBALM HOLDER",
+            "content": "<p>Signature elastic, Slim Profile, Quality Keyring to Attach to Keys<\/p>",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/CUSTOM_IMAGES_0001_IMG_9861.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 20,
+            "spacing_bottom": 40,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-start",
+            "layout_x_alignment": "text-center justify-center",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        }
+      },
+      "block_order": [
+        "0f5162db-44b5-4fdd-810d-049a247f5608",
+        "67b85560-76ca-4b1e-a20b-a54070ccb4c9",
+        "a0ffa719-bf5b-4e10-b552-05bbdfbd97c1"
+      ],
+      "settings": {
+        "heading": "",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 0,
+        "spacing_bottom": 20,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "",
+        "row_size_desktop": "md:grid-cols-3",
+        "row_size_mobile": "grid-cols-1",
+        "layout_x_alignment": "justify-between",
+        "layout_horizontal": "window--full",
+        "visibility": ""
+      }
+    },
+    "a6598595-a87d-4b96-8b9e-8e8856a5e469": {
+      "type": "content-grid",
+      "blocks": {
+        "c07ab9f1-ddff-4511-a351-7d0af3654d05": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/CUSTOM_IMAGES_2cbee245-bb42-4d3b-9ebe-52ea835db0e6.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-start",
+            "layout_x_alignment": "text-center justify-center",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        }
+      },
+      "block_order": [
+        "c07ab9f1-ddff-4511-a351-7d0af3654d05"
+      ],
+      "settings": {
+        "heading": "",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 0,
+        "spacing_bottom": 20,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "",
+        "row_size_desktop": "md:grid-cols-1",
+        "row_size_mobile": "grid-cols-1",
+        "layout_x_alignment": "justify-between",
+        "layout_horizontal": "window--full",
+        "visibility": ""
+      }
+    },
+    "0d9805c2-387e-43ec-b09b-3bc81d0bbb8d": {
+      "type": "content-grid",
+      "blocks": {
+        "c63765fd-2c3a-4131-a67d-b6d1322d8268": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "<h2>CUSTOMIZE THREAD™ PRODUCTS<\/h2><p>Create something unique people will love.<\/p>",
+            "button_label": "Let's Get Started",
+            "button_url": "shopify:\/\/pages\/custom",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 100,
+            "spacing_bottom": 100,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-center",
+            "layout_x_alignment": "text-center justify-center",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "b576146b-5143-47be-80f7-e2f4c1860e6c": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "button_label": "",
+            "button_url": "",
+            "image_background": "shopify:\/\/shop_images\/CUSTOM_IMAGES_94829b87-7ac6-4e59-a5ba-6f122b97901e.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": true,
+            "visibility": ""
+          }
+        }
+      },
+      "block_order": [
+        "c63765fd-2c3a-4131-a67d-b6d1322d8268",
+        "b576146b-5143-47be-80f7-e2f4c1860e6c"
+      ],
+      "settings": {
+        "heading": "",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 0,
+        "spacing_bottom": 20,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "",
+        "row_size_desktop": "md:grid-cols-2",
+        "row_size_mobile": "grid-cols-1",
+        "layout_x_alignment": "justify-between",
+        "layout_horizontal": "window--full",
+        "visibility": ""
+      }
+    }
+  },
+  "order": [
+    "main",
+    "b087e870-c327-4462-bf21-3fef50c82ffc",
+    "f63820ef-b46e-4b54-bdc0-f6aa5eab4485",
+    "7fcf460a-de7f-4ee0-ac76-f55193e21430",
+    "a6598595-a87d-4b96-8b9e-8e8856a5e469",
+    "0d9805c2-387e-43ec-b09b-3bc81d0bbb8d"
+  ]
+}

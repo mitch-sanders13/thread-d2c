@@ -1,0 +1,257 @@
+<!-- sections/banner-video.liquid -->
+{% comment %} 
+  Video that can autoplay or play on click.
+
+  Globals:
+    - settings.layout_horizontal: horizontaly margin
+    - settings.enable_animations
+
+  Pro tips:
+    - Use a background image from the video as a placeholder.
+{% endcomment %}
+
+<section class="
+	banner-video
+	{{ section.settings.visibility }}
+	{%- unless request.design_mode -%}
+		{%- if settings.enable_animations -%} {%- endif -%}
+	{%- endunless -%}"
+
+	{%- if settings.enable_animations -%}
+		data-delay="100"
+		data-replace="{'opacity-50' : 'opacity-100'}"
+	{%- endif -%}
+	x-data="{ play: false }" 
+	x-init="$watch('play', (value) => {
+		if (value) {
+			$refs.video.play()
+		} else {
+			$refs.video.pause()
+		}
+	})">
+
+	<div 
+		class="flex flex-col h-[500px]  md:h-[75vw]"
+		style="padding-bottom:{{ section.settings.spacing_bottom }}px;">
+
+		<div class="flex flex-row flex-wrap absolute pt-9
+			{{ section.settings.color_scheme }}
+			"
+		>
+			<div class="min-[525px]:max-w-[55vw] md:!max-w-[67vw] min-[1550px]:!max-w-[64vw] z-10 pl-8 py-8 md:p-14">
+				{%- unless section.settings.content == blank -%}
+					<div class="!m-0">
+						{{ section.settings.content }}
+					</div>
+				{%- endunless -%}
+	
+				{%- unless section.settings.heading == blank -%}
+					<h3 class="" aria-level="1">{{ section.settings.heading }}</h3>
+				{%- endunless -%}
+			</div>
+		</div>
+		
+		<div class="h-1/2 md:h-1/4 {{ section.settings.color_scheme }}"></div>
+
+		{%- unless section.settings.video_background == blank %}
+		<div class="relative overflow-hidden h-1/2 md:h-3/4">
+			<video
+				x-ref="video"
+				class="rounded-none absolute h-full w-full left-0 top-0 object-cover"
+				playsinline preload="metadata"{% if section.settings.auto_play %} autoplay loop muted{% endif %}
+				poster="{%- if section.settings.image_background == blank %}
+				https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png?format=webp&v=1530129081
+				{%- else -%}
+				{{ section.settings.image_background | image_url: width: 1200 }}
+				{%- endif -%}">
+					{% for source in section.settings.video_background.sources %}
+					<source src="{{ source.url }}" type="{{ source.mime_type }}">
+					{% endfor %}
+			</video>
+			<button x-ref="playBtn" class="hover:cursor-default border relative z-10 flex items-center justify-center w-full h-full overflow-hidden" aria-label="Play">
+			<span
+				class="{{ section.settings.color_button }} hover:cursor-pointer absolute mt-2"
+				@click='
+				{% if section.settings.auto_play %}
+					$refs.video.currentTime = 0;
+					$refs.video.controls = true;
+					$refs.video.muted = false;
+					$refs.playBtn.style.display = "none";
+				{% else %}
+					$refs.video.play();
+					$refs.video.controls = true;
+					$refs.playBtn.style.display = "none";
+				{% endif %}'>
+				{% render 'component__icon', icon: 'play', size: '30', class: "ml-2" %}
+			</span>
+			</button>
+		</div>
+		{%- endunless -%}
+
+	</div>
+</section>
+
+
+{% schema %}
+{
+"name":"Video banner",
+"settings":[
+	{
+	"type":"select",
+	"id":"visibility",
+	"label":"Visibility",
+	"options":[
+		{
+		"value":"",
+		"label":"Show on all devices"
+		},
+		{
+		"value":"md:hidden",
+		"label":"Show on mobile only"
+		},
+		{
+		"value":"hidden md:block",
+		"label":"Show on desktop only"
+		}
+	],
+	"default":""
+	},
+	{
+	"type":"header",
+	"content":"CONTENT"
+	},
+	{
+	"type":"image_picker",
+	"id":"image_background",
+	"label":"Image"
+	},
+	{
+	"type":"video",
+	"id":"video_background",
+	"label":"Video"
+	},
+	{
+	"type":"checkbox",
+	"id":"auto_play",
+	"label":"Auto-play video",
+	"info":"Video will auto-play with muted audio. Customers will see a button to unmute and play the full video.",
+	"default":false
+	},
+	{
+	"type":"richtext",
+	"id":"content",
+	"label":"Subline"
+	},
+	{
+	"type":"text",
+	"id":"heading",
+	"label":"Heading"
+	},
+	{
+	"type":"header",
+	"content":"Color"
+	},
+	{
+	"type":"select",
+	"id":"color_scheme",
+	"label":"Background",
+	"options":[
+		{
+		"value":"color__bg-body color__text",
+		"label":"Body"
+		},
+		{
+		"value":"color__bg-neutral color__text",
+		"label":"Neutral"
+		},
+		{
+		"value":"color__bg-overlay-1 color__text",
+		"label":"Accent 1"
+		},
+		{
+		"value":"color__bg-overlay-2 color__text",
+		"label":"Accent 2"
+		},
+		{
+		"value":"color__bg-overlay-3 color__text",
+		"label":"Accent 3"
+		},
+		{
+		"value":"color__bg-primary color__primary",
+		"label":"Primary"
+		},
+		{
+		"value":"color__bg-secondary color__secondary",
+		"label":"Secondary"
+		},
+		{
+		"value":"color__bg-tertiary color__tertiary",
+		"label":"Tertiary"
+		}
+	],
+	"default":"color__bg-body color__text"
+	},
+	{
+	"type":"select",
+	"id":"color_button",
+	"label":"Button",
+	"options":[
+		{
+		"value":"btn",
+		"label":"Primary"
+		},
+		{
+		"value":"btn btn--secondary",
+		"label":"Secondary"
+		},
+		{
+		"value":"btn btn--tertiary",
+		"label":"Tertiary"
+		},
+		{
+		"value":"btn btn--neutral",
+		"label":"Neutral"
+		},
+		{
+		"value":"btn btn--plain",
+		"label":"Plain"
+		}
+	],
+	"default":"btn btn--secondary"
+	},
+	{
+		"type":"header",
+		"content":"SPACING"
+	},
+	{
+		"type":"range",
+		"id":"spacing_bottom",
+		"min":0,
+		"max":300,
+		"step":20,
+		"unit":"px",
+		"label":"Bottom padding",
+		"default":100
+	}
+],
+"presets":[
+	{
+	"name":"Video banner",
+      "settings": {
+        "visibility": "",
+        "image_background": "shopify:\/\/shop_images\/DSC08789.jpg",
+        "video_background": "shopify:\/\/files\/videos\/Thread_FINAL_subtitles 2_1_1_1.mp4",
+        "auto_play": true,
+        "content": "<p>OUR MISSION<\/p>",
+        "heading": "Empower and inspire others to carry on",
+        "color_scheme": "color__bg-secondary color__secondary",
+        "color_button": "btn btn--tertiary",
+        "spacing_bottom": 0
+      }
+	}
+],
+"disabled_on": {
+	"groups": ["custom.overlay"]
+}
+}
+{% endschema %}

@@ -1,0 +1,574 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "page__main",
+      "disabled": true,
+      "settings": {
+        "color_scheme": "color__bg-body color__text",
+        "layout_horizontal": "window--wide"
+      }
+    },
+    "text_63HDTf": {
+      "type": "text",
+      "disabled": true,
+      "name": "Rich text",
+      "settings": {
+        "heading": "Have a favorite store?",
+        "content": "<p>Tell us about a store you'd like to see Thread products in. Please include store name and location.</p>",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 0,
+        "spacing_bottom": 0,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "",
+        "layout_x_alignment": "text-center justify-center",
+        "content_x_alignment": "text-center justify-center",
+        "visibility": ""
+      }
+    },
+    "page_store_request_UjYYdr": {
+      "type": "page__store-request",
+      "disabled": true,
+      "custom_css": [
+        "h1.mb-0.type--big {display: none;}"
+      ],
+      "name": "[custom] Store Request",
+      "settings": {
+        "color_scheme": "color__bg-body color__text"
+      }
+    },
+    "banner_N9wfnk": {
+      "type": "banner",
+      "blocks": {
+        "heading_hBQhH7": {
+          "type": "heading",
+          "settings": {
+            "content": "Event Space",
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_left": 0,
+            "spacing_right": 0,
+            "font_family": "heading",
+            "font_family_custom": "",
+            "font_size": 80,
+            "font_weight": "700",
+            "text_transform": "uppercase",
+            "letter_spacing": "0em",
+            "line_height": 95,
+            "custom_color": ""
+          }
+        },
+        "content_3BLH96": {
+          "type": "content",
+          "settings": {
+            "content": "<p><em>241 W Center St Provo, UT 84601</em></p>",
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_left": 0,
+            "spacing_right": 0,
+            "font_family": "body",
+            "font_family_custom": "",
+            "font_size": 16,
+            "font_weight": "400",
+            "text_transform": "none",
+            "letter_spacing": "0.02em",
+            "custom_color": ""
+          }
+        },
+        "content_T3y8YM": {
+          "type": "content",
+          "settings": {
+            "content": "<p>Inside our HQ we have a beautiful industrial-style venue perfect for corporate, private, or community events of all kinds.</p>",
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_left": 0,
+            "spacing_right": 0,
+            "font_family": "body",
+            "font_family_custom": "",
+            "font_size": 16,
+            "font_weight": "400",
+            "text_transform": "none",
+            "letter_spacing": "0.02em",
+            "custom_color": ""
+          }
+        },
+        "buttons_UgYghn": {
+          "type": "buttons",
+          "disabled": true,
+          "settings": {
+            "button_color": "btn",
+            "button_label": "BOOK A TOUR",
+            "button_url": "/collections/all",
+            "button_custom_bg": "",
+            "button_custom_text": "",
+            "secondary_button_color": "btn btn--neutral",
+            "secondary_button_label": "",
+            "secondary_button_url": "",
+            "secondary_button_custom_bg": "",
+            "secondary_button_custom_text": "",
+            "tertiary_button_color": "btn btn--neutral",
+            "tertiary_button_label": "",
+            "tertiary_button_url": "",
+            "tertiary_button_custom_bg": "",
+            "tertiary_button_custom_text": "",
+            "btns_font": "inherit",
+            "btns_size": 0,
+            "btns_weight": "",
+            "btns_case": "",
+            "btns_ls": "",
+            "btns_style": "",
+            "block_layout": "stack",
+            "spacing_top": 8,
+            "spacing_bottom": 0,
+            "spacing_left": 0,
+            "spacing_right": 0,
+            "font_family": "inherit",
+            "font_family_custom": ""
+          }
+        }
+      },
+      "block_order": [
+        "heading_hBQhH7",
+        "content_3BLH96",
+        "content_T3y8YM",
+        "buttons_UgYghn"
+      ],
+      "name": "t:sections.banner.name",
+      "settings": {
+        "url": "",
+        "image_background_desktop": "shopify://shop_images/AK_01691.jpg",
+        "image_background_mobile": "shopify://shop_images/AK_01695.jpg",
+        "show_video_background_mobile": true,
+        "show_entire_image": false,
+        "enable_lazy_loading": false,
+        "color_scheme": "color__bg-body color__text",
+        "color_text": "color__light",
+        "color_border": "color__border-divider-1",
+        "enable_gradient": true,
+        "style_border": "border--b-width",
+        "layout_horizontal": "window--full",
+        "layout_y_spacing": "min-h-[550px] max-h-[800px]",
+        "custom_height_px": 500,
+        "layout_y_alignment": "items-start",
+        "content_offset_top": 0,
+        "content_offset_bottom": 40,
+        "layout_x_alignment": "justify-start",
+        "use_global_spacing": "custom",
+        "visibility": ""
+      }
+    },
+    "text_EjALGx": {
+      "type": "text",
+      "custom_css": [],
+      "name": "Rich text",
+      "settings": {
+        "heading": "About",
+        "content": "<p>Built over 100 years ago in heart of downtown Provo is the industrial-style home of Thread. We have designed a flexible event venue equipped with a full kitchen, large stage with jumbotron, professional sound system with microphone, tables and chairs, tablecloths, decorations, a rolling bar, and a spacious layout, this space can be customized to fit your event. </p><p>If you have any question please email blythe@threadwallets.com or call (801) 874-1848</p>",
+        "button_label": "Book a tour",
+        "button_url": "https://(calendly.com/blythe-threadwallets/30min)",
+        "spacing_top": 60,
+        "spacing_bottom": 60,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn",
+        "style_border": "",
+        "layout_x_alignment": "text-center justify-center",
+        "content_x_alignment": "text-left",
+        "visibility": ""
+      }
+    },
+    "17736908480425825c": {
+      "type": "_blocks",
+      "blocks": {
+        "ai_gen_block_08ba506_QxykF7": {
+          "type": "ai_gen_block_08ba506",
+          "settings": {
+            "title": "",
+            "description": "",
+            "text_alignment": "center",
+            "image_1": "shopify://shop_images/DamagedGoods-40_7ddbc986-1b63-4afd-befd-6ce1cb599da3.jpg",
+            "caption_1": "",
+            "image_2": "shopify://shop_images/AK_01812.jpg",
+            "caption_2": "",
+            "image_3": "shopify://shop_images/DamagedGoods-12.jpg",
+            "caption_3": "",
+            "image_4": "shopify://shop_images/IMG_3715.jpg",
+            "caption_4": "",
+            "image_5": "shopify://shop_images/AK_02369.jpg",
+            "caption_5": "",
+            "caption_6": "",
+            "caption_7": "",
+            "caption_8": "",
+            "image_width_desktop": 420,
+            "image_height_desktop": 340,
+            "image_width_mobile": 280,
+            "image_height_mobile": 340,
+            "image_gap": 20,
+            "section_padding": 10,
+            "header_spacing": 10,
+            "border_radius": 0,
+            "enable_hover_zoom": true,
+            "title_size": 40,
+            "description_size": 18,
+            "background_color": "#fdfdfd",
+            "text_color": "#212121",
+            "scrollbar_color": "#e7e7e7"
+          },
+          "blocks": {}
+        },
+        "ai_gen_block_0661f29_9zgGa8": {
+          "type": "ai_gen_block_0661f29",
+          "settings": {
+            "title": "What's Included",
+            "intro_text": "Everything you need for a seamless and stylish event is included.",
+            "item_1_enabled": true,
+            "item_1_title": "2,220 sq ft",
+            "item_1_description": "Beautiful 1912 industrial style (red brick and raw wood) building with a large open event room with high ceilings and wood beams.",
+            "item_1_image": "shopify://shop_images/AK_02369.jpg",
+            "item_2_enabled": true,
+            "item_2_title": "Full kitchen",
+            "item_2_description": "Island with 4 bar stools, dishwasher, oven, electric stove, microwave, toaster, air fryer, electric kettle, coffee machine, large double-sided fridge, additional drink fridge, and freezer.",
+            "item_2_image": "shopify://shop_images/IMG_3721.jpg",
+            "item_3_enabled": true,
+            "item_3_title": "Stage and large TV",
+            "item_3_description": "Stage for performances, presentations, or speeches. High resolution jumbotron style screen.",
+            "item_3_image": "shopify://shop_images/DamagedGoods-12.jpg",
+            "item_4_enabled": true,
+            "item_4_title": "High Quality Sound System",
+            "item_4_description": "Bluetooth sound system with high quality speakers, cordless microphone and wifi access.",
+            "item_4_image": "shopify://shop_images/DamagedGoods-11.jpg",
+            "item_5_enabled": true,
+            "item_5_title": "Tables & Chairs",
+            "item_5_description": "68 foldable wooden foldable, 8 foldable tables with white tablecloths, Four 6ft long bench style tables, 3 small round tables, 4 tall black cocktail tables. Stadium seating with 3 rows.",
+            "item_5_image": "shopify://shop_images/IMG_1899.jpg",
+            "item_6_enabled": true,
+            "item_6_title": "Wheelchair accessibility",
+            "item_6_description": "Wheelchair accessible ramps and ADA compliant restrooms.",
+            "item_6_image": "shopify://shop_images/IMG_3711.jpg",
+            "item_7_enabled": true,
+            "item_7_title": "Private & Waste",
+            "item_7_description": "20+ spaces on-site, plus multiple nearby public parking options. 2 large trash cans and dumpster.",
+            "item_7_image": "shopify://shop_images/AK_01691_f3c0a65f-ff75-4502-bcc5-ca90b9f8a6ed.jpg",
+            "item_8_enabled": true,
+            "item_8_title": "Mothers' room / bridal suite",
+            "item_8_description": "Quite, comfortable room for mothers or brides to prep or have privacy.",
+            "item_8_image": "shopify://shop_images/IMG_3735.jpg",
+            "item_9_enabled": true,
+            "item_9_title": "Restrooms",
+            "item_9_description": "4 separate stalls, 2 urinals and 4 communal style sinks.",
+            "item_9_image": "shopify://shop_images/IMG_3744.jpg",
+            "show_image_placeholders": true,
+            "title_size": 40,
+            "intro_size": 16,
+            "card_title_size": 22,
+            "card_description_size": 14,
+            "card_gap": 12,
+            "card_padding": 12,
+            "card_border_width": 0,
+            "text_color": "#212121",
+            "card_bg_color": "#ffffff",
+            "card_border_color": "#e7e7e7"
+          },
+          "blocks": {}
+        },
+        "ai_gen_block_0e11719_qqrCbW": {
+          "type": "ai_gen_block_0e11719",
+          "settings": {
+            "section_title": "Pricing",
+            "intro_text": "",
+            "card_1_enabled": true,
+            "card_1_name": "Community Events",
+            "card_1_price": "$50/hr",
+            "card_1_description": "Ideal for workshops, clubs, nonprofits, networking events, and small gatherings. Discounts available for recurring booking.",
+            "card_2_enabled": true,
+            "card_2_name": "Private Celebrations",
+            "card_2_price": "M - Th = $800\n<br>\nF - Su = $1200",
+            "card_2_description": "Perfect for weddings, receptions, graduation parties, and formal events.",
+            "card_3_enabled": true,
+            "card_3_name": "Conference Rooms",
+            "card_3_price": "Small Room = $25   Large Room = $30/hr",
+            "card_3_description": "Small (7 chairs + TV)\n<br>\nLarge (10 chairs + TV)",
+            "card_4_enabled": false,
+            "card_4_name": "Conference Room B",
+            "card_4_price": "$30/hr",
+            "card_4_description": "Includes 10 chairs and 1 large TV",
+            "callout_text": "*Note a $100 deposit is required to reserve your date and is refundable after your event, provided the space is left in good condition. If the event is canceled your deposit is non-refundable. Final payment is due one week before the event.",
+            "background_color": "#f1f1f1",
+            "text_color": "#212121",
+            "price_color": "#83bed3",
+            "card_background": "#fdfdfd",
+            "card_border_color": "#e7e7e7",
+            "callout_background": "#e7e7e7",
+            "callout_border_color": "#ffffff",
+            "title_size": 40,
+            "intro_size": 15,
+            "card_title_size": 24,
+            "price_size": 16,
+            "description_size": 14,
+            "callout_size": 14,
+            "card_gap": 16,
+            "card_border_width": 0,
+            "callout_border_width": 0
+          },
+          "blocks": {}
+        },
+        "ai_gen_block_0abf7ce_iLM7qG": {
+          "type": "ai_gen_block_0abf7ce",
+          "settings": {
+            "section_title": "Optional Add-Ons",
+            "intro_text": "Customize your event with optional rentals and support services.",
+            "text_alignment": "center",
+            "addon_1_name": "Personalized Marquee",
+            "addon_1_price": "$25",
+            "addon_2_name": "Black Metal Sign Stand",
+            "addon_2_price": "$25",
+            "addon_3_name": "Couch",
+            "addon_3_price": "$50 each",
+            "addon_4_name": "Bar Cart",
+            "addon_4_price": "$50",
+            "addon_5_name": "Bar Cart with Soda Service",
+            "addon_5_price": "$400",
+            "addon_6_name": "Decor Package",
+            "addon_6_price": "$25",
+            "addon_7_name": "Personal Decorator",
+            "addon_7_price": "$50",
+            "addon_8_name": "Set Up & Take Down of Tables & Chairs",
+            "addon_8_price": "$50",
+            "addon_9_name": "On Site Coordinator",
+            "addon_9_price": "$50",
+            "desktop_width_percent": 100,
+            "section_padding": 60,
+            "card_gap": 10,
+            "card_padding": 15,
+            "card_background": "#fdfdfd",
+            "card_border_color": "#e7e7e7",
+            "card_hover_border": "#e7e7e7",
+            "card_border_width": 1,
+            "card_border_radius": 0,
+            "background_color": "#fdfdfd",
+            "text_color": "#212121",
+            "price_color": "#83bed3",
+            "title_size": 40,
+            "intro_size": 16,
+            "addon_name_size": 22,
+            "addon_price_size": 16
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "ai_gen_block_08ba506_QxykF7",
+        "ai_gen_block_0661f29_9zgGa8",
+        "ai_gen_block_0e11719_qqrCbW",
+        "ai_gen_block_0abf7ce_iLM7qG"
+      ],
+      "settings": {}
+    },
+    "177393505430f0d64e": {
+      "type": "_blocks",
+      "blocks": {
+        "ai_gen_block_888f336_9GkNKp": {
+          "type": "ai_gen_block_888f336",
+          "settings": {
+            "heading": "<strong>Contact us</strong>",
+            "subtext": "Call (801) 874-1848 or fill out the form below and we'll get back to you as soon as possible.",
+            "recipient_email": "blythe@threadwallets.com",
+            "show_name_field": true,
+            "name_label": "Name",
+            "name_placeholder": "Full name",
+            "name_required": true,
+            "show_email_field": true,
+            "email_label": "Email",
+            "email_placeholder": "your@email.com",
+            "show_phone_field": true,
+            "phone_label": "Phone",
+            "phone_placeholder": "(123) 456-7890",
+            "phone_required": false,
+            "show_company_field": false,
+            "company_label": "Company",
+            "company_placeholder": "Your company name",
+            "company_required": false,
+            "show_subject_field": true,
+            "subject_label": "Company / Organization",
+            "subject_placeholder": "Company",
+            "subject_required": false,
+            "show_message_field": true,
+            "message_label": "Event Details",
+            "message_placeholder": "Tell us about your event",
+            "message_required": true,
+            "button_text": "SEND",
+            "success_message": "Thank you for contacting us! We'll get back to you soon.",
+            "desktop_width_percent": 100,
+            "text_alignment": "left",
+            "heading_size": 30,
+            "subtext_size": 16,
+            "background_color": "#fdfdfd",
+            "heading_color": "#212121",
+            "subtext_color": "#212121",
+            "label_color": "#212121",
+            "input_background_color": "#ffffff",
+            "input_text_color": "#212121",
+            "input_border_color": "#e7e7e7",
+            "input_focus_color": "#83bed3",
+            "button_color": "#83bed3",
+            "button_hover_color": "#212121",
+            "button_text_color": "#fdfdfd",
+            "success_background_color": "#d4edda",
+            "success_text_color": "#155724",
+            "error_background_color": "#f8d7da",
+            "error_text_color": "#721c24",
+            "border_radius": 0,
+            "input_border_radius": 0,
+            "input_border_width": 0,
+            "button_border_radius": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "ai_gen_block_888f336_9GkNKp"
+      ],
+      "disabled": true,
+      "settings": {}
+    },
+    "accordions_wQpc46": {
+      "type": "accordions",
+      "blocks": {
+        "content_GtUYdT": {
+          "type": "content",
+          "settings": {
+            "title": "When is payment due?",
+            "content": "<p>The date of your event will be booked and reserved for you as soon as you have paid the $100 security deposit. The rest of the payment is due 1 week prior to your event. Access to the venue will not be granted until payment is received.</p>"
+          }
+        },
+        "content_xfJHrk": {
+          "type": "content",
+          "settings": {
+            "title": "Do you allow alcohol?",
+            "content": "<p>Yes. Alcohol is permitted with the required $300 alcohol fee and the use of a licensed bartender. Clients may hire any licensed bartender of their choice.</p>"
+          }
+        },
+        "content_GKB4Mk": {
+          "type": "content",
+          "settings": {
+            "title": "What are your venue policies?",
+            "content": "<p>To ensure the safety and care of our venue, we ask all clients to review and adhere to the<br/>following policies. Violation of any policy may result in forfeiture of the security deposit.</p><ul><li>Prohibited Items & Activities:</li><li>Candles or open flames of any kind</li><li>Illegal substances</li><li>Confetti, petals, rice, lavender, glitter, or similar small loose items (throwing or<br/>scattering is not permitted)</li><li>Cleaning Fee & Closing Checklist</li><li>A $50 cleaning fee is required for all events. </li></ul><p>This covers standard post-event<br/>cleaning. Clients are responsible for completing the closing checklist provided at<br/>the event. Failure to complete checklist items may result in loss of deposit.<br/>-Alcohol Policy<br/>-Events serving alcohol must pay a $300 alcohol fee.<br/>-A licensed bartender is required and must be present while alcohol is served.<br/>Failure to pay the alcohol fee or provide a licensed bartender will result in loss of<br/>deposit.<br/>-Damages & Property Loss<br/>-Any damage to the venue or its contents will result in loss of deposit. This<br/>includes but is not limited to holes or dents in walls, nails, tape, command strips,<br/>peeled paint, or burned/ruined tables, chairs, or décor. If damages exceed the<br/>deposit amount, the client is responsible for the full cost of repairs or<br/>replacement.<br/>-Additional Policies<br/>-All clients must sign an event contract prior to the event. Access to the venue will<br/>not be granted without a signed contract.<br/>-Do not remove, disable, or tamper with smoke or carbon monoxide detectors.<br/>-Clients are responsible for the actions of their guests and invitees.<br/>-Any damages or breakages must be reported immediately.</p>"
+          }
+        },
+        "content_m3JdJx": {
+          "type": "content",
+          "settings": {
+            "title": "What is the capacity of the event space?",
+            "content": "<p>The event space comfortably accommodates up to 100-150 guests. If you’re unsure whether the space will suit your event, we encourage you to schedule a tour. We’d be happy to walk you through the space and answer any questions.</p>"
+          }
+        },
+        "content_VPKAc4": {
+          "type": "content",
+          "settings": {
+            "title": "How large is the space?",
+            "content": "<p>The main event space offers 2,220 square feet, perfectly suited for intimate dinners and<br/>community events. Guests also have access to an open four-stall restroom and a private<br/>mother’s room.</p>"
+          }
+        },
+        "content_rByptH": {
+          "type": "content",
+          "settings": {
+            "title": "When can setup and takedown occur?",
+            "content": "<p>All setup and takedown must take place within your scheduled rental time. If you’d like additional support or want to save time, please visit our Add-Ons page for staff assistance<br/>options.</p>"
+          }
+        },
+        "content_wDfDxx": {
+          "type": "content",
+          "settings": {
+            "title": "Do you allow outside vendors for catering?",
+            "content": "<p>Yes. While we offer a list of preferred vendors we highly recommend, you are welcome to bring in any licensed vendors of your choice.</p><p>Yes. You are welcome to bring in any licensed vendors of your choice for your event. While we do not require the use of specific vendors, we’ve compiled a list of professionals we’ve worked with and trust. These vendors are familiar with our space and consistently provide excellent service.<br/>We’re happy to share their information as a resource to help make your planning process easier.</p><ul><li><strong>Guru’s Cafe</strong> - catering@guruscafe.com<br/>A longtime local favorite in downtown Provo, Guru’s is known for its flavorful, globally inspired menu and fresh ingredients. Their diverse offerings make it easy to accommodate a wide range of tastes and dietary preferences, and their team is experienced, reliable, and great to work with. If you’re looking for a catering option that’s both crowd-pleasing and uniquely local, Guru’s is an excellent choice.</li><li><strong>Rockwell Ice Cream - </strong>events@rockwellicecream.com<br/>We’re proud to feature Rockwell Ice Cream as one of our preferred vendors. Known for their handcrafted, small-batch ice cream and creative, crowd-pleasing flavors, Rockwell brings a fun and memorable touch to any event. Their commitment to quality ingredients<br/>and exceptional service makes them a favorite for weddings, corporate gatherings, and celebrations of all kinds. Whether served from a charming cart or as part of a custom dessert experience, Rockwell Ice Cream is always a sweet highlight for our guests</li></ul>"
+          }
+        },
+        "content_kkaUMe": {
+          "type": "content",
+          "settings": {
+            "title": "Is the venue wheelchair accessible?",
+            "content": "<p>Yes. Our venue is wheelchair accessible, with ramps located throughout the event space.</p>"
+          }
+        },
+        "content_fi7PVm": {
+          "type": "content",
+          "settings": {
+            "title": "Is there parking available for guests?",
+            "content": "<p>Yes. We offer 20+ on-site parking spaces, as well as street parking and a nearby parking<br/>garage.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "content_GtUYdT",
+        "content_xfJHrk",
+        "content_GKB4Mk",
+        "content_m3JdJx",
+        "content_VPKAc4",
+        "content_rByptH",
+        "content_wDfDxx",
+        "content_kkaUMe",
+        "content_fi7PVm"
+      ],
+      "name": "t:sections.accordions.name",
+      "settings": {
+        "heading": "FREQUENTLY ASKED QUESTIONS",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 0,
+        "spacing_bottom": 20,
+        "color_scheme": "color__bg-overlay-1 color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--b-width",
+        "layout_x_alignment": "justify-between",
+        "layout_horizontal": "window",
+        "visibility": ""
+      }
+    },
+    "text_B3hc8Q": {
+      "type": "text",
+      "name": "Rich text",
+      "settings": {
+        "heading": "Contact us",
+        "content": "<p>We would love to host your next event! Please email or call us with any questions. </p><p>(801) 874-1848 </p><p>blythe@threadwallets.com</p><p></p>",
+        "button_label": "BOOK A TOUR",
+        "button_url": "https://(calendly.com/blythe-threadwallets/30min)",
+        "spacing_top": 100,
+        "spacing_bottom": 100,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn",
+        "style_border": "border--b-width",
+        "layout_x_alignment": "",
+        "content_x_alignment": "text-left",
+        "visibility": ""
+      }
+    }
+  },
+  "order": [
+    "main",
+    "text_63HDTf",
+    "page_store_request_UjYYdr",
+    "banner_N9wfnk",
+    "text_EjALGx",
+    "17736908480425825c",
+    "177393505430f0d64e",
+    "accordions_wQpc46",
+    "text_B3hc8Q"
+  ]
+}

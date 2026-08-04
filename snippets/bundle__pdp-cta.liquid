@@ -1,0 +1,1569 @@
+{% comment %}
+  PDP "Frequently bought together" — inline Trifecta preview.
+
+  Per-product dropdown UX (Amazon-style):
+    - Three product cards in a row: current locked product + two
+      auto-picked companions.
+    - Tap an unlocked card → its dropdown panel opens below the row,
+      showing product-type tabs at the top and a swatch grid below.
+      Picking a swatch updates the selection and closes the panel.
+    - The locked card has no dropdown — customer is already on its PDP.
+
+  Server-side ranking (per non-locked slot):
+    1. Default-type match + color-match + available  (best pick — index 0)
+    2. Color-match + available
+    3. Default-type match + available
+    4. Available
+    5. Sold-out
+    Default type comes from theme settings:
+      trifecta_default_wallet_type / lanyard / chapstick
+    Color-match means the product carries a `color_<slug>` tag matching
+    the current PDP product's color_<slug>.
+
+  Data shape (script type=application/json, one per PDP):
+    {
+      "slots": [
+        {
+          "label": "Wallet",
+          "locked": true|false,
+          "products": [
+            { handle, title, url, image, imageLarge, variantId,
+              price, available, colorTag, type }
+          ]
+        },
+        ...
+      ],
+      "currency": "$",
+      "discountCode": "TRIFECTA10",
+      "productsPerSlot": 30
+    }
+
+  Add-to-cart:
+    POST /cart/add.js with the 3 currently-selected variants +
+    bundle properties. Discount code (if configured) is applied
+    silently via a background fetch — no full-page redirect.
+{% endcomment %}
+
+{%- liquid
+  comment
+    Trifecta bundle eligibility — driven by product.type, not tags.
+
+    The previous tag scheme (`bundle:wallet`, `bundle:lanyard`,
+    `bundle:chapstick`) had drifted over time — `bundlelanyard`
+    without a separator, `bundle-lip-balm-holder` instead of the
+    chapstick tag, etc. — and tagging new products correctly was
+    ongoing maintenance burden. product.type is already clean in
+    the catalog so it's now the source of truth.
+
+    `trifecta_slot` is the canonical "wallet" | "lanyard" |
+    "chapstick" lowercase tag. `bundle_slot` is derived from it
+    with the previous titlecase values so the rest of this snippet
+    (3 slot loops + the inline script data block) keeps working
+    without rewriting every `bundle_slot == 'Wallet'` test.
+
+    Lanyard list intentionally includes Wristlet Keychain — those
+    SKUs carried the legacy `bundlelanyard` tag and the merchant
+    confirmed they should count as a lanyard for bundle purposes.
+  endcomment
+  assign wallet_types = "Adventure Pouch Wallet|Elastic Wallet|Envelope Wallet|Leather Bifold Wallet|Leather Zip Wallet|Magnetic Wallet|Mystery Wallet|Phone Case Wallet|Stick On Wallet|Vegan Leather Bifold Wallet|Velcro Bifold Wallet|Vertical Leather Wallet|Wallet" | split: "|"
+  assign lanyard_types = "Keychain Clip|Mystery Lanyard|Neck Lanyard|Wide Wrist Lanyard|Wristlet Keychain" | split: "|"
+  assign chapstick_types = "Chapstick Holder Keychain|Mystery Chapstick Holder Keychain" | split: "|"
+
+  assign trifecta_slot = blank
+  if wallet_types contains product.type
+    assign trifecta_slot = "wallet"
+  elsif lanyard_types contains product.type
+    assign trifecta_slot = "lanyard"
+  elsif chapstick_types contains product.type
+    assign trifecta_slot = "chapstick"
+  endif
+
+  comment
+    Back-compat: downstream code in this file already branches on
+    `bundle_slot == 'Wallet' | 'Lanyard' | 'Chapstick'`. Derive
+    the titlecase value from the new lowercase slot so we don't
+    have to rewrite every downstream comparison.
+  endcomment
+  assign bundle_slot = ''
+  if trifecta_slot == 'wallet'
+    assign bundle_slot = 'Wallet'
+  elsif trifecta_slot == 'lanyard'
+    assign bundle_slot = 'Lanyard'
+  elsif trifecta_slot == 'chapstick'
+    assign bundle_slot = 'Chapstick'
+  endif
+
+  comment
+    Color-tag capture (unchanged from before): the bundle widget
+    color-matches the current product to siblings by walking the
+    color_* tags. Independent of slot detection, so it stays.
+  endcomment
+  assign current_color_tag = ''
+  assign current_color_tags = ''
+  for tag in product.tags
+    assign tag_lc = tag | downcase | strip
+    if tag_lc contains 'color_'
+      assign _c = tag_lc | remove_first: 'color_'
+      if current_color_tag == blank
+        assign current_color_tag = _c
+      endif
+      assign current_color_tags = current_color_tags | append: ',' | append: _c
+    endif
+  endfor
+  if current_color_tags != blank
+    assign current_color_tags = current_color_tags | append: ','
+  endif
+
+  assign _show = false
+  if settings.trifecta_pdp_preview_enable and trifecta_slot != blank
+    if settings.trifecta_wallet_collection != blank and settings.trifecta_lanyard_collection != blank and settings.trifecta_chapstick_collection != blank
+      assign _show = true
+    endif
+  endif
+-%}
+
+{%- if _show -%}
+
+{%- liquid
+  assign _wallet_coll = settings.trifecta_wallet_collection
+  assign _lanyard_coll = settings.trifecta_lanyard_collection
+  assign _chapstick_coll = settings.trifecta_chapstick_collection
+  assign _default_wallet_type = settings.trifecta_default_wallet_type | strip
+  assign _default_lanyard_type = settings.trifecta_default_lanyard_type | strip
+  assign _default_chapstick_type = settings.trifecta_default_chapstick_type | strip
+  assign PRODUCTS_PER_SLOT = 200
+-%}
+
+{%- comment -%}
+  Per-slot product list builder. For the locked slot, just emit the
+  current product. For the iterated slots, walk the eligibility
+  collection (up to 80 products) and bucket each entry into one of
+  five priority lists, then concat in order.
+{%- endcomment -%}
+
+{%- capture _slot_json_wallet -%}
+{%- assign _bucket0 = '' -%}
+{%- assign _bucket1 = '' -%}{%- assign _bucket2 = '' -%}{%- assign _bucket3 = '' -%}
+{%- assign _bucket4 = '' -%}{%- assign _bucket5 = '' -%}{%- assign _bucket6 = '' -%}
+{%- assign _bucket7 = '' -%}
+
+{%- if bundle_slot == 'Wallet' -%}
+  {%- assign _v = product.selected_or_first_available_variant -%}
+  {%- capture _current_entry -%}{
+    "handle": {{ product.handle | json }},
+    "title": {{ product.title | json }},
+    "url": {{ product.url | json }},
+    "image": {{ product.featured_image | image_url: width: 240 | json }},
+    "imageLarge": {{ product.featured_image | image_url: width: 480 | json }},
+    "variantId": {{ _v.id | json }},
+    "price": {{ _v.price | default: 0 | json }},
+    "available": {{ _v.available | json }},
+    "colorTag": {{ current_color_tag | json }},
+    "type": {{ product.type | json }}
+  }{%- endcapture -%}
+  {%- assign _bucket0 = _current_entry | append: ',' -%}
+{%- endif -%}
+
+{%- for p in _wallet_coll.products limit: 200 -%}
+  {%- if bundle_slot == 'Wallet' and p.handle == product.handle -%}{%- continue -%}{%- endif -%}
+  {%- if p.type == 'Bundle' -%}{%- continue -%}{%- endif -%}
+  {%- assign _v = p.selected_or_first_available_variant -%}
+  {%- assign _p_color = '' -%}
+  {%- for tag in p.tags -%}
+    {%- assign _tlc = tag | downcase | strip -%}
+    {%- if _tlc contains 'color_' -%}
+      {%- assign _p_color = _tlc | remove_first: 'color_' -%}{%- break -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- assign _is_type_match = false -%}
+  {%- if _default_wallet_type != blank and p.type == _default_wallet_type -%}
+    {%- assign _is_type_match = true -%}
+  {%- endif -%}
+  {%- assign _is_color_match = false -%}
+  {%- if current_color_tag != blank and _p_color == current_color_tag -%}
+    {%- assign _is_color_match = true -%}
+  {%- endif -%}
+  {%- comment -%}
+    Solids fallback: candidate is tagged `solids` AND shares at least
+    one color_* tag with the current product. Lets a Blossom wallet
+    (multi-color pattern) default to a solid pink/green lanyard when
+    no exact-pattern lanyard exists.
+  {%- endcomment -%}
+  {%- assign _is_solid = false -%}
+  {%- assign _shares_color = false -%}
+  {%- for tag in p.tags -%}
+    {%- assign _tlc = tag | downcase | strip -%}
+    {%- if _tlc == 'solids' -%}
+      {%- assign _is_solid = true -%}
+    {%- endif -%}
+    {%- if _tlc contains 'color_' -%}
+      {%- assign _c = _tlc | remove_first: 'color_' -%}
+      {%- assign _needle = ',' | append: _c | append: ',' -%}
+      {%- if current_color_tags contains _needle -%}
+        {%- assign _shares_color = true -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- assign _is_solid_match = false -%}
+  {%- if _is_solid and _shares_color -%}
+    {%- assign _is_solid_match = true -%}
+  {%- endif -%}
+  {%- capture _entry -%}{
+    "handle": {{ p.handle | json }},
+    "title": {{ p.title | json }},
+    "url": {{ p.url | json }},
+    "image": {{ p.featured_image | image_url: width: 240 | json }},
+    "imageLarge": {{ p.featured_image | image_url: width: 480 | json }},
+    "variantId": {{ _v.id | default: 0 | json }},
+    "price": {{ _v.price | default: 0 | json }},
+    "available": {{ _v.available | default: false | json }},
+    "colorTag": {{ _p_color | json }},
+    "type": {{ p.type | json }}
+  }{%- endcapture -%}
+  {%- if _v.available and _is_type_match and _is_color_match -%}
+    {%- assign _bucket1 = _bucket1 | append: _entry | append: ',' -%}
+  {%- elsif _v.available and _is_color_match -%}
+    {%- assign _bucket2 = _bucket2 | append: _entry | append: ',' -%}
+  {%- elsif _v.available and _is_type_match and _is_solid_match -%}
+    {%- assign _bucket3 = _bucket3 | append: _entry | append: ',' -%}
+  {%- elsif _v.available and _is_solid_match -%}
+    {%- assign _bucket4 = _bucket4 | append: _entry | append: ',' -%}
+  {%- elsif _v.available and _is_type_match -%}
+    {%- assign _bucket5 = _bucket5 | append: _entry | append: ',' -%}
+  {%- elsif _v.available -%}
+    {%- assign _bucket6 = _bucket6 | append: _entry | append: ',' -%}
+  {%- else -%}
+    {%- assign _bucket7 = _bucket7 | append: _entry | append: ',' -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- assign _combined = _bucket0 | append: _bucket1 | append: _bucket2 | append: _bucket3 | append: _bucket4 | append: _bucket5 | append: _bucket6 | append: _bucket7 -%}
+[{{ _combined | remove_last: ',' }}]
+{%- endcapture -%}
+
+{%- capture _slot_json_lanyard -%}
+{%- assign _bucket0 = '' -%}
+{%- assign _bucket1 = '' -%}{%- assign _bucket2 = '' -%}{%- assign _bucket3 = '' -%}
+{%- assign _bucket4 = '' -%}{%- assign _bucket5 = '' -%}{%- assign _bucket6 = '' -%}
+{%- assign _bucket7 = '' -%}
+
+{%- if bundle_slot == 'Lanyard' -%}
+  {%- assign _v = product.selected_or_first_available_variant -%}
+  {%- capture _current_entry -%}{
+    "handle": {{ product.handle | json }},
+    "title": {{ product.title | json }},
+    "url": {{ product.url | json }},
+    "image": {{ product.featured_image | image_url: width: 240 | json }},
+    "imageLarge": {{ product.featured_image | image_url: width: 480 | json }},
+    "variantId": {{ _v.id | json }},
+    "price": {{ _v.price | default: 0 | json }},
+    "available": {{ _v.available | json }},
+    "colorTag": {{ current_color_tag | json }},
+    "type": {{ product.type | json }}
+  }{%- endcapture -%}
+  {%- assign _bucket0 = _current_entry | append: ',' -%}
+{%- endif -%}
+
+{%- for p in _lanyard_coll.products limit: 200 -%}
+  {%- if bundle_slot == 'Lanyard' and p.handle == product.handle -%}{%- continue -%}{%- endif -%}
+  {%- if p.type == 'Bundle' -%}{%- continue -%}{%- endif -%}
+  {%- assign _v = p.selected_or_first_available_variant -%}
+  {%- assign _p_color = '' -%}
+  {%- for tag in p.tags -%}
+    {%- assign _tlc = tag | downcase | strip -%}
+    {%- if _tlc contains 'color_' -%}
+      {%- assign _p_color = _tlc | remove_first: 'color_' -%}{%- break -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- assign _is_type_match = false -%}
+  {%- if _default_lanyard_type != blank and p.type == _default_lanyard_type -%}
+    {%- assign _is_type_match = true -%}
+  {%- endif -%}
+  {%- assign _is_color_match = false -%}
+  {%- if current_color_tag != blank and _p_color == current_color_tag -%}
+    {%- assign _is_color_match = true -%}
+  {%- endif -%}
+  {%- comment -%}
+    Solids fallback: candidate is tagged `solids` AND shares at least
+    one color_* tag with the current product. Lets a Blossom wallet
+    (multi-color pattern) default to a solid pink/green lanyard when
+    no exact-pattern lanyard exists.
+  {%- endcomment -%}
+  {%- assign _is_solid = false -%}
+  {%- assign _shares_color = false -%}
+  {%- for tag in p.tags -%}
+    {%- assign _tlc = tag | downcase | strip -%}
+    {%- if _tlc == 'solids' -%}
+      {%- assign _is_solid = true -%}
+    {%- endif -%}
+    {%- if _tlc contains 'color_' -%}
+      {%- assign _c = _tlc | remove_first: 'color_' -%}
+      {%- assign _needle = ',' | append: _c | append: ',' -%}
+      {%- if current_color_tags contains _needle -%}
+        {%- assign _shares_color = true -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- assign _is_solid_match = false -%}
+  {%- if _is_solid and _shares_color -%}
+    {%- assign _is_solid_match = true -%}
+  {%- endif -%}
+  {%- capture _entry -%}{
+    "handle": {{ p.handle | json }},
+    "title": {{ p.title | json }},
+    "url": {{ p.url | json }},
+    "image": {{ p.featured_image | image_url: width: 240 | json }},
+    "imageLarge": {{ p.featured_image | image_url: width: 480 | json }},
+    "variantId": {{ _v.id | default: 0 | json }},
+    "price": {{ _v.price | default: 0 | json }},
+    "available": {{ _v.available | default: false | json }},
+    "colorTag": {{ _p_color | json }},
+    "type": {{ p.type | json }}
+  }{%- endcapture -%}
+  {%- if _v.available and _is_type_match and _is_color_match -%}
+    {%- assign _bucket1 = _bucket1 | append: _entry | append: ',' -%}
+  {%- elsif _v.available and _is_color_match -%}
+    {%- assign _bucket2 = _bucket2 | append: _entry | append: ',' -%}
+  {%- elsif _v.available and _is_type_match and _is_solid_match -%}
+    {%- assign _bucket3 = _bucket3 | append: _entry | append: ',' -%}
+  {%- elsif _v.available and _is_solid_match -%}
+    {%- assign _bucket4 = _bucket4 | append: _entry | append: ',' -%}
+  {%- elsif _v.available and _is_type_match -%}
+    {%- assign _bucket5 = _bucket5 | append: _entry | append: ',' -%}
+  {%- elsif _v.available -%}
+    {%- assign _bucket6 = _bucket6 | append: _entry | append: ',' -%}
+  {%- else -%}
+    {%- assign _bucket7 = _bucket7 | append: _entry | append: ',' -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- assign _combined = _bucket0 | append: _bucket1 | append: _bucket2 | append: _bucket3 | append: _bucket4 | append: _bucket5 | append: _bucket6 | append: _bucket7 -%}
+[{{ _combined | remove_last: ',' }}]
+{%- endcapture -%}
+
+{%- capture _slot_json_chapstick -%}
+{%- assign _bucket0 = '' -%}
+{%- assign _bucket1 = '' -%}{%- assign _bucket2 = '' -%}{%- assign _bucket3 = '' -%}
+{%- assign _bucket4 = '' -%}{%- assign _bucket5 = '' -%}{%- assign _bucket6 = '' -%}
+{%- assign _bucket7 = '' -%}
+
+{%- if bundle_slot == 'Chapstick' -%}
+  {%- assign _v = product.selected_or_first_available_variant -%}
+  {%- capture _current_entry -%}{
+    "handle": {{ product.handle | json }},
+    "title": {{ product.title | json }},
+    "url": {{ product.url | json }},
+    "image": {{ product.featured_image | image_url: width: 240 | json }},
+    "imageLarge": {{ product.featured_image | image_url: width: 480 | json }},
+    "variantId": {{ _v.id | json }},
+    "price": {{ _v.price | default: 0 | json }},
+    "available": {{ _v.available | json }},
+    "colorTag": {{ current_color_tag | json }},
+    "type": {{ product.type | json }}
+  }{%- endcapture -%}
+  {%- assign _bucket0 = _current_entry | append: ',' -%}
+{%- endif -%}
+
+{%- for p in _chapstick_coll.products limit: 200 -%}
+  {%- if bundle_slot == 'Chapstick' and p.handle == product.handle -%}{%- continue -%}{%- endif -%}
+  {%- if p.type == 'Bundle' -%}{%- continue -%}{%- endif -%}
+  {%- assign _v = p.selected_or_first_available_variant -%}
+  {%- assign _p_color = '' -%}
+  {%- for tag in p.tags -%}
+    {%- assign _tlc = tag | downcase | strip -%}
+    {%- if _tlc contains 'color_' -%}
+      {%- assign _p_color = _tlc | remove_first: 'color_' -%}{%- break -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- assign _is_type_match = false -%}
+  {%- if _default_chapstick_type != blank and p.type == _default_chapstick_type -%}
+    {%- assign _is_type_match = true -%}
+  {%- endif -%}
+  {%- assign _is_color_match = false -%}
+  {%- if current_color_tag != blank and _p_color == current_color_tag -%}
+    {%- assign _is_color_match = true -%}
+  {%- endif -%}
+  {%- comment -%}
+    Solids fallback: candidate is tagged `solids` AND shares at least
+    one color_* tag with the current product. Lets a Blossom wallet
+    (multi-color pattern) default to a solid pink/green lanyard when
+    no exact-pattern lanyard exists.
+  {%- endcomment -%}
+  {%- assign _is_solid = false -%}
+  {%- assign _shares_color = false -%}
+  {%- for tag in p.tags -%}
+    {%- assign _tlc = tag | downcase | strip -%}
+    {%- if _tlc == 'solids' -%}
+      {%- assign _is_solid = true -%}
+    {%- endif -%}
+    {%- if _tlc contains 'color_' -%}
+      {%- assign _c = _tlc | remove_first: 'color_' -%}
+      {%- assign _needle = ',' | append: _c | append: ',' -%}
+      {%- if current_color_tags contains _needle -%}
+        {%- assign _shares_color = true -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- assign _is_solid_match = false -%}
+  {%- if _is_solid and _shares_color -%}
+    {%- assign _is_solid_match = true -%}
+  {%- endif -%}
+  {%- capture _entry -%}{
+    "handle": {{ p.handle | json }},
+    "title": {{ p.title | json }},
+    "url": {{ p.url | json }},
+    "image": {{ p.featured_image | image_url: width: 240 | json }},
+    "imageLarge": {{ p.featured_image | image_url: width: 480 | json }},
+    "variantId": {{ _v.id | default: 0 | json }},
+    "price": {{ _v.price | default: 0 | json }},
+    "available": {{ _v.available | default: false | json }},
+    "colorTag": {{ _p_color | json }},
+    "type": {{ p.type | json }}
+  }{%- endcapture -%}
+  {%- if _v.available and _is_type_match and _is_color_match -%}
+    {%- assign _bucket1 = _bucket1 | append: _entry | append: ',' -%}
+  {%- elsif _v.available and _is_color_match -%}
+    {%- assign _bucket2 = _bucket2 | append: _entry | append: ',' -%}
+  {%- elsif _v.available and _is_type_match and _is_solid_match -%}
+    {%- assign _bucket3 = _bucket3 | append: _entry | append: ',' -%}
+  {%- elsif _v.available and _is_solid_match -%}
+    {%- assign _bucket4 = _bucket4 | append: _entry | append: ',' -%}
+  {%- elsif _v.available and _is_type_match -%}
+    {%- assign _bucket5 = _bucket5 | append: _entry | append: ',' -%}
+  {%- elsif _v.available -%}
+    {%- assign _bucket6 = _bucket6 | append: _entry | append: ',' -%}
+  {%- else -%}
+    {%- assign _bucket7 = _bucket7 | append: _entry | append: ',' -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- assign _combined = _bucket0 | append: _bucket1 | append: _bucket2 | append: _bucket3 | append: _bucket4 | append: _bucket5 | append: _bucket6 | append: _bucket7 -%}
+[{{ _combined | remove_last: ',' }}]
+{%- endcapture -%}
+
+{%- assign _data_id = 'bundle-pdp-data-' | append: product.id -%}
+{%- assign _discount_code = settings.trifecta_discount_code | default: '' -%}
+
+<script type="application/json" id="{{ _data_id }}">
+{
+  "currency": {{ cart.currency.symbol | json }},
+  "discountCode": {{ _discount_code | json }},
+  "productsPerSlot": {{ PRODUCTS_PER_SLOT }},
+  "bundleSlot": {{ bundle_slot | json }},
+  "bundlePdpHandle": {{ product.handle | json }},
+  "currentColorTag": {{ current_color_tag | json }},
+  "slots": [
+    { "label": "Wallet",    "collectionHandle": {{ _wallet_coll.handle | json }},    "defaultType": {{ _default_wallet_type | json }},    "products": {{ _slot_json_wallet | strip }} },
+    { "label": "Lanyard",   "collectionHandle": {{ _lanyard_coll.handle | json }},   "defaultType": {{ _default_lanyard_type | json }},   "products": {{ _slot_json_lanyard | strip }} },
+    { "label": "Chapstick", "collectionHandle": {{ _chapstick_coll.handle | json }}, "defaultType": {{ _default_chapstick_type | json }}, "products": {{ _slot_json_chapstick | strip }} }
+  ]
+}
+</script>
+
+{%- comment -%}
+  Inline <style> overrides for the trifecta bundle. Bumps the static
+  rules in assets/bundle-builder.css per the merchant's font settings
+  (config/settings_schema.json → "Trifecta bundle"). Each property is
+  emitted only when the setting has a non-default value so the static
+  defaults still apply when the merchant hasn't customized.
+{%- endcomment -%}
+<style>
+  /* ----- Spacing (Bundle container) ----- */
+  .bundle-pdp-preview {
+    margin-top: {{ settings.trifecta_margin_top_d | default: 16 }}px;
+    margin-bottom: {{ settings.trifecta_margin_bot_d | default: 16 }}px;
+    padding: {{ settings.trifecta_pad_v_d | default: 16 }}px {{ settings.trifecta_pad_h_d | default: 16 }}px;
+    /* `position: relative` anchors the ::before divider rule below.
+       Border-top / border-bottom (the previous divider implementation)
+       spanned the full element width edge-to-edge, ignoring the
+       merchant's horizontal padding. The ::before below is inset to
+       match the content area, so the divider lines up with the rest
+       of the bundle's elements. */
+    position: relative;
+    border: 0;
+  }
+  {%- if settings.trifecta_show_dividers -%}
+    /* Top divider only — bottom intentionally omitted per merchant
+       feedback. Left/right inset matches the horizontal padding so
+       the line aligns with the bundle's content edges. */
+    .bundle-pdp-preview::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: {{ settings.trifecta_pad_h_d | default: 16 }}px;
+      right: {{ settings.trifecta_pad_h_d | default: 16 }}px;
+      height: 1px;
+      background: rgba(0, 0, 0, 0.1);
+      pointer-events: none;
+    }
+    @media (max-width: 749px) {
+      .bundle-pdp-preview::before {
+        left: {{ settings.trifecta_pad_h_m | default: 16 }}px;
+        right: {{ settings.trifecta_pad_h_m | default: 16 }}px;
+      }
+    }
+  {%- endif -%}
+  @media (max-width: 749px) {
+    .bundle-pdp-preview {
+      margin-top: {{ settings.trifecta_margin_top_m | default: 16 }}px;
+      margin-bottom: {{ settings.trifecta_margin_bot_m | default: 16 }}px;
+      padding: {{ settings.trifecta_pad_v_m | default: 16 }}px {{ settings.trifecta_pad_h_m | default: 16 }}px;
+    }
+  }
+
+  /* ----- Spacing (Heading + Items + Summary + Actions) ----- */
+  .bundle-pdp-preview__heading      { margin-bottom: {{ settings.trifecta_heading_mb | default: 12 }}px; }
+  .bundle-pdp-preview__items        { gap: {{ settings.trifecta_items_gap | default: 8 }}px; margin-bottom: {{ settings.trifecta_items_mb | default: 12 }}px; }
+  /* Summary now lives BELOW the actions per merchant layout: the
+   * mb setting becomes the gap between button and summary, and the
+   * mt setting becomes the gap above the button (still the gap
+   * between the items row and the button). */
+  .bundle-pdp-preview__actions      { margin-top: {{ settings.trifecta_actions_mt | default: 12 }}px; }
+  .bundle-pdp-preview__summary      { margin: {{ settings.trifecta_summary_mb | default: 12 }}px 0 0; }
+
+  /* ----- Spacing (Item card internals) ----- */
+  /* Card padding is BOTTOM-ONLY so the image fills the card edge-
+   * to-edge on top and sides (matches the static rule in
+   * assets/bundle-builder.css). trifecta_card_pad now controls the
+   * bottom breathing room only. */
+  .bundle-pdp-preview__item-card    { padding: 0 0 {{ settings.trifecta_card_pad | default: 8 }}px; }
+
+  /* ----- Card outline (border width + color) -----
+   * The static rule in bundle-builder.css uses 1px var(--color-divider).
+   * Merchants can now override both per Customizer. The active-dropdown
+   * card keeps its 'currentColor' highlight but its width is also
+   * controlled here so the visual emphasis tracks the resting width. */
+  .bundle-pdp-preview__item-card {
+    border-width: {{ settings.trifecta_card_border_w | default: 1 }}px;
+    {%- if settings.trifecta_card_border_color != blank %}border-color: {{ settings.trifecta_card_border_color }};{%- endif %}
+  }
+  .bundle-pdp-preview__item.is-active-dropdown .bundle-pdp-preview__item-card {
+    {%- assign _tri_active_w = settings.trifecta_card_border_w | default: 1 | plus: 1 -%}
+    border-width: {{ _tri_active_w }}px;
+  }
+
+  /* ----- Corner checkbox (include/exclude toggle) -----
+   * Static defaults live in bundle-builder.css (22px box, 1.5px
+   * divider-colored border, theme-primary fill when checked). These
+   * merchant overrides load after the static sheet so they win on
+   * equal specificity. The checkmark SVG scales at ~55% of the box
+   * so it stays proportioned at any size. */
+  {%- assign _tri_cb_size = settings.trifecta_checkbox_size | default: 22 -%}
+  {%- assign _tri_cb_mark = _tri_cb_size | times: 0.55 | round -%}
+  .bundle-pdp-preview__item-checkbox {
+    width: {{ _tri_cb_size }}px;
+    height: {{ _tri_cb_size }}px;
+    top: {{ settings.trifecta_checkbox_offset | default: 6 }}px;
+    right: {{ settings.trifecta_checkbox_offset | default: 6 }}px;
+    border-width: {{ settings.trifecta_checkbox_border_w | default: 1.5 }}px;
+    border-radius: {{ settings.trifecta_checkbox_radius | default: 4 }}px;
+    {%- if settings.trifecta_checkbox_border_color != blank %}border-color: {{ settings.trifecta_checkbox_border_color }};{%- endif %}
+    {%- if settings.trifecta_checkbox_bg != blank %}background: {{ settings.trifecta_checkbox_bg }};{%- endif %}
+    {%- if settings.trifecta_checkbox_mark_color != blank %}color: {{ settings.trifecta_checkbox_mark_color }};{%- endif %}
+  }
+  {%- if settings.trifecta_checkbox_border_color != blank %}
+  /* Keep the merchant's border color on hover too — the static
+   * :hover rule would otherwise flip it to the darker default. */
+  .bundle-pdp-preview__item-checkbox:hover {
+    border-color: {{ settings.trifecta_checkbox_border_color }};
+  }
+  {%- endif %}
+  {%- if settings.trifecta_checkbox_checked_color != blank %}
+  .bundle-pdp-preview__item-checkbox[aria-checked="true"] {
+    background: {{ settings.trifecta_checkbox_checked_color }};
+    border-color: {{ settings.trifecta_checkbox_checked_color }};
+  }
+  {%- endif %}
+  .bundle-pdp-preview__item-checkbox-mark {
+    width: {{ _tri_cb_mark }}px;
+    height: {{ _tri_cb_mark }}px;
+  }
+
+  /* ----- Slot label (Wallet / Lanyard / Chapstick) -----
+   * The static rule in bundle-builder.css gives the 'current' slot
+   * (.is-this) full opacity while the other two render at 0.55 — that
+   * was making the WALLET label appear darker on a wallet PDP. Per
+   * merchant request all three labels render identically. */
+  .bundle-pdp-preview__item.is-this .bundle-pdp-preview__item-slot {
+    opacity: 0.55;
+    color: inherit;
+  }
+
+  .bundle-pdp-preview__item-img     { margin-bottom: {{ settings.trifecta_card_gap | default: 6 }}px; }
+  .bundle-pdp-preview__item-slot          { margin-top: {{ settings.trifecta_slot_mt | default: 4 }}px; }
+  .bundle-pdp-preview__item-title         { margin-top: {{ settings.trifecta_itemtitle_mt | default: 2 }}px; }
+  .bundle-pdp-preview__item-type          { margin-top: {{ settings.trifecta_itemtype_mt | default: 1 }}px; }
+  .bundle-pdp-preview__item-price         { margin-top: {{ settings.trifecta_itemprice_mt | default: 2 }}px; }
+  .bundle-pdp-preview__item-change-hint   { margin-top: {{ settings.trifecta_hint_mt | default: 3 }}px; }
+
+  /* ----- Spacing (Dropdown / Change panel) ----- */
+  .bundle-pdp-preview__dropdown.is-open   { padding: {{ settings.trifecta_dropdown_pad | default: 12 }}px; }
+  /* dropdown header was removed from the markup so trifecta_dh_mb
+   * no longer has a target — keep the schema entry around so the
+   * merchant doesn't lose their saved value if the header ever
+   * comes back. */
+  /* Toolbar sits flush above the dropdown panel — the dropdown's own
+   * padding: 12px (in bundle-builder.css) is the only spacing between
+   * the filter-pill row and the swatch grid. Result: 12px gap. */
+  .bundle-pdp-preview__dropdown-toolbar   { margin-bottom: 0; }
+  /* Dropdown grid layout is now 3-row horizontal scroll (set in
+   * bundle-builder.css to mirror the PDP .rs-grid). The static rule
+   * uses gap: 12px 8px and grid-auto-columns; merchant gap/min-width
+   * settings no longer apply since the layout doesn't auto-fill. */
+
+  /* ----- Fonts (per-element) ----- */
+  .bundle-pdp-preview__heading {
+    font-size: {{ settings.trifecta_heading_size_d | default: 16 }}px;
+    font-weight: {{ settings.trifecta_heading_weight | default: '700' }};
+    text-transform: {{ settings.trifecta_heading_transform | default: 'none' }};
+    letter-spacing: {{ settings.trifecta_heading_ls | default: '0em' }};
+    text-align: {{ settings.trifecta_heading_align | default: 'left' }};
+    {%- case settings.trifecta_heading_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family);
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family);
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family);
+    {%- endcase -%}
+    {%- if settings.trifecta_heading_color != blank %}color: {{ settings.trifecta_heading_color }};{%- endif %}
+  }
+  @media (max-width: 749px) { .bundle-pdp-preview__heading { font-size: {{ settings.trifecta_heading_size_m | default: 16 }}px; } }
+
+  .bundle-pdp-preview__item-slot {
+    font-size: {{ settings.trifecta_slot_size_d | default: 11 }}px;
+    font-weight: {{ settings.trifecta_slot_weight | default: '700' }};
+    text-transform: {{ settings.trifecta_slot_transform | default: 'uppercase' }};
+    letter-spacing: {{ settings.trifecta_slot_ls | default: '0.08em' }};
+    {%- case settings.trifecta_slot_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family);
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family);
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family);
+    {%- endcase -%}
+    {%- if settings.trifecta_slot_color != blank %}color: {{ settings.trifecta_slot_color }};{%- endif %}
+  }
+  @media (max-width: 749px) { .bundle-pdp-preview__item-slot { font-size: {{ settings.trifecta_slot_size_m | default: 11 }}px; } }
+
+  .bundle-pdp-preview__item-title {
+    font-size: {{ settings.trifecta_itemtitle_size_d | default: 12 }}px;
+    font-weight: {{ settings.trifecta_itemtitle_weight | default: '500' }};
+    text-transform: {{ settings.trifecta_itemtitle_transform | default: 'none' }};
+    letter-spacing: {{ settings.trifecta_itemtitle_ls | default: '0em' }};
+    {%- case settings.trifecta_itemtitle_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family);
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family);
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family);
+    {%- endcase -%}
+    {%- if settings.trifecta_itemtitle_color != blank %}color: {{ settings.trifecta_itemtitle_color }};{%- endif %}
+  }
+  @media (max-width: 749px) { .bundle-pdp-preview__item-title { font-size: {{ settings.trifecta_itemtitle_size_m | default: 12 }}px; } }
+
+  /* Product type line — sits between the title (color name) and the
+   * price. Single line + ellipsis so the three cards stay equal
+   * height. No static rule exists in bundle-builder.css (this element
+   * is new), so everything it needs lives here: the 6px horizontal
+   * padding matches the other text rows. */
+  .bundle-pdp-preview__item-type {
+    margin-bottom: 0;
+    padding-left: 6px;
+    padding-right: 6px;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    opacity: 0.65;
+    font-size: {{ settings.trifecta_itemtype_size_d | default: 11 }}px;
+    font-weight: {{ settings.trifecta_itemtype_weight | default: '400' }};
+    text-transform: {{ settings.trifecta_itemtype_transform | default: 'none' }};
+    letter-spacing: {{ settings.trifecta_itemtype_ls | default: '0em' }};
+    {%- case settings.trifecta_itemtype_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family);
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family);
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family);
+    {%- endcase -%}
+    {%- if settings.trifecta_itemtype_color != blank %}color: {{ settings.trifecta_itemtype_color }}; opacity: 1;{%- endif %}
+  }
+  @media (max-width: 749px) { .bundle-pdp-preview__item-type { font-size: {{ settings.trifecta_itemtype_size_m | default: 11 }}px; } }
+
+  .bundle-pdp-preview__item-price {
+    font-size: {{ settings.trifecta_itemprice_size_d | default: 12 }}px;
+    font-weight: {{ settings.trifecta_itemprice_weight | default: '400' }};
+    text-transform: {{ settings.trifecta_itemprice_transform | default: 'none' }};
+    letter-spacing: {{ settings.trifecta_itemprice_ls | default: '0em' }};
+    {%- case settings.trifecta_itemprice_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family);
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family);
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family);
+    {%- endcase -%}
+    {%- if settings.trifecta_itemprice_color != blank %}color: {{ settings.trifecta_itemprice_color }};{%- endif %}
+  }
+  @media (max-width: 749px) { .bundle-pdp-preview__item-price { font-size: {{ settings.trifecta_itemprice_size_m | default: 12 }}px; } }
+
+  /* !important defeats the static .bundle-pdp-preview__item-caret
+   * rule (font-size: 0.6rem) in bundle-builder.css. The merchant's
+   * size setting now scales both the 'Change' label and the caret
+   * together. Wildcard selector catches every descendant so future
+   * markup additions inside the hint stay in sync.
+   *
+   * font-weight is ALSO forced on every descendant because the
+   * theme's global `span { font-weight: var(--type-font-body-weight) }`
+   * rule (styles-*.css, ~line 473) sets weight directly on every
+   * span — blocking inheritance from the parent .item-change-hint.
+   * Without the descendant override the merchant's weight setting
+   * silently no-op'd. */
+  .bundle-pdp-preview__item-change-hint,
+  .bundle-pdp-preview__item-change-hint * {
+    font-size: {{ settings.trifecta_hint_size_d | default: 11 }}px !important;
+    font-weight: {{ settings.trifecta_hint_weight | default: '600' }} !important;
+    {%- case settings.trifecta_hint_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family) !important;
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family) !important;
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family) !important;
+    {%- endcase -%}
+  }
+  .bundle-pdp-preview__item-change-hint {
+    text-transform: {{ settings.trifecta_hint_transform | default: 'uppercase' }};
+    letter-spacing: {{ settings.trifecta_hint_ls | default: '0.05em' }};
+    {%- if settings.trifecta_hint_color != blank %}color: {{ settings.trifecta_hint_color }};{%- endif %}
+  }
+  @media (max-width: 749px) {
+    .bundle-pdp-preview__item-change-hint,
+    .bundle-pdp-preview__item-change-hint * {
+      font-size: {{ settings.trifecta_hint_size_m | default: 11 }}px !important;
+    }
+  }
+
+  .bundle-pdp-preview__dropdown-header {
+    font-size: {{ settings.trifecta_dh_size_d | default: 13 }}px;
+    font-weight: {{ settings.trifecta_dh_weight | default: '500' }};
+    text-transform: {{ settings.trifecta_dh_transform | default: 'none' }};
+    letter-spacing: {{ settings.trifecta_dh_ls | default: '0em' }};
+    {%- case settings.trifecta_dh_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family);
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family);
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family);
+    {%- endcase -%}
+    {%- if settings.trifecta_dh_color != blank %}color: {{ settings.trifecta_dh_color }};{%- endif %}
+  }
+  @media (max-width: 749px) { .bundle-pdp-preview__dropdown-header { font-size: {{ settings.trifecta_dh_size_m | default: 13 }}px; } }
+
+  /* Filter pills inside the dropdown. !important on every property
+   * to guarantee the merchant settings beat the static defaults in
+   * assets/bundle-builder.css regardless of source-order / cache.
+   *
+   * The button-text lives inside a <span> child. A global rule in
+   * styles-*.css sets `span { font-size: 1rem; ... }`, which would
+   * override the button's font-size on the span. We target the
+   * button AND its descendants (.type-tab > *) so the font properties
+   * propagate down to the inner span where the text actually renders. */
+  .bundle-pdp-preview__type-tabs {
+    gap: {{ settings.trifecta_dt_gap | default: 12 }}px !important;
+  }
+  .bundle-pdp-preview__type-tab,
+  .bundle-pdp-preview__type-tab > * {
+    font-size: {{ settings.trifecta_dt_size_d | default: 12 }}px !important;
+    font-weight: {{ settings.trifecta_dt_weight | default: '700' }} !important;
+    text-transform: {{ settings.trifecta_dt_transform | default: 'none' }} !important;
+    letter-spacing: {{ settings.trifecta_dt_ls | default: '0em' }} !important;
+    {%- case settings.trifecta_dt_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family) !important;
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family) !important;
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family) !important;
+    {%- endcase -%}
+    {%- if settings.trifecta_dt_color != blank %}color: {{ settings.trifecta_dt_color }} !important;{%- endif %}
+  }
+  .bundle-pdp-preview__type-tab {
+    padding: {{ settings.trifecta_dt_pad_v | default: 8 }}px {{ settings.trifecta_dt_pad_h | default: 12 }}px !important;
+  }
+  @media (max-width: 749px) {
+    .bundle-pdp-preview__type-tab,
+    .bundle-pdp-preview__type-tab > * {
+      font-size: {{ settings.trifecta_dt_size_m | default: 12 }}px !important;
+    }
+  }
+  .bundle-pdp-preview__type-tab.is-active,
+  .bundle-pdp-preview__type-tab.is-active > * {
+    {%- if settings.trifecta_dt_active_bg    != blank %}background: {{ settings.trifecta_dt_active_bg }} !important; border-color: {{ settings.trifecta_dt_active_bg }} !important;{%- endif %}
+    {%- if settings.trifecta_dt_active_color != blank %}color: {{ settings.trifecta_dt_active_color }} !important;{%- endif %}
+  }
+
+  .bundle-pdp-preview__dropdown-swatch-name {
+    font-size: 12px;
+    font-weight: {{ settings.trifecta_dn_weight | default: '400' }};
+    text-transform: {{ settings.trifecta_dn_transform | default: 'none' }};
+    letter-spacing: 0.05em;
+    {%- case settings.trifecta_dn_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family);
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family);
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family);
+    {%- endcase -%}
+    {%- if settings.trifecta_dn_color != blank %}color: {{ settings.trifecta_dn_color }};{%- endif %}
+  }
+  @media (max-width: 749px) { .bundle-pdp-preview__dropdown-swatch-name { font-size: 12px; } }
+
+  /* carousel bleeds to the dropdown's right edge on mobile (matches the related-styles grid) */
+  @media (max-width: 749px) {
+    .bundle-pdp-preview__dropdown-grid { width: calc(100% + {{ settings.trifecta_dropdown_pad | default: 12 }}px); }
+  }
+
+  .bundle-pdp-preview__summary-total,
+  .bundle-pdp-preview__summary-label {
+    font-size: {{ settings.trifecta_total_size_d | default: 14 }}px;
+    font-weight: {{ settings.trifecta_total_weight | default: '500' }};
+    text-transform: {{ settings.trifecta_total_transform | default: 'none' }};
+    letter-spacing: {{ settings.trifecta_total_ls | default: '0em' }};
+    {%- case settings.trifecta_total_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family);
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family);
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family);
+    {%- endcase -%}
+    {%- if settings.trifecta_total_color != blank %}color: {{ settings.trifecta_total_color }};{%- endif %}
+  }
+  @media (max-width: 749px) {
+    .bundle-pdp-preview__summary-total,
+    .bundle-pdp-preview__summary-label { font-size: {{ settings.trifecta_total_size_m | default: 14 }}px; }
+  }
+
+  {%- if settings.trifecta_price_override -%}
+  /* ----- Bundle total — price numbers (custom styling) -----
+   * Only emitted when the merchant flips the override toggle. The
+   * markup also drops the .pdp-price-regular / .pdp-price-compare
+   * classes in this mode (see the summary markup below), so the PDP
+   * Price block's section-scoped !important rules no longer apply
+   * and these plain class rules style the numbers cleanly. */
+  .bundle-pdp-preview__summary-now {
+    font-size: {{ settings.trifecta_price_size_d | default: 14 }}px !important;
+    font-weight: {{ settings.trifecta_price_weight | default: '600' }} !important;
+    {%- case settings.trifecta_price_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family) !important;
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family) !important;
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family) !important;
+    {%- endcase -%}
+    {%- if settings.trifecta_price_color != blank %}color: {{ settings.trifecta_price_color }} !important;{%- endif %}
+  }
+  .bundle-pdp-preview__summary-was {
+    font-size: {{ settings.trifecta_was_size_d | default: 12 }}px !important;
+    {%- if settings.trifecta_was_color != blank %}color: {{ settings.trifecta_was_color }} !important;{%- endif %}
+  }
+  @media (max-width: 749px) {
+    .bundle-pdp-preview__summary-now { font-size: {{ settings.trifecta_price_size_m | default: 14 }}px !important; }
+    .bundle-pdp-preview__summary-was { font-size: {{ settings.trifecta_was_size_m | default: 12 }}px !important; }
+  }
+  {%- endif -%}
+
+  /* No-FOUC guard for the bundle widget.
+
+     The widget's slot row uses <template x-for> (not rendered until
+     Alpine evaluates the template), while the action button + summary
+     row and the dropdown toolbar render their wrapper markup straight
+     from HTML and only hide their TEXT via x-show + x-cloak on inner
+     spans. That meant the customer briefly saw:
+        - Heading
+        - Empty slot row (nothing rendered yet)
+        - An empty blue Add button (text spans cloaked)
+        - The dropdown toolbar's All pill + X (toolbar wrapper cloaked
+          but x-cloak CSS rule depends on a stylesheet that may not be
+          parsed before first paint)
+     for the few hundred ms before Alpine hydrated.
+
+     Adding `x-cloak` to the root `.bundle-pdp-preview` div + this
+     scoped `display: none !important` rule (inlined so it ships in
+     the document with the markup, no separate stylesheet required)
+     keeps the whole widget invisible until Alpine runs. The instant
+     Alpine inits it removes the x-cloak attribute and the rule no
+     longer matches, revealing the fully-populated widget in one
+     paint instead of a flicker. */
+  .bundle-pdp-preview[x-cloak] { display: none !important; }
+</style>
+
+<div
+  class="bundle-pdp-preview"
+  x-cloak
+  x-data="bundlePdpPreview_{{ product.id }}()"
+  x-init="init()"
+  @keydown.escape.window="dropdownOpen = -1"
+  {%- comment -%}
+    Drives the global `bundle_in_view` flag (defined in
+    snippets/theme__scripts.liquid). Both sticky ATC implementations
+    read this flag to hide themselves while the customer is interacting
+    with the bundle widget — keeps the regular "Add to Cart" sticky
+    from competing with the bundle's "Add Bundle to Cart" CTA.
+
+    Debounced with a 120ms quiet period so fast scrolls across the
+    widget edge don't flicker the sticky bar. Mirrors the pattern in
+    sections/product__main.liquid:1083 and featured-product.liquid:45.
+  {%- endcomment -%}
+  x-intersect:enter="if (window.__bundleInViewTimer) clearTimeout(window.__bundleInViewTimer); window.__bundleInViewTimer = setTimeout(() => bundle_in_view = true, 120);"
+  x-intersect:leave="if (window.__bundleInViewTimer) clearTimeout(window.__bundleInViewTimer); window.__bundleInViewTimer = setTimeout(() => bundle_in_view = false, 120);"
+  x-destroy="bundle_in_view = false">
+
+  <h3 class="bundle-pdp-preview__heading">
+    {{ settings.trifecta_pdp_preview_heading | default: 'Save 10% with a Trifecta' }}
+  </h3>
+
+  <ol class="bundle-pdp-preview__items" aria-label="Trifecta bundle items">
+    <template x-for="(slot, sIdx) in slots" :key="sIdx">
+      <li
+        class="bundle-pdp-preview__item"
+        :class="{ 'is-this': isCurrentProduct(sIdx), 'is-active-dropdown': dropdownOpen === sIdx, 'is-unchecked': !checked[sIdx] }">
+        <button
+          type="button"
+          class="bundle-pdp-preview__item-checkbox"
+          role="checkbox"
+          :aria-checked="checked[sIdx] ? 'true' : 'false'"
+          :aria-label="(checked[sIdx] ? 'Remove ' : 'Add ') + slot.label"
+          @click.stop="toggle(sIdx)"
+          @keydown.space.prevent="toggle(sIdx)">
+          <svg
+            class="bundle-pdp-preview__item-checkbox-mark"
+            x-show="checked[sIdx]"
+            width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button
+          type="button"
+          class="bundle-pdp-preview__item-card"
+          :aria-expanded="dropdownOpen === sIdx"
+          @click="toggleDropdown(sIdx)">
+          <div class="bundle-pdp-preview__item-img">
+            <img
+              :src="currentProduct(sIdx).image || ''"
+              :alt="currentProduct(sIdx).title || ''"
+              loading="lazy" />
+          </div>
+          {%- if settings.trifecta_show_slot_label != false -%}
+          <p class="bundle-pdp-preview__item-slot" x-text="slot.label"></p>
+          {%- endif -%}
+          {%- comment -%}
+            Title shows only the color part of the conventional
+            "<Color> - <Type>" product name (same shortName helper the
+            dropdown swatches use). The full type renders on its own
+            line below when the merchant has the toggle on.
+          {%- endcomment -%}
+          <p class="bundle-pdp-preview__item-title" x-text="shortName(currentProduct(sIdx).title || '')"></p>
+          {%- if settings.trifecta_show_item_type != false -%}
+          <p class="bundle-pdp-preview__item-type" x-text="currentProduct(sIdx).type || ''"></p>
+          {%- endif -%}
+          <p class="bundle-pdp-preview__item-price" x-text="formatMoney(currentProduct(sIdx).price || 0)"></p>
+          <span class="bundle-pdp-preview__item-change-hint" x-cloak>
+            <span x-text="dropdownOpen === sIdx ? 'Close' : 'Change'"></span>
+            <span class="bundle-pdp-preview__item-caret" aria-hidden="true">▾</span>
+          </span>
+        </button>
+      </li>
+    </template>
+  </ol>
+
+  {%- comment -%}
+    Dropdown panel — single panel anchored below the row, swaps content
+    based on which slot is open. No <template x-if> wrapper around the
+    inner content (that pattern caused a race with @click.outside that
+    closed the panel on the same click that opened it). Content stays in
+    the DOM always; the parent's .is-open class drives the CSS collapse.
+  {%- endcomment -%}
+  {%- comment -%}
+    Toolbar above the dropdown panel holds the filter pills (left,
+    horizontally scrollable) and the close X (right) on one row —
+    mirrors the PDP swatch grid's tab + control header layout. The
+    pills scroll under the X rather than overlapping it. x-show keeps
+    the whole row hidden while the dropdown is collapsed.
+  {%- endcomment -%}
+  <div class="bundle-pdp-preview__dropdown-toolbar" x-show="dropdownOpen >= 0" x-cloak>
+    <div class="bundle-pdp-preview__type-tabs">
+      <button
+        type="button"
+        class="bundle-pdp-preview__type-tab"
+        :class="{ 'is-active': dropdownOpen >= 0 && selectedType[dropdownOpen] === '' }"
+        @click="selectType(dropdownOpen, '')">
+        <span>All</span>
+      </button>
+      <template x-for="type in (dropdownOpen >= 0 ? typesForSlot(dropdownOpen) : [])" :key="type">
+        <button
+          type="button"
+          class="bundle-pdp-preview__type-tab"
+          :class="{ 'is-active': dropdownOpen >= 0 && selectedType[dropdownOpen] === type }"
+          @click="selectType(dropdownOpen, type)">
+          <span x-text="type"></span>
+        </button>
+      </template>
+    </div>
+    <button
+      type="button"
+      class="bundle-pdp-preview__dropdown-close"
+      aria-label="Close"
+      @click="dropdownOpen = -1">✕</button>
+  </div>
+  <div
+    class="bundle-pdp-preview__dropdown"
+    :class="{ 'is-open': dropdownOpen >= 0 }">
+
+    <div class="bundle-pdp-preview__dropdown-grid">
+      <template x-for="p in (dropdownOpen >= 0 ? productsForCurrentType(dropdownOpen) : [])" :key="p.handle">
+        <button
+          type="button"
+          class="bundle-pdp-preview__dropdown-swatch"
+          :class="{
+            'is-selected': dropdownOpen >= 0 && currentProduct(dropdownOpen).handle === p.handle,
+            'is-unavailable': !p.available
+          }"
+          :disabled="!p.available"
+          :aria-label="p.title + (p.available ? '' : ' (sold out)')"
+          :title="p.title"
+          @click="selectProduct(dropdownOpen, p)">
+          <span class="bundle-pdp-preview__dropdown-swatch-img">
+            <img :src="p.image" :alt="p.title" loading="lazy" decoding="async" />
+          </span>
+          <span class="bundle-pdp-preview__dropdown-swatch-name" x-text="shortName(p.title)"></span>
+        </button>
+      </template>
+    </div>
+
+    <p
+      class="bundle-pdp-preview__dropdown-empty"
+      x-show="dropdownOpen >= 0 && productsForCurrentType(dropdownOpen).length === 0"
+      x-cloak>
+      No products available in this type.
+    </p>
+  </div>
+
+  {%- comment -%}
+    Layout order per merchant: CTA button first, then the bundle
+    total summary below it. Summary's margin-top setting now
+    controls the gap between button and total instead of the gap
+    between total and button. The .summary-mb / .actions-mt CSS
+    knobs in the schema swap their meaning visually but the
+    settings themselves keep their original labels.
+  {%- endcomment -%}
+  <div class="bundle-pdp-preview__actions">
+    <button
+      type="button"
+      class="btn btn--primary w-full"
+      :disabled="loading || !canAdd()"
+      :class="{ 'opacity-50 cursor-not-allowed': loading || !canAdd() }"
+      @click="addBundle()">
+      <span x-show="!loading && checkedCount() === 0" x-cloak>Select at least one item</span>
+      <span x-show="!loading && checkedCount() > 0 && !checkedAvailable()" x-cloak>One selected item is sold out</span>
+      <span x-show="!loading && checkedCount() === 3 && checkedAvailable()" x-cloak>Add Bundle &mdash; Save 10%</span>
+      <span x-show="!loading && checkedCount() === 2 && checkedAvailable()" x-cloak>Add 2 items to Cart</span>
+      <span x-show="!loading && checkedCount() === 1 && checkedAvailable()" x-cloak>Add 1 item to Cart</span>
+      <span x-show="loading" x-cloak>Adding&hellip;</span>
+    </button>
+    <p
+      class="bundle-pdp-preview__error type--small color__text-error"
+      x-show="error"
+      x-text="error"
+      x-cloak></p>
+  </div>
+
+  <div class="bundle-pdp-preview__summary">
+    <p class="bundle-pdp-preview__summary-total">
+      <span class="bundle-pdp-preview__summary-label" x-text="totals().bundled ? 'Bundle total:' : 'Total:'"></span>
+      {%- comment -%}
+        With the price-override toggle ON, the pdp-price-* classes are
+        dropped so the PDP Price block's !important rules can't reach
+        these numbers — the custom rules in the style block above take
+        over. With the toggle OFF the classes stay and the bundle total
+        matches the PDP price typography exactly, as before.
+      {%- endcomment -%}
+      <strong class="{% unless settings.trifecta_price_override %}pdp-price-regular {% endunless %}bundle-pdp-preview__summary-now" x-text="formatMoney(totals().total)"></strong>
+      <s class="{% unless settings.trifecta_price_override %}pdp-price-compare {% endunless %}bundle-pdp-preview__summary-was" x-show="totals().bundled" x-text="formatMoney(totals().subtotal)" x-cloak></s>
+    </p>
+  </div>
+</div>
+
+<script>
+(function(){
+  window.bundlePdpPreview_{{ product.id }} = function() {
+    return {
+      slots: [],
+      selectedIndex: [0, 0, 0],
+      selectedType: { 0: '', 1: '', 2: '' },
+      /* Per-slot include flag. All 3 checked → bundle with 10% discount;
+       * fewer checked → add selected items individually at full price. */
+      checked: [true, true, true],
+      dropdownOpen: -1,
+      loading: false,
+      error: '',
+      productsPerSlot: 200,
+      currency: '$',
+      discountCode: '',
+      bundleSlot: '',
+      bundlePdpHandle: '',
+      currentColorTag: '',
+
+      init: function() {
+        var dataEl = document.getElementById('{{ _data_id | escape }}');
+        if (!dataEl) return;
+        try {
+          var data = JSON.parse(dataEl.textContent);
+          this.slots = data.slots || [];
+          this.productsPerSlot = data.productsPerSlot || 200;
+          this.currency = data.currency || '$';
+          this.discountCode = data.discountCode || '';
+          this.bundleSlot = data.bundleSlot || '';
+          this.bundlePdpHandle = data.bundlePdpHandle || '';
+          this.currentColorTag = data.currentColorTag || '';
+        } catch (e) {
+          console.error('[bundle-pdp-preview] failed to parse data', e);
+          return;
+        }
+        // Index 0 is always the best pick (server-sorted by type+color+available).
+        this.selectedIndex = this.slots.map(function(){ return 0; });
+        // All slots checked by default — bundle is the recommended state.
+        this.checked = this.slots.map(function(){ return true; });
+        // Default filter is "All" (no type filter) so the customer sees
+        // every option in the dropdown and can pick the type pill to
+        // narrow it. Pre-filtering to the current product's type was
+        // hiding the type tabs from the customer's awareness.
+        var self = this;
+        this.slots.forEach(function(_slot, sIdx) {
+          self.selectedType[sIdx] = '';
+        });
+
+        // Shopify Liquid caps collection.products at 50 per page in
+        // snippets (paginate isn't allowed). For large collections like
+        // "lanyards" (~1283 products) most product types are missing
+        // from the initial output. Fetch additional pages from the
+        // storefront products.json endpoint and merge.
+        //
+        // Deferred to idle time: the inline Liquid island already
+        // seeds up to 200 products per slot, so the Change dropdown
+        // is fully usable immediately. Running the 6-page x 3-slot
+        // fetch loop during initial interaction competed for
+        // bandwidth/CPU and mutated the reactive products array
+        // while the customer was browsing the dropdown.
+        var startFetches = function(){
+          self.slots.forEach(function(slot, sIdx){
+            if (slot.collectionHandle) self._loadMoreProducts(slot.collectionHandle, sIdx);
+          });
+        };
+        if (typeof window.requestIdleCallback === 'function') {
+          window.requestIdleCallback(startFetches, { timeout: 3000 });
+        } else if (document.readyState === 'complete') {
+          setTimeout(startFetches, 0);
+        } else {
+          window.addEventListener('load', function(){ setTimeout(startFetches, 0); }, { once: true });
+        }
+      },
+
+      /* Pick the best default for a slot using the same priority order
+       * as the server-side Liquid bucket logic:
+       *   1. available + type match + color match
+       *   2. available + color match
+       *   3. available + type match
+       *   4. available
+       * Called after _loadMoreProducts streams in additional products
+       * the Liquid loop never reached (the snippet caps at 50 items
+       * per collection — a Shopify limit — but big collections like
+       * "lanyards" have 1200+ products, so the truly-matching color
+       * may only show up after the AJAX paging).
+       *
+       * Exception: for the slot whose label matches the current PDP's
+       * bundleSlot, the current PDP product itself is always the
+       * default — even if another product is a 'better' match by type
+       * (e.g. Clark Vertical Cardholder ranks higher than Clark
+       * Elastic Wallet on a default_wallet_type = 'Vertical Leather
+       * Wallet', but the customer is on the Elastic Wallet PDP so
+       * that's the one the slot should show). */
+      pickBestDefault: function(sIdx) {
+        var slot = this.slots[sIdx];
+        if (!slot || !slot.products || !slot.products.length) return;
+        if (slot.label === this.bundleSlot) {
+          for (var k = 0; k < slot.products.length; k++) {
+            if (slot.products[k].handle === this.bundlePdpHandle) {
+              this.selectedIndex[sIdx] = k;
+              return;
+            }
+          }
+          return;
+        }
+        var defaultType = slot.defaultType || '';
+        var color = this.currentColorTag || '';
+        var bestRank = 99;
+        var bestIdx = this.selectedIndex[sIdx] || 0;
+        for (var i = 0; i < slot.products.length; i++) {
+          var p = slot.products[i];
+          if (!p || !p.available) continue;
+          var typeMatch = defaultType && p.type === defaultType;
+          var colorMatch = color && p.colorTag === color;
+          var rank = colorMatch && typeMatch ? 1
+                   : colorMatch ? 2
+                   : typeMatch ? 3
+                   : 4;
+          if (rank < bestRank) {
+            bestRank = rank;
+            bestIdx = i;
+            if (rank === 1) break; // perfect match, stop early
+          }
+        }
+        this.selectedIndex[sIdx] = bestIdx;
+      },
+
+      _loadMoreProducts: function(handle, sIdx) {
+        var self = this;
+        var MAX_PAGES = 6;
+        var PAGE_SIZE = 250;
+        function fetchPage(page) {
+          var url = window.Shopify.routes.root + 'collections/' + encodeURIComponent(handle)
+            + '/products.json?limit=' + PAGE_SIZE + '&page=' + page;
+          return fetch(url, { credentials: 'same-origin' })
+            .then(function(r){ return r.ok ? r.json() : { products: [] }; })
+            .then(function(data){
+              var slot = self.slots[sIdx];
+              if (!slot || !data || !Array.isArray(data.products) || data.products.length === 0) {
+                return false;
+              }
+              var existing = {};
+              slot.products.forEach(function(p){ existing[p.handle] = true; });
+              data.products.forEach(function(p){
+                if (existing[p.handle]) return;
+                if (!p.variants || p.variants.length === 0) return;
+                // Exclude this PDP's own product from its own slot.
+                if (slot.label === self.bundleSlot && p.handle === self.bundlePdpHandle) return;
+                if ((p.product_type || '') === 'Bundle') return;
+                var v = p.variants[0];
+                var priceCents = (typeof v.price === 'number')
+                  ? v.price
+                  : Math.round(parseFloat(v.price || '0') * 100);
+                var image = '';
+                if (p.images && p.images.length > 0) image = p.images[0].src || p.images[0];
+                /* Extract the first color_<x> tag so the bundle's
+                 * default-picking logic can color-match the current
+                 * PDP product even when Liquid's 50-product cap
+                 * skipped this entry on the server. */
+                var colorTag = '';
+                var tags = p.tags;
+                if (typeof tags === 'string') tags = tags.split(',');
+                if (Array.isArray(tags)) {
+                  for (var t = 0; t < tags.length; t++) {
+                    var tag = String(tags[t]).trim().toLowerCase();
+                    if (tag.indexOf('color_') === 0) { colorTag = tag.slice(6); break; }
+                  }
+                }
+                slot.products.push({
+                  handle: p.handle,
+                  title: p.title || '',
+                  url: '/products/' + p.handle,
+                  image: image,
+                  imageLarge: image,
+                  variantId: v.id,
+                  price: priceCents,
+                  available: v.available !== false,
+                  colorTag: colorTag,
+                  type: p.product_type || ''
+                });
+              });
+              return data.products.length >= PAGE_SIZE;
+            });
+        }
+        (function loop(page) {
+          if (page > MAX_PAGES) {
+            /* All pages in: re-evaluate the default selection ONCE.
+             * Doing this per page re-sorted the visible dropdown on
+             * every fetch while the customer was browsing it. */
+            self.pickBestDefault(sIdx);
+            return;
+          }
+          fetchPage(page).then(function(more){
+            if (more) { loop(page + 1); } else { self.pickBestDefault(sIdx); }
+          }).catch(function(err){
+            console.warn('[bundle-pdp-preview] page', page, 'fetch failed', err);
+            self.pickBestDefault(sIdx);
+          });
+        })(1);
+      },
+
+      currentProduct: function(sIdx) {
+        if (sIdx < 0 || sIdx >= this.slots.length) return {};
+        var slot = this.slots[sIdx];
+        if (!slot || !slot.products || !slot.products.length) return {};
+        var idx = this.selectedIndex[sIdx] || 0;
+        return slot.products[idx] || slot.products[0] || {};
+      },
+
+      typesForSlot: function(sIdx) {
+        if (sIdx < 0) return [];
+        var slot = this.slots[sIdx];
+        if (!slot || !slot.products) return [];
+        var seen = {}, out = [];
+        for (var i = 0; i < slot.products.length; i++) {
+          var t = slot.products[i].type;
+          if (t && !seen[t]) { seen[t] = true; out.push(t); }
+        }
+        return out;
+      },
+
+      productsForCurrentType: function(sIdx) {
+        if (sIdx < 0) return [];
+        var slot = this.slots[sIdx];
+        if (!slot || !slot.products) return [];
+        var cap = this.productsPerSlot || 200;
+        var type = this.selectedType[sIdx];
+        var list = type
+          ? slot.products.filter(function(p){ return p.type === type; })
+          : slot.products;
+        return list.slice(0, cap);
+      },
+
+      selectType: function(sIdx, type) {
+        if (sIdx < 0) return;
+        this.selectedType[sIdx] = type;
+      },
+
+      _scrollToWidget: function(instant) {
+        // Uses window.scrollBy with a DELTA computed from
+        // Element.getBoundingClientRect().top. Both numbers are live —
+        // no dependency on window.pageYOffset, which iOS Safari can
+        // return stale after a recent programmatic scroll (the bug
+        // that caused PRs #39-#41's offset tweaks to under-scroll on
+        // the user's device).
+        //
+        // OPEN (instant=false): smooth-scroll the DROPDOWN PANEL's top
+        //   to the top of the viewport. The dropdown's internal
+        //   padding leaves the "Choose your ..." header text visible
+        //   below the theme nav overlay.
+        // CLOSE (instant=true): instant-snap the BUNDLE ROOT's top to
+        //   the closeHeaderOffset below the viewport top — so the
+        //   customer sees the 3-card preview + Add Bundle CTA right
+        //   after picking a swatch. Instant avoids any race with the
+        //   dropdown collapse animation.
+        var root = this.$el;
+        if (!root) return;
+        var isMobile = window.matchMedia && window.matchMedia('(max-width: 749px)').matches;
+
+        if (instant) {
+          var rootRect = root.getBoundingClientRect();
+          var closeOffset = isMobile ? 96 : 110;
+          var closeDelta = rootRect.top - closeOffset;
+          if (closeDelta === 0) return;
+          try { window.scrollBy({ top: closeDelta, behavior: 'auto' }); }
+          catch (_) { window.scrollBy(0, closeDelta); }
+          return;
+        }
+
+        var dropdownEl = root.querySelector('.bundle-pdp-preview__dropdown');
+        // Target the header text itself (".bundle-pdp-preview__dropdown-
+        // header") so "Choose your <slot>" lands at the top of the
+        // viewport — landing on the dropdown panel's top edge instead
+        // left the header text below the nav overlay because of the
+        // panel's own padding.
+        var headerEl = root.querySelector('.bundle-pdp-preview__dropdown-header');
+        var openTarget = headerEl || dropdownEl || root;
+        var openRect = openTarget.getBoundingClientRect();
+        // openOffset accounts for the fixed mobile header so the
+        // "Choose your ..." text isn't tucked under it.
+        var openOffset = isMobile ? 64 : 80;
+        var openDelta = openRect.top - openOffset;
+        if (openDelta === 0) return;
+        try { window.scrollBy({ top: openDelta, behavior: 'smooth' }); }
+        catch (_) { window.scrollBy(0, openDelta); }
+      },
+
+      toggleDropdown: function(sIdx) {
+        if (this.dropdownOpen === sIdx) {
+          this.dropdownOpen = -1;
+          return;
+        }
+        // Cache the absolute scrollY that we want to land on after the
+        // user picks a swatch. Computed BEFORE the open-scroll, when
+        // pageYOffset is fresh (no in-flight programmatic scroll), so
+        // it's reliable on iOS Safari. The target = position where the
+        // bundle widget's top sits closeOffset below viewport top.
+        var rect = this.$el.getBoundingClientRect();
+        var isMobile = window.matchMedia && window.matchMedia('(max-width: 749px)').matches;
+        var closeOffset = isMobile ? 96 : 110;
+        this._closeTargetY = Math.max(0, window.pageYOffset + rect.top - closeOffset);
+
+        this.dropdownOpen = sIdx;
+        this.selectedType[sIdx] = '';
+        // Synchronous scroll inside the click handler — iOS allows this
+        // when tied to a user gesture but drops deferred scroll calls.
+        this._scrollToWidget();
+      },
+
+      selectProduct: function(sIdx, p) {
+        if (sIdx < 0 || !p || !p.available) return;
+        var slot = this.slots[sIdx];
+        if (!slot) return;
+        for (var i = 0; i < slot.products.length; i++) {
+          if (slot.products[i].handle === p.handle) {
+            this.selectedIndex[sIdx] = i;
+            break;
+          }
+        }
+        // Two-part close fix:
+        //   (1) Disable the dropdown's CSS transition so the collapse is
+        //       instant. The animated collapse races with our close-scroll
+        //       and lets iOS scroll anchoring rebound the viewport.
+        //   (2) Use the absolute Y cached at OPEN time, applied with
+        //       window.scrollTo. Absolute targets are immune to the
+        //       stale-pageYOffset bug AND to anchoring deltas — the
+        //       browser respects scrollTo as the ground truth.
+        var dropdownEl = this.$el && this.$el.querySelector('.bundle-pdp-preview__dropdown');
+        var self = this;
+        // Globally disable scroll anchoring for the duration of the close.
+        // Prevents the browser from "compensating" for the dropdown's
+        // sudden height shrink by adjusting scrollY — the exact bug that
+        // was undoing our close-scroll.
+        var docEl = document.documentElement;
+        var prevAnchor = docEl.style.overflowAnchor;
+        docEl.style.overflowAnchor = 'none';
+        if (dropdownEl) dropdownEl.style.transition = 'none';
+        this.dropdownOpen = -1;
+        var targetY = (typeof this._closeTargetY === 'number') ? this._closeTargetY : null;
+        this.$nextTick(function(){
+          if (targetY !== null) {
+            try { window.scrollTo({ top: targetY, behavior: 'auto' }); }
+            catch (_) { window.scrollTo(0, targetY); }
+          } else {
+            self._scrollToWidget(true);
+          }
+          requestAnimationFrame(function(){
+            requestAnimationFrame(function(){
+              if (dropdownEl) dropdownEl.style.transition = '';
+              docEl.style.overflowAnchor = prevAnchor || '';
+            });
+          });
+        });
+      },
+
+      isCurrentProduct: function(sIdx) {
+        // Returns true when the slot is the current PDP's slot AND the
+        // currently-displayed product is the PDP product itself. Used by
+        // the UI to show the "This item" badge + highlighted border —
+        // both should disappear if the customer swaps that slot away.
+        var slot = this.slots[sIdx];
+        if (!slot || slot.label !== this.bundleSlot) return false;
+        var p = this.currentProduct(sIdx);
+        return !!(p && p.handle === this.bundlePdpHandle);
+      },
+
+      toggle: function(sIdx) {
+        if (sIdx < 0 || sIdx >= this.checked.length) return;
+        this.checked[sIdx] = !this.checked[sIdx];
+      },
+
+      checkedCount: function() {
+        var n = 0;
+        for (var i = 0; i < this.checked.length; i++) {
+          if (this.checked[i]) n++;
+        }
+        return n;
+      },
+
+      checkedAvailable: function() {
+        for (var i = 0; i < this.slots.length; i++) {
+          if (!this.checked[i]) continue;
+          var p = this.currentProduct(i);
+          if (!p || !p.available) return false;
+        }
+        return this.checkedCount() > 0;
+      },
+
+      canAdd: function() {
+        return this.checkedCount() > 0 && this.checkedAvailable();
+      },
+
+      totals: function() {
+        var sum = 0;
+        for (var i = 0; i < this.slots.length; i++) {
+          if (!this.checked[i]) continue;
+          var p = this.currentProduct(i);
+          sum += (p && typeof p.price === 'number') ? p.price : 0;
+        }
+        /* 10% bundle discount applies only when all 3 slots are checked.
+         * Partial selections (1-2 items) add at full price as individual
+         * cart lines; the cart-drawer auto-combine logic will re-fold
+         * them into a Trifecta Bundle if/when the 3rd type lands. */
+        var bundled = this.checkedCount() === 3;
+        var savings = bundled ? Math.round(sum * 0.10) : 0;
+        return { subtotal: sum, savings: savings, total: sum - savings, bundled: bundled };
+      },
+
+      formatMoney: function(cents) {
+        if (window.Shopify && window.Shopify.formatMoney) {
+          return window.Shopify.formatMoney(cents || 0, this.currency);
+        }
+        return this.currency + ((cents || 0) / 100).toFixed(2);
+      },
+
+      /* Product titles are conventionally "<Color> - <Type>", e.g.
+       * "Clark - Elastic Wallet". Customers only need the color part
+       * under a swatch — the type is implied by the slot. Split on
+       * the first " - " and fall back to the whole title if absent. */
+      shortName: function(title) {
+        if (!title) return '';
+        var idx = title.indexOf(' - ');
+        return idx > 0 ? title.slice(0, idx) : title;
+      },
+
+      addBundle: function() {
+        if (this.loading) return;
+        if (!this.canAdd()) {
+          this.error = this.checkedCount() === 0
+            ? 'Select at least one item.'
+            : 'One of the selected items is sold out. Pick a different color.';
+          return;
+        }
+        this.loading = true;
+        this.error = '';
+        this.dropdownOpen = -1;
+        /* Apply Trifecta bundling properties (and discount code) only
+         * when all 3 slots are checked. Partial selections go in as
+         * regular cart lines without _bundle_id. */
+        var isBundle = this.checkedCount() === 3;
+        var bundleId = isBundle ? ('tri_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8)) : '';
+        var self = this;
+        var items = [];
+        for (var i = 0; i < this.slots.length; i++) {
+          if (!this.checked[i]) continue;
+          var p = this.currentProduct(i);
+          var props = {};
+          if (isBundle) {
+            props['Bundle Slot'] = this.slots[i].label;
+            props['_bundle_id'] = bundleId;
+          }
+          var entry = { id: p.variantId, quantity: 1 };
+          if (isBundle) entry.properties = props;
+          items.push(entry);
+        }
+        var rootScope = (window.Alpine && document.body) ? window.Alpine.$data(document.body) : null;
+        var dc = isBundle ? this.discountCode : '';
+        fetch(window.Shopify.routes.root + 'cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ items: items })
+        })
+        .then(function(r){
+          return r.json().then(function(body){
+            if (!r.ok) throw Object.assign(new Error('Add to cart failed'), { body: body });
+            return body;
+          });
+        })
+        .then(function(){
+          /* Fire the discount-code attach and cart-refresh IN PARALLEL.
+           * Previously these were chained sequentially, adding the
+           * /discount/<code> latency (often 500ms-1s on Shopify's
+           * end for validation) to the critical path before the
+           * cart drawer opened. /discount/<code> only attaches the
+           * code to the session cookie — it doesn't change line
+           * prices in the drawer (the discount applies at checkout),
+           * so the cart-drawer display is identical whether the
+           * discount has been attached or not. Safe to fire-and-
+           * forget while the drawer opens. */
+          if (dc) {
+            fetch('/discount/' + encodeURIComponent(dc), {
+              method: 'GET',
+              credentials: 'same-origin'
+            }).catch(function(){});
+          }
+          if (rootScope && typeof rootScope.updateCart === 'function') rootScope.updateCart(true);
+        })
+        .catch(function(err){
+          self.error = (err && err.body && err.body.description) || 'Could not add to cart. Please try again.';
+          console.error('[bundle-pdp-preview]', err);
+        })
+        .finally(function(){ self.loading = false; });
+      }
+    };
+  };
+})();
+</script>
+
+{%- endif -%}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html 
+  class="min-h-[100vh]"
+  lang="{{ request.locale.iso_code }}"
+  x-data="app()" 
+  x-init="
+    handleSharedCart(); 
+    updateCart(false);">
+
+  <head>
+    {% render 'theme__meta' %}
+    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+    {%- unless settings.type_font_heading.system? and settings.type_font_body.system? -%}
+      <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+    {%- endunless -%}
+    {%- unless settings.type_font_body.system? -%}
+      <link rel="preload" as="font" href="{{ settings.type_font_body | font_url }}" type="font/woff2" crossorigin>
+    {%- endunless -%}
+    {%- unless settings.type_font_heading.system? -%}
+      <link rel="preload" as="font" href="{{ settings.type_font_heading | font_url }}" type="font/woff2" crossorigin>
+    {%- endunless -%}
+    {% render 'theme__structured-data' %}
+    {% render 'theme__styles' %}
+    {% render 'script__product-card-media' %}
+    {% render 'assets' with 'styles.css' %}
+    {{ content_for_header }}
+  </head>
+
+  <body class="min-h-[100vh] break-words 
+    {{ template | handle }}"
+    x-intersect.half:enter="scroll_up = false"
+    x-intersect.half:leave="scroll_up = true">
+      
+    <a href="#root"
+      class="top-4 left-4 color__bg-body focus:translate-y-0 border__button--radius fixed z-50 px-4 py-2 no-underline transform -translate-y-20 shadow-md">
+      {{ 'general.accessibility.skip_to_content' | t }}
+    </a>
+
+    <main id="root" role="main">
+      {{ content_for_layout }}
+    </main>
+    {% render 'assets' with 'main.js' %}
+    {% render 'theme__scripts' %}
+
+  </body>
+
+</html>
+

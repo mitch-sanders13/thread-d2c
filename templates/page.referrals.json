@@ -1,0 +1,66 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "b57feb6f-cecb-43f0-b943-03ad7b68546b": {
+      "type": "page__main",
+      "disabled": true,
+      "settings": {
+        "color_scheme": "color__bg-body color__text",
+        "layout_horizontal": "window"
+      }
+    },
+    "511ddaeb-c7bf-40c8-9b50-93a66e9d010d": {
+      "type": "text",
+      "disabled": true,
+      "settings": {
+        "heading": "REFERRALS",
+        "content": "",
+        "button_label": "Button",
+        "button_url": "",
+        "spacing_top": 40,
+        "spacing_bottom": 40,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--b-width",
+        "layout_x_alignment": "text-center justify-center",
+        "content_x_alignment": "text-center justify-center",
+        "visibility": ""
+      }
+    },
+    "1702017643894a6d19": {
+      "type": "apps",
+      "blocks": {
+        "0d4eb9ef-ddf1-4a32-a7e8-965c476f843a": {
+          "type": "shopify:\/\/apps\/okendo\/blocks\/referral-widget\/bb689e69-ea70-4661-8fb7-ad24a2e23c29",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "0d4eb9ef-ddf1-4a32-a7e8-965c476f843a"
+      ],
+      "settings": {
+        "spacing_top": 0,
+        "spacing_bottom": 0,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "style_border": "",
+        "layout_horizontal": "window--full",
+        "layout_padding": false
+      }
+    }
+  },
+  "order": [
+    "b57feb6f-cecb-43f0-b943-03ad7b68546b",
+    "511ddaeb-c7bf-40c8-9b50-93a66e9d010d",
+    "1702017643894a6d19"
+  ]
+}

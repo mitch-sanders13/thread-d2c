@@ -1,0 +1,89 @@
+<!-- sections/about-image-text.liquid -->
+{% comment %} 
+  Custom about page section
+{% endcomment %}
+
+<section
+	data-section-id="{{ section.id }}"
+	class="
+		sec-{{ section.id }}
+		pt-{{ section.settings.padding_top }}
+		pb-{{ section.settings.padding_bottom }}
+		image-text
+		flex
+		justify-center
+		items-center
+		h-fit
+		w-screen">
+
+	<div class="flex flex-col md:flex-row md:p-20 max-w-6xl">
+		<div class="h-1/2 md:w-1/2 flex flex-col justify-start items-start md:justify-center px-8 pb-8 md:pl-0">
+				<div class="subtext translate-y-12 md:translate-y-0">{{ section.settings.subtext }}</div>
+				<div class="heading z-10 font-extrabold translate-y-12 md:translate-y-0 max-w-[21rem] md:mt-4 md:mb-8">{{ section.settings.heading }}</div>
+				<div class="body-1 hidden md:block max-w-[27rem]">{{ section.settings.body }}</div>
+		</div>
+		<div class="h-1/2 md:w-1/2">
+			<div class="">
+				{% if section.settings.image != blank %}
+					<img src="{{ section.settings.image | image_url }}" alt="{{ section.settings.image.alt | escape }}" loading="lazy" decoding="async" width="{{ section.settings.image.width }}" height="{{ section.settings.image.height }}">
+				{% else %}
+					<div class="placeholder-wrapper">{{ 'collection-1' | placeholder_svg_tag: 'placeholder dark' }}</div>
+				{% endif %}
+			</div>
+		</div>
+		<div class="body-2 p-8 md:hidden">
+			{{ section.settings.body }}
+		</div>
+	</div>
+</section>
+
+{% schema %}
+{
+	"name": "[about] Image text",
+	"settings": [
+	{
+		"type": "image_picker",
+		"id": "image",
+		"label": "Image"
+	},
+	{
+		"type":"richtext",
+		"id":"subtext",
+		"label":"Subtext"
+	},
+	{
+		"type":"richtext",
+		"id":"heading",
+		"label":"Heading"
+	},
+	{
+		"type":"richtext",
+		"id":"body",
+		"label":"Body"
+	},
+	{
+	"type": "range",
+	"id": "padding_top",
+	"min": 0,
+	"max": 6,
+	"step": 1,
+	"label": "Top Padding",
+	"default": 0
+	},
+	{
+	"type": "range",
+	"id": "padding_bottom",
+	"min": 0,
+	"max": 6,
+	"step": 1,
+	"label": "Bottom padding",
+	"default": 0
+	}
+	],
+	"presets":[
+		{
+			"name":"[about] Image text"
+		}
+	]
+}
+{% endschema %}

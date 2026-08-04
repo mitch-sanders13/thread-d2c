@@ -1,0 +1,82 @@
+<!-- snippets/collection__filter-drawer.liquid -->
+{% comment %}
+  Mobile bottom-sheet drawer for collection filters. Slides up from the
+  bottom of the viewport. Header + scrollable accordion body + sticky
+  "Apply" footer. Visibility is owned by the parent section's
+  `filter_drawer_open` Alpine state.
+
+  Globals (read from the parent section's Alpine scope):
+    - filter_drawer_open (boolean): toggle for the drawer
+    - settings.enable_animations: gate for x-transition
+
+  Accepts (from the caller):
+    - active_filter_count: integer (rendered as the (N) count next to
+      the Apply button).
+{% endcomment %}
+
+<section role="dialog" aria-modal="true"
+  class="cs-filter-drawer md:hidden fixed inset-0 z-50 overflow-hidden"
+  x-show="filter_drawer_open"
+  @keyup.escape.window="filter_drawer_open = false"
+  x-cloak>
+
+  {%- comment -%} Backdrop {%- endcomment -%}
+  <div aria-hidden="true"
+    class="fixed inset-0 bg-black bg-opacity-50"
+    @click="filter_drawer_open = false"
+    x-show="filter_drawer_open"
+    {% if settings.enable_animations %}
+      x-transition:enter="animation-300"
+      x-transition:enter-start="opacity-0"
+      x-transition:enter-end="opacity-100"
+      x-transition:leave="animation-300"
+      x-transition:leave-start="opacity-100"
+      x-transition:leave-end="opacity-0"
+    {% endif %}
+    x-cloak></div>
+
+  {%- comment -%} Panel — slides up from the bottom {%- endcomment -%}
+  <div
+    class="absolute bottom-0 left-0 right-0 max-h-[90svh] color__bg-body flex flex-col transform"
+    x-show="filter_drawer_open"
+    {% if settings.enable_animations %}
+      x-transition:enter="animation-300"
+      x-transition:enter-start="translate-y-full"
+      x-transition:enter-end="translate-y-0"
+      x-transition:leave="animation-300"
+      x-transition:leave-start="translate-y-0"
+      x-transition:leave-end="translate-y-full"
+    {% endif %}
+    x-cloak>
+
+    {%- comment -%} Header {%- endcomment -%}
+    <div class="flex items-center justify-between px-4 py-4 border--b-width color__border-divider-1">
+      <span class="type__nav type--smaller" style="letter-spacing:0.1em;">FILTERS</span>
+      <button type="button"
+        class="flex items-center justify-center hover:opacity-75"
+        @click="filter_drawer_open = false"
+        aria-label="{{ 'general.accessibility.close' | t }}">
+        {% render 'component__icon', icon: 'x', size: '24' %}
+      </button>
+    </div>
+
+    {%- comment -%} Body — accordion sections {%- endcomment -%}
+    <form id="js:drawerFilter"
+      class="flex-1 overflow-y-auto"
+      @change.prevent="
+        handleFilterChange('js:drawerFilter');
+        scrollToTop('js:top');
+      ">
+      {% render 'collection__filter-bodies', form_id_suffix: 'drawer', include_active_pills: true %}
+    </form>
+
+    {%- comment -%} Footer — Apply button {%- endcomment -%}
+    <div class="p-4 border--t-width color__border-divider-1">
+      <button type="button"
+        class="btn btn--secondary !w-full"
+        @click="filter_drawer_open = false">
+        APPLY{% if active_filter_count and active_filter_count > 0 %} ({{ active_filter_count }}){% endif %}
+      </button>
+    </div>
+  </div>
+</section>

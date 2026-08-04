@@ -1,0 +1,151 @@
+<div
+  class="flex justify-center flex-none"
+  x-show="!item.tags.includes('hiderecommendation') && item.available && item.url"
+>
+  <div
+    class="
+      group relative w-full border--width border--radius border-gray-300 border-opacity-0 hover:border-opacity-100
+      {% if settings.thumbnails_border_style == 'thumbnail' %}
+        border--radius overflow-hidden
+      {% endif %}
+    "
+    x-data="
+      {
+        option_popup: true,
+        button_loading: false
+      }
+    "
+  >
+    {%- comment -%} Image {%- endcomment -%}
+    <a
+      class="relative block hover:opacity-100"
+      :href="item && item.url ? `${item.url}` : '#'"
+    >
+      <div
+        class="
+          animation-500 w-full overflow-hidden color__bg-overlay-1
+          {% if settings.thumbnails_border_style == 'image' %}
+            border--radius
+          {% endif %}
+        "
+      >
+        <div class="{{ settings.thumbnails_ratio }} object-cover overflow-hidden">
+          {% if settings['thumbnails_object-sizing'] == 'cover' %}
+            {% capture image_class %}w-full h-full object-cover {{ settings.thumbmails_color_scheme }}{% endcapture %}
+          {% else %}
+            {% capture image_class %}w-full h-full object-contain {{ settings.thumbmails_color_scheme }}{% endcapture %}
+          {% endif %}
+          <img
+            :src="`${ item.featured_image }`"
+            :alt="`${ item.title }`"
+            width="904"
+            class="{{ image_class }}"
+            loading="lazy"
+          >
+        </div>
+      </div>
+    </a>
+
+    {%- comment -%} Desktop Content {%- endcomment -%}
+    <div
+      class="
+        hidden md:block hover:no-underline no-underline whitespace-normal relative flex flex-col justify-end py-2 {{ settings.thumbnails_alignment }}
+        {% if settings.thumbnails_border_style == "thumbnail" %}
+          px-4 pb-4
+        {% endif %}
+      "
+    >
+      <div class="px-2 flex flex-wrap items-center justify-between gap-1 mb-0 {{ settings.thumbnails_alignment }}">
+        <div class="flex items-center gap-1 pr-2">
+          <h3 class="type--base !leading-tight mb-0 type__heading" aria-level="2" x-text="item.title"></h3>
+          <ul class="flex items-center p-0 mb-0 opacity-75 gap-x-1 gap-y-0 type__body">
+            {% if settings.enable_thumbnails_vendor %}
+              <li
+                class="
+                  type--small inline-block last:after:hidden
+                  {% if settings.type_seperator == 'dot' %} after:content-['\00B7'] {% else %} after:content-['\007C'] {% endif %}
+                "
+                x-text="item.vendor"
+              ></li>
+            {% endif %}
+            {% if settings.enable_thumbnails_variant_count %}
+              <li
+                class="
+                  type--small inline-block last:after:hidden
+                  {% if settings.type_seperator == 'dot' %} after:content-['\00B7'] {% else %} after:content-['\007C'] {% endif %}
+                "
+                x-text="item.variants.length + ' {{ 'products.general.options' | t }}'"
+              ></li>
+            {% endif %}
+          </ul>
+        </div>
+
+        {% comment %} Desktop Prices {% endcomment %}
+        <div class="w-full text-center md:text-right md:w-auto">
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <span class="text-xs font-bold" x-html="Shopify.formatMoney(item.price)"></span>
+            <span
+              class="text-xs line-through opacity-75"
+              x-show="item.compare_at_price_max > item.price"
+              x-html="Shopify.formatMoney(item.compare_at_price_max)"
+            >
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {% comment %} Desktop Swatches {% endcomment %}
+      <div
+        :class="(item.tags && item.tags.some(tag => tag.toLowerCase().trim() === 'collegiate') ? 'js:swatchList-collegiate-' : 'js:swatchList-') + item.type.toLowerCase().replace(/\s+/g, '-')"
+        class="mt-2 relative z-[15] hidden md:block"
+      >
+        <div class="flex flex-wrap gap-2 px-2">
+          {% for i in (1..4) %}
+            <span
+              class="animate-pulse btn btn--plain btn--small bg-center !w-6 !h-6 !min-h-[1.5rem] !min-w-[1.5rem] bg-contain !rounded-full !p-0"
+            >
+            </span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    {%- comment -%} Mobile Content {%- endcomment -%}
+    <div class="md:hidden hover:no-underline no-underline whitespace-normal relative flex flex-col justify-end py-1">
+      <div class="px-2">
+        {% comment %} Product Type & Price on first line {% endcomment %}
+        <div class="flex items-start justify-between gap-1 mb-0">
+          <h3
+            class="mb-0"
+            aria-level="2"
+            style="font-size: {{ settings.type_label_size }}px; line-height: 1.1; font-weight: 500; max-width: 65%; word-break: break-word;"
+            x-text="item.title"
+          ></h3>
+          <div class="flex whitespace-nowrap pl-1" style="margin-top: -1px;">
+            <span
+              class="text-xs font-bold"
+              x-bind:data-product-id="item.id"
+              x-html="Shopify.formatMoney(item.price)"
+            >
+            </span>
+            <span
+              class="text-xs ml-1"
+              style="text-decoration: line-through; opacity: 0.75;"
+              x-bind:data-product-id="item.id"
+              x-show="item.compare_at_price_max > item.price"
+              x-html="Shopify.formatMoney(item.compare_at_price_max)"
+            >
+            </span>
+          </div>
+        </div>
+
+        {% comment %} Title and Colors on second line {% endcomment %}
+        {% comment %}
+          <div class="flex items-center justify-between gap-2 mt-0">
+            <span class="opacity-75 whitespace-nowrap shrink-0 text-xs" x-text="item.variants.length + ' Colors'"></span>
+          </div>
+        {% endcomment %}
+      </div>
+    </div>
+  </div>
+</div>

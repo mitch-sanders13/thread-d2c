@@ -1,0 +1,1318 @@
+<!-- sections/ugc-gallery.liquid -->
+{% comment %}
+  UGC / "Do what connects you" gallery.
+  Horizontal infinite-scroll track of image/video tiles with username captions.
+
+  Reuses from theme__styles.liquid:
+    - Typography utilities: .type-display, .type-h1, .type-h2, .type-h3, .type-body, .type-small, .type-label
+    - Spacing utility: .spacing-sides (side gutter for header + CTA; track is full-bleed)
+    - CSS variables: --color__bg-body-light, --color__bg-overlay-light-1/2/3, --color__link-light
+    - Typography font-family vars: --type-font-body-family, --type-font-header-family,
+      --type-font-nav-family, --type-font-handwritten-family
+    - Button classes: .btn, .btn--secondary, .btn--tertiary, .btn--neutral, .btn--plain
+    - Color source: settings.background_primary_light (via --color__link-light for CTA underline)
+
+  New tokens worth promoting to theme__styles.liquid :root (follow-up):
+    - --color__bg-bone-light / --color__bg-cream-light as first-class tokens.
+      Currently mapped to --color__bg-overlay-light-1 / -light-2 respectively.
+
+  Merchant-facing decisions:
+    - Background select exposes body | bone | cream | primary only (no raw color picker).
+    - Autoplay respects OS-level prefers-reduced-motion by default; merchants can override
+      via "Force autoplay" toggle for visitors who have that setting on.
+    - Typography on eyebrow / heading / lede / CTA follows the brand-statement pattern:
+      pick a theme token ("↳ Use theme token …") OR override manually per-element.
+    - CTA style select: link-arrow (default) or any of the theme's btn variants.
+{% endcomment %}
+
+{%- liquid
+  assign section_id = section.id
+  assign heading_text = section.settings.heading | default: ''
+  assign align = section.settings.heading_alignment | default: 'center'
+
+  case section.settings.background
+    when 'body'
+      assign bg_value = 'var(--color__bg-body-light)'
+      assign bg_class = 'ugc-gallery--bg-body'
+    when 'bone'
+      assign bg_value = 'var(--color__bg-overlay-light-1)'
+      assign bg_class = 'ugc-gallery--bg-bone'
+    when 'cream'
+      assign bg_value = 'var(--color__bg-overlay-light-2)'
+      assign bg_class = 'ugc-gallery--bg-cream'
+    when 'primary'
+      assign bg_value = 'var(--color__link-light)'
+      assign bg_class = 'ugc-gallery--bg-primary'
+    else
+      assign bg_value = 'var(--color__bg-body-light)'
+      assign bg_class = 'ugc-gallery--bg-body'
+  endcase
+
+  assign autoplay_attr = 'false'
+  if section.settings.autoplay
+    assign autoplay_attr = 'true'
+  endif
+  assign force_motion_attr = 'false'
+  if section.settings.force_autoplay
+    assign force_motion_attr = 'true'
+  endif
+  assign pause_attr = 'false'
+  if section.settings.pause_on_hover
+    assign pause_attr = 'true'
+  endif
+  assign drag_attr = 'false'
+  if section.settings.enable_drag
+    assign drag_attr = 'true'
+  endif
+
+  assign aria_label = heading_text | strip_html | strip
+  if aria_label == blank
+    assign aria_label = 'Community gallery'
+  endif
+
+  comment
+    Typography resolvers — per-element. Same pattern as brand-statement.liquid:
+    if the font select starts with "token-", use the token utility class (.type-*)
+    and skip manual overrides; otherwise apply a manual font-family + sizing styles.
+  endcomment
+
+  assign eyebrow_use_token = false
+  assign eyebrow_token_class = ''
+  assign eyebrow_font_style = ''
+  if section.settings.eyebrow_font contains 'token-'
+    assign eyebrow_use_token = true
+    assign eyebrow_token_class = section.settings.eyebrow_font | replace: 'token-', 'type-'
+  elsif section.settings.eyebrow_font == 'body'
+    assign eyebrow_font_style = 'font-family:var(--type-font-body-family);'
+  elsif section.settings.eyebrow_font == 'heading'
+    assign eyebrow_font_style = 'font-family:var(--type-font-header-family);'
+  elsif section.settings.eyebrow_font == 'nav'
+    assign eyebrow_font_style = 'font-family:var(--type-font-nav-family);'
+  elsif section.settings.eyebrow_font == 'handwritten'
+    assign eyebrow_font_style = 'font-family:var(--type-font-handwritten-family);'
+  endif
+
+  assign heading_use_token = false
+  assign heading_token_class = ''
+  assign heading_font_style = ''
+  if section.settings.heading_font contains 'token-'
+    assign heading_use_token = true
+    assign heading_token_class = section.settings.heading_font | replace: 'token-', 'type-'
+  elsif section.settings.heading_font == 'body'
+    assign heading_font_style = 'font-family:var(--type-font-body-family);'
+  elsif section.settings.heading_font == 'heading'
+    assign heading_font_style = 'font-family:var(--type-font-header-family);'
+  elsif section.settings.heading_font == 'nav'
+    assign heading_font_style = 'font-family:var(--type-font-nav-family);'
+  elsif section.settings.heading_font == 'handwritten'
+    assign heading_font_style = 'font-family:var(--type-font-handwritten-family);'
+  endif
+
+  assign lede_use_token = false
+  assign lede_token_class = ''
+  assign lede_font_style = ''
+  if section.settings.lede_font contains 'token-'
+    assign lede_use_token = true
+    assign lede_token_class = section.settings.lede_font | replace: 'token-', 'type-'
+  elsif section.settings.lede_font == 'body'
+    assign lede_font_style = 'font-family:var(--type-font-body-family);'
+  elsif section.settings.lede_font == 'heading'
+    assign lede_font_style = 'font-family:var(--type-font-header-family);'
+  elsif section.settings.lede_font == 'nav'
+    assign lede_font_style = 'font-family:var(--type-font-nav-family);'
+  elsif section.settings.lede_font == 'handwritten'
+    assign lede_font_style = 'font-family:var(--type-font-handwritten-family);'
+  endif
+
+  assign cta_use_token = false
+  assign cta_token_class = ''
+  assign cta_font_style = ''
+  if section.settings.cta_font contains 'token-'
+    assign cta_use_token = true
+    assign cta_token_class = section.settings.cta_font | replace: 'token-', 'type-'
+  elsif section.settings.cta_font == 'body'
+    assign cta_font_style = 'font-family:var(--type-font-body-family);'
+  elsif section.settings.cta_font == 'heading'
+    assign cta_font_style = 'font-family:var(--type-font-header-family);'
+  elsif section.settings.cta_font == 'nav'
+    assign cta_font_style = 'font-family:var(--type-font-nav-family);'
+  elsif section.settings.cta_font == 'handwritten'
+    assign cta_font_style = 'font-family:var(--type-font-handwritten-family);'
+  endif
+
+  assign cta_is_link = false
+  if section.settings.cta_style == 'link-arrow'
+    assign cta_is_link = true
+  endif
+-%}
+
+{%- comment -%}
+  Capture the CTA markup once at the top so both render sites
+  (above-gallery near the header, below-gallery before the closing
+  </section>) can reuse it. If this lived further down in the file,
+  the above-gallery render would fire BEFORE the capture executed
+  and the variable would be empty — which is exactly the bug that
+  was hiding the CTA when the merchant flipped "Above gallery" on.
+{%- endcomment -%}
+{%- capture _ugc_cta_html -%}
+  {%- if section.settings.show_cta and section.settings.cta_label != blank and section.settings.cta_url != blank -%}
+    <div class="ugc-gallery__inner ugc-gallery__cta-wrap ugc-gallery__cta-wrap--{{ section.settings.cta_position | default: 'below_gallery' }} spacing-sides">
+      {%- if cta_is_link -%}
+        <a
+          class="ugc-gallery__cta {% if cta_use_token %}{{ cta_token_class }}{% endif %}"
+          href="{{ section.settings.cta_url }}">
+          <span>{{ section.settings.cta_label | escape }}</span>
+          <span class="ugc-gallery__cta-arrow" aria-hidden="true">&rarr;</span>
+        </a>
+      {%- else -%}
+        <a
+          class="{{ section.settings.cta_style }} ugc-gallery__cta-btn {% if cta_use_token %}{{ cta_token_class }}{% endif %}"
+          href="{{ section.settings.cta_url }}">
+          {{ section.settings.cta_label | escape }}
+        </a>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+{%- endcapture -%}
+
+<section
+  id="ugc-gallery-{{ section_id }}"
+  class="ugc-gallery {{ bg_class }} ugc-gallery--align-{{ align }}"
+  style="
+    --ugc-gap: {{ section.settings.gap_px }}px;
+    --ugc-pt-d: {{ section.settings.padding_top_desktop }}px;
+    --ugc-pb-d: {{ section.settings.padding_bottom_desktop }}px;
+    --ugc-pt-m: {{ section.settings.padding_top_mobile }}px;
+    --ugc-pb-m: {{ section.settings.padding_bottom_mobile }}px;
+    --ugc-bg: {{ bg_value }};"
+  data-ugc-gallery
+  data-duration="{{ section.settings.loop_duration_seconds }}"
+  data-autoplay="{{ autoplay_attr }}"
+  data-force-motion="{{ force_motion_attr }}"
+  data-pause-on-hover="{{ pause_attr }}"
+  data-drag="{{ drag_attr }}">
+
+  {%- assign ugc_show_eyebrow = false -%}
+  {%- if section.settings.show_eyebrow and section.settings.eyebrow_text != blank -%}{%- assign ugc_show_eyebrow = true -%}{%- endif -%}
+  {%- if ugc_show_eyebrow or heading_text != blank or section.settings.lede != blank -%}
+    <div class="ugc-gallery__inner spacing-sides">
+      <header class="ugc-gallery__header">
+        {%- if ugc_show_eyebrow -%}
+          <span class="ugc-gallery__eyebrow {% if eyebrow_use_token %}{{ eyebrow_token_class }}{% endif %}"
+            style="
+              {% unless eyebrow_use_token %}
+                font-size:{{ section.settings.eyebrow_size_mobile }}px;
+                font-weight:{{ section.settings.eyebrow_weight }};
+                text-transform:{{ section.settings.eyebrow_transform }};
+                letter-spacing:{{ section.settings.eyebrow_letter_spacing }}em;
+                {{ eyebrow_font_style }}
+              {% endunless %}
+              {% if section.settings.eyebrow_color != blank %}color:{{ section.settings.eyebrow_color }};{% endif %}">
+            {{ section.settings.eyebrow_text | escape }}
+          </span>
+        {%- endif -%}
+
+        {%- if heading_text != blank -%}
+          <{{ section.settings.heading_tag }}
+            id="ugc-gallery-{{ section_id }}-heading"
+            class="ugc-gallery__heading {% if heading_use_token %}{{ heading_token_class }}{% endif %}"
+            style="
+              {% unless heading_use_token %}
+                font-size:{{ section.settings.heading_size_mobile }}px;
+                font-weight:{{ section.settings.heading_weight }};
+                text-transform:{{ section.settings.heading_transform }};
+                line-height:{{ section.settings.heading_line_height }};
+                letter-spacing:{{ section.settings.heading_letter_spacing }}em;
+                {{ heading_font_style }}
+              {% endunless %}
+              {% if section.settings.heading_color != blank %}color:{{ section.settings.heading_color }};{% endif %}">
+            {{ heading_text }}
+          </{{ section.settings.heading_tag }}>
+        {%- endif -%}
+
+        {%- if section.settings.lede != blank -%}
+          <div class="ugc-gallery__lede {% if lede_use_token %}{{ lede_token_class }}{% endif %}"
+            style="
+              {% unless lede_use_token %}
+                font-size:{{ section.settings.lede_size_mobile }}px;
+                font-weight:{{ section.settings.lede_weight }};
+                line-height:{{ section.settings.lede_line_height }};
+                letter-spacing:{{ section.settings.lede_letter_spacing }}em;
+                {{ lede_font_style }}
+              {% endunless %}
+              {% if section.settings.lede_color != blank %}color:{{ section.settings.lede_color }};{% endif %}">
+            {{ section.settings.lede | strip_html | newline_to_br }}
+          </div>
+        {%- endif -%}
+      </header>
+    </div>
+  {%- endif -%}
+
+  {%- if section.settings.cta_position == 'above_gallery' -%}
+    {{ _ugc_cta_html }}
+  {%- endif -%}
+
+  {%- if section.blocks.size > 0 -%}
+    <div
+      class="ugc-gallery__track-wrap"
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="{{ aria_label | escape }}">
+      <div class="ugc-gallery__track" data-ugc-track>
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign aspect_class = 'ugc-gallery__tile--portrait'
+            if block.settings.aspect == 'square'
+              assign aspect_class = 'ugc-gallery__tile--square'
+            endif
+
+            assign has_link = false
+            if block.settings.link != blank
+              assign has_link = true
+            endif
+
+            assign tile_tag = 'figure'
+            if has_link
+              assign tile_tag = 'a'
+            endif
+
+            assign alt_text = block.settings.alt_override
+            if alt_text == blank
+              assign alt_text = block.settings.image.alt
+            endif
+            if alt_text == blank
+              assign alt_text = block.settings.username | replace: '@', '' | append: ' — community photo'
+            endif
+
+            assign has_video = false
+            if block.settings.media_type == 'video' and block.settings.video != blank
+              assign has_video = true
+            endif
+
+            assign has_image = false
+            if block.settings.image != blank
+              assign has_image = true
+            endif
+
+            assign caption_color_style = ''
+            if section.settings.caption_color != blank
+              assign caption_color_style = 'color:' | append: section.settings.caption_color | append: ';'
+            endif
+          -%}
+
+          <{{ tile_tag }}
+            class="ugc-gallery__tile {{ aspect_class }}"
+            {% if has_link %}href="{{ block.settings.link }}" aria-label="{{ block.settings.username | default: 'View post' | escape }}"{% endif %}
+            {{ block.shopify_attributes }}>
+
+            {%- if has_video -%}
+              {%- assign mp4_src = block.settings.video.sources | where: 'format', 'mp4' | first -%}
+              {%- unless mp4_src -%}
+                {%- assign mp4_src = block.settings.video.sources | first -%}
+              {%- endunless -%}
+              {%- assign poster_url = block.settings.video.preview_image | image_url: width: 800 -%}
+              <video
+                class="ugc-gallery__media"
+                data-ugc-video
+                muted
+                loop
+                playsinline
+                preload="metadata"
+                poster="{{ poster_url }}"
+                aria-hidden="true"
+                tabindex="-1">
+                {%- if mp4_src -%}
+                  <source src="{{ mp4_src.url }}" type="{{ mp4_src.mime_type | default: 'video/mp4' }}">
+                {%- endif -%}
+              </video>
+            {%- elsif has_image -%}
+              {{ block.settings.image
+                | image_url: width: 800
+                | image_tag:
+                  widths: '200, 260, 340, 420, 520, 680, 800',
+                  sizes: '(min-width: 768px) 420px, 320px',
+                  loading: 'lazy',
+                  class: 'ugc-gallery__media',
+                  alt: alt_text
+              }}
+            {%- else -%}
+              <div class="ugc-gallery__media ugc-gallery__media--placeholder" aria-hidden="true"></div>
+            {%- endif -%}
+
+            {%- if block.settings.username != blank -%}
+              {%- if has_link -%}
+                <span class="ugc-gallery__caption" style="{{ caption_color_style }}">{{ block.settings.username | escape }}</span>
+              {%- else -%}
+                <figcaption class="ugc-gallery__caption" style="{{ caption_color_style }}">{{ block.settings.username | escape }}</figcaption>
+              {%- endif -%}
+            {%- endif -%}
+          </{{ tile_tag }}>
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  {%- comment -%}
+    CTA defaults to below the gallery; merchant can flip it above
+    via the cta_position select. Both renders draw the same captured
+    HTML (captured at the top of this file) so the styling and label
+    stay consistent.
+  {%- endcomment -%}
+  {%- unless section.settings.cta_position == 'above_gallery' -%}
+    {{ _ugc_cta_html }}
+  {%- endunless -%}
+</section>
+
+{% comment %} Desktop type-size overrides — only when element is NOT using a token class {% endcomment %}
+<style>
+  /* CTA typography — full set of properties as !important so they
+   * beat the theme's .btn rules when the merchant picks a button
+   * variant. The inline `style` attributes used to live on each
+   * <a>, but the theme's btn variant CSS is generated with
+   * !important too and at higher specificity, so the inline values
+   * were silently overridden. */
+  {% unless cta_use_token %}
+    #ugc-gallery-{{ section_id }} .ugc-gallery__cta,
+    #ugc-gallery-{{ section_id }} .ugc-gallery__cta-btn,
+    #ugc-gallery-{{ section_id }} .ugc-gallery__cta *,
+    #ugc-gallery-{{ section_id }} .ugc-gallery__cta-btn * {
+      font-size: {{ section.settings.cta_size_mobile }}px !important;
+      font-weight: {{ section.settings.cta_weight }} !important;
+      text-transform: {{ section.settings.cta_transform }} !important;
+      letter-spacing: {{ section.settings.cta_letter_spacing }}em !important;
+      {% if cta_font_style != '' %}{{ cta_font_style | replace: 'font-family:', 'font-family: ' | replace: ';', ' !important;' }}{% endif %}
+    }
+  {% endunless %}
+  {% if section.settings.cta_color != blank %}
+    #ugc-gallery-{{ section_id }} .ugc-gallery__cta,
+    #ugc-gallery-{{ section_id }} .ugc-gallery__cta-btn,
+    #ugc-gallery-{{ section_id }} .ugc-gallery__cta *,
+    #ugc-gallery-{{ section_id }} .ugc-gallery__cta-btn * {
+      color: {{ section.settings.cta_color }} !important;
+    }
+  {% endif %}
+
+  /* CTA wrapper padding — merchant-controlled top + bottom.
+   * Setting margin (not padding) so the spacing collapses cleanly
+   * when the wrapper is hidden by an x-show / x-cloak. */
+  #ugc-gallery-{{ section_id }} .ugc-gallery__cta-wrap {
+    margin-top: {{ section.settings.cta_pad_top | default: 16 }}px !important;
+    margin-bottom: {{ section.settings.cta_pad_bot | default: 24 }}px !important;
+  }
+
+  /* When the CTA is above the gallery, neutralize the header's
+   * bottom margin AND the track-wrap's top margin so the merchant's
+   * cta_pad_top / cta_pad_bot values are the SOLE drivers of space
+   * around the CTA. Without this the baked-in 40px on
+   * .ugc-gallery__header and .ugc-gallery__track-wrap stacked with
+   * the CTA's own margins, making the gap feel 2-3x too wide.
+   * Below-gallery position keeps the existing layout. */
+  {% if section.settings.cta_position == 'above_gallery' %}
+    #ugc-gallery-{{ section_id }} .ugc-gallery__header {
+      margin-bottom: 0 !important;
+    }
+    #ugc-gallery-{{ section_id }} .ugc-gallery__track-wrap {
+      margin-top: 0 !important;
+    }
+  {% endif %}
+
+  @media (min-width: 768px) {
+    {% unless eyebrow_use_token %}
+      #ugc-gallery-{{ section_id }} .ugc-gallery__eyebrow {
+        font-size: {{ section.settings.eyebrow_size_desktop }}px !important;
+      }
+    {% endunless %}
+    {% unless heading_use_token %}
+      #ugc-gallery-{{ section_id }} .ugc-gallery__heading {
+        font-size: {{ section.settings.heading_size_desktop }}px !important;
+      }
+    {% endunless %}
+    {% unless lede_use_token %}
+      #ugc-gallery-{{ section_id }} .ugc-gallery__lede {
+        font-size: {{ section.settings.lede_size_desktop }}px !important;
+      }
+    {% endunless %}
+    {% unless cta_use_token %}
+      #ugc-gallery-{{ section_id }} .ugc-gallery__cta,
+      #ugc-gallery-{{ section_id }} .ugc-gallery__cta-btn,
+      #ugc-gallery-{{ section_id }} .ugc-gallery__cta *,
+      #ugc-gallery-{{ section_id }} .ugc-gallery__cta-btn * {
+        font-size: {{ section.settings.cta_size_desktop }}px !important;
+      }
+    {% endunless %}
+  }
+  {% if section.settings.caption_size_mobile %}
+    #ugc-gallery-{{ section_id }} .ugc-gallery__caption {
+      font-size: {{ section.settings.caption_size_mobile }}px;
+    }
+  {% endif %}
+  @media (min-width: 768px) {
+    {% if section.settings.caption_size_desktop %}
+      #ugc-gallery-{{ section_id }} .ugc-gallery__caption {
+        font-size: {{ section.settings.caption_size_desktop }}px;
+      }
+    {% endif %}
+  }
+</style>
+
+{% stylesheet %}
+  .ugc-gallery {
+    position: relative;
+    padding-top: var(--ugc-pt-m, 48px);
+    padding-bottom: var(--ugc-pb-m, 48px);
+    background: var(--ugc-bg, var(--color__bg-body-light));
+  }
+  @media (min-width: 768px) {
+    .ugc-gallery {
+      padding-top: var(--ugc-pt-d, 96px);
+      padding-bottom: var(--ugc-pb-d, 96px);
+    }
+  }
+
+  /* Primary brand-blue background needs light text */
+  .ugc-gallery--bg-primary { color: #fff; }
+  .ugc-gallery--bg-primary .ugc-gallery__cta::after { background: #fff; }
+
+  /* Reveal — only engaged when JS upgrades the section (prevents FOUC if JS fails) */
+  .ugc-gallery--js:not(.is-revealed) {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  .ugc-gallery--js.is-revealed {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--thread-dur-reveal) var(--thread-ease),
+                transform var(--thread-dur-reveal) var(--thread-ease);
+  }
+
+  .ugc-gallery__inner { max-width: 100%; }
+
+  .ugc-gallery__header {
+    max-width: 640px;
+    margin: 0 0 40px;
+  }
+  .ugc-gallery--align-center .ugc-gallery__header {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+  .ugc-gallery--align-left .ugc-gallery__header {
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .ugc-gallery__eyebrow {
+    display: inline-block;
+    margin: 0 0 16px;
+  }
+  .ugc-gallery__heading { margin: 0; }
+  .ugc-gallery__lede { margin: 20px 0 0; }
+
+  .ugc-gallery__track-wrap {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    margin: 40px 0 0;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: pan-y;
+  }
+  .ugc-gallery__track-wrap.is-dragging { cursor: grabbing; }
+
+  .ugc-gallery__track {
+    display: flex;
+    gap: var(--ugc-gap, 16px);
+    will-change: transform;
+    padding-inline: var(--ugc-gap, 16px);
+  }
+
+  .ugc-gallery__tile {
+    flex: 0 0 auto;
+    margin: 0;
+    position: relative;
+    background: var(--color__bg-overlay-light-2);
+    overflow: hidden;
+    border-radius: 2px;
+    text-decoration: none;
+    color: #fff;
+    display: block;
+  }
+  .ugc-gallery__tile--portrait { width: 260px; aspect-ratio: 3 / 4; }
+  .ugc-gallery__tile--square   { width: 320px; aspect-ratio: 1 / 1; }
+  @media (min-width: 768px) {
+    .ugc-gallery__tile--portrait { width: 340px; }
+    .ugc-gallery__tile--square   { width: 420px; }
+  }
+  a.ugc-gallery__tile:focus-visible {
+    outline: 2px solid var(--color__link-light);
+    outline-offset: 3px;
+  }
+
+  .ugc-gallery__media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+  }
+  .ugc-gallery__media--placeholder {
+    background: linear-gradient(135deg, var(--color__bg-overlay-light-2) 0%, var(--color__bg-overlay-light-3) 100%);
+  }
+
+  .ugc-gallery__caption {
+    position: absolute;
+    left: 14px;
+    bottom: 12px;
+    margin: 0;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .ugc-gallery__cta-wrap { margin-top: 40px; }
+  .ugc-gallery--align-center .ugc-gallery__cta-wrap { text-align: center; }
+  .ugc-gallery--align-left   .ugc-gallery__cta-wrap { text-align: left; }
+
+  .ugc-gallery__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    position: relative;
+    padding-bottom: 3px;
+    color: inherit;
+    text-decoration: none;
+    transition: color 200ms var(--thread-ease);
+  }
+  .ugc-gallery__cta::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 100%;
+    bottom: 0;
+    height: 1px;
+    background: var(--color__link-light);
+    transition: right 200ms var(--thread-ease);
+  }
+  .ugc-gallery__cta:hover,
+  .ugc-gallery__cta:focus-visible { color: var(--color__link-light); }
+  .ugc-gallery__cta:hover::after,
+  .ugc-gallery__cta:focus-visible::after { right: 0; }
+  .ugc-gallery__cta-arrow {
+    display: inline-block;
+    transition: transform 200ms var(--thread-ease);
+  }
+  .ugc-gallery__cta:hover      .ugc-gallery__cta-arrow,
+  .ugc-gallery__cta:focus-visible .ugc-gallery__cta-arrow { transform: translateX(4px); }
+
+  .ugc-gallery__cta-btn { display: inline-flex; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ugc-gallery,
+    .ugc-gallery--js,
+    .ugc-gallery--js.is-revealed {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+    .ugc-gallery__cta,
+    .ugc-gallery__cta::after,
+    .ugc-gallery__cta-arrow { transition: none !important; }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  (function () {
+    'use strict';
+    var SELECTOR = '[data-ugc-gallery]';
+    var osReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var instances = new WeakMap();
+
+    function qs(root, sel)  { return root.querySelector(sel); }
+    function qsa(root, sel) { return Array.prototype.slice.call(root.querySelectorAll(sel)); }
+
+    function init(root) {
+      if (instances.has(root)) return;
+
+      var track = qs(root, '[data-ugc-track]');
+      var wrap  = qs(root, '.ugc-gallery__track-wrap');
+      if (!track) return;
+
+      var duration    = parseFloat(root.dataset.duration) || 35;
+      var autoplay    = root.dataset.autoplay === 'true';
+      var forceMotion = root.dataset.forceMotion === 'true';
+      var pauseHover  = root.dataset.pauseOnHover === 'true';
+      var dragEnabled = root.dataset.drag === 'true';
+
+      // If merchant forced autoplay, ignore OS reduced-motion preference for the track.
+      // (Reveal animation still respects OS pref to avoid unnecessary motion.)
+      var motionBlocked = osReducedMotion && !forceMotion;
+
+      // Clone children once for seamless infinite loop
+      var originals = Array.prototype.slice.call(track.children);
+      originals.forEach(function (node) {
+        var clone = node.cloneNode(true);
+        clone.setAttribute('aria-hidden', 'true');
+        clone.setAttribute('tabindex', '-1');
+        qsa(clone, 'a, button, video').forEach(function (el) {
+          el.setAttribute('tabindex', '-1');
+          if (el.tagName === 'A') el.setAttribute('aria-hidden', 'true');
+        });
+        track.appendChild(clone);
+      });
+
+      var loopWidth = 0;
+      function measure() {
+        var w = 0;
+        var gapStr = window.getComputedStyle(track).gap || '0';
+        var gap = parseFloat(gapStr) || 0;
+        originals.forEach(function (node) { w += node.getBoundingClientRect().width; });
+        w += gap * originals.length;
+        loopWidth = w;
+      }
+      measure();
+      if (window.requestAnimationFrame) {
+        requestAnimationFrame(function () { requestAnimationFrame(measure); });
+      }
+
+      var offset = 0;
+      var paused = false;
+      var focused = false;
+      var dragging = false;
+      var dragCommitted = false;
+      var dragStartX = 0;
+      var dragStartY = 0;
+      var dragStartOffset = 0;
+      var raf = 0;
+      var lastT = 0;
+
+      function shouldAnimate() {
+        return autoplay && !motionBlocked && !paused && !focused && !dragging;
+      }
+
+      function apply() {
+        if (loopWidth > 0) {
+          if (offset <= -loopWidth) offset += loopWidth;
+          if (offset > 0) offset -= loopWidth;
+        }
+        track.style.transform = 'translate3d(' + offset + 'px, 0, 0)';
+      }
+
+      function tick(t) {
+        if (!lastT) lastT = t;
+        var dt = t - lastT;
+        lastT = t;
+        if (shouldAnimate() && loopWidth > 0) {
+          var perMs = loopWidth / (duration * 1000);
+          offset -= perMs * dt;
+        }
+        apply();
+        raf = requestAnimationFrame(tick);
+      }
+
+      function onEnter() { if (pauseHover) paused = true; }
+      function onLeave() { if (pauseHover) paused = false; }
+      root.addEventListener('mouseenter', onEnter);
+      root.addEventListener('mouseleave', onLeave);
+
+      function onFocusIn(e) {
+        if (e.target && e.target.closest && e.target.closest('.ugc-gallery__tile')) {
+          focused = true;
+        }
+      }
+      function onFocusOut(e) {
+        if (!root.contains(e.relatedTarget)) focused = false;
+      }
+      root.addEventListener('focusin', onFocusIn);
+      root.addEventListener('focusout', onFocusOut);
+
+      function onPointerDown(e) {
+        if (!dragEnabled) return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        dragging = true;
+        dragCommitted = false;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        dragStartOffset = offset;
+        lastT = 0;
+      }
+      function onPointerMove(e) {
+        if (!dragging) return;
+        var dx = e.clientX - dragStartX;
+        var dy = e.clientY - dragStartY;
+        if (!dragCommitted) {
+          if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) {
+            dragCommitted = true;
+            wrap.classList.add('is-dragging');
+            try { wrap.setPointerCapture(e.pointerId); } catch (_) {}
+          } else if (Math.abs(dy) > 8 && Math.abs(dy) > Math.abs(dx)) {
+            dragging = false;
+            return;
+          } else {
+            return;
+          }
+        }
+        offset = dragStartOffset + dx;
+        apply();
+        e.preventDefault();
+      }
+      function onPointerEnd(e) {
+        if (!dragging) return;
+        dragging = false;
+        dragCommitted = false;
+        wrap.classList.remove('is-dragging');
+        try { wrap.releasePointerCapture(e.pointerId); } catch (_) {}
+      }
+      if (wrap) {
+        wrap.addEventListener('pointerdown', onPointerDown);
+        wrap.addEventListener('pointermove', onPointerMove);
+        wrap.addEventListener('pointerup', onPointerEnd);
+        wrap.addEventListener('pointercancel', onPointerEnd);
+      }
+
+      function onResize() { measure(); }
+      window.addEventListener('resize', onResize);
+
+      // Reveal — always respects OS reduced-motion (no force-override for reveal).
+      var revealIO = null;
+      if (!osReducedMotion && 'IntersectionObserver' in window) {
+        root.classList.add('ugc-gallery--js');
+        revealIO = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              root.classList.add('is-revealed');
+              revealIO.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+        revealIO.observe(root);
+      }
+
+      // Video tiles — play in view, pause out; skip entirely if motion is blocked.
+      var videoIO = null;
+      var videos = qsa(track, '[data-ugc-video]');
+      if (!motionBlocked && 'IntersectionObserver' in window && videos.length) {
+        videoIO = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            var v = entry.target;
+            if (entry.isIntersecting) {
+              var p = v.play();
+              if (p && p.catch) p.catch(function () {});
+            } else {
+              v.pause();
+            }
+          });
+        }, { threshold: 0.1 });
+        videos.forEach(function (v) { videoIO.observe(v); });
+      }
+
+      raf = requestAnimationFrame(tick);
+
+      instances.set(root, function cleanup() {
+        cancelAnimationFrame(raf);
+        window.removeEventListener('resize', onResize);
+        root.removeEventListener('mouseenter', onEnter);
+        root.removeEventListener('mouseleave', onLeave);
+        root.removeEventListener('focusin', onFocusIn);
+        root.removeEventListener('focusout', onFocusOut);
+        if (wrap) {
+          wrap.removeEventListener('pointerdown', onPointerDown);
+          wrap.removeEventListener('pointermove', onPointerMove);
+          wrap.removeEventListener('pointerup', onPointerEnd);
+          wrap.removeEventListener('pointercancel', onPointerEnd);
+        }
+        if (revealIO) revealIO.disconnect();
+        if (videoIO)  videoIO.disconnect();
+      });
+    }
+
+    function initAll(scope) {
+      var parent = scope || document;
+      var roots;
+      if (parent.matches && parent.matches(SELECTOR)) {
+        roots = [parent];
+      } else {
+        roots = qsa(parent, SELECTOR);
+      }
+      roots.forEach(init);
+    }
+
+    function destroy(scope) {
+      var parent = scope || document;
+      var roots;
+      if (parent.matches && parent.matches(SELECTOR)) {
+        roots = [parent];
+      } else {
+        roots = qsa(parent, SELECTOR);
+      }
+      roots.forEach(function (root) {
+        var fn = instances.get(root);
+        if (fn) { fn(); instances.delete(root); }
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () { initAll(); });
+    } else {
+      initAll();
+    }
+
+    document.addEventListener('shopify:section:load', function (e) { initAll(e.target); });
+    document.addEventListener('shopify:section:unload', function (e) { destroy(e.target); });
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "UGC gallery",
+  "tag": "section",
+  "class": "section",
+  "max_blocks": 20,
+  "settings": [
+    { "type": "header", "content": "Content" },
+    {
+      "type": "checkbox",
+      "id": "show_eyebrow",
+      "label": "Show eyebrow",
+      "info": "Uncheck to hide the eyebrow without deleting its text.",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "eyebrow_text",
+      "label": "Eyebrow",
+      "default": "Community"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Do what connects you."
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "textarea",
+      "id": "lede",
+      "label": "Supporting text",
+      "info": "Plain text only. Use line breaks for paragraphs. Typography is controlled by the settings below.",
+      "default": "We're individual threads, woven together by what we love. Here's our community doing what connects them."
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Header alignment",
+      "options": [
+        { "value": "left",   "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "center"
+    },
+
+    { "type": "header", "content": "Eyebrow typography" },
+    {
+      "type": "select",
+      "id": "eyebrow_font",
+      "label": "Font",
+      "options": [
+        { "value": "token-label",   "label": "↳ Use theme token (Label)" },
+        { "value": "token-small",   "label": "↳ Use theme token (Small)" },
+        { "value": "token-body",    "label": "↳ Use theme token (Body)" },
+        { "value": "token-display", "label": "↳ Use theme token (Display)" },
+        { "value": "token-h1",      "label": "↳ Use theme token (H1)" },
+        { "value": "token-h2",      "label": "↳ Use theme token (H2)" },
+        { "value": "token-h3",      "label": "↳ Use theme token (H3)" },
+        { "value": "inherit",       "label": "Theme default" },
+        { "value": "body",          "label": "Forma DJR" },
+        { "value": "heading",       "label": "PP Right Grotesk" },
+        { "value": "handwritten",   "label": "Thread Handwritten" }
+      ],
+      "default": "token-label"
+    },
+    { "type": "range", "id": "eyebrow_size_mobile",  "label": "Size — mobile",  "unit": "px", "min": 9,  "max": 32, "step": 1, "default": 11 },
+    { "type": "range", "id": "eyebrow_size_desktop", "label": "Size — desktop", "unit": "px", "min": 9,  "max": 40, "step": 1, "default": 11 },
+    {
+      "type": "select",
+      "id": "eyebrow_weight",
+      "label": "Weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "select",
+      "id": "eyebrow_transform",
+      "label": "Text transform",
+      "options": [
+        { "value": "none",       "label": "None" },
+        { "value": "uppercase",  "label": "Uppercase" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "uppercase"
+    },
+    { "type": "range", "id": "eyebrow_letter_spacing", "label": "Letter spacing", "unit": "em", "min": -0.1, "max": 0.4, "step": 0.1, "default": 0.2 },
+    { "type": "color", "id": "eyebrow_color", "label": "Color" },
+
+    { "type": "header", "content": "Heading typography" },
+    {
+      "type": "select",
+      "id": "heading_font",
+      "label": "Font",
+      "options": [
+        { "value": "token-display", "label": "↳ Use theme token (Display)" },
+        { "value": "token-h1",      "label": "↳ Use theme token (H1)" },
+        { "value": "token-h2",      "label": "↳ Use theme token (H2)" },
+        { "value": "token-h3",      "label": "↳ Use theme token (H3)" },
+        { "value": "token-body",    "label": "↳ Use theme token (Body)" },
+        { "value": "token-small",   "label": "↳ Use theme token (Small)" },
+        { "value": "token-label",   "label": "↳ Use theme token (Label)" },
+        { "value": "inherit",       "label": "Theme default" },
+        { "value": "body",          "label": "Forma DJR" },
+        { "value": "heading",       "label": "PP Right Grotesk" },
+        { "value": "handwritten",   "label": "Thread Handwritten" }
+      ],
+      "default": "token-display"
+    },
+    { "type": "range", "id": "heading_size_mobile",  "label": "Size — mobile",  "unit": "px", "min": 16, "max": 96,  "step": 1, "default": 40 },
+    { "type": "range", "id": "heading_size_desktop", "label": "Size — desktop", "unit": "px", "min": 16, "max": 160, "step": 2, "default": 80 },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" },
+        { "value": "800", "label": "Extra-bold" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select",
+      "id": "heading_transform",
+      "label": "Text transform",
+      "options": [
+        { "value": "none",       "label": "None" },
+        { "value": "uppercase",  "label": "Uppercase" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "none"
+    },
+    { "type": "range", "id": "heading_line_height",    "label": "Line height",    "min": 0.8, "max": 2.0, "step": 0.1, "default": 1.0 },
+    {
+      "type": "select",
+      "id": "heading_letter_spacing",
+      "label": "Letter spacing",
+      "options": [
+        { "value": "0", "label": "None" },
+        { "value": "0.02", "label": "Tight" },
+        { "value": "0.05", "label": "Normal" },
+        { "value": "0.1", "label": "Wide" },
+        { "value": "0.2", "label": "Extra wide" }
+      ],
+      "default": "0"
+    },
+    { "type": "color", "id": "heading_color", "label": "Color" },
+
+    { "type": "header", "content": "Supporting text typography" },
+    {
+      "type": "select",
+      "id": "lede_font",
+      "label": "Font",
+      "options": [
+        { "value": "token-body",    "label": "↳ Use theme token (Body)" },
+        { "value": "token-small",   "label": "↳ Use theme token (Small)" },
+        { "value": "token-label",   "label": "↳ Use theme token (Label)" },
+        { "value": "token-h3",      "label": "↳ Use theme token (H3)" },
+        { "value": "inherit",       "label": "Theme default" },
+        { "value": "body",          "label": "Forma DJR" },
+        { "value": "heading",       "label": "PP Right Grotesk" },
+        { "value": "handwritten",   "label": "Thread Handwritten" }
+      ],
+      "default": "token-body"
+    },
+    { "type": "range", "id": "lede_size_mobile",  "label": "Size — mobile",  "unit": "px", "min": 10, "max": 28, "step": 1, "default": 15 },
+    { "type": "range", "id": "lede_size_desktop", "label": "Size — desktop", "unit": "px", "min": 10, "max": 32, "step": 1, "default": 17 },
+    {
+      "type": "select",
+      "id": "lede_weight",
+      "label": "Weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "400"
+    },
+    { "type": "range", "id": "lede_line_height",    "label": "Line height",    "min": 1.0,  "max": 2.0, "step": 0.1, "default": 1.5 },
+    { "type": "select", "id": "lede_letter_spacing", "label": "Letter spacing", "options": [ { "value": "0", "label": "None" }, { "value": "0.05", "label": "Brand body (0.05em)" }, { "value": "0.1", "label": "Wide" }, { "value": "0.2", "label": "Wider" } ], "default": "0.05" },
+    { "type": "color", "id": "lede_color", "label": "Color" },
+
+    { "type": "header", "content": "Caption (tile username)" },
+    { "type": "range", "id": "caption_size_mobile",  "label": "Size — mobile",  "unit": "px", "min": 9,  "max": 20, "step": 1, "default": 12 },
+    { "type": "range", "id": "caption_size_desktop", "label": "Size — desktop", "unit": "px", "min": 9,  "max": 24, "step": 1, "default": 12 },
+    { "type": "color", "id": "caption_color", "label": "Color", "default": "#ffffff" },
+
+    { "type": "header", "content": "Gallery behavior" },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Auto-scroll",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "force_autoplay",
+      "label": "Force autoplay",
+      "info": "When on, auto-scroll runs even for visitors with \"Reduce motion\" enabled in their OS. Leave off for best accessibility; turn on if mobile visitors aren't seeing the track move.",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "loop_duration_seconds",
+      "label": "Loop duration",
+      "unit": "s",
+      "min": 10,
+      "max": 90,
+      "step": 5,
+      "default": 35
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "label": "Pause on hover",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_drag",
+      "label": "Allow drag / swipe",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "gap_px",
+      "label": "Space between tiles",
+      "unit": "px",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "default": 16
+    },
+
+    { "type": "header", "content": "Call to action" },
+    {
+      "type": "checkbox",
+      "id": "show_cta",
+      "label": "Show CTA",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "cta_position",
+      "label": "CTA position",
+      "info": "Where the CTA renders relative to the gallery track.",
+      "options": [
+        { "value": "below_gallery", "label": "Below gallery (default)" },
+        { "value": "above_gallery", "label": "Above gallery (right below the supporting text)" }
+      ],
+      "default": "below_gallery"
+    },
+    { "type": "range", "id": "cta_pad_top", "label": "CTA top padding (px)",    "info": "Space above the CTA block.",  "min": 0, "max": 96, "step": 2, "default": 16 },
+    { "type": "range", "id": "cta_pad_bot", "label": "CTA bottom padding (px)", "info": "Space below the CTA block.", "min": 0, "max": 96, "step": 2, "default": 24 },
+    {
+      "type": "select",
+      "id": "cta_style",
+      "label": "CTA style",
+      "options": [
+        { "value": "link-arrow",        "label": "Text link with arrow" },
+        { "value": "btn",               "label": "Button — primary" },
+        { "value": "btn btn--secondary", "label": "Button — secondary" },
+        { "value": "btn btn--tertiary",  "label": "Button — tertiary" },
+        { "value": "btn btn--neutral",   "label": "Button — neutral" },
+        { "value": "btn btn--plain",     "label": "Button — plain" }
+      ],
+      "default": "link-arrow"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA label",
+      "default": "Learn more about us"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA link",
+      "info": "Suggested: /pages/about"
+    },
+
+    { "type": "header", "content": "CTA typography" },
+    {
+      "type": "select",
+      "id": "cta_font",
+      "label": "Font",
+      "options": [
+        { "value": "token-label",   "label": "↳ Use theme token (Label)" },
+        { "value": "token-small",   "label": "↳ Use theme token (Small)" },
+        { "value": "token-body",    "label": "↳ Use theme token (Body)" },
+        { "value": "inherit",       "label": "Theme default" },
+        { "value": "body",          "label": "Forma DJR" },
+        { "value": "heading",       "label": "PP Right Grotesk" },
+        { "value": "handwritten",   "label": "Thread Handwritten" }
+      ],
+      "default": "inherit"
+    },
+    { "type": "range", "id": "cta_size_mobile",  "label": "Size — mobile",  "unit": "px", "min": 10, "max": 24, "step": 1, "default": 13 },
+    { "type": "range", "id": "cta_size_desktop", "label": "Size — desktop", "unit": "px", "min": 10, "max": 28, "step": 1, "default": 13 },
+    {
+      "type": "select",
+      "id": "cta_weight",
+      "label": "Weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "select",
+      "id": "cta_transform",
+      "label": "Text transform",
+      "options": [
+        { "value": "none",       "label": "None" },
+        { "value": "uppercase",  "label": "Uppercase" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "uppercase"
+    },
+    { "type": "range", "id": "cta_letter_spacing", "label": "Letter spacing", "unit": "em", "min": -0.1, "max": 0.3, "step": 0.1, "default": 0.1 },
+    { "type": "color", "id": "cta_color", "label": "Color override", "info": "Leave blank to use the CTA style's default color." },
+
+    { "type": "header", "content": "Appearance" },
+    {
+      "type": "select",
+      "id": "background",
+      "label": "Background",
+      "info": "Pulls from theme color tokens — edit those in Theme settings.",
+      "options": [
+        { "value": "body",    "label": "Body" },
+        { "value": "bone",    "label": "Bone (overlay 1)" },
+        { "value": "cream",   "label": "Cream (overlay 2)" },
+        { "value": "primary", "label": "Primary (brand blue)" }
+      ],
+      "default": "cream"
+    },
+    { "type": "range", "id": "padding_top_desktop",    "label": "Padding top — desktop",    "unit": "px", "min": 0, "max": 160, "step": 4, "default": 96 },
+    { "type": "range", "id": "padding_bottom_desktop", "label": "Padding bottom — desktop", "unit": "px", "min": 0, "max": 160, "step": 4, "default": 96 },
+    { "type": "range", "id": "padding_top_mobile",     "label": "Padding top — mobile",     "unit": "px", "min": 0, "max": 160, "step": 4, "default": 48 },
+    { "type": "range", "id": "padding_bottom_mobile",  "label": "Padding bottom — mobile",  "unit": "px", "min": 0, "max": 160, "step": 4, "default": 48 }
+  ],
+  "blocks": [
+    {
+      "type": "tile",
+      "name": "Tile",
+      "settings": [
+        {
+          "type": "select",
+          "id": "media_type",
+          "label": "Media type",
+          "options": [
+            { "value": "image", "label": "Image" },
+            { "value": "video", "label": "Video" }
+          ],
+          "default": "image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "Used when Media type is set to Image."
+        },
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Video",
+          "info": "Used when Media type is set to Video. Autoplays muted, loops, pauses off-screen."
+        },
+        {
+          "type": "select",
+          "id": "aspect",
+          "label": "Aspect",
+          "options": [
+            { "value": "portrait", "label": "Portrait (3:4)" },
+            { "value": "square",   "label": "Square (1:1)" }
+          ],
+          "default": "portrait"
+        },
+        {
+          "type": "text",
+          "id": "username",
+          "label": "Caption / username",
+          "default": "@username"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link (optional)"
+        },
+        {
+          "type": "text",
+          "id": "alt_override",
+          "label": "Alt text (optional)",
+          "info": "Overrides the image's alt text. Falls back to image alt, then username."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "UGC gallery",
+      "blocks": [
+        { "type": "tile", "settings": { "aspect": "portrait", "media_type": "image", "username": "@skyelane" } },
+        { "type": "tile", "settings": { "aspect": "square",   "media_type": "image", "username": "@mackkenzi" } },
+        { "type": "tile", "settings": { "aspect": "portrait", "media_type": "video", "username": "@juneaux" } },
+        { "type": "tile", "settings": { "aspect": "square",   "media_type": "image", "username": "@rynebernard" } },
+        { "type": "tile", "settings": { "aspect": "portrait", "media_type": "image", "username": "@coop.travels" } },
+        { "type": "tile", "settings": { "aspect": "square",   "media_type": "video", "username": "@dailycarry" } },
+        { "type": "tile", "settings": { "aspect": "portrait", "media_type": "image", "username": "@lauraroams" } },
+        { "type": "tile", "settings": { "aspect": "square",   "media_type": "image", "username": "@tentandtrail" } }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["custom.overlay"]
+  }
+}
+{% endschema %}

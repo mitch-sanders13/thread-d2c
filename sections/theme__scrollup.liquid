@@ -1,0 +1,121 @@
+<!-- sections/theme__scrollup.liquid -->
+{% comment %} 
+  Show a button to scroll back to top.
+{% endcomment %}
+
+<section>
+  {% if section.settings.enable_back_to_top %}
+    <button class="{{ section.settings.visibility }} {{ section.settings.button_color }} z-40 fixed bottom-0 right-0 p-2 m-4 shadow-md"
+      :class="{ 
+        '!z-20' : filter_popup }" 
+      aria-label="{{ 'general.navigation.scroll_up' | t }}"
+      {% if settings.enable_animations %}
+        x-transition:enter="animation-300"
+        x-transition:enter-start="opacity-0 translate-y-8"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="animation-300"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0 translate-y-8"
+      {% endif %}
+      x-show="scroll_up && scroll_up_force"
+      x-cloak
+      x-on:scroll.window="scroll_up = (window.pageYOffset > document.body.offsetHeight * 0.3) ? true : false"
+      @click.prevent="window.scrollTo({top: 0, behavior: 'smooth'})">
+      {% if section.settings.scroll_up_style == 'text' %}
+        {{ 'general.navigation.scroll_up' | t }}
+      {% else %}
+        {% render 'component__icon', icon: 'chevron-up', size: '24', class: '' %}
+      {% endif %}
+    </button>      
+  {% endif %}
+</section>
+
+{% schema %}
+   {
+  "name":"t:sections.theme_scrollup.name",
+  "settings":[
+    {
+      "type":"checkbox",
+      "id":"enable_back_to_top",
+      "label":"t:sections.theme_scrollup.settings.enable_back_to_top.label",
+      "default":false
+    },
+    {
+      "type":"select",
+      "id":"scroll_up_style",
+      "label":"t:sections.theme_scrollup.settings.scroll_up_style.label",
+      "options":[
+        {
+          "value":"icon",
+          "label":"t:sections.theme_scrollup.settings.scroll_up_style.options__1.label"
+        },
+        {
+          "value":"text",
+          "label":"t:sections.theme_scrollup.settings.scroll_up_style.options__2.label"
+        }
+      ],
+      "default":"icon"
+    },
+    {
+      "type":"select",
+      "id":"button_color",
+      "label":"t:sections.all.colors.settings.color_button.label",
+      "options":[
+        {
+          "value":"btn",
+          "label":"t:sections.all.colors.settings.color_button.options__1.label"
+        },
+        {
+          "value":"btn btn--secondary",
+          "label":"t:sections.all.colors.settings.color_button.options__2.label"
+        },
+        {
+          "value":"btn btn--tertiary",
+          "label":"t:sections.all.colors.settings.color_button.options__5.label"
+        },
+        {
+          "value":"btn btn--neutral",
+          "label":"t:sections.all.colors.settings.color_button.options__3.label"
+        },
+        {
+          "value":"btn btn--plain",
+          "label":"t:sections.all.colors.settings.color_button.options__4.label"
+        },
+        {
+          "value":"btn--minimal-light",
+          "label":"t:sections.all.colors.settings.color_button.options__6.label"
+        },
+        {
+          "value":"btn--minimal-dark",
+          "label":"t:sections.all.colors.settings.color_button.options__7.label"
+        }
+      ],
+      "default":"btn"
+    },
+    {
+      "type":"select",
+      "id":"visibility",
+      "label":"t:sections.all.visibility.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.visibility.options__1.label"
+        },
+        {
+          "value":"md:hidden",
+          "label":"t:sections.all.visibility.options__2.label"
+        },
+        {
+          "value":"hidden md:block",
+          "label":"t:sections.all.visibility.options__3.label"
+        }
+      ],
+      "default":""
+    },
+    {
+      "type":"paragraph",
+      "content":"t:sections.theme_scrollup.settings.paragraph__1.content"
+    }
+  ]
+}
+{% endschema %}

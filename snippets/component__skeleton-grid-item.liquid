@@ -1,0 +1,29 @@
+<!-- snippets/component__skeleton-grid-item.liquid -->
+{% comment %} 
+  Placeholder thumbnail shown while content is loading.
+
+  Usage:
+    {% render 'component__skeleton-grid-item' %}
+  
+  Globals:
+    - settings.thumbnails_color_border: border color
+    - settings.thumbmails_color_scheme: color scheme of thumbnails
+    - settings.thumbnails_ratio: set the aspect ratio of thumbnails
+
+  Pro tips:
+    - Used on dynamic content sections like recently viewed. This snippet will be shown as a placeholder before dynamic content is injected.
+{% endcomment %}
+
+<div class="animate-pulse relative w-full
+  {{ settings.thumbnail_alignment }}">
+  <div class="border--radius flex items-center mb-2 overflow-hidden
+    {{ settings.thumbmails_color_scheme }} 
+    {{ settings.thumbnails_color_border }} 
+    {{ settings.thumbnails_ratio }}">
+  </div>
+  <div class="flex flex-wrap
+    {{ settings.thumbnail_alignment }}">
+    <div class="color__bg-overlay-1 border--radius block w-4/5 h-4 mb-2"></div>
+    <div class="color__bg-overlay-1 border--radius block w-2/5 h-4 pb-4"></div>
+  </div>
+</div>

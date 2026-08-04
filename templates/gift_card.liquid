@@ -1,0 +1,97 @@
+<!-- templates/gift_card.liquid -->
+{% layout 'minimal' %}
+
+<div class="py-24
+  {{ settings.layout_horizontal }}
+  {{ settings.layout_alignment }}">
+  
+  <div class="max-w-prose w-full">
+    <p>{{ shop.name }}</p>
+    <h1>{{ 'gift_cards.issued.subtext' | t }}</h1>
+    <div>
+      <p>
+        {% if settings.currency_code_enabled %}
+          {{ gift_card.initial_value | money_with_currency }}
+          {% else %}
+          {{ gift_card.initial_value | money }}
+        {% endif %}
+      </p>
+      {%- if gift_card.enabled == false or gift_card.expired -%}
+        <p>{{ 'gift_cards.issued.expired' | t }}</p>
+      {%- endif -%}
+    </div>
+    
+    {% if settings.currency_code_enabled %}
+      {%- assign gift_card_balance = gift_card.balance | money_with_currency -%}
+    {% else %}
+    {%- assign gift_card_balance = gift_card.balance | money -%}
+  {% endif %}
+  {%- if gift_card.balance != gift_card.initial_value -%}
+    <p>{{ 'gift_cards.issued.remaining_html' | t: balance: gift_card_balance }}</p>
+  {%- endif -%}
+  
+  <div class="js:giftCardQrCode mb-4" data-identifier="{{ gift_card.qr_identifier }}"></div>
+  
+  <div class="relative mb-4" 
+    x-data="{
+      copy: 'Copy'
+    }">
+    <input
+      id="copy-gift-card"
+      type="text"
+      class="js:giftCardNumber"
+      value="{{ gift_card.code | format_code }}"
+      aria-label="{{ 'gift_cards.issued.gift_card_code' | t }}"
+      readonly
+    >
+      <div class="right-2 type--smaller absolute inline-flex items-center h-full">
+        <button class="btn btn--secondary btn--smaller"
+          @click="
+          copyToClipboard('copy-gift-card');
+          copy = 'Copied';
+          ">
+          <span class="btn__content" x-text="copy">{{ 'gift_cards.issued.copy' | t }}</span>
+        </button>
+      </div>
+    </div>
+    
+    {%- if gift_card.pass_url -%}
+      <a href="{{ gift_card.pass_url }}" class="gift_card__apple-wallet">
+        <img src="{{ 'gift-card/add-to-apple-wallet.svg' | shopify_asset_url }}" width="120" height="40" alt="{{ 'gift_cards.issued.add_to_apple_wallet' | t }}" loading="lazy">
+      </a>
+    {%- endif -%}
+    
+    <div class="no-print">
+      <a
+        href="{{ shop.url }}"
+        class="btn"
+        target="_blank"
+        rel="noopener"
+        aria-describedby="a11y-new-window-message">
+        {{ 'gift_cards.issued.shop_link' | t }}
+      </a>
+      <button
+        class="btn btn--plain"
+        onclick="window.print();"
+      >
+        {{ 'gift_cards.issued.print' | t }}
+      </button>
+    </div>
+    
+  </div>
+  
+</section>
+
+<script src="{{ 'vendor/qrcode.js' | asset_url }}" async></script>
+<script>
+  var string = { qrImageAlt: {{ 'gift_cards.issued.qr_image_alt' | t | json }} };
+  document.addEventListener('DOMContentLoaded', function() {
+    new QRCode( document.querySelector('.js\\:giftCardQrCode'), {
+      text: document.querySelector('.js\\:giftCardQrCode').dataset.identifier,
+      width: 120,
+      height: 120,
+      imageAltText: string.qrImageAlt
+    });
+  });
+
+</script>

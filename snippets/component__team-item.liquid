@@ -1,0 +1,97 @@
+<!-- snippets/component__blog-item.liquid -->
+{% comment %} 
+  Thumbnail of a blog article.
+
+  Accepts: 
+  - article: {Object} Liquid object for the blog article.
+
+  Globals:
+  - settings.blog_cards_border_style: {string} Class string to set border style.
+  - settings.blog_cards_color_scheme: {string} Class string to set color scheme.
+  - settings.blog_cards_object: {string} Class string to set crop level.
+  - settings.blog_cards_title_font: {string} Set the font family for titles.
+  - settings.blog_cards_title_capitlization: {string} Set the capitalization.
+  - settings.blog_cards_enable_author: {boolean} Boolean to show/hide author.
+  - settings.blog_cards_enable_summary: {boolean} Boolean to show/hide article summary.
+  - settings.blog_cards_enable_date: {boolean} Boolean to show/hide publication date.
+  - settings.blog_cards_enable_tags: {boolean} Boolean to show/hide article tags.
+
+  Usage:
+    {% render 'component__blog-item', 
+      article: article 
+    %}
+
+  Recommendations:
+  - This is commonly used on blog templates or article grid sections.
+{% endcomment %}
+
+{% capture date %}{{ article.published_at | date: format: 'abbreviated_date' }}{% endcapture %}
+
+<div 
+  class="
+    min-w-[256px] hover:no-underline hover:opacity-90 block no-underline relative flex flex-wrap overflow-hidden group/blog focus:border--focus content-start
+    {% if settings.blog_cards_border_style == 'thumbnail' %}
+      border--width border--radius border-gray-300 border-opacity-0 hover:border-opacity-100
+    {% endif %}
+  ">
+  
+  {% comment %} Image + overlay {% endcomment %}
+  <div
+    class="
+      relative block w-full overflow-hidden
+      {% if settings.blog_cards_border_style == 'image' %}
+        border--radius
+      {% endif %}
+    ">
+
+    {% comment %} Image {% endcomment %}
+    {%- unless article.image == blank %}
+      {% if settings.blog_cards_object-sizing == "cover" %}
+        {% capture image_crop %}object-cover{% endcapture %}
+      {% else %}
+        {% capture image_crop %}object-contain{% endcapture %}
+      {% endif %}
+      {% render 'component__image',
+        image: article.image,
+        aspect_ratio: 'aspect-[1\/1] aspect-w-1 aspect-h-1',
+        background: 'color__bg-overlay-1',
+        crop: image_crop,
+        max_width: 900,
+        container_class: '',
+        image_class: '',
+        enable_lazy_load: true,
+        include_2x: true
+      %}
+    {%- endunless -%}
+  </div>
+
+  {% comment %} Content {% endcomment %}
+  <div 
+    class="
+      w-full
+      {{ settings.blog_cards_alignment }}
+      {% if settings.blog_cards_border_style == 'thumbnail' %}
+        p-4
+      {% else %}
+        pt-2
+      {% endif %}
+    ">
+
+    {% comment %} Article title {% endcomment %}
+    <h3 
+      class="
+        mb-1 type__heading type__heading--bold-2 !leading-none
+      ">
+      {{ article.title }}
+    </h3>
+    
+    {% comment %} Author {% endcomment %}
+    <p class="mb-0">
+      {{ article.excerpt_or_content | truncate: 256 | strip }}
+    </p>
+
+
+    
+  </div>
+
+</div>

@@ -1,0 +1,1731 @@
+<!-- snippets/product__related-styles.liquid -->
+{% comment %}
+  Related Styles — renders ONE section of product swatches.
+  Used by sections/product__main.liquid (block.type == 'related_styles').
+
+  One block = one section. Add multiple related_styles blocks to the
+  product template for multiple sections (e.g. Best Sellers, Seasonal).
+
+  Source options (blocksettings.source_type):
+    - 'silhouette' (default): per-product custom.swatch_collection metafield
+    - 'collection': merchant-picked collection (blocksettings.collection)
+
+  Optional cross-filter (blocksettings.filter_collection): only include
+  products that also exist in this collection. e.g. silhouette + best-sellers
+  shows best sellers of the current product's silhouette.
+
+  Accepts:
+    - blocksettings: block.settings
+    - block_id: block.id (for CSS scoping)
+{% endcomment %}
+
+{%- assign current_handle = product.handle -%}
+{%- assign source_type = blocksettings.source_type | default: 'silhouette' -%}
+{%- assign filter_handle = blocksettings.filter_collection -%}
+{%- assign heading_text = blocksettings.heading -%}
+
+{%- comment -%} Resolve source collection {%- endcomment -%}
+{%- assign coll = nil -%}
+{%- assign rs_variant_mode = false -%}
+{%- if source_type == 'silhouette' -%}
+  {%- comment -%} Bundle sets: colors are VARIANTS, and their swatch
+      metafield points at the sibling-set collection — whose products
+      are all Bundles, which the grid excludes by design. Render the
+      product's own variants instead. {%- endcomment -%}
+  {%- if product.variants.size > 1 -%}
+    {%- if product.type == 'Bundle' or product.tags contains 'bundle' -%}
+      {%- assign rs_variant_mode = true -%}
+    {%- endif -%}
+  {%- endif -%}
+  {%- assign coll = product.metafields.custom.swatch_collection.value -%}
+  {%- comment -%} Products without the metafield: multi-variant products
+      (bundles/sets where each color combo is a VARIANT, not a sibling
+      product) render their own variants as the swatch grid; single-
+      variant products fall back to the block's collection so the
+      selector never silently disappears. {%- endcomment -%}
+  {%- if coll == empty or coll == nil -%}
+    {%- if product.variants.size > 1 -%}
+      {%- assign rs_variant_mode = true -%}
+    {%- elsif blocksettings.collection != blank -%}
+      {%- assign coll = collections[blocksettings.collection] -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- else -%}
+  {%- assign coll = collections[blocksettings.collection] -%}
+{%- endif -%}
+
+{%- comment -%} Build cross-filter handle set if filter_collection is set {%- endcomment -%}
+{%- assign filter_handles = '' -%}
+{%- if filter_handle != blank -%}
+  {%- assign filter_coll = collections[filter_handle] -%}
+  {%- if filter_coll != empty and filter_coll != nil -%}
+    {%- assign filter_handles = '|' -%}
+    {%- for fp in filter_coll.products limit: 2000 -%}
+      {%- assign filter_handles = filter_handles | append: fp.handle | append: '|' -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- comment -%} Layout helpers {%- endcomment -%}
+{%- assign aspect_value = '1 / 1' -%}
+{%- case blocksettings.swatch_aspect -%}
+  {%- when '3/4' -%}{%- assign aspect_value = '3 / 4' -%}
+  {%- when '4/5' -%}{%- assign aspect_value = '4 / 5' -%}
+{%- endcase -%}
+{%- assign shape_radius = '0px' -%}
+{%- case blocksettings.swatch_shape -%}
+  {%- when 'square' -%}{%- assign shape_radius = '0px' -%}
+  {%- when 'rounded' -%}{%- assign shape_radius = blocksettings.swatch_radius | append: 'px' -%}
+  {%- when 'circle' -%}{%- assign shape_radius = '50%' -%}
+{%- endcase -%}
+{%- assign soldout_opacity = blocksettings.soldout_image_opacity | default: 50 | divided_by: 100.0 -%}
+
+<style>
+  [data-rs-block="{{ block_id }}"] {
+    padding: {{ blocksettings.pad_top_d | default: 32 }}px 16px {{ blocksettings.pad_bot_d | default: 32 }}px;
+    {%- if blocksettings.section_bg != blank %}background: {{ blocksettings.section_bg }};{%- endif %}
+  }
+
+  /* Override the global .pdp-section-divider's hardcoded `margin-bottom: 16px`
+     (in assets/bundle-builder.css) for the divider that precedes THIS block.
+     `:has(+ X)` matches an element whose next sibling is X — modern Chrome /
+     Safari / Firefox all support it. Lets the merchant tighten the gap
+     between the price/title divider and "Select Your Style" via the
+     block-level `rs_divider_mb_d` setting. */
+  .pdp-section-divider:has(+ [data-rs-block="{{ block_id }}"]) {
+    margin-bottom: {{ blocksettings.rs_divider_mb_d | default: 16 }}px;
+  }
+  [data-rs-block="{{ block_id }}"] .rs-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0 0 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    font-size: {{ blocksettings.heading_size_d | default: 14 }}px;
+    font-weight: {{ blocksettings.heading_weight | default: '500' }};
+    text-transform: {{ blocksettings.heading_transform | default: 'none' }};
+    letter-spacing: {{ blocksettings.heading_ls | default: '0.05em' }};
+    {%- if blocksettings.heading_color != blank %}color: {{ blocksettings.heading_color }};{%- endif %}
+  }
+  /* Style count ("N styles") — merchant-controlled via rs_count_*
+     settings. Shared by the heading row's count, the title-row count
+     (heading hidden), and the tabbed-mode shared count below. */
+  [data-rs-block="{{ block_id }}"] .rs-count {
+    font-size: {{ blocksettings.rs_count_size_d | default: 12 }}px;
+    font-weight: {{ blocksettings.rs_count_weight | default: '400' }};
+    color: {{ blocksettings.rs_count_color | default: 'var(--thread-grey)' }};
+    text-transform: none;
+    letter-spacing: {{ blocksettings.rs_count_ls | default: '0em' }};
+  }
+  @media (max-width: 749px) {
+    [data-rs-block="{{ block_id }}"] .rs-count {
+      font-size: {{ blocksettings.rs_count_size_m | default: 12 }}px;
+    }
+  }
+  /* "Select Your Style" title — merchant-controlled via rs_title_*
+     settings on the block (see schema). Each related_styles block
+     can render its own title (non-tabbed mode); in tabbed mode this
+     selector is hidden and the shared .rs-tabbed-title takes over. */
+  [data-rs-block="{{ block_id }}"] .rs-title {
+    margin: 0 0 {{ blocksettings.rs_title_mb | default: 12 }}px;
+    line-height: 1.3;
+    text-align: left;
+    font-size: {{ blocksettings.rs_title_size_d | default: 15 }}px;
+    font-weight: {{ blocksettings.rs_title_weight | default: '700' }};
+    text-transform: {{ blocksettings.rs_title_transform | default: 'none' }};
+    letter-spacing: {{ blocksettings.rs_title_ls | default: '0em' }};
+    {%- case blocksettings.rs_title_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family);
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family);
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family);
+    {%- endcase -%}
+    {%- if blocksettings.rs_title_color != blank %}color: {{ blocksettings.rs_title_color }};{%- endif %}
+  }
+  @media (max-width: 749px) {
+    [data-rs-block="{{ block_id }}"] .rs-title {
+      font-size: {{ blocksettings.rs_title_size_m | default: 15 }}px;
+    }
+  }
+
+  /* (.rs-current-name removed — the hover/selected style name was
+     pulled per merchant request. rs_cn_* schema settings remain
+     defined in the block but no longer drive any CSS.) */
+
+  /* Arrows now live inside .rs-header (top-right of each block) so
+     they sit above the grid instead of below it. The per-block
+     .rs-footer is no longer rendered. */
+  [data-rs-block="{{ block_id }}"] .rs-arrows {
+    display: none;
+    gap: 8px;
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+  @media (min-width: 750px) {
+    [data-rs-block="{{ block_id }}"].rs-has-pagination .rs-arrows {
+      display: inline-flex;
+    }
+  }
+
+  /* Title row: "Select Your Style" left + (when the section heading
+     is hidden) the style count right-justified on the same line —
+     mirrors the tabbed-mode shared title row. The title's typography
+     comes from the merchant-controlled .rs-title rule above; a
+     second hardcoded .rs-title rule used to live here and silently
+     overrode those settings (same-specificity, later in source) —
+     removed. */
+  [data-rs-block="{{ block_id }}"] .rs-titlerow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 {{ blocksettings.rs_title_mb | default: 12 }}px;
+    min-width: 0;
+  }
+  [data-rs-block="{{ block_id }}"] .rs-titlerow .rs-title {
+    margin: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  /* When the arrows share the title row they cluster on the right —
+     the count's margin-left:auto pushes count + arrows together to
+     the right edge, with the row's gap separating them. */
+  [data-rs-block="{{ block_id }}"] .rs-titlerow .rs-arrows {
+    margin-left: 0;
+  }
+  [data-rs-block="{{ block_id }}"] .rs-titlerow-count {
+    flex: 0 0 auto;
+    margin-left: auto;
+    font-size: {{ blocksettings.rs_count_size_d | default: 12 }}px;
+    font-weight: {{ blocksettings.rs_count_weight | default: '400' }};
+    color: {{ blocksettings.rs_count_color | default: 'var(--thread-grey)' }};
+    text-transform: none;
+    letter-spacing: {{ blocksettings.rs_count_ls | default: '0em' }};
+  }
+  @media (max-width: 749px) {
+    [data-rs-block="{{ block_id }}"] .rs-titlerow-count {
+      font-size: {{ blocksettings.rs_count_size_m | default: 12 }}px;
+    }
+  }
+  /* With the heading hidden the header row only holds the desktop
+     pagination arrows — drop its bottom margin unless the arrows are
+     actually showing so it doesn't add a phantom gap above the grid. */
+  /* With the heading hidden the header row holds nothing visible
+     (the arrows moved up into the title row) — collapse its margin
+     so it doesn't add a phantom gap above the grid. */
+  [data-rs-block="{{ block_id }}"] .rs-header--noheading {
+    margin-bottom: 0;
+  }
+
+  /* Header row above the grid: rs-heading (optional) on the left +
+     the current/hover style name on the right. The name uses
+     margin-left:auto so it stays right-aligned even when the
+     heading is hidden (tabbed mode) or omitted. */
+  [data-rs-block="{{ block_id }}"] .rs-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: {{ blocksettings.rs_tab_bar_mb | default: 8 }}px;
+    min-width: 0;
+  }
+  [data-rs-block="{{ block_id }}"] .rs-header .rs-heading {
+    /* Strip the heading's own margin — the header row owns the gap
+       below now. Lets the heading shrink instead of pushing the
+       name off-screen on narrow viewports. */
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+  [data-rs-block="{{ block_id }}"] .rs-current-name {
+    margin: 0 0 0 auto;
+    font-size: 0.8rem;
+    line-height: 1.2;
+    color: #4a4a4a;
+    font-weight: 500;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    text-align: right;
+  }
+
+  [data-rs-block="{{ block_id }}"] .rs-arrow {
+    /* Visual styling (size, bg, border, shadow) comes from the
+     * shared .btn .btn--plain .btn--small .shadow-sm classes so
+     * these arrows match the PDP product-gallery slider arrows.
+     * Only layout + disabled state is customized here. */
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  [data-rs-block="{{ block_id }}"] .rs-arrow:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  /* Column-flow scrolling grid.
+       - Items fill column 1 top-to-bottom (up to `rows`), then column 2,
+         then column 3, etc.
+       - Each column is sized so `cols` columns plus a `creep` peek of the
+         next column are visible at once. The peek signals "scroll right
+         for more styles".
+       - `overflow-x: auto` exposes additional columns past the visible
+         set; `scroll-snap-type: x mandatory` snaps each scroll step to
+         the next column edge.
+
+     Merchant controls (block schema → "Grid"):
+       rs_grid_cols_d  / rs_grid_cols_m   visible columns at a time
+       rs_grid_rows_d  / rs_grid_rows_m   rows per column
+       rs_grid_creep_d / rs_grid_creep_m  peek of next column, in %
+                                          (30 = 30% of one column visible)
+  */
+  {%- assign _rs_cols_d    = blocksettings.rs_grid_cols_d  | default: 4  -%}
+  {%- assign _rs_cols_m    = blocksettings.rs_grid_cols_m  | default: 3  -%}
+  {%- assign _rs_rows_d    = blocksettings.rs_grid_rows_d  | default: 3  -%}
+  {%- assign _rs_rows_m    = blocksettings.rs_grid_rows_m  | default: 3  -%}
+  {%- assign _rs_creep_d   = blocksettings.rs_grid_creep_d | default: 30 -%}
+  {%- assign _rs_creep_m   = blocksettings.rs_grid_creep_m | default: 20 -%}
+  {%- assign _rs_gap_col_d = blocksettings.rs_grid_gap_col_d | default: 8 -%}
+  {%- assign _rs_gap_col_m = blocksettings.rs_grid_gap_col_m | default: 8 -%}
+  [data-rs-block="{{ block_id }}"] .rs-grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat({{ _rs_rows_d }}, auto);
+    grid-auto-columns: calc((100% - ({{ _rs_cols_d }} * {{ _rs_gap_col_d }}px)) / ({{ _rs_cols_d }} + {{ _rs_creep_d }} / 100));
+    gap: {{ blocksettings.rs_grid_gap_row_d | default: 12 }}px {{ _rs_gap_col_d }}px;
+    /* padding-top creates clearance for the .rs-swatch-badge to
+     * protrude above the selected swatch without being clipped by
+     * the grid's overflow-y: hidden. */
+    padding-top: 8px;
+    padding-bottom: 2px;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  [data-rs-block="{{ block_id }}"] .rs-grid::-webkit-scrollbar { display: none; }
+
+  /* JS wraps each .rs-swatch anchor in a .rs-swatch-cell flex column
+     that holds the swatch image and the style-name label below. */
+  [data-rs-block="{{ block_id }}"] .rs-swatch-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: {{ blocksettings.rs_cell_gap | default: 4 }}px;
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+  [data-rs-block="{{ block_id }}"] .rs-swatch-cell .rs-swatch {
+    width: 100%;
+    flex: 0 0 auto;
+    transition: transform 0.12s ease;
+  }
+  [data-rs-block="{{ block_id }}"] .rs-swatch-cell:hover .rs-swatch { transform: scale(1.04); }
+  [data-rs-block="{{ block_id }}"] .rs-swatch-name {
+    line-height: 1.15;
+    text-align: center;
+    opacity: 0.85;
+    width: 100%;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+    font-size: {{ blocksettings.rs_sn_size_d | default: 11 }}px;
+    font-weight: {{ blocksettings.rs_sn_weight | default: '400' }};
+    text-transform: {{ blocksettings.rs_sn_transform | default: 'none' }};
+    letter-spacing: {{ blocksettings.rs_sn_ls | default: '0em' }};
+    {%- case blocksettings.rs_sn_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family);
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family);
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family);
+    {%- endcase -%}
+    {%- if blocksettings.rs_sn_color != blank %}color: {{ blocksettings.rs_sn_color }};{%- endif %}
+  }
+  @media (max-width: 749px) {
+    [data-rs-block="{{ block_id }}"] .rs-swatch-name {
+      font-size: {{ blocksettings.rs_sn_size_m | default: 11 }}px;
+    }
+  }
+  [data-rs-block="{{ block_id }}"] .rs-swatch-cell.rs-swatch-cell--selected .rs-swatch-name {
+    opacity: 1;
+    font-weight: {{ blocksettings.rs_sn_current_weight | default: '700' }};
+    {%- if blocksettings.rs_sn_current_ls != blank %}letter-spacing: {{ blocksettings.rs_sn_current_ls }};{%- endif %}
+    {%- if blocksettings.rs_sn_current_color != blank %}color: {{ blocksettings.rs_sn_current_color }};{%- endif %}
+  }
+
+  [data-rs-block="{{ block_id }}"] .rs-swatch {
+    position: relative;
+    aspect-ratio: {{ aspect_value }};
+    border-radius: {{ shape_radius }};
+    /* overflow:hidden removed so the .rs-swatch-badge on the
+     * selected swatch can extend slightly past the corner. The
+     * image inherits the swatch's border-radius below for the
+     * rounded-corner clipping that overflow:hidden used to give. */
+    background: #f5f5f5;
+    border: {{ blocksettings.selected_border_width | default: 2 }}px solid transparent;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  [data-rs-block="{{ block_id }}"] .rs-swatch img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: inherit;
+  }
+
+  /* Checkmark badge in a black bubble on the upper-right of the
+     currently-selected swatch. Slightly off the corner via negative
+     top/right offsets. The white box-shadow ring helps it pop against
+     dark images. */
+  [data-rs-block="{{ block_id }}"] .rs-swatch-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: {{ blocksettings.rs_badge_bg | default: 'var(--thread-ink)' }};
+    /* The checkmark SVG strokes with currentColor, so `color` here IS
+       the checkmark color. */
+    color: {{ blocksettings.rs_badge_check_color | default: '#ffffff' }};
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 2;
+  }
+  [data-rs-block="{{ block_id }}"] .rs-swatch-badge svg {
+    display: block;
+  }
+  {%- if blocksettings.hover_scale %}
+  [data-rs-block="{{ block_id }}"] .rs-swatch:hover { transform: scale(1.02); }
+  {%- endif %}
+  [data-rs-block="{{ block_id }}"] .rs-swatch--selected {
+    border-color: {{ blocksettings.selected_border_color | default: 'var(--thread-ink)' }};
+  }
+  {%- assign _rs_inner_w = blocksettings.selected_inner_width | default: 1 -%}
+  {%- if _rs_inner_w > 0 -%}
+  /* Inner separator ring just inside the selected border — creates a
+     visual gap between the border and the swatch image. Width/color
+     merchant-controlled; set width to 0 to remove it. The inner
+     radius tracks the outer radius minus the border width so the
+     ring hugs the border at any width setting. */
+  [data-rs-block="{{ block_id }}"] .rs-swatch--selected::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: {{ _rs_inner_w }}px solid {{ blocksettings.selected_inner_color | default: '#ffffff' }};
+    border-radius: calc({{ shape_radius }} - {{ blocksettings.selected_border_width | default: 2 }}px);
+    pointer-events: none;
+  }
+  {%- endif -%}
+  [data-rs-block="{{ block_id }}"] .rs-swatch--soldout img { opacity: {{ soldout_opacity }}; }
+  [data-rs-block="{{ block_id }}"] .rs-swatch--soldout::before {
+    content: 'Sold Out';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--thread-ink);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: var(--thread-ls-label);
+    /* No background pill — just text on the grayed-out swatch. The
+       text-shadow gives it a subtle outline so it stays readable on
+       dark or busy images. white-space prevents the label from
+       wrapping to two lines ("SOLD" / "OUT") on narrow swatches. */
+    white-space: nowrap;
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.85);
+    z-index: 2;
+  }
+  @media (max-width: 749px) {
+    [data-rs-block="{{ block_id }}"] {
+      padding: {{ blocksettings.pad_top_m | default: 24 }}px 16px {{ blocksettings.pad_bot_m | default: 24 }}px;
+    }
+    [data-rs-block="{{ block_id }}"] .rs-heading {
+      font-size: {{ blocksettings.heading_size_m | default: 14 }}px;
+    }
+    [data-rs-block="{{ block_id }}"] .rs-grid {
+      grid-template-rows: repeat({{ _rs_rows_m }}, auto);
+      grid-auto-columns: calc((100% - ({{ _rs_cols_m }} * {{ _rs_gap_col_m }}px)) / ({{ _rs_cols_m }} + {{ _rs_creep_m }} / 100));
+      gap: {{ blocksettings.rs_grid_gap_row_m | default: 10 }}px {{ _rs_gap_col_m }}px;
+    }
+  }
+</style>
+
+{%- assign rs_no_source = false -%}
+{%- if coll == empty or coll == nil -%}{%- assign rs_no_source = true -%}{%- endif -%}
+{%- if rs_variant_mode -%}{%- assign rs_no_source = false -%}{%- endif -%}
+{%- if rs_no_source -%}
+  {%- if request.design_mode -%}
+    <div class="rs-block" data-rs-block="{{ block_id }}" style="padding: 24px 16px;">
+      <div style="padding:24px;border:1px dashed #ccc;border-radius:8px;text-align:center;color:#666;font-size:13px;">
+        No swatches to show. {% if source_type == 'silhouette' %}This product is missing a <code>custom.swatch_collection</code> metafield.{% else %}Pick a source collection.{% endif %}
+      </div>
+    </div>
+  {%- endif -%}
+{%- else -%}
+
+  {%- assign current_html = '' -%}
+  {%- assign in_html = '' -%}
+  {%- assign out_html = '' -%}
+  {%- assign ord_html = '' -%}
+  {%- assign group_count = 0 -%}
+
+  {%- if rs_variant_mode -%}
+  {%- assign rs_cur_variant = product.selected_or_first_available_variant -%}
+  {%- for v in product.variants limit: 2000 -%}
+    {%- assign p_classes = 'rs-swatch' -%}
+    {%- if v.id == rs_cur_variant.id -%}{%- assign p_classes = p_classes | append: ' rs-swatch--selected' -%}{%- endif -%}
+    {%- unless v.available -%}{%- assign p_classes = p_classes | append: ' rs-swatch--soldout' -%}{%- endunless -%}
+    {%- assign tag = 'a' -%}
+    {%- if v.available == false and blocksettings.soldout_tappable == false -%}{%- assign tag = 'div' -%}{%- endif -%}
+    {%- assign p_img = v.featured_image | default: product.featured_image -%}
+    {%- capture swatch_html -%}<{{ tag }} class="{{ p_classes }}"{% if tag == 'a' %} href="{{ product.url }}?variant={{ v.id }}" data-rs-vswatch data-vid="{{ v.id }}" data-vprice="{{ v.price }}" data-vcompare="{{ v.compare_at_price | default: 0 }}" data-vavail="{{ v.available }}"{% if v.featured_media %} data-vmedia="{{ v.featured_media.position | minus: 1 }}" data-vmediaid="{{ v.featured_media.id }}"{% endif %}{% if v.featured_image %} data-vimgid="{{ v.featured_image.id }}"{% endif %}{% endif %}{% if v.id == rs_cur_variant.id %} aria-current="true"{% endif %} title="{{ v.title | escape }}">{% if p_img %}<img src="{{ p_img | image_url: width: 400 }}" srcset="{{ p_img | image_url: width: 200 }} 200w, {{ p_img | image_url: width: 400 }} 400w, {{ p_img | image_url: width: 600 }} 600w" sizes="(max-width: 749px) 25vw, 15vw" alt="{{ v.title | escape }}" loading="lazy" width="400" height="400">{% endif %}{% if v.id == rs_cur_variant.id %}<span class="rs-swatch-badge" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>{% endif %}</{{ tag }}>{%- endcapture -%}
+    {%- if v.id == rs_cur_variant.id -%}
+      {%- assign current_html = current_html | append: swatch_html -%}
+    {%- elsif v.available -%}
+      {%- assign in_html = in_html | append: swatch_html -%}
+    {%- else -%}
+      {%- assign out_html = out_html | append: swatch_html -%}
+    {%- endif -%}
+    {%- unless v.id == rs_cur_variant.id -%}
+      {%- assign ord_html = ord_html | append: swatch_html -%}
+    {%- endunless -%}
+    {%- assign group_count = group_count | plus: 1 -%}
+  {%- endfor -%}
+  {%- else -%}
+  {%- for p in coll.products limit: 2000 -%}
+    {%- if filter_handle != blank and filter_handles != '' -%}
+      {%- assign h_marker = '|' | append: p.handle | append: '|' -%}
+      {%- unless filter_handles contains h_marker -%}{%- continue -%}{%- endunless -%}
+    {%- endif -%}
+
+    {%- comment -%}
+      Exclude Trifecta Bundle products from every related-styles grid.
+      They share tags / colors with the individual silhouettes (so the
+      collection rules pick them up) but they aren't a "style" of the
+      current silhouette — they're a multi-product bundle that lives
+      in its own slot. When we set up dedicated bundle collections /
+      tabs in Shopify we'll revisit, but for now: skip them.
+
+      Tag-based so we don't miss any. All current bundles have
+      product_type = "Bundle" AND tag "trifecta" or "bundle". Tag is
+      more flexible if the merchant later adds non-Trifecta bundle
+      products that SHOULD show up (e.g., a duo bundle).
+    {%- endcomment -%}
+    {%- if p.type == 'Bundle' -%}{%- continue -%}{%- endif -%}
+    {%- if p.tags contains 'trifecta' -%}{%- continue -%}{%- endif -%}
+
+    {%- assign p_classes = 'rs-swatch' -%}
+    {%- if p.handle == current_handle -%}{%- assign p_classes = p_classes | append: ' rs-swatch--selected' -%}{%- endif -%}
+    {%- unless p.available -%}{%- assign p_classes = p_classes | append: ' rs-swatch--soldout' -%}{%- endunless -%}
+
+    {%- assign tag = 'a' -%}
+    {%- if p.available == false and blocksettings.soldout_tappable == false -%}{%- assign tag = 'div' -%}{%- endif -%}
+
+    {%- assign p_img = p.featured_image -%}
+    {%- if blocksettings.swatch_image_source == 'second' and p.images.size > 1 -%}
+      {%- assign p_img = p.images[1] -%}
+    {%- endif -%}
+
+    {%- capture swatch_html -%}<{{ tag }} class="{{ p_classes }}"{% if tag == 'a' %} href="{{ p.url }}"{% endif %}{% if p.handle == current_handle %} aria-current="true"{% endif %} title="{{ p.title | escape }}">{% if p_img %}<img src="{{ p_img | image_url: width: 400 }}" srcset="{{ p_img | image_url: width: 200 }} 200w, {{ p_img | image_url: width: 400 }} 400w, {{ p_img | image_url: width: 600 }} 600w" sizes="(max-width: 749px) 25vw, 15vw" alt="{{ p.title | escape }}" loading="lazy" width="400" height="400">{% endif %}{% if p.handle == current_handle %}<span class="rs-swatch-badge" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>{% endif %}</{{ tag }}>{%- endcapture -%}
+
+    {%- comment -%}
+      The selected swatch lives in its own bucket so it always
+      renders FIRST in the grid regardless of the natural order
+      from the source collection. Per merchant request.
+    {%- endcomment -%}
+    {%- if p.handle == current_handle -%}
+      {%- assign current_html = current_html | append: swatch_html -%}
+    {%- elsif p.available -%}
+      {%- assign in_html = in_html | append: swatch_html -%}
+    {%- else -%}
+      {%- assign out_html = out_html | append: swatch_html -%}
+    {%- endif -%}
+    {%- unless p.handle == current_handle -%}
+      {%- assign ord_html = ord_html | append: swatch_html -%}
+    {%- endunless -%}
+    {%- assign group_count = group_count | plus: 1 -%}
+  {%- endfor -%}
+  {%- endif -%}
+
+  {%- if blocksettings.instock_first -%}
+    {%- assign all_html = current_html | append: in_html | append: out_html -%}
+  {%- else -%}
+    {%- assign all_html = current_html | append: ord_html -%}
+  {%- endif -%}
+
+  {%- if group_count > 0 -%}
+    {%- comment -%}
+      Tabbed treatment only kicks in when the merchant has the global
+      "Show Related Styles sections as toggleable tabs" setting on AND
+      there are 2+ related_styles blocks in the section. With one block
+      there's no tab strip to switch between, so the block renders as a
+      standalone widget — its own "Select Your Style" title takes over
+      (the shared tabbed title only renders with multiple blocks).
+    {%- endcomment -%}
+    {%- assign rs_tabbed = settings.related_styles_tabbed_mode -%}
+    {%- if rs_total != nil and rs_total < 2 -%}{%- assign rs_tabbed = false -%}{%- endif -%}
+    {%- comment -%}
+      Thin desktop-only divider above the swatch widget — sits
+      between the price/review block and the "Select Your Style"
+      title to mirror the merchant reference. In tabbed mode this
+      per-block divider is hidden by the shared CSS and a single
+      divider is injected via the shared script (so we don't get
+      one divider per tabbed block).
+    {%- endcomment -%}
+    <hr class="pdp-section-divider hidden md:block" aria-hidden="true" />
+    <div
+      class="rs-block{% if rs_tabbed %} rs-block--tabbed{% endif %}"
+      data-rs-block="{{ block_id }}"
+      data-current-title="{{ product.title | escape }}"
+      data-current-handle="{{ product.handle }}"
+      {% if rs_tabbed %}data-rs-tabbed="true"{% endif %}
+    >
+      {%- comment -%}
+        The existing rs-heading already serves as the section title
+        and has its own merchant settings (heading_text plus the
+        heading_size_d/heading_weight/etc. font controls higher up
+        in the inline <style> block). No separate hardcoded "Select
+        Style" h4 needed here — would just duplicate the merchant's
+        configured heading.
+      {%- endcomment -%}
+      {%- comment -%}
+        Widget title above everything. In tabbed mode the shared CSS
+        block hides this title on all but the first tabbed block so
+        it doesn't repeat above each tab's content. The text matches
+        the product__options widget for visual consistency between
+        the two swatch experiences.
+      {%- endcomment -%}
+      {%- comment -%}
+        Per-block heading visibility. `== false` (not truthiness) so
+        blocks saved before the checkbox existed keep showing their
+        heading. When hidden, the style count moves up into the title
+        row so "Select Your Style ... N styles" share one line.
+      {%- endcomment -%}
+      {%- assign rs_heading_visible = false -%}
+      {%- if heading_text != blank -%}
+        {%- unless blocksettings.rs_show_heading == false -%}
+          {%- assign rs_heading_visible = true -%}
+        {%- endunless -%}
+      {%- endif -%}
+      {%- comment -%}
+        Pagination arrows — captured once, placed exactly once. With
+        the heading hidden and the title shown they join the title row
+        (title left, count + arrows right-justified on the SAME line);
+        otherwise they keep their spot on the header row.
+      {%- endcomment -%}
+      {%- capture rs_arrows_html -%}
+        <div class="rs-arrows">
+          <button type="button" class="rs-arrow rs-arrow--prev btn btn--plain btn--small shadow-sm" aria-label="Previous styles" disabled>
+            {% render 'component__icon', icon: 'arrow-left', size: '20', class: '' %}
+          </button>
+          <button type="button" class="rs-arrow rs-arrow--next btn btn--plain btn--small shadow-sm" aria-label="Next styles" disabled>
+            {% render 'component__icon', icon: 'arrow-right', size: '20', class: '' %}
+          </button>
+        </div>
+      {%- endcapture -%}
+      {%- assign rs_arrows_in_titlerow = false -%}
+      {%- if blocksettings.rs_show_title and rs_heading_visible == false -%}
+        {%- assign rs_arrows_in_titlerow = true -%}
+      {%- endif -%}
+      {%- if blocksettings.rs_show_title -%}
+        <div class="rs-titlerow">
+          <h4 class="rs-title">{{ blocksettings.rs_title_text | default: 'Select Your Style' | escape }}</h4>
+          {%- unless rs_heading_visible -%}
+            <span class="rs-titlerow-count">{{ group_count }} {% if group_count == 1 %}style{% else %}styles{% endif %}</span>
+          {%- endunless -%}
+          {%- if rs_arrows_in_titlerow -%}{{ rs_arrows_html }}{%- endif -%}
+        </div>
+      {%- endif -%}
+      {%- comment -%}
+        Header row: heading on the left (hidden in tabbed mode) and
+        the pagination arrows on the right. The hover/selected style
+        name was removed per merchant request.
+
+        The heading stays in the DOM even when toggled off (inline
+        display:none) because the tabbed-mode script reads each tab's
+        label from `.rs-heading span` and the count from `.rs-count`.
+      {%- endcomment -%}
+      <div class="rs-header{% unless rs_heading_visible %} rs-header--noheading{% endunless %}">
+        {%- if heading_text != blank -%}
+          <div class="rs-heading"{% unless rs_heading_visible %} style="display: none;"{% endunless %}>
+            <span>{{ heading_text }}</span>
+            <span class="rs-count">{{ group_count }} {% if group_count == 1 %}style{% else %}styles{% endif %}</span>
+          </div>
+        {%- endif -%}
+        {%- unless rs_arrows_in_titlerow -%}{{ rs_arrows_html }}{%- endunless -%}
+      </div>
+      <div class="rs-grid" data-rs-grid>{{ all_html }}</div>
+    </div>
+  {%- endif -%}
+
+  {%- if rs_variant_mode -%}
+  <script>
+    /* Variant-mode swatches swap IN PLACE (no reload): move the
+       selected badge, update the Alpine variant state (price / ATC /
+       express input), jump the gallery to the variant's image, and
+       keep the URL in sync for share/refresh. */
+    (function () {
+      var root = document.querySelector('[data-rs-block="{{ block_id }}"]');
+      if (!root) return;
+
+      /* On load, pre-select the current variant so the real Add to
+         Cart renders immediately — the "Choose options" state never
+         shows on variant-swatch products. Alpine loads as a deferred
+         module after this inline script, so retry until its scope
+         exists. */
+      function rsAutoSelect() {
+        var pdpRoot = document.querySelector('[x-ref="formContainer"]');
+        if (!pdpRoot || !window.Alpine) return false;
+        var scope;
+        try { scope = window.Alpine.$data(pdpRoot); } catch (_) { return false; }
+        if (!scope || typeof scope.handleForm !== 'function') return false;
+        if (scope.buttonDisabled) scope.handleForm(false, {{ rs_cur_variant.id }});
+        return true;
+      }
+      if (!rsAutoSelect()) {
+        document.addEventListener('alpine:initialized', function () { rsAutoSelect(); }, { once: true });
+        var rsTries = 0;
+        var rsTimer = setInterval(function () {
+          if (rsAutoSelect() || ++rsTries > 40) clearInterval(rsTimer);
+        }, 250);
+      }
+
+      var BADGE = '<span class="rs-swatch-badge" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+      root.addEventListener('click', function (e) {
+        var a = e.target.closest('[data-rs-vswatch]');
+        if (!a || !root.contains(a)) return;
+        e.preventDefault();
+        /* highlight */
+        root.querySelectorAll('.rs-swatch--selected').forEach(function (s) {
+          s.classList.remove('rs-swatch--selected');
+          s.removeAttribute('aria-current');
+          var b = s.querySelector('.rs-swatch-badge');
+          if (b) b.remove();
+        });
+        a.classList.add('rs-swatch--selected');
+        a.setAttribute('aria-current', 'true');
+        if (!a.querySelector('.rs-swatch-badge')) a.insertAdjacentHTML('beforeend', BADGE);
+        /* Full variant selection via the theme's own handleForm — sets
+           the option selections (so the real Add to Cart replaces the
+           "Choose options" button), price, availability, and scrolls
+           the gallery to the variant's image. Manual state pokes kept
+           only as a fallback for older cached scripts. */
+        var pdpRoot = document.querySelector('[x-ref="formContainer"]');
+        if (pdpRoot && window.Alpine) {
+          var scope;
+          try { scope = window.Alpine.$data(pdpRoot); } catch (_) { scope = null; }
+          if (scope) {
+            var vid = parseInt(a.dataset.vid, 10);
+            if (typeof scope.handleForm === 'function') {
+              /* quickAdd=true: state only (options/price/CTA) — no
+                 gallery side effects, no scrolling of any kind. */
+              try { scope.handleForm(true, vid); } catch (_) {}
+            } else {
+              scope.defaultVariantId = vid;
+              scope.defaultVariantPrice = parseInt(a.dataset.vprice, 10);
+              scope.defaultVariantComparePrice = parseInt(a.dataset.vcompare, 10) || 0;
+              scope.defaultAvailable = a.dataset.vavail !== 'false';
+              scope.buttonDisabled = false;
+              scope.allOptionsSelected = true;
+            }
+            if (a.dataset.vimgid) scope.current_variant_featured_image_id = a.dataset.vimgid;
+            if (a.dataset.vmediaid) scope.current_variant_featured_media_id = a.dataset.vmediaid;
+            var idx = parseInt(a.dataset.vmedia, 10);
+            if (!isNaN(idx) && typeof scope.scrollToIndex === 'function') {
+              /* Zero-motion swap: fade the gallery out (150ms), jump it
+                 to the variant's image while invisible, fade back in.
+                 No page scroll, no slider glide — nothing can fight. */
+              var sliderEl = pdpRoot.querySelector('[x-ref="slider"]');
+              var jump = function () {
+                try {
+                  scope.gallery_index_scroll = idx;
+                  scope.scrollToIndex(idx, 'instant');
+                } catch (_) {}
+              };
+              if (sliderEl) {
+                sliderEl.style.transition = 'opacity 0.15s ease';
+                sliderEl.style.opacity = '0';
+                setTimeout(function () {
+                  jump();
+                  requestAnimationFrame(function () { sliderEl.style.opacity = '1'; });
+                }, 160);
+              } else {
+                jump();
+              }
+            }
+          }
+        }
+        var expressInput = document.querySelector('[data-pdp-express-variant]');
+        if (expressInput) expressInput.value = a.dataset.vid;
+        try { history.replaceState({}, '', a.href); } catch (_) {}
+      });
+    })();
+  </script>
+  {%- endif -%}
+
+{%- endif -%}
+
+{%- if settings.related_styles_tabbed_mode and rs_index == 1 -%}
+  {%- comment -%}
+    Tabbed mode shared assets — emitted exactly once per page (gated by
+    rs_index == 1 passed from sections/product__main.liquid).
+
+    No-FOUC strategy:
+    - The `.rs-block--tabbed ~ .rs-block--tabbed` rule hides every tabbed
+      sibling that follows another tabbed sibling, so on first paint
+      only the first block is visible. No JS, no body class wait.
+    - The `.rs-heading` inside any tabbed block is hidden from the
+      start — the tab pill IS the heading.
+    - Once JS builds the tab strip and assigns `.rs-tabbed-active`, the
+      stronger compound-class rule takes over so the user can switch tabs
+      while the first block (no longer active) gets hidden.
+  {%- endcomment -%}
+  <style>
+    /* Per-block titles, header rows, and the heading-with-count
+       block all need to stay hidden in tabbed mode — the shared
+       script renders ONE title row at the top (title left, count
+       right) and ONE tab strip, so every tab renders identically.
+       Using !important because per-block `[data-rs-block]` rules
+       above set display: flex with higher specificity than the
+       single-class `.rs-block--tabbed` selector. */
+    .rs-block--tabbed .rs-title    { display: none !important; }
+    .rs-block--tabbed .rs-titlerow { display: none !important; }
+    .rs-block--tabbed .rs-header   { display: none !important; }
+    .rs-block--tabbed .rs-heading  { display: none !important; }
+    .rs-block--tabbed ~ .rs-block--tabbed { display: none; }
+    /* Each rs-block renders its own <hr class="pdp-section-divider">
+       above its container. In tabbed mode we want only one divider
+       at the top — hide every divider that comes AFTER a tabbed
+       block so the layout collapses to ONE divider → title → tabs
+       → grid regardless of how many tabbed blocks the merchant has. */
+    .rs-block--tabbed ~ .pdp-section-divider { display: none; }
+    .rs-block--tabbed.rs-tabbed-active { display: block; }
+    .rs-block--tabbed.rs-tabbed-hidden { display: none; }
+    /* Shared title row above the tab strip. Title text on the left,
+       active-tab style count on the right, sharing the same baseline.
+       Driven by the FIRST related_styles block's rs_title_* settings
+       so a merchant editing the first block controls the look for all
+       tabs (every tab renders identically). */
+    .rs-tabbed-titlerow {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 16px 12px;
+      padding: 12px 0 0;
+    }
+    .rs-tabbed-title {
+      margin: 0;
+      padding: 0;
+      line-height: 1.3;
+      text-align: left;
+      flex: 1 1 auto;
+      min-width: 0;
+      font-size: {{ blocksettings.rs_title_size_d | default: 15 }}px;
+      font-weight: {{ blocksettings.rs_title_weight | default: '700' }};
+      text-transform: {{ blocksettings.rs_title_transform | default: 'none' }};
+      letter-spacing: {{ blocksettings.rs_title_ls | default: '0em' }};
+      {%- case blocksettings.rs_title_font -%}
+        {%- when 'body'        -%}font-family: var(--type-font-body-family);
+        {%- when 'heading'     -%}font-family: var(--type-font-header-family);
+        {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family);
+      {%- endcase -%}
+      {%- if blocksettings.rs_title_color != blank %}color: {{ blocksettings.rs_title_color }};{%- endif %}
+    }
+    /* Tabbed-mode shared count — driven by the FIRST related_styles
+       block's rs_count_* settings (same convention as the shared
+       title). */
+    .rs-tabbed-count {
+      flex: 0 0 auto;
+      font-size: {{ blocksettings.rs_count_size_d | default: 12 }}px;
+      font-weight: {{ blocksettings.rs_count_weight | default: '400' }};
+      color: {{ blocksettings.rs_count_color | default: 'var(--thread-grey)' }};
+      letter-spacing: {{ blocksettings.rs_count_ls | default: '0em' }};
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+    @media (max-width: 749px) {
+      .rs-tabbed-title { font-size: {{ blocksettings.rs_title_size_m | default: 15 }}px; }
+      .rs-tabbed-count { font-size: {{ blocksettings.rs_count_size_m | default: 12 }}px; }
+    }
+
+    /* One row holds tabs (left) + pagination arrows (right). The
+       current/hover style name was removed — only arrows + pills
+       live on this row now. */
+    .rs-tabbed-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 16px;
+      padding: 0 0 {{ blocksettings.rs_tab_bar_mb | default: 8 }}px;
+      min-width: 0;
+    }
+    .rs-tabbed-arrows {
+      display: none;
+      gap: 8px;
+      flex: 0 0 auto;
+      margin-left: auto;
+    }
+    @media (min-width: 750px) {
+      .rs-tabbed-arrows.is-pagination { display: inline-flex; }
+    }
+    /* Visual styling (size, bg, border, shadow) comes from the shared
+     * .btn .btn--plain .btn--small .shadow-sm classes added in JS so
+     * these tabbed-mode arrows match the PDP product-gallery arrows. */
+    .rs-tabbed-arrow {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .rs-tabbed-arrow:disabled { opacity: 0.4; cursor: default; }
+
+    .rs-tabbed-tabs {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: {{ blocksettings.rs_tab_gap | default: 6 }}px;
+      flex: 1 1 auto;
+      min-width: 0;
+      margin: 0;
+      /* Padding gives the scaled active pill room to render without
+         clipping its left/top/bottom edges; overflow stays X-only so
+         vertical scrolling never appears even when an X scrollbar
+         spawns. */
+      padding: 2px 0 2px 2px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+    .rs-tabbed-tab {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      padding: {{ blocksettings.rs_tab_pad_v | default: 7 }}px {{ blocksettings.rs_tab_pad_h | default: 14 }}px;
+      cursor: pointer;
+      white-space: nowrap;
+      line-height: 1.2;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+      font-size: {{ blocksettings.rs_tab_size_d | default: 12 }}px;
+      font-weight: {{ blocksettings.rs_tab_weight | default: '700' }};
+      text-transform: {{ blocksettings.rs_tab_transform | default: 'none' }};
+      letter-spacing: {{ blocksettings.rs_tab_ls | default: '0em' }};
+      {%- case blocksettings.rs_tab_font -%}
+        {%- when 'body'        -%}font-family: var(--type-font-body-family);
+        {%- when 'heading'     -%}font-family: var(--type-font-header-family);
+        {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family);
+      {%- endcase -%}
+      color: {{ blocksettings.rs_tab_color | default: 'inherit' }};
+      background: {{ blocksettings.rs_tab_bg | default: 'rgba(0, 0, 0, 0.04)' }};
+      border: {{ blocksettings.rs_tab_border_width | default: 1.5 }}px solid {{ blocksettings.rs_tab_border | default: '#c4c4c4' }};
+    }
+    @media (max-width: 749px) {
+      .rs-tabbed-tab { font-size: {{ blocksettings.rs_tab_size_m | default: 12 }}px; }
+    }
+    .rs-tabbed-tab:hover { border-color: {{ blocksettings.rs_tab_active_bg | default: 'var(--background_primary_light, var(--thread-blue))' }}; }
+    .rs-tabbed-tab.is-active {
+      background: {{ blocksettings.rs_tab_active_bg | default: 'var(--background_primary_light, var(--thread-blue))' }};
+      border-color: {{ blocksettings.rs_tab_active_bg | default: 'var(--background_primary_light, var(--thread-blue))' }};
+      color: {{ blocksettings.rs_tab_active_color | default: 'var(--foreground_primary_light, #fff)' }};
+      transform: scale(1.03);
+    }
+  </style>
+  <script>
+    (function(){
+      function init(){
+        var blocks = document.querySelectorAll('.rs-block--tabbed');
+        if (blocks.length === 0) return;
+        blocks = Array.prototype.slice.call(blocks);
+        // Single block: nothing to toggle — leave as-is.
+        if (blocks.length === 1) return;
+        var tabs = document.createElement('div');
+        tabs.className = 'rs-tabbed-tabs';
+        tabs.setAttribute('role', 'tablist');
+        var buttons = [];
+
+        function activate(idx){
+          for (var i = 0; i < blocks.length; i++) {
+            var on = i === idx;
+            blocks[i].classList.toggle('rs-tabbed-active', on);
+            blocks[i].classList.toggle('rs-tabbed-hidden', !on);
+            buttons[i].classList.toggle('is-active', on);
+            buttons[i].setAttribute('aria-selected', on ? 'true' : 'false');
+          }
+        }
+
+        blocks.forEach(function(b, i){
+          var head = b.querySelector('.rs-heading span') || b.querySelector('.rs-heading');
+          var label = (head ? head.textContent : '').trim() || ('Section ' + (i + 1));
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'rs-tabbed-tab';
+          btn.setAttribute('role', 'tab');
+          btn.textContent = label;
+          btn.addEventListener('click', function(){ activate(i); });
+          tabs.appendChild(btn);
+          buttons.push(btn);
+        });
+        /* Layout in tabbed mode:
+         *   [title]
+         *   [bar: tabs (left) | arrows (right)]
+         *   [active block: grid]
+         * Shared arrows live in the bar so they sit beside the tab
+         * row instead of below the grid. Click delegation: the
+         * shared arrows trigger .click() on whichever block is
+         * currently active — the per-block JS already knows how to
+         * scroll its own grid. A MutationObserver mirrors the active
+         * block's disabled state to the shared buttons. */
+        // Title row: "Select Your Style" on the left, active-tab's
+        // style count on the right. Same line for every tab — the
+        // count text gets refreshed on every activate().
+        var titleRow = document.createElement('div');
+        titleRow.className = 'rs-tabbed-titlerow';
+        /* Title visibility is driven by the first related_styles block's
+         * rs_show_title checkbox — same toggle that controls the per-
+         * block title in single-block mode. When off, the bar still
+         * renders the tabs + arrows + style count but skips the title. */
+        {%- if blocksettings.rs_show_title -%}
+        var titleEl = document.createElement('h4');
+        titleEl.className = 'rs-tabbed-title';
+        titleEl.textContent = {{ blocksettings.rs_title_text | default: 'Select Your Style' | json }};
+        titleRow.appendChild(titleEl);
+        {%- endif -%}
+        var countEl = document.createElement('span');
+        countEl.className = 'rs-tabbed-count';
+        titleRow.appendChild(countEl);
+
+        function refreshCount(idx) {
+          var b = blocks[idx];
+          if (!b) { countEl.textContent = ''; return; }
+          // Each block renders a hidden .rs-count inside its own
+          // .rs-heading. Read straight from that so the displayed
+          // number always matches the active tab's actual style total.
+          var src = b.querySelector('.rs-count');
+          countEl.textContent = src ? src.textContent.trim() : '';
+        }
+
+        var bar = document.createElement('div');
+        bar.className = 'rs-tabbed-bar';
+        bar.appendChild(tabs);
+
+        var arrowsEl = document.createElement('div');
+        arrowsEl.className = 'rs-tabbed-arrows';
+        var rsArrowLeftSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left inline-block"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>';
+        var rsArrowRightSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right inline-block"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>';
+        var sharedPrev = document.createElement('button');
+        sharedPrev.type = 'button';
+        sharedPrev.className = 'rs-tabbed-arrow rs-tabbed-arrow--prev btn btn--plain btn--small shadow-sm';
+        sharedPrev.setAttribute('aria-label', 'Previous styles');
+        sharedPrev.innerHTML = rsArrowLeftSvg;
+        var sharedNext = document.createElement('button');
+        sharedNext.type = 'button';
+        sharedNext.className = 'rs-tabbed-arrow rs-tabbed-arrow--next btn btn--plain btn--small shadow-sm';
+        sharedNext.setAttribute('aria-label', 'Next styles');
+        sharedNext.innerHTML = rsArrowRightSvg;
+        arrowsEl.appendChild(sharedPrev);
+        arrowsEl.appendChild(sharedNext);
+        bar.appendChild(arrowsEl);
+
+        function activeBlock(){
+          return document.querySelector('.rs-block--tabbed.rs-tabbed-active') || blocks[0];
+        }
+        function activeBtn(dir){
+          var b = activeBlock();
+          return b && b.querySelector(dir === 'prev' ? '.rs-arrow--prev' : '.rs-arrow--next');
+        }
+        function syncSharedDisabled(){
+          var p = activeBtn('prev'), n = activeBtn('next');
+          sharedPrev.disabled = !p || p.disabled;
+          sharedNext.disabled = !n || n.disabled;
+          /* Pagination only makes sense when the active block has
+           * overflow — mirror the per-block .rs-has-pagination class
+           * onto the shared arrow container so it shows/hides
+           * accordingly. */
+          var b = activeBlock();
+          arrowsEl.classList.toggle(
+            'is-pagination',
+            !!(b && b.classList.contains('rs-has-pagination'))
+          );
+        }
+        sharedPrev.addEventListener('click', function(){
+          var p = activeBtn('prev'); if (p && !p.disabled) p.click();
+        });
+        sharedNext.addEventListener('click', function(){
+          var n = activeBtn('next'); if (n && !n.disabled) n.click();
+        });
+
+        var observer = null;
+        function rebindObserver(){
+          if (observer) { observer.disconnect(); observer = null; }
+          var p = activeBtn('prev'), n = activeBtn('next');
+          if (!p && !n) return;
+          observer = new MutationObserver(syncSharedDisabled);
+          if (p) observer.observe(p, { attributes: true, attributeFilter: ['disabled'] });
+          if (n) observer.observe(n, { attributes: true, attributeFilter: ['disabled'] });
+          /* The .rs-has-pagination class lives on the rs-block itself
+           * (toggled by per-block updateArrows). Observe each block's
+           * class attribute too so the shared arrows appear/disappear
+           * as a tab is switched onto a block whose grid overflows. */
+          blocks.forEach(function(b){
+            observer.observe(b, { attributes: true, attributeFilter: ['class'] });
+          });
+          syncSharedDisabled();
+        }
+
+        /* Wrap the original activate() so each tab switch re-binds
+         * the observer to the newly active block's arrows AND
+         * refreshes the title-row count to that tab's total. */
+        var origActivate = activate;
+        activate = function(idx){
+          origActivate(idx);
+          rebindObserver();
+          refreshCount(idx);
+        };
+
+        blocks[0].parentNode.insertBefore(titleRow, blocks[0]);
+        blocks[0].parentNode.insertBefore(bar, blocks[0]);
+        activate(0);
+      }
+      // The shared assets are emitted at the FIRST tabbed block's location
+      // in the DOM, so subsequent blocks aren't parsed yet. Run init after
+      // DOM ready to ensure every block is in the tree.
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+{%- endif -%}
+
+<script>
+  (function(){
+    var rootEl = document.querySelector('[data-rs-block="{{ block_id }}"]');
+    if (!rootEl || rootEl.dataset.rsReady) return;
+    rootEl.dataset.rsReady = '1';
+
+    var grid = rootEl.querySelector('[data-rs-grid]');
+    var prevBtn = rootEl.querySelector('.rs-arrow--prev');
+    var nextBtn = rootEl.querySelector('.rs-arrow--next');
+    /* The shared tabbed-mode bar inserts a .rs-tabbed-current-name
+     * after DOMContentLoaded; this per-block <script> runs inline
+     * BEFORE that, so we resolve the target element lazily inside
+     * setColorLabel rather than caching it once at init. Falls back
+     * to the per-block .rs-current-name (non-tabbed mode). */
+    function getColorNameEl(){
+      return document.querySelector('.rs-tabbed-current-name')
+        || rootEl.querySelector('.rs-current-name');
+    }
+    if (!grid) return;
+
+    var currentTitle = rootEl.getAttribute('data-current-title') || '';
+    var currentHandle = rootEl.getAttribute('data-current-handle') || '';
+    var canHover = !!(window.matchMedia && window.matchMedia('(hover: hover)').matches);
+
+    /* Product titles are conventionally "<Color> - <Type>", e.g.
+     * "Clark - Elastic Wallet". Only the color part is shown under a
+     * swatch and in the "Color: …" header; the type is implied. */
+    function shortName(s){
+      if (!s) return '';
+      var idx = s.indexOf(' - ');
+      return idx > 0 ? s.slice(0, idx) : s;
+    }
+    var currentShortTitle = shortName(currentTitle);
+
+    /* Hero preview state (lazy capture on first hover so we don't race
+     * the gallery's own init). previousSrc holds pre-hover src and is
+     * cleared on mouseleave so subsequent hovers re-capture whatever
+     * the gallery shows then (e.g. after a variant change). */
+    var heroImg = null;
+    var heroPreviousSrc = null;
+    var heroPreviousSrcset = null;
+    var heroHoverHandle = null;
+    var heroCache = {};
+    var heroInFlight = {};
+
+    /* Find a visible image in the gallery — multiple slides exist and
+     * in variant-image mode all but the active one are hidden via
+     * Alpine x-show, so picking the first matching <img> can silently
+     * swap an off-screen one. */
+    function getHeroImg(){
+      if (heroImg && document.body.contains(heroImg) && heroImg.clientWidth > 0) return heroImg;
+      var candidates = document.querySelectorAll('.pdp-gallery-track img, .product__media img');
+      for (var i = 0; i < candidates.length; i++) {
+        if (candidates[i].clientWidth > 0 && candidates[i].clientHeight > 0) {
+          heroImg = candidates[i];
+          return heroImg;
+        }
+      }
+      heroImg = candidates[0] || null;
+      return heroImg;
+    }
+    function applyHeroSrc(img, url){
+      if (heroPreviousSrc === null) {
+        heroPreviousSrc = img.src;
+        heroPreviousSrcset = img.getAttribute('srcset');
+      }
+      /* Clearing srcset is required: with srcset present the browser
+       * re-picks a source on layout and undoes our swap. */
+      img.removeAttribute('srcset');
+      img.src = url;
+    }
+    function setColorLabel(name){
+      var el = getColorNameEl();
+      if (el) el.textContent = shortName(name) || currentShortTitle;
+    }
+    function previewHero(handle){
+      var img = getHeroImg();
+      if (!img) return;
+      if (heroCache[handle]) {
+        applyHeroSrc(img, heroCache[handle]);
+        return;
+      }
+      /* Route through fetchProduct so the FULL product JSON also
+       * lands in productCache — when the customer hovers and then
+       * clicks, the click handler's fetchProduct() finds the entry
+       * cached and the swap is fully synchronous (no network wait
+       * for variant id / price). */
+      fetchProduct(handle).then(function(p){
+        if (!p) return;
+        var src = p.featured_image;
+        if (src && src.indexOf('//') === 0) src = 'https:' + src;
+        if (!src) return;
+        heroCache[handle] = src;
+        if (heroHoverHandle === handle) applyHeroSrc(img, src);
+      });
+    }
+    function revertHero(){
+      var img = getHeroImg();
+      if (img && heroPreviousSrc !== null) {
+        img.src = heroPreviousSrc;
+        if (heroPreviousSrcset !== null) img.setAttribute('srcset', heroPreviousSrcset);
+      }
+      heroPreviousSrc = null;
+      heroPreviousSrcset = null;
+      heroHoverHandle = null;
+    }
+
+    /* ---------- In-place product swap on swatch click ----------
+     * Each color/pattern is its own Shopify product (SKU-per-product
+     * model). Clicking a swatch normally follows <a href> and full-
+     * reloads the PDP. This block intercepts that click and swaps the
+     * active product in place: gallery image + title + price + ATC
+     * variant id + URL all update, no navigation. Description /
+     * accordions / review widget remain on the original product
+     * (server-rendered) — acceptable for sibling swaps within the
+     * same silhouette. The merchant accepts this trade-off for now;
+     * the proper fix is the planned variant-restructure on the
+     * Shopify side. */
+
+    var productCache = {};
+    var productInFlight = {};
+
+    function fetchProduct(handle) {
+      if (productCache[handle]) return Promise.resolve(productCache[handle]);
+      if (productInFlight[handle]) return productInFlight[handle];
+      var promise = fetch('/products/' + encodeURIComponent(handle) + '.js', { credentials: 'same-origin' })
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(p){
+          if (p) productCache[handle] = p;
+          productInFlight[handle] = null;
+          return p;
+        })
+        .catch(function(){
+          productInFlight[handle] = null;
+          return null;
+        });
+      productInFlight[handle] = promise;
+      return promise;
+    }
+
+    function abs(src){
+      if (!src) return '';
+      return src.indexOf('//') === 0 ? 'https:' + src : src;
+    }
+
+    /* Collapse the PDP gallery to a single slide with the new product's
+     * featured image. Side effects: remove sibling slides (they belong
+     * to the old product), clear srcset on the remaining img so the
+     * browser doesn't re-pick from the old resolutions, hide the
+     * pagination dots, and hide the desktop thumbnail strip — all the
+     * old product's media is no longer relevant after the swap. */
+    function swapGalleryToSingleImage(imgUrl) {
+      var src = abs(imgUrl);
+      if (!src) return;
+      var track = document.querySelector('.pdp-gallery-track');
+      if (!track) return;
+      var slides = track.querySelectorAll(':scope > div');
+      for (var i = 1; i < slides.length; i++) slides[i].remove();
+      var img = track.querySelector('img');
+      if (img) {
+        img.removeAttribute('srcset');
+        img.src = src;
+      }
+      var dots = document.querySelector('.pdp-gallery-dots');
+      if (dots) dots.style.display = 'none';
+      var thumbCol = document.querySelector('.pdp-thumb-col');
+      if (thumbCol) thumbCol.style.display = 'none';
+    }
+
+    /* Rebuild the FULL gallery for a swapped product: all slides, the
+     * desktop thumbnail column, and the mobile dots — so the customer
+     * can browse every photo of the style they picked (previously the
+     * swap collapsed the gallery to a single image and hid the
+     * thumbnails/dots entirely).
+     *
+     * The Liquid-rendered slides carry Alpine bindings with hardcoded
+     * indices (x-intersect, @click) that can't survive DOM
+     * replacement, so the rebuilt gallery drives the SAME Alpine scope
+     * (gallery_index / scrollToIndex / show_arrows) through plain
+     * listeners + one IntersectionObserver. Zoom-on-click is not
+     * re-wired for swapped galleries — the fullscreen viewer's markup
+     * is server-rendered for the original product only. */
+    function rebuildGallery(p) {
+      var images = (p && p.images) || [];
+      if (images.length < 2) {
+        if (p && p.featured_image) swapGalleryToSingleImage(p.featured_image);
+        return;
+      }
+      var track = document.querySelector('.pdp-gallery-track');
+      if (!track) return;
+      var scope = null;
+      try { scope = window.Alpine ? window.Alpine.$data(track) : null; } catch (_) {}
+
+      function sized(url, w) {
+        var u = abs(url);
+        return u + (u.indexOf('?') === -1 ? '?' : '&') + 'width=' + w;
+      }
+
+      /* Clone the structural classes off the server-rendered markup so
+       * the rebuilt gallery inherits the theme's borders/radius/snap
+       * styling — minus zoom affordance (see comment above). */
+      var firstSlide = track.querySelector(':scope > div');
+      var slideClass = (firstSlide ? firstSlide.className : 'relative snap-center flex-none border--width border--radius overflow-hidden w-full')
+        .replace('cursor-zoom-in', '').trim();
+      var firstImg = firstSlide ? firstSlide.querySelector('img') : null;
+      var imgClass = firstImg ? firstImg.className : 'w-full h-full object-cover';
+
+      while (track.firstChild) track.removeChild(track.firstChild);
+      images.forEach(function (url, idx) {
+        var slide = document.createElement('div');
+        slide.className = slideClass;
+        slide.setAttribute('data-slide', idx);
+        var img = document.createElement('img');
+        img.className = imgClass;
+        img.style.objectFit = 'cover';
+        img.src = sized(url, 1100);
+        img.srcset = sized(url, 600) + ' 600w, ' + sized(url, 900) + ' 900w, ' + sized(url, 1400) + ' 1400w';
+        img.sizes = '(min-width: 768px) 45vw, 100vw';
+        img.loading = idx === 0 ? 'eager' : 'lazy';
+        img.decoding = 'async';
+        img.alt = (p.title || '') + ' — image ' + (idx + 1);
+        slide.appendChild(img);
+        track.appendChild(slide);
+      });
+
+      var dots = document.querySelector('.pdp-gallery-dots');
+      if (dots) {
+        while (dots.firstChild) dots.removeChild(dots.firstChild);
+        images.forEach(function (_u, idx) {
+          var b = document.createElement('button');
+          b.setAttribute('aria-label', 'gallery_button_' + idx);
+          b.className = 'pdp-gallery-dot color__bg-text animation-100 rounded-full w-2 h-2 opacity-25';
+          b.addEventListener('click', function () {
+            if (scope && typeof scope.scrollToIndex === 'function') {
+              scope.gallery_index_scroll = idx;
+              scope.scrollToIndex(idx);
+            }
+          });
+          dots.appendChild(b);
+        });
+        dots.style.display = '';
+      }
+
+      var thumbCol = document.querySelector('.pdp-thumb-col');
+      if (thumbCol) {
+        var firstThumbImg = thumbCol.querySelector('img');
+        var thumbImgClass = firstThumbImg ? firstThumbImg.className : 'w-full h-full object-cover !bg-transparent';
+        while (thumbCol.firstChild) thumbCol.removeChild(thumbCol.firstChild);
+        images.forEach(function (url, idx) {
+          var t = document.createElement('div');
+          t.className = 'pdp-thumb relative snap-center flex-none hover:cursor-pointer w-full border--width border--radius overflow-hidden animation-300';
+          t.setAttribute('data-slide', idx);
+          t.tabIndex = 0;
+          var wrap = document.createElement('div');
+          wrap.className = 'overflow-hidden object-cover aspect-[1/1] aspect-w-1 aspect-h-1 w-full';
+          var img = document.createElement('img');
+          img.className = thumbImgClass;
+          img.style.objectFit = 'cover';
+          img.src = sized(url, 192);
+          img.loading = 'lazy';
+          img.decoding = 'async';
+          img.alt = '';
+          wrap.appendChild(img);
+          t.appendChild(wrap);
+          var go = function (behavior) {
+            if (scope && typeof scope.scrollToIndex === 'function') {
+              scope.gallery_index_scroll = idx;
+              scope.scrollToIndex(idx, behavior);
+            }
+          };
+          t.addEventListener('click', function () { go(); });
+          t.addEventListener('mouseenter', function () { go('instant'); });
+          t.addEventListener('focus', function () { go('instant'); });
+          thumbCol.appendChild(t);
+        });
+        thumbCol.style.display = '';
+      }
+
+      /* Active-state sync — replaces the per-slide x-intersect bindings. */
+      function setActive(idx) {
+        if (scope) scope.gallery_index = idx;
+        if (dots) Array.prototype.forEach.call(dots.children, function (d, i) {
+          d.classList.toggle('pdp-gallery-dot--active', i === idx);
+          d.classList.toggle('!opacity-100', i === idx);
+        });
+        if (thumbCol) Array.prototype.forEach.call(thumbCol.children, function (t, i) {
+          t.classList.toggle('pdp-thumb--active', i === idx);
+          t.classList.toggle('color__border-selected-1', i === idx);
+        });
+      }
+      if (window.__rsGalleryObserver) { try { window.__rsGalleryObserver.disconnect(); } catch (_) {} }
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) {
+            /* Loop clones carry no data-slide — ignore them so the
+             * active dot/thumb never snaps to 0 mid-wrap. */
+            if (en.isIntersecting && en.target.hasAttribute('data-slide')) {
+              setActive(parseInt(en.target.getAttribute('data-slide'), 10) || 0);
+            }
+          });
+        }, { root: track, threshold: 0.5 });
+        Array.prototype.forEach.call(track.querySelectorAll(':scope > [data-slide]'), function (s) { io.observe(s); });
+        window.__rsGalleryObserver = io;
+      }
+
+      track.scrollLeft = 0;
+      setActive(0);
+      if (scope) {
+        scope.gallery_index = 0;
+        scope.gallery_index_scroll = 0;
+        /* Desktop arrows (CSS hides them on mobile). */
+        scope.show_arrows = true;
+      }
+
+    }
+
+    /* Extract the first color_<x> tag from a product JSON's tags so
+     * the bundle's color-match logic can re-rank the OTHER slots
+     * around the new active product. */
+    function extractColorTag(p) {
+      if (!p) return '';
+      var tags = p.tags;
+      if (typeof tags === 'string') tags = tags.split(',');
+      if (!Array.isArray(tags)) return '';
+      for (var t = 0; t < tags.length; t++) {
+        var tag = String(tags[t]).trim().toLowerCase();
+        if (tag.indexOf('color_') === 0) return tag.slice(6);
+      }
+      return '';
+    }
+
+    /* Push the new product into the trifecta bundle widget's locked
+     * slot so the bundle's "current" card + ATC variant id follow the
+     * swap. Also re-rank the OTHER slots: the bundle's pickBestDefault
+     * uses currentColorTag to color-match across slots, so updating
+     * that var + re-running pickBestDefault for every slot makes the
+     * lanyard + chapstick auto-flip to the matching colour. Bails
+     * silently if no bundle widget on the page. */
+    function notifyBundleOfNewProduct(p) {
+      var bundleRoot = document.querySelector('.bundle-pdp-preview[x-data]');
+      if (!bundleRoot || !window.Alpine) return;
+      var scope;
+      try { scope = window.Alpine.$data(bundleRoot); } catch (_) { return; }
+      if (!scope || !Array.isArray(scope.slots)) return;
+
+      scope.bundlePdpHandle = p.handle;
+      scope.currentColorTag = extractColorTag(p);
+
+      /* Make sure the new product is present in the current slot's
+       * products array — the bundle's pickBestDefault for the current
+       * slot looks up by handle. If the swatch we just clicked is past
+       * the server-rendered 50-product limit (collection.products is
+       * capped), the AJAX paging may not have reached it yet; in that
+       * case synthesize a minimal entry and prepend it. */
+      var bundleSlotIdx = -1;
+      for (var i = 0; i < scope.slots.length; i++) {
+        if (scope.slots[i].label === scope.bundleSlot) { bundleSlotIdx = i; break; }
+      }
+      if (bundleSlotIdx >= 0) {
+        var slot = scope.slots[bundleSlotIdx];
+        var v = p.variants && p.variants[0] ? p.variants[0] : null;
+        var has = (slot.products || []).some(function(sp){ return sp.handle === p.handle; });
+        if (!has && v) {
+          slot.products.unshift({
+            handle: p.handle,
+            title: p.title,
+            url: '/products/' + p.handle,
+            image: abs(p.featured_image),
+            variantId: v.id,
+            price: v.price,
+            available: v.available !== false,
+            colorTag: scope.currentColorTag,
+            type: p.type || ''
+          });
+        }
+      }
+
+      /* Re-evaluate the default selection for every slot. The current
+       * slot pins to bundlePdpHandle (so it follows our swap); the
+       * other slots re-rank by colour against the new currentColorTag,
+       * picking e.g. the matching-pattern lanyard. */
+      if (typeof scope.pickBestDefault === 'function') {
+        for (var s = 0; s < scope.slots.length; s++) {
+          scope.pickBestDefault(s);
+        }
+      }
+    }
+
+    /* Update the Alpine state in script_product.liquid so the price
+     * spans (x-text bindings) and ATC button (reads defaultVariantId
+     * at click time) follow the swap. */
+    function updateActiveVariantState(p) {
+      var v = p.variants && p.variants[0] ? p.variants[0] : null;
+      if (!v) return;
+      var pdpRoot = document.querySelector('[x-ref="formContainer"]');
+      if (!pdpRoot || !window.Alpine) return;
+      var scope;
+      try { scope = window.Alpine.$data(pdpRoot); } catch (_) { return; }
+      if (!scope) return;
+      scope.defaultVariantId = v.id;
+      scope.defaultVariantPrice = v.price;
+      scope.defaultVariantComparePrice = v.compare_at_price || 0;
+      scope.defaultAvailable = v.available !== false;
+      /* Keep the express-checkout (Buy It Now) hidden input in sync —
+       * the Liquid product form can't know about client-side swaps. */
+      var expressInput = document.querySelector('[data-pdp-express-variant]');
+      if (expressInput) expressInput.value = v.id;
+    }
+
+    /* Toggle the .rs-swatch--selected anchor class + black-circle
+     * checkmark badge on/off for a cell. The badge markup matches
+     * the server-rendered version in the swatch_html capture above. */
+    function setSelectedBadge(cell, isSelected) {
+      if (!cell) return;
+      var anchor = cell.querySelector('.rs-swatch');
+      if (!anchor) return;
+      if (isSelected) {
+        anchor.classList.add('rs-swatch--selected');
+        if (!anchor.querySelector('.rs-swatch-badge')) {
+          var badge = document.createElement('span');
+          badge.className = 'rs-swatch-badge';
+          badge.setAttribute('aria-hidden', 'true');
+          badge.innerHTML =
+            '<svg width="10" height="10" viewBox="0 0 12 12" fill="none">' +
+              '<path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '</svg>';
+          anchor.appendChild(badge);
+        }
+      } else {
+        anchor.classList.remove('rs-swatch--selected');
+        var b = anchor.querySelector('.rs-swatch-badge');
+        if (b) b.remove();
+      }
+    }
+
+    /* (Previously had a moveSwatchCellToFront helper that promoted
+     * the just-clicked swatch to position 0 of the grid. Removed per
+     * merchant request — keeping the swatches in place avoids the
+     * grid shuffling on every click.) */
+
+
+    function swapActiveProduct(newHandle, cell, swatchAnchor) {
+      /* ===== Instant visual updates (no fetch wait) =====
+       * Run synchronously so the customer sees the click "land" on
+       * the new swatch immediately, even on the first interaction
+       * with that swatch (when fetchProduct hasn't been primed by
+       * a prior hover). The Alpine variant state still needs the
+       * JSON fetch — that update happens below in .then(). */
+
+      /* 1. Move the highlight + black-circle checkmark badge */
+      document.querySelectorAll('.rs-swatch-cell--selected').forEach(function(c){
+        c.classList.remove('rs-swatch-cell--selected');
+        setSelectedBadge(c, false);
+      });
+      if (cell) {
+        cell.classList.add('rs-swatch-cell--selected');
+        setSelectedBadge(cell, true);
+      }
+
+      /* 2. Swap hero image right away. Use the cached high-res URL
+       * if we have it; otherwise use the swatch's own <img> src as
+       * a placeholder. The 400px swatch image gets stretched in the
+       * hero for ~100ms until the JSON fetch returns the full-res
+       * featured_image — still feels far snappier than waiting for
+       * the fetch before showing anything. */
+      var heroUrl = heroCache[newHandle];
+      if (!heroUrl && swatchAnchor) {
+        var swImg = swatchAnchor.querySelector('img');
+        heroUrl = swImg ? (swImg.currentSrc || swImg.src) : '';
+      }
+      if (heroUrl) swapGalleryToSingleImage(heroUrl);
+
+      /* The hover-revert machinery's "previous src" pointer is now
+       * stale (we'll never want to revert to the original PDP image
+       * after a permanent swap). Reset so future hovers re-capture
+       * the new baseline. */
+      heroPreviousSrc = null;
+      heroPreviousSrcset = null;
+      heroHoverHandle = null;
+
+      /* 3. Title from the swatch's title attribute (instant). */
+      var swTitle = swatchAnchor ? (swatchAnchor.getAttribute('title') || '') : '';
+      if (swTitle) {
+        var titleEl = document.querySelector('.pdp-title');
+        if (titleEl) titleEl.textContent = swTitle;
+        currentTitle = swTitle;
+        currentShortTitle = shortName(swTitle);
+      }
+
+      /* 4. URL bar — replaceState (not pushState) so back leaves the
+       * PDP entirely. Reload at the new URL renders fresh. */
+      if (window.history && history.replaceState) {
+        try { history.replaceState({}, '', '/products/' + newHandle); } catch (_) {}
+      }
+
+      currentHandle = newHandle;
+      rootEl.setAttribute('data-current-handle', newHandle);
+
+      /* ===== Async: pull full product JSON for variant id + price
+       * + bundle widget. The ATC button reads scope.defaultVariantId
+       * at click time, so as long as we update this before the
+       * customer taps ATC (typically a beat later), the right
+       * variant ships to /cart/add.js. */
+      fetchProduct(newHandle).then(function(p){
+        if (!p) return;
+
+        updateActiveVariantState(p);
+        notifyBundleOfNewProduct(p);
+
+        /* Cache the full-res hero for future hover-previews, then
+         * rebuild the WHOLE gallery (all slides + thumbnails + dots)
+         * from the swapped product's image set — the instant
+         * single-image swap above was just the placeholder while this
+         * fetch was in flight. */
+        var fullSrc = p.featured_image;
+        if (fullSrc && fullSrc.indexOf('//') === 0) fullSrc = 'https:' + fullSrc;
+        if (fullSrc) heroCache[newHandle] = fullSrc;
+        rebuildGallery(p);
+
+        /* Re-apply title in case the JSON title differs from the
+         * swatch's title attribute (rare but possible). */
+        if (p.title) {
+          var t2 = document.querySelector('.pdp-title');
+          if (t2) t2.textContent = p.title;
+          currentTitle = p.title;
+          currentShortTitle = shortName(p.title);
+        }
+      });
+    }
+
+    Array.prototype.forEach.call(grid.querySelectorAll(':scope > .rs-swatch'), function(sw){
+      var title = sw.getAttribute('title') || '';
+      var href = sw.getAttribute('href') || '';
+      var match = href.match(/\/products\/([^?#\/]+)/);
+      var handle = match ? decodeURIComponent(match[1]) : '';
+
+      var cell = document.createElement('div');
+      cell.className = 'rs-swatch-cell';
+      if (handle && handle === currentHandle) cell.classList.add('rs-swatch-cell--selected');
+      sw.parentNode.insertBefore(cell, sw);
+      cell.appendChild(sw);
+      var label = document.createElement('span');
+      label.className = 'rs-swatch-name';
+      label.textContent = shortName(title);
+      cell.appendChild(label);
+
+      cell.addEventListener('mouseenter', function(){
+        setColorLabel(title);
+        if (canHover && handle) {
+          heroHoverHandle = handle;
+          previewHero(handle);
+        }
+      });
+      /* No mouseleave on individual cells — reverting per-cell flashes
+       * the original image as the cursor crosses gaps between swatches.
+       * The block-level mouseleave below handles revert when the cursor
+       * leaves the whole widget. */
+
+      /* Intercept the swatch click: instead of navigating to the
+       * other product's PDP (full reload), swap the active product
+       * in place. Modifier keys / non-primary buttons fall through
+       * to the browser default so cmd-click / middle-click still
+       * open the sibling in a new tab. */
+      if (sw.tagName === 'A') {
+        sw.addEventListener('click', function(e){
+          if (e.defaultPrevented) return;
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          if (typeof e.button === 'number' && e.button !== 0) return;
+          if (!handle || handle === currentHandle) {
+            e.preventDefault();
+            return;
+          }
+          e.preventDefault();
+          /* The hover-preview already updated the hero — no need to
+           * revert before swap; the swap call writes the new image
+           * over whatever's showing. Skipping revertHero() here
+           * shaves off one DOM mutation + transition flash. */
+          swapActiveProduct(handle, cell, sw);
+        });
+      }
+    });
+
+    rootEl.addEventListener('mouseleave', function(){
+      setColorLabel(currentTitle);
+      if (canHover) revertHero();
+    });
+
+    function updateArrows(){
+      var max = grid.scrollWidth - grid.clientWidth;
+      var hasOverflow = max > 1;
+      rootEl.classList.toggle('rs-has-pagination', hasOverflow);
+      if (!prevBtn || !nextBtn) return;
+      if (!hasOverflow) {
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        return;
+      }
+      prevBtn.disabled = grid.scrollLeft <= 1;
+      nextBtn.disabled = grid.scrollLeft >= max - 1;
+    }
+    function pageBy(dir){
+      var step = Math.max(grid.clientWidth * 0.9, 120);
+      grid.scrollBy({ left: dir * step, behavior: 'smooth' });
+    }
+    if (prevBtn) prevBtn.addEventListener('click', function(){ pageBy(-1); });
+    if (nextBtn) nextBtn.addEventListener('click', function(){ pageBy(1); });
+    grid.addEventListener('scroll', updateArrows, { passive: true });
+    window.addEventListener('resize', updateArrows);
+    /* In tabbed mode the block starts display:none; ResizeObserver
+     * re-evaluates arrows when the grid becomes visible after a tab
+     * switch (clientWidth changes from 0 → real width). */
+    if (typeof ResizeObserver !== 'undefined') {
+      new ResizeObserver(updateArrows).observe(grid);
+    }
+    requestAnimationFrame(updateArrows);
+  })();
+</script>

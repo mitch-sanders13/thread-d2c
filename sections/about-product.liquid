@@ -1,0 +1,161 @@
+<!-- sections/about-product.liquid -->
+{% comment %} 
+  Custom section for about page.
+{% endcomment %}
+
+<section
+	data-section-id="{{ section.id }}"
+	class="
+		sec-{{ section.id }}
+		pt-{{ section.settings.padding_top }}
+		pb-{{ section.settings.padding_bottom }}
+		image-text-alt-3">
+
+	<div class="flex flex-col items-center">
+		<div class="w-full 2xl:w-[70vw] flex items-start h-24">
+			<div class=" flex flex-col justify-start items-start px-8 md:justify-center md:px-5">
+				<div class="subtext translate-y-0">{{ section.settings.subtext }}</div>
+				<div class="heading translate-y-0 block md:hidden">{{ section.settings.heading }}</div>
+				<div class="heading translate-y-0 hidden md:block w-2/3 2xl:w-80 mt-4 mb-8">{{ section.settings.heading_2 }}</div>
+			</div>
+		</div>
+
+		<div class="md:pl-8 md:-translate-y-[90px]">
+			<div class="relative">
+				{% if section.settings.image != blank %}
+					<img src="{{ section.settings.image | image_url }}" alt="{{ section.settings.image.alt | escape }}" loading="lazy" decoding="async" width="{{ section.settings.image.width }}" height="{{ section.settings.image.height }}">
+
+					<div class="smallest absolute left-6 -bottom-2.5 flex flex-col items-start md:left-5 md:bottom-9">
+						{{ section.settings.title_1 }}
+						<a href="{{ section.settings.url_1 }}" class="border-b-2 border-blue-700 md:pb-1">SEE MORE ></a>
+					</div>
+
+					<div class="smallest absolute text-white right-14 top-[57%] flex flex-col items-start md:right-36 md:top-[60%]">
+						{{ section.settings.title_2 }}
+						<a href="{{ section.settings.url_2 }}" class="border-b-2 border-blue-700 md:pb-1">SEE MORE ></a>
+					</div>
+
+					<div class="smallest absolute top-1/2 left-1 flex flex-col items-start">
+						{{ section.settings.title_3 }}
+						<a href="{{ section.settings.url_3 }}" class="border-b-2 border-blue-700 md:pb-1">SEE MORE ></a>
+					</div>
+
+					<div class="smallest absolute right-1 top-[45%] md:right-5 flex flex-col items-start">
+						{{ section.settings.title_4 }}
+						<a href="{{ section.settings.url_4 }}" class="border-b-2 border-blue-700 md:pb-1">SEE MORE ></a>
+					</div>
+
+					<div class="smallest absolute top-0 right-1 md:top-5 flex flex-col items-end">
+						{{ section.settings.title_5 }}
+						<a href="{{ section.settings.url_5 }}" class="border-b-2 border-blue-700 md:pb-1">SEE MORE ></a>
+					</div>
+
+				{% else %}
+					<div class="placeholder-wrapper">{{ 'collection-1' | placeholder_svg_tag: 'placeholder dark' }}</div>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</section>
+
+
+{% schema %}
+{
+	"name": "[about] Product",
+	"settings": [
+	{
+		"type": "image_picker",
+		"id": "image",
+		"label": "Image"
+	},
+	{
+		"type":"richtext",
+		"id":"subtext",
+		"label":"Subtext"
+	},
+	{
+		"type":"richtext",
+		"id":"heading",
+		"label":"Heading Mobile"
+	},
+	{
+		"type":"richtext",
+		"id":"heading_2",
+		"label":"Heading Desktop"
+	},
+	{
+		"type":"richtext",
+		"id":"title_1",
+		"label":"Product 1"
+	},
+	{
+		"type":"text",
+		"id":"url_1",
+		"label":"Product 1 URL"
+	},
+	{
+		"type":"richtext",
+		"id":"title_2",
+		"label":"Product 2"
+	},
+	{
+		"type":"text",
+		"id":"url_2",
+		"label":"Product 2 URL"
+	},
+	{
+		"type":"richtext",
+		"id":"title_3",
+		"label":"Product 3"
+	},
+	{
+		"type":"text",
+		"id":"url_3",
+		"label":"Product 3 URL"
+	},
+	{
+		"type":"richtext",
+		"id":"title_4",
+		"label":"Product 4"
+	},
+	{
+		"type":"text",
+		"id":"url_4",
+		"label":"Product 4 URL"
+	},
+	{
+		"type":"richtext",
+		"id":"title_5",
+		"label":"Product 5"
+	},
+	{
+		"type":"text",
+		"id":"url_5",
+		"label":"Product 5 URL"
+	},
+	{
+	"type": "range",
+	"id": "padding_top",
+	"min": 0,
+	"max": 6,
+	"step": 1,
+	"label": "Top Padding",
+	"default": 0
+	},
+	{
+	"type": "range",
+	"id": "padding_bottom",
+	"min": 0,
+	"max": 6,
+	"step": 1,
+	"label": "Bottom padding",
+	"default": 0
+	}
+	],
+	"presets":[
+		{
+			"name":"[about] Product"
+		}
+	]
+}
+{% endschema %}

@@ -1,0 +1,55 @@
+<!-- templates/customers/activate_account.liquid -->
+
+<section>
+  <div class="py-24
+    {{ settings.layout_horizontal }}
+    {{ settings.layout_alignment }}">
+
+    <div class="max-w-prose w-full">
+      <h1>
+        {{ 'customer.account.activate' | t }}
+      </h1>
+
+      {% form 'activate_customer_password' %}
+      
+      {% if form.errors %}
+        <div class="color__bg-overlay-1 type--small border--radius p-2 mt-2 mb-4">
+          {{ form.errors | default_errors }}
+        </div>
+      {% endif %}
+
+
+        <label for="password">{{ 'customer.account.password' | t }}</label>
+        <input id="password" class="mb-4" type="password" name="customer[password]">
+        
+
+        <label for="password_confirmation">{{ 'customer.account.password_confirmation' | t }}</label>
+        <input id="password_confirmation" class="mb-4" type="password" name="customer[password_confirmation]">
+
+        <div class="mb-4">
+  
+          <button type="submit" class="btn">
+            {{ 'customer.account.activate' | t }}
+          </button>
+  
+          <span class="px-2">{{ 'customer.account.or' | t }}</span>
+  
+          <button type="submit" name="decline" class="btn btn--secondary">
+            {{ 'customer.account.decline_invitation' | t }}
+          </button>
+        </div>
+
+        <div class="border--t-width color__border-divider-1 pt-4">
+  
+          <p>{{ 'customer.account.existing' | t }}</p>
+  
+          <a href="{{ routes.account_login_url }}" class="btn btn--plain">
+            {{ 'customer.account.log_in' | t }}
+          </a>
+        </div>
+      {% endform %}
+
+    </div>
+
+  </div>
+</section>

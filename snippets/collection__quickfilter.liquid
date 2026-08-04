@@ -1,0 +1,488 @@
+{% assign current_category = 'All ' | append: collection.title %}
+{% if current_category != collection.title %}
+  {% assign current_category = 'All Products' %}
+{% endif %}
+
+{% assign product_type_count = 0 %}
+{%- for filter in collection.filters -%}
+  {% if filter.label == 'Product type' %}
+    {%- for filter_value in filter.values -%}
+      {% assign product_type_count = product_type_count | plus: 1 %}
+    {%- endfor -%}
+  {% endif %}
+{%- endfor -%}
+
+{%- assign _qf_offset = section.settings.quickfilter_underline_offset | default: 4 -%}
+{%- assign _qf_thick = section.settings.quickfilter_underline_thickness | default: 4 -%}
+{%- assign _qf_color = section.settings.quickfilter_active_color | default: 'var(--thread-blue)' -%}
+
+{%- assign _qf_font       = section.settings.quickfilter_font | default: 'inherit' -%}
+{%- assign _qf_weight     = section.settings.quickfilter_weight | default: '500' -%}
+{%- assign _qf_transform  = section.settings.quickfilter_text_transform | default: 'uppercase' -%}
+{%- assign _qf_ls         = section.settings.quickfilter_letter_spacing | default: '0.05em' -%}
+{%- assign _qf_size_m     = section.settings.quickfilter_size_mobile | default: 13 -%}
+{%- assign _qf_size_d     = section.settings.quickfilter_size_desktop | default: 14 -%}
+{%- assign _qf_pv_m       = section.settings.quickfilter_pad_v_mobile | default: 16 -%}
+{%- assign _qf_pv_d       = section.settings.quickfilter_pad_v_desktop | default: 24 -%}
+{%- assign _qf_ph_m       = section.settings.quickfilter_pad_h_mobile | default: 12 -%}
+{%- assign _qf_ph_d       = section.settings.quickfilter_pad_h_desktop | default: 24 -%}
+{%- assign _qf_gap_m      = section.settings.quickfilter_gap_mobile | default: 0 -%}
+{%- assign _qf_gap_d      = section.settings.quickfilter_gap_desktop | default: 0 -%}
+{%- assign _qf_text_color = section.settings.quickfilter_text_color -%}
+
+{%- comment -%} Reuse the collection grid's edge padding so the arrows sit flush with the product images' left/right edges. {%- endcomment -%}
+{%- assign _qf_pad_edge_m = section.settings.grid_edge_padding | default: 8 -%}
+{%- assign _qf_pad_edge_d = section.settings.grid_edge_padding_desktop | default: _qf_pad_edge_m -%}
+
+<style>
+  /* Quick filter chip typography + spacing.
+   *
+   * The chip's <label> carries .header__link2, .type__nav, .type--small all at
+   * once, and the inner <span> carries .type__nav. We target every combination
+   * AND use the broadest selectors with !important so theme-wide rules in
+   * theme__styles.liquid can't silently outweigh the merchant's settings.
+   */
+  #js\:quickFilter .header__link2,
+  #js\:quickFilter .header__link2 *,
+  #js\:quickFilter .type__nav,
+  #js\:quickFilter .type__nav *,
+  #js\:quickFilter .type--small,
+  #js\:quickFilter .type--small * {
+    font-weight: {{ _qf_weight }} !important;
+    text-transform: {{ _qf_transform }} !important;
+    letter-spacing: {{ _qf_ls }} !important;
+    {% if _qf_font == 'body' %}font-family: var(--type-font-body-family) !important;{% endif %}
+    {% if _qf_font == 'heading' %}font-family: var(--type-font-header-family) !important;{% endif %}
+    {% if _qf_font == 'handwritten' %}font-family: var(--type-font-handwritten-family) !important;{% endif %}
+    {% if _qf_text_color != blank %}color: {{ _qf_text_color }} !important;{% endif %}
+    font-size: {{ _qf_size_m }}px !important;
+    line-height: 1.2 !important;
+  }
+  #js\:quickFilter .header__link2 {
+    padding: {{ _qf_pv_m }}px {{ _qf_ph_m }}px !important;
+  }
+  /* Flex row gap — overrides the existing gap-2 if user provides their own value */
+  #js\:quickFilter .flex.flex-row { column-gap: {{ _qf_gap_m }}px; }
+
+  @media (min-width: 768px) {
+    #js\:quickFilter .header__link2,
+    #js\:quickFilter .header__link2 *,
+    #js\:quickFilter .type__nav,
+    #js\:quickFilter .type__nav *,
+    #js\:quickFilter .type--small,
+    #js\:quickFilter .type--small * {
+      font-size: {{ _qf_size_d }}px !important;
+    }
+    #js\:quickFilter .header__link2 {
+      padding: {{ _qf_pv_d }}px {{ _qf_ph_d }}px !important;
+    }
+    #js\:quickFilter .flex.flex-row { column-gap: {{ _qf_gap_d }}px; }
+  }
+
+  /* Active / hover underline (pre-existing behavior) */
+  #js\:quickFilter .header__link2:hover,
+  #js\:quickFilter .header__link2--hover,
+  #js\:quickFilter .header__link2-active {
+    box-shadow: none !important;
+  }
+  #js\:quickFilter .header__link2:hover > .type__nav,
+  #js\:quickFilter .header__link2--hover > .type__nav,
+  #js\:quickFilter .header__link2-active > .type__nav {
+    border-bottom: {{ _qf_thick }}px solid {{ _qf_color }};
+    padding-bottom: {{ _qf_offset }}px;
+  }
+  /* Active filter text matches the underline color */
+  #js\:quickFilter .header__link2-active,
+  #js\:quickFilter .header__link2-active > .type__nav {
+    color: {{ _qf_color }} !important;
+  }
+
+  /* Arrow-flanked scroll row. Padding matches the collection grid's edges so
+     the arrows line up with the leftmost / rightmost product images. */
+  .qf-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding-left: {{ _qf_pad_edge_m }}px;
+    padding-right: {{ _qf_pad_edge_m }}px;
+    box-sizing: border-box;
+  }
+  /* Flexible middle column that holds the scroll + its custom progress indicator */
+  .qf-scroll-wrap {
+    flex: 1 1 auto;
+    min-width: 0;
+    position: relative;
+  }
+  .qf-scroll {
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
+    /* Hide the native scrollbar — browsers won't reliably honor a 2px custom
+       height (esp. macOS overlay scrollbars and mobile). We render our own. */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .qf-scroll::-webkit-scrollbar { display: none; }
+  /* Center chips when they fit; auto-margins collapse to 0 when content
+     overflows, so scrollLeft still starts at 0 and no chips get clipped. */
+  .qf-scroll > .flex.flex-row { margin-left: auto; margin-right: auto; }
+
+  /* Custom 2px progress bar — fades in on scroll, out when idle */
+  .qf-progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.10);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .qf-progress[data-active="true"] { opacity: 1; }
+  .qf-progress[data-visible="false"] { display: none; }
+  .qf-progress-dot {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.55);
+    border-radius: 1px;
+    left: 0;
+    width: 20%;
+  }
+  @media (min-width: 768px) {
+    .qf-row {
+      padding-left: {{ _qf_pad_edge_d }}px;
+      padding-right: {{ _qf_pad_edge_d }}px;
+    }
+  }
+
+  /* Visual styling (size, bg, border, shadow) comes from the shared
+     .btn .btn--plain .btn--small .shadow-sm classes so these arrows
+     match every other carousel arrow in the theme. */
+  .qf-arrow {
+    display: none;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+  }
+  .qf-arrow--left  { margin-right: 8px; }
+  .qf-arrow--right { margin-left: 8px; }
+
+  /* Desktop-only: reveal arrows, but only when the list actually overflows. */
+  @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
+    .qf-row[data-has-overflow="true"] .qf-arrow { display: inline-flex; }
+  }
+</style>
+
+{% comment %}Hide quickfilter UI for collegiate collection but keep form for pagination{% endcomment %}
+{% if product_type_count > 1 %}
+  <form
+    id="js:quickFilter"
+    class="
+      block bg-inherit
+      md:static
+      sticky sm:relative
+      top-[var(--header-height,0px)] md:top-auto
+      z-30 md:z-20
+      {{ section.settings.color_scheme }}
+      {% if collection.handle == 'collegiate' %}hidden{% endif %}
+    "
+    {% if settings.header_position == 'sticky' %}
+      x-init="
+        $el.style.top = ($refs.header ? $refs.header.offsetHeight : 0) + 'px';
+      "
+    {% endif %}
+  >
+    {% comment %}
+      The collection filter / sort / pagination is handled by a
+      document-level delegated 'change' listener in the script block
+      below — NOT by an Alpine @change on this form. Every filter
+      replaces the surrounding section's innerHTML, which destroys and
+      recreates this form; a handler bound to the form itself is lost
+      on that swap, so the second filter would silently do nothing.
+    {% endcomment %}
+    {% comment %} Include active School filter as hidden input {% endcomment %}
+    {% if collection.handle contains 'collegiate' %}
+      {% for filter in collection.filters %}
+        {% if filter.label == 'School' %}
+          {% for filter_value in filter.values %}
+            {% if filter_value.active %}
+              <input
+                type="hidden"
+                name="{{ filter_value.param_name }}"
+                value="{{ filter_value.value }}"
+              >
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    <div class="flex flex-row flex-wrap items-center justify-between gap-2 max-h-[85vh] {% unless section.settings.hide_sublinks_divider %}border--b-width{% endunless %} color__border-divider-1">
+      <div class="w-full">
+        <div class="flex flex-col gap-2 w-full">
+          {%- for filter in collection.filters -%}
+            {% assign has_values = false %}
+            {%- for filter_value in filter.values -%}
+              {%- if filter_value.count > 0 -%}
+                {% assign has_values = true %}
+              {%- endif -%}
+            {%- endfor -%}
+            {%- if filter.type == 'price_range' -%}
+              {% assign has_values = true %}
+            {%- endif -%}
+
+            {% if filter.label == 'Product type' %}
+              {%- if has_values -%}
+                <div class="flex flex-none justify-center snap-center">
+                  {% capture popup_content %}
+                    {%- case filter.type -%}
+                      {%- when 'boolean' or 'list' -%}
+                        
+                        {%- for filter_value in filter.active_values -%}
+                          {% assign active_product_type_filter = filter_value.value %}
+                        {%- endfor -%}
+                        
+                        {% comment %} All button {% endcomment %}
+                        <label 
+                          class="
+                            whitespace-pre text-center header__link2 type__nav type--small h-full flex flex-col items-center md:py-6 px-6 py-6 
+                            {% if active_product_type_filter == blank %}header__link2-active{% endif %}
+                          "
+                          tabindex="0"
+                          for="Filter-all">
+                          <input 
+                            type="radio"
+                            class="hidden"
+                            @click="popup = true;"
+                            name="{{ filter.values[1].param_name }}"
+                            value=""
+                            id="Filter-all">
+                          <span class="type__nav">{{ current_category }}</span>
+                        </label>
+                        
+                        {% comment %} Filter buttons {% endcomment %}
+                        {%- for filter_value in filter.values -%}
+                          <label 
+                            class="
+                              whitespace-pre text-center header__link2 type__nav type--small h-full flex flex-col items-center md:py-6 px-6 py-6 
+                              {% if filter_value.active %}header__link2-active{% endif %}
+                            "
+                            tabindex="0"
+                            for="Filter-{{ filter.param_name }}-{{ forloop.index }}">
+                            <input 
+                              type="radio"
+                              class="hidden"
+                              @click="popup = true;"
+                              name="{{ filter_value.param_name }}"
+                              value="{{ filter_value.value }}"
+                              id="Filter-{{ filter.param_name }}-{{ forloop.index }}"
+                              {% if filter_value.active %}checked{% endif %}
+                              {% if filter_value.count == 0 and filter_value.active == false %}disabled{% endif %}>
+                             <span class="type__nav">{{ filter_value.label }}</span>
+                          </label>
+                        {%- endfor -%}
+                        
+                        {% assign is_filter_active = false %}
+                        {%- for filter in collection.filters -%}
+                          {%- for filter_value in filter.values -%}
+                            {%- if filter_value.active -%}
+                              {% assign is_filter_active = true %}
+                            {%- endif -%}
+                          {%- endfor -%}
+                        {%- endfor -%}
+
+                    {%- endcase -%}
+                  {% endcapture %}
+
+                  <div class="qf-row">
+                    <button type="button" class="qf-arrow qf-arrow--left btn btn--plain btn--small shadow-sm" data-qf-prev aria-label="Scroll filters left" tabindex="-1">
+                      {% render 'component__icon', icon: 'arrow-left', size: '20', class: '' %}
+                    </button>
+                    <div class="qf-scroll-wrap">
+                      <div class="qf-scroll" data-qf-scroll>
+                        <div class="flex flex-row">{{ popup_content }}</div>
+                      </div>
+                      <div class="qf-progress" data-qf-progress aria-hidden="true">
+                        <div class="qf-progress-dot" data-qf-progress-dot></div>
+                      </div>
+                    </div>
+                    <button type="button" class="qf-arrow qf-arrow--right btn btn--plain btn--small shadow-sm" data-qf-next aria-label="Scroll filters right" tabindex="-1">
+                      {% render 'component__icon', icon: 'arrow-right', size: '20', class: '' %}
+                    </button>
+                  </div>
+                </div>
+              {%- endif -%}
+            {% endif %}
+          {%- endfor -%}
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <script>
+    (function () {
+      if (window.__qfArrowInit) return;
+      window.__qfArrowInit = true;
+
+      // Arrow click → scroll filters by a soft-page amount.
+      document.addEventListener('click', function (e) {
+        var btn = e.target && e.target.closest && e.target.closest('.qf-arrow');
+        if (!btn) return;
+        var row = btn.parentElement;
+        if (!row) return;
+        var scroll = row.querySelector('[data-qf-scroll]');
+        if (!scroll) return;
+        e.preventDefault();
+        e.stopPropagation();
+        var step = Math.max(200, scroll.clientWidth * 0.6);
+        var dir = btn.hasAttribute('data-qf-prev') ? -1 : 1;
+        scroll.scrollBy({ left: dir * step, behavior: 'smooth' });
+      });
+
+      // Filter pill change → re-render the collection grid.
+      //
+      // Delegated at the document level on purpose: each filter calls
+      // fetchAndRenderCollection(), which replaces the collection
+      // section's innerHTML — destroying and recreating this form. A
+      // handler bound to the form (Alpine @change) is lost on that
+      // swap, so only the first filter would work. A document-level
+      // listener keeps catching changes from every recreated form.
+      //
+      // handleFilterChange / scrollToTop live on the root app() Alpine
+      // component (on <html>); reach them via Alpine.$data so 'this'
+      // resolves to the live reactive state (pagination_section, etc.).
+      //
+      // Set a flag so the MutationObserver below knows to horizontally
+      // center the newly-active chip on the rebuilt [data-qf-scroll]
+      // (the section's innerHTML swap otherwise resets scrollLeft to
+      // 0, hiding the chip the user just tapped if it was off-screen).
+      document.addEventListener('change', function (e) {
+        var input = e.target;
+        if (!input || !input.closest) return;
+        var form = input.closest('form');
+        if (!form || form.id !== 'js:quickFilter') return;
+        window.__qfCenterActiveOnSwap = true;
+        if (!window.Alpine || typeof window.Alpine.$data !== 'function') return;
+        var root = window.Alpine.$data(document.documentElement);
+        if (!root || typeof root.handleFilterChange !== 'function') return;
+        root.handleFilterChange('js:quickFilter');
+        if (typeof root.scrollToTop === 'function') root.scrollToTop('js:top');
+      });
+
+      // Custom progress indicator — runs on every [data-qf-scroll] found
+      // now or added later (collection filtering replaces the form).
+      function updateProgress(scroll) {
+        var wrap = scroll.parentElement;
+        if (!wrap) return;
+        var progress = wrap.querySelector('[data-qf-progress]');
+        var dot = wrap.querySelector('[data-qf-progress-dot]');
+        if (!progress || !dot) return;
+
+        var hasOverflow = scroll.scrollWidth > scroll.clientWidth + 1;
+        progress.setAttribute('data-visible', hasOverflow ? 'true' : 'false');
+        var row = wrap.parentElement;
+        if (row) row.setAttribute('data-has-overflow', hasOverflow ? 'true' : 'false');
+        if (!hasOverflow) return;
+
+        var visibleRatio = scroll.clientWidth / scroll.scrollWidth;         // 0–1
+        var scrollRatio = scroll.scrollLeft / (scroll.scrollWidth - scroll.clientWidth); // 0–1
+        if (scrollRatio < 0) scrollRatio = 0;
+        if (scrollRatio > 1) scrollRatio = 1;
+
+        // Dot width = how much of the track is currently visible (min 20%
+        // so it's still a clickable-looking indicator when tons of chips).
+        var widthPct = Math.max(0.2, visibleRatio) * 100;
+        var leftPct = (1 - widthPct / 100) * scrollRatio * 100;
+        dot.style.width = widthPct + '%';
+        dot.style.left = leftPct + '%';
+      }
+
+      function wire(scroll) {
+        if (scroll.__qfProgressWired) return;
+        scroll.__qfProgressWired = true;
+
+        var fadeTimer;
+        var onScroll = function () {
+          updateProgress(scroll);
+          var wrap = scroll.parentElement;
+          var progress = wrap && wrap.querySelector('[data-qf-progress]');
+          if (progress) {
+            progress.setAttribute('data-active', 'true');
+            clearTimeout(fadeTimer);
+            fadeTimer = setTimeout(function () {
+              progress.setAttribute('data-active', 'false');
+            }, 900);
+          }
+        };
+        scroll.addEventListener('scroll', onScroll, { passive: true });
+
+        // Initial size/visibility pass (in case content overflows without any scroll).
+        requestAnimationFrame(function () { updateProgress(scroll); });
+
+        // Re-measure on resize since clientWidth/scrollWidth change with viewport.
+        var resizeTimer;
+        window.addEventListener('resize', function () {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(function () { updateProgress(scroll); }, 120);
+        });
+      }
+
+      function scan(root) {
+        var nodes = (root || document).querySelectorAll('[data-qf-scroll]');
+        for (var i = 0; i < nodes.length; i++) wire(nodes[i]);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () { scan(document); });
+      } else {
+        scan(document);
+      }
+
+      function centerActiveChip(scroll) {
+        if (!window.__qfCenterActiveOnSwap) return;
+        window.__qfCenterActiveOnSwap = false;
+        // Apply on the next frame so layout + chip widths are settled
+        // before measuring offsetLeft / clientWidth.
+        requestAnimationFrame(function () {
+          var active = scroll.querySelector('.header__link2-active');
+          if (!active) return;
+          var chipCenter = active.offsetLeft + active.offsetWidth / 2;
+          var target = chipCenter - scroll.clientWidth / 2;
+          var max = scroll.scrollWidth - scroll.clientWidth;
+          if (target < 0) target = 0;
+          if (target > max) target = max;
+          scroll.scrollLeft = target;
+          updateProgress(scroll);
+        });
+      }
+
+      // Collection filters reflow the DOM; watch for new scroll rows.
+      new MutationObserver(function (mutations) {
+        for (var i = 0; i < mutations.length; i++) {
+          var added = mutations[i].addedNodes;
+          for (var j = 0; j < added.length; j++) {
+            var n = added[j];
+            if (n.nodeType !== 1) continue;
+            if (n.matches && n.matches('[data-qf-scroll]')) {
+              wire(n);
+              centerActiveChip(n);
+            }
+            if (n.querySelectorAll) {
+              scan(n);
+              var inner = n.querySelector && n.querySelector('[data-qf-scroll]');
+              if (inner) centerActiveChip(inner);
+            }
+          }
+        }
+      }).observe(document.body, { childList: true, subtree: true });
+    })();
+  </script>
+{% endif %}

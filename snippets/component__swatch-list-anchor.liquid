@@ -1,0 +1,76 @@
+{% comment %}
+  snippets/component__swatch-list-anchor.liquid
+
+  Renders a single swatch anchor. Called from component__swatch-list.liquid.
+
+  Parameters:
+    p       — sibling product object (the swatch)
+    product — the current product (for "current" styling)
+
+  Identifier logic matches the compiled grid-swatch JS so existing
+  Shopify Files uploaded as `swatch-<identifier>.jpg` resolve correctly:
+    1) If the product has a tag starting with `color_`, use the part after it.
+    2) Otherwise fall back to the product title run through the `handle` filter.
+
+  Background is two layered images via CSS:
+    - Layer 1 (top): /cdn/shop/files/swatch-<id>.jpg (the real swatch)
+    - Layer 2 (under): product featured_image
+  If the swatch file doesn't exist, browsers drop that layer and the
+  featured image shows through.
+
+  Data attributes for the script layer (script__product-card-media.liquid):
+    - data-swatch-url    — the sibling product URL (for card-link swap on mobile tap)
+    - data-swatch-image  — the sibling's featured_image URL at thumbnail size
+                           (used as the hover-preview overlay source on desktop,
+                            and as the sticky-tap preview on mobile).
+{% endcomment %}
+
+{%- liquid
+  assign _color_tag = ''
+  for _t in p.tags
+    assign _tl = _t | downcase | strip
+    assign _prefix = _tl | slice: 0, 6
+    if _prefix == 'color_'
+      assign _color_tag = _tl | remove_first: 'color_' | strip
+      break
+    endif
+  endfor
+
+  assign _sw_id = _color_tag
+  if _sw_id == blank
+    assign _sw_id = p.title | handle
+  endif
+
+  assign _sw_url = '/cdn/shop/files/swatch-' | append: _sw_id | append: '.jpg?width=64&height=64'
+
+  comment
+    For the preview overlay we want the FIRST uploaded product image —
+    typically the front-of-product-on-white-background shot. `featured_image`
+    can be reordered by the admin; `images.first` is reliably image index 0.
+  endcomment
+  assign _first_image = p.images.first
+  if _first_image == nil
+    assign _first_image = p.featured_image
+  endif
+
+  assign _feat_url = ''
+  if _first_image
+    assign _feat_url = _first_image | image_url: width: 64, height: 64, crop: 'center'
+  endif
+
+  assign _preview_url = ''
+  if _first_image
+    assign _preview_url = _first_image | image_url: width: 800
+  endif
+-%}
+
+{%- capture _bg -%}
+  url('{{ _sw_url }}'){% if _feat_url != '' %}, url('{{ _feat_url }}'){% endif %}
+{%- endcapture -%}
+
+<a href="{{ p.url }}"
+   title="{{ p.title | escape }}"
+   class="tw-swatch{% if p.handle == product.handle %} tw-swatch--current{% endif %}"
+   data-swatch-url="{{ p.url }}"
+   data-swatch-image="{{ _preview_url }}"
+   style="background-image: {{ _bg | strip }};"></a>

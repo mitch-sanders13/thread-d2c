@@ -1,0 +1,180 @@
+{% comment %}
+  Shared slide-over drawer that hosts the bundle-builder wizard.
+
+  Used by:
+    - snippets/bundle__pdp-cta.liquid (PDP "Make it a Trifecta" entry; mode=lock)
+    - sections/theme__cart.liquid (cart "Edit bundle" entry; mode=prefill)
+
+  Each call site mounts its own drawer with a unique `drawer_id`. The drawer
+  exposes an Alpine scope on its root element so the parent can interact via
+  $refs OR by dispatching a CustomEvent named after the drawer_id.
+
+  Inputs:
+    - drawer_id: REQUIRED. Unique scope key, e.g. "bundle-drawer-pdp-12345"
+                 or "bundle-drawer-cart".
+    - bundle_page_path: defaults to '/pages/build-your-trifecta'
+    - bundle_section_id: defaults to 'bundle_builder' (matches the JSON
+                         template section key)
+    - title: drawer header text, defaults to "Build Your Trifecta"
+
+  External API:
+    - window.dispatchEvent(new CustomEvent('bundle-drawer:open', {
+        detail: { drawerId, mode, payload }
+      }))
+        mode: 'lock'    — PDP CTA. payload: { slotLabel, productHandle }
+              'prefill' — Edit existing bundle from cart. Lands on Review.
+                          payload: { bundleId, items: [{slotLabel, handle, key}] }
+              'upsell'  — Complete a partial bundle from cart. Lands on the
+                          first incomplete step. The existing line items
+                          listed in payload.items are removed when the new
+                          bundle is added.
+                          payload: { items: [{slotLabel, handle, key}] }
+    - window.dispatchEvent(new CustomEvent('bundle-drawer:close'))
+        Closes every drawer (broadcast).
+{% endcomment %}
+
+{%- assign _drawer_id = drawer_id | default: 'bundle-drawer' -%}
+{%- assign _bundle_page_path = bundle_page_path | default: '/pages/build-your-trifecta' -%}
+{%- assign _bundle_section_id = bundle_section_id | default: 'bundle_builder' -%}
+{%- assign _title = title | default: 'Build Your Trifecta' -%}
+
+<div
+  class="bundle-drawer"
+  data-drawer-id="{{ _drawer_id }}"
+  x-data="{
+    open: false,
+    loaded: false,
+    loading: false,
+    error: '',
+    bundlePagePath: '{{ _bundle_page_path | escape }}',
+    bundleSectionId: '{{ _bundle_section_id | escape }}',
+    pendingMode: null,
+    pendingPayload: null,
+
+    init() {
+      var self = this;
+      var myId = '{{ _drawer_id | escape }}';
+      window.addEventListener('bundle-drawer:open', function(e) {
+        if (!e.detail || e.detail.drawerId !== myId) return;
+        self.pendingMode = e.detail.mode || null;
+        self.pendingPayload = e.detail.payload || null;
+        self.openDrawer();
+      });
+      window.addEventListener('bundle-drawer:close', function() {
+        self.open = false;
+      });
+    },
+
+    async openDrawer() {
+      this.open = true;
+      if (this.loaded) {
+        this.$nextTick(() => this.applyMode());
+        return;
+      }
+      if (this.loading) return;
+      this.loading = true;
+      this.error = '';
+      try {
+        let url = this.bundlePagePath + '?section_id=' + this.bundleSectionId;
+        const previewId = new URLSearchParams(window.location.search || '').get('preview_theme_id');
+        if (previewId) url += '&preview_theme_id=' + encodeURIComponent(previewId);
+        const r = await fetch(url, { headers: { 'Accept': 'text/html' }, credentials: 'same-origin' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const html = await r.text();
+        const target = this.$refs.body;
+        if (!target) return;
+        target.innerHTML = html;
+        // <script> tags inserted via innerHTML are inert per HTML5 spec —
+        // they sit in the DOM but never execute. The bundle-builder section
+        // ships its Alpine factory + JSON data as inline scripts, so without
+        // this clone-and-replace step the drawer body stays empty (Alpine
+        // can't find bundleBuilder_<id>()).
+        target.querySelectorAll('script').forEach(function(oldScript) {
+          var newScript = document.createElement('script');
+          for (var i = 0; i < oldScript.attributes.length; i++) {
+            var a = oldScript.attributes[i];
+            newScript.setAttribute(a.name, a.value);
+          }
+          newScript.textContent = oldScript.textContent;
+          oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+        if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+          window.Alpine.initTree(target);
+        }
+        this.loaded = true;
+        this.$nextTick(() => this.applyMode());
+      } catch (e) {
+        console.error('[bundle-drawer]', e);
+        this.error = 'Could not load the bundle builder. Please try again.';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    builderData() {
+      const target = this.$refs.body;
+      if (!target || !window.Alpine) return null;
+      const el = target.querySelector('[x-data^=&quot;bundleBuilder_&quot;]');
+      if (!el) return null;
+      return window.Alpine.$data(el);
+    },
+
+    applyMode() {
+      const data = this.builderData();
+      if (!data) return;
+      if (this.pendingMode === 'lock' && this.pendingPayload) {
+        if (typeof data.lockSlot === 'function') {
+          data.lockSlot(this.pendingPayload.slotLabel, this.pendingPayload.productHandle);
+        }
+      } else if (this.pendingMode === 'prefill' && this.pendingPayload) {
+        if (typeof data.prefillFromCart === 'function') {
+          data.prefillFromCart(this.pendingPayload);
+        }
+      } else if (this.pendingMode === 'upsell' && this.pendingPayload) {
+        if (typeof data.prefillForUpsell === 'function') {
+          data.prefillForUpsell(this.pendingPayload);
+        }
+      }
+    }
+  }"
+  x-init="init()"
+  x-show="open"
+  x-cloak
+  @keydown.escape.window="open = false">
+
+  <div
+    class="bundle-drawer__overlay"
+    x-show="open"
+    x-transition.opacity
+    @click="open = false"></div>
+
+  <div
+    class="bundle-drawer__panel"
+    x-show="open"
+    x-transition:enter="transition transform ease-out duration-300"
+    x-transition:enter-start="translate-x-full"
+    x-transition:enter-end="translate-x-0"
+    x-transition:leave="transition transform ease-in duration-200"
+    x-transition:leave-start="translate-x-0"
+    x-transition:leave-end="translate-x-full"
+    role="dialog"
+    aria-modal="true"
+    aria-label="{{ _title | escape }}">
+
+    <header class="bundle-drawer__header">
+      <h3 class="m-0">{{ _title }}</h3>
+      <button
+        type="button"
+        class="bundle-drawer__close"
+        aria-label="Close"
+        @click="open = false">×</button>
+    </header>
+
+    <div class="bundle-drawer__body">
+      <div x-show="loading" x-cloak class="p-6 text-center type--small">Loading…</div>
+      <div x-show="error" x-cloak class="p-6 text-center type--small color__text-error" x-text="error"></div>
+      <div x-ref="body"></div>
+    </div>
+
+  </div>
+</div>

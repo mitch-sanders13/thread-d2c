@@ -1,0 +1,44 @@
+<!-- sections/dropdown-slider.liquid -->
+{% comment %}
+  Use section rendering API to load and inject slider of products.
+{% endcomment %}
+
+<section>
+  <div class="!px-0">
+    <span class="type__nav type--small px-4 pb-2 block">{{ collection.title }}</span>
+
+    {% comment %} Capture products to display in slider {% endcomment %}
+    {%- capture slides -%}
+      {% assign product_count = 0 %}
+      {% for product in collections[collection.handle].products %}
+        {% assign show_product = true %}
+        
+        {% comment %} Hide collegiate products from non-collegiate collections {% endcomment %}
+        {% unless collection.handle contains 'collegiate' %}
+          {% if product.tags contains 'collegiate' %}
+            {% assign show_product = false %}
+          {% endif %}
+        {% endunless %}
+        
+        {% if show_product and product_count < 6 %}
+          <div class="md:w-[22%] flex justify-center flex-none w-8/12" 
+            x-bind:data-slide="{{ product_count }}">
+            {% render 'component__product-item', product: product, source: 'prod-slider' %}
+          </div>
+          {% assign product_count = product_count | plus: 1 %}
+        {% endif %}
+      {% endfor %}
+    {%- endcapture -%}
+
+    {% comment %} Calculate slider size {% endcomment %}
+    {% assign slider_size = product_count | at_most: 6 | minus: 1 %}
+
+    {% comment %} Render slider {% endcomment %}
+    {% render 'component__slider',
+      container_class: 'px-4',
+      slider_size: slider_size,
+      slides: slides,
+      hide_arrows: true
+    %}
+  </div>
+</section>

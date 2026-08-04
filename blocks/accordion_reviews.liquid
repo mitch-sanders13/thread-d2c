@@ -1,0 +1,91 @@
+{% comment %}
+  blocks/accordion_reviews.liquid
+
+  Renders the Okendo product reviews widget inside an accordion row.
+
+  Okendo's script is loaded site-wide (the same one that powers the star
+  rating elsewhere on the PDP). It hydrates any element carrying the
+  `data-oke-widget` attribute; the `okendo.ReviewsWidgetSnippet`
+  metafield is output inside it so the reviews are present server-side
+  before the script runs. No per-product configuration is needed.
+
+  The PDP's Okendo style overrides in sections/product__main.liquid
+  target `[data-oke-reviews-widget]` (the element Okendo renders), so
+  they keep applying to the widget here.
+
+  Re-measure on open: Okendo picks its responsive layout from the
+  container width it sees when it first renders. Inside a collapsed
+  accordion that width is wrong, so the widget stays stuck in its
+  narrow / mobile layout on desktop. The small script below re-fires a
+  resize (and briefly perturbs the container width) once the row opens,
+  which makes Okendo recalculate against the real, full width.
+{% endcomment %}
+
+{%- liquid
+  assign bs = block.settings
+  assign col = bs.column | default: 'full'
+-%}
+
+<div
+  id="pdp-acc-reviews-{{ block.id }}"
+  class="pdp-acc__reviews pdp-acc__col--{{ col }}"
+  {{ block.shopify_attributes }}>
+  {%- if product != blank -%}
+    <div data-oke-widget data-oke-reviews-product-id="shopify-{{ product.id }}">{{ product.metafields.okendo.ReviewsWidgetSnippet }}</div>
+  {%- elsif request.design_mode -%}
+    <p class="pdp-acc__subheading">Product reviews widget — appears on live product pages.</p>
+  {%- endif -%}
+</div>
+
+{%- if product != blank -%}
+  <script>
+    (function () {
+      var el = document.getElementById('pdp-acc-reviews-{{ block.id }}');
+      var row = el && el.closest('.pdp-acc');
+      if (!row) return;
+
+      function nudge() {
+        [80, 420, 900, 1600].forEach(function (t) {
+          setTimeout(function () {
+            /* perturb the width so a ResizeObserver inside Okendo re-fires */
+            el.style.width = '99.99%';
+            requestAnimationFrame(function () {
+              el.style.width = '';
+              /* and cover widgets that recalc on the window resize event */
+              window.dispatchEvent(new Event('resize'));
+            });
+          }, t);
+        });
+      }
+
+      if (row.classList.contains('pdp-acc--open')) nudge();
+      new MutationObserver(function () {
+        if (row.classList.contains('pdp-acc--open')) nudge();
+      }).observe(row, { attributes: true, attributeFilter: ['class'] });
+    })();
+  </script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Product reviews",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Shows the Okendo product reviews widget for the current product. No setup needed."
+    },
+    {
+      "type": "select",
+      "id": "column",
+      "label": "Placement",
+      "info": "Reviews are usually best left full width.",
+      "options": [
+        { "value": "full", "label": "Full width" },
+        { "value": "left", "label": "Left column" },
+        { "value": "right", "label": "Right column" }
+      ],
+      "default": "full"
+    }
+  ]
+}
+{% endschema %}

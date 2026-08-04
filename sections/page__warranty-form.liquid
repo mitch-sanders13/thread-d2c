@@ -1,0 +1,326 @@
+<!-- sections/page__warranty-form.liquid -->
+{% comment %} 
+Form for warranty claim page.
+
+Globals:
+- settings.layout_horizontal: horizontally margin
+- settings.layout_alignment: vertically margin
+
+Possible enhancements:
+- Add setting so merchant can add more fields to warranty form.
+
+Pro tips:
+- Update email address so form submissions are going to the right inbox.
+{% endcomment %}
+
+<section class="{{ section.settings.color_scheme }}"> 
+
+  <div class="flex flex-col items-center justify-center py-8 border--b-width color__border-divider-1">
+    <h1 class="mb-0 type--big">
+      {{ page.title | escape }}
+    </h1>
+  </div>
+
+  <div class="flex flex-col justify-center items-center 2 py-24
+    {{ settings.layout_horizontal }}
+    {{ settings.layout_alignment }}">
+    <div class="w-full max-w-prose xl:max-w-5xl">
+        
+      <div class="mb-4 rte">
+        {{ pagze.content }}
+      </div>
+
+      <form
+        action="https://formspree.io/f/xaypleob"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+
+        <div class="grid grid-cols-2 mb-4"
+          style="gap: {{ settings.layout_gap_size }}px;">
+          
+          <div>
+            <label class="type--base" for="WarrantyFirstName">{{ 'customer.account.first_name' | t }}</label>
+            <input
+              required
+              type="text"
+              class="form-input"
+              name="contact[first_name]"
+              id="WarrantyFirstName"
+              placeholder="{{ 'customer.account.first_name' | t }}"
+              value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.first_name }}{% endif %}">
+          </div>
+            
+          <div>
+            <label class="type--base" for="WarrantyLastName">{{ 'customer.account.last_name' | t }}</label>
+            <input
+              type="text"
+              class="form-input"
+              name="contact[last_name]"
+              id="WarrantyLastName"
+              placeholder="{{ 'customer.account.last_name' | t }}"
+              value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.last_name }}{% endif %}">
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="type--base" for="WarrantyFormEmail">{{ 'contact.form.email' | t }}</label>
+          <input
+            required
+            type="email"
+            class="form-input"
+            name="email"
+            id="WarrantyFormEmail"
+            placeholder="{{ 'contact.form.email_placeholder' | t }}"
+            value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off">
+        </div>
+
+        <div class="mb-4">
+          <label class="type--base" for="WarrantyOrderNumber">{{ 'customer.order.order_number' | t }}</label>
+          <input
+            type="text"
+            class="form-input"
+            name="warranty[orderNumber]"
+            id="WarrantyOrderNumber"
+            placeholder="{{ 'customer.order.order_number' | t }}"
+            value="{% if order.order_number %}{{ order.order_number }}{% endif %}"
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off">
+        </div>
+
+        <div class="mb-4">
+          <label class="type--base" for="WarrantyPicture">{{ 'customer.warranty.picture_of' | t }}</label>
+          <input
+            type="file"
+            class="w-full form-input"
+            name="warranty[picture]"
+            id="WarrantyPicture"
+            placeholder="{{ 'customer.warranty.picture_of' | t }}"
+            value=""
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off">
+        </div>
+
+        <div class="mb-4">
+          <label class="type--base" for="ReplacementDesign">{{ 'customer.warranty.replacement_design' | t }}</label>
+          <input
+            type="text"
+            class="form-input"
+            name="warranty[replacement_design]"
+            id="ReplacementDesign"
+            placeholder=""
+            value=""
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off">
+        </div>
+
+        <div class="mb-4">
+          <label class="type--base" for="CurrentAddress">{{ 'customer.addresses.current_address' | t }}</label>
+          <input
+            type="text"
+            class="form-input"
+            name="warranty[current_address]"
+            id="CurrentAddress"
+            placeholder="{{ 'customer.addresses.current_address' | t }}"
+            value=""
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off">
+        </div>
+
+        <div class="mb-4">
+          <label class="type--base" for="AddressLineTwo">{{ 'customer.addresses.address_line_2' | t }}</label>
+          <input
+            type="text"
+            class="form-inpu"
+            name="warranty[address_line_2]"
+            id="AddressLineTwo"
+            placeholder="{{ 'customer.addresses.address_line_2' | t }}"
+            value=""
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off">
+        </div>
+
+        <div class="grid grid-cols-2 mb-4"
+          style="gap: {{ settings.layout_gap_size }}px;">
+          
+          <div>
+            <label class="type--base" for="WarrantyCity">{{ 'customer.addresses.city' | t }}</label>
+            <input
+              type="text"
+              class="form-input"
+              name="warranty[city]"
+              id="WarrantyCity"
+              placeholder="{{ 'customer.addresses.city' | t }}"
+              value="{% if customer.current_location %}{{ customer.current_location }}{% endif %}">
+          </div>
+
+          <div>
+            <label class="type--base" for="province_{{form.id}}">{{ 'customer.addresses.region' | t }}</label>
+                <select required class="form-input" id="province_{{form.id}}" name="warranty[province]">
+                  <option selected disabled>Select</option>
+                  <option value="AL" {% if form.province == "Alabama" %}selected{% endif %}>Alabama</option>
+                  <option value="AK" {% if form.province == "Alaska" %}selected{% endif %}>Alaska</option>
+                  <option value="AZ" {% if form.province == "Arizona" %}selected{% endif %}>Arizona</option>
+                  <option value="AR" {% if form.province == "Arkansas" %}selected{% endif %}>Arkansas</option>
+                  <option value="CA" {% if form.province == "California" %}selected{% endif %}>California</option>
+                  <option value="CO" {% if form.province == "Colorado" %}selected{% endif %}>Colorado</option>
+                  <option value="CT" {% if form.province == "Connecticut" %}selected{% endif %}>Connecticut</option>
+                  <option value="DE" {% if form.province == "Delaware" %}selected{% endif %}>Delaware</option>
+                  <option value="DC" {% if form.province == "District Of Columbia" %}selected{% endif %}>District Of Columbia</option>
+                  <option value="FL" {% if form.province == "Florida" %}selected{% endif %}>Florida</option>
+                  <option value="GA" {% if form.province == "Georgia" %}selected{% endif %}>Georgia</option>
+                  <option value="HI" {% if form.province == "Hawaii" %}selected{% endif %}>Hawaii</option>
+                  <option value="ID" {% if form.province == "Idaho" %}selected{% endif %}>Idaho</option>
+                  <option value="IL" {% if form.province == "Illinois" %}selected{% endif %}>Illinois</option>
+                  <option value="IN" {% if form.province == "Indiana" %}selected{% endif %}>Indiana</option>
+                  <option value="IA" {% if form.province == "Iowa" %}selected{% endif %}>Iowa</option>
+                  <option value="KS" {% if form.province == "Kansas" %}selected{% endif %}>Kansas</option>
+                  <option value="KY" {% if form.province == "Kentucky" %}selected{% endif %}>Kentucky</option>
+                  <option value="LA" {% if form.province == "Louisiana" %}selected{% endif %}>Louisiana</option>
+                  <option value="ME" {% if form.province == "Maine" %}selected{% endif %}>Maine</option>
+                  <option value="MD" {% if form.province == "Maryland" %}selected{% endif %}>Maryland</option>
+                  <option value="MA" {% if form.province == "Massachusetts" %}selected{% endif %}>Massachusetts</option>
+                  <option value="MI" {% if form.province == "Michigan" %}selected{% endif %}>Michigan</option>
+                  <option value="MN" {% if form.province == "Minnesota" %}selected{% endif %}>Minnesota</option>
+                  <option value="MS" {% if form.province == "Mississippi" %}selected{% endif %}>Mississippi</option>
+                  <option value="MO" {% if form.province == "Missouri" %}selected{% endif %}>Missouri</option>
+                  <option value="MT" {% if form.province == "Montana" %}selected{% endif %}>Montana</option>
+                  <option value="NE" {% if form.province == "Nebraska" %}selected{% endif %}>Nebraska</option>
+                  <option value="NV" {% if form.province == "Nevada" %}selected{% endif %}>Nevada</option>
+                  <option value="NH" {% if form.province == "New Hampshire" %}selected{% endif %}>New Hampshire</option>
+                  <option value="NJ" {% if form.province == "New Jersey" %}selected{% endif %}>New Jersey</option>
+                  <option value="NM" {% if form.province == "New Mexico" %}selected{% endif %}>New Mexico</option>
+                  <option value="NY" {% if form.province == "New York" %}selected{% endif %}>New York</option>
+                  <option value="NC" {% if form.province == "North Carolina" %}selected{% endif %}>North Carolina</option>
+                  <option value="ND" {% if form.province == "North Dakota" %}selected{% endif %}>North Dakota</option>
+                  <option value="OH" {% if form.province == "Ohio" %}selected{% endif %}>Ohio</option>
+                  <option value="OK" {% if form.province == "Oklahoma" %}selected{% endif %}>Oklahoma</option>
+                  <option value="OR" {% if form.province == "Oregon" %}selected{% endif %}>Oregon</option>
+                  <option value="PA" {% if form.province == "Pennsylvania" %}selected{% endif %}>Pennsylvania</option>
+                  <option value="RI" {% if form.province == "Rhode Island" %}selected{% endif %}>Rhode Island</option>
+                  <option value="SC" {% if form.province == "South Carolina" %}selected{% endif %}>South Carolina</option>
+                  <option value="SD" {% if form.province == "South Dakota" %}selected{% endif %}>South Dakota</option>
+                  <option value="TN" {% if form.province == "Tennessee" %}selected{% endif %}>Tennessee</option>
+                  <option value="TX" {% if form.province == "Texas" %}selected{% endif %}>Texas</option>
+                  <option value="UT" {% if form.province == "Utah" %}selected{% endif %}>Utah</option>
+                  <option value="VT" {% if form.province == "Vermont" %}selected{% endif %}>Vermont</option>
+                  <option value="VA" {% if form.province == "Virginia" %}selected{% endif %}>Virginia</option>
+                  <option value="WA" {% if form.province == "Washington" %}selected{% endif %}>Washington</option>
+                  <option value="WV" {% if form.province == "West Virginia" %}selected{% endif %}>West Virginia</option>
+                  <option value="WI" {% if form.province == "Wisconsin" %}selected{% endif %}>Wisconsin</option>
+                  <option value="WY" {% if form.province == "Wyoming" %}selected{% endif %}>Wyoming</option>
+                </select>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-2 mb-4"
+          style="gap: {{ settings.layout_gap_size }}px;">
+          
+          <div>
+            <label class="type--base" for="country_{{form.id}}">
+              {{ 'general.localization.country_only' | t }}
+            </label>
+            <select required class="form-input" id="country_{{form.id}}" name="contact[country]" data-default="{{form.country}}">
+              <option value="United States">United States</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="type--base" for="CustomerZip">{{ 'customer.addresses.zip' | t }}</label>
+            <input
+              type="text"
+              class="form-input"
+              name="warranty[zip]"
+              id="CustomerZip"
+              placeholder="{{ 'customer.addresses.zip' | t }}"
+              value="">
+          </div>
+        </div>
+
+        <div class="flex flex-col mb-4">
+          <label class="type--base" for="ContactFormMessage">{{ 'contact.form.message' | t }}:</label>
+          <textarea
+            required
+              rows="10"
+              class="border--radius"
+              name="contact[body]"
+              id="ContactFormMessage"
+              placeholder="{{ 'contact.form.dots' | t }}">
+              {% if form.body %}
+              {{ form.body }}{% endif %}
+          </textarea>
+        </div>
+        
+        <div class="mb-4">
+          <button type="submit" class="btn btn--secondary !w-full">
+              {{ 'customer.account.submit' | t }}
+          </button>
+        </div>
+      
+      </form>
+      
+    </div>
+  </div>
+    
+</section>
+
+{% schema %}
+    {
+    "name": "[custom] Warranty",
+    "settings": [
+        {
+        "type": "header",
+        "content": "t:sections.all.headers.header__1.content"
+        }, {
+        "type": "select",
+        "id": "color_scheme",
+        "label": "t:sections.all.colors.settings.color_scheme.label",
+        "options": [
+            {
+            "value": "color__bg-body color__text",
+            "label": "t:sections.all.colors.settings.color_scheme.options__1.label"
+            },
+            {
+            "value": "color__bg-neutral color__text",
+            "label": "t:sections.all.colors.settings.color_scheme.options__2.label"
+            },
+            {
+            "value": "color__bg-overlay-1 color__text",
+            "label": "t:sections.all.colors.settings.color_scheme.options__3.label"
+            },
+            {
+            "value": "color__bg-overlay-2 color__text",
+            "label": "t:sections.all.colors.settings.color_scheme.options__4.label"
+            }, {
+            "value": "color__bg-overlay-3 color__text",
+            "label": "t:sections.all.colors.settings.color_scheme.options__5.label"
+            }, {
+            "value": "color__bg-primary color__primary",
+            "label": "t:sections.all.colors.settings.color_scheme.options__6.label"
+            }, {
+            "value": "color__bg-secondary color__secondary",
+            "label": "t:sections.all.colors.settings.color_scheme.options__7.label"
+            }, {
+            "value": "color__bg-tertiary color__tertiary",
+            "label": "t:sections.all.colors.settings.color_scheme.options__8.label"
+            }
+        ],
+        "default": "color__bg-body color__text"
+        }
+    ],
+    "presets": [
+        {
+        "name": "[custom] Warranty"
+        }
+    ],
+    "templates": ["page"]
+    }
+{% endschema %}

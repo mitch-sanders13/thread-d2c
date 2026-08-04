@@ -1,0 +1,444 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "page__main",
+      "disabled": true,
+      "settings": {
+        "color_scheme": "color__bg-body color__text",
+        "layout_horizontal": "window--wide"
+      }
+    },
+    "text_63HDTf": {
+      "type": "text",
+      "disabled": true,
+      "name": "Rich text",
+      "settings": {
+        "heading": "Have a favorite store?",
+        "content": "<p>Tell us about a store you'd like to see Thread products in. Please include store name and location.</p>",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 0,
+        "spacing_bottom": 0,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "",
+        "layout_x_alignment": "text-center justify-center",
+        "content_x_alignment": "text-center justify-center",
+        "visibility": ""
+      }
+    },
+    "page_store_request_UjYYdr": {
+      "type": "page__store-request",
+      "disabled": true,
+      "custom_css": [
+        "h1.mb-0.type--big {display: none;}"
+      ],
+      "name": "[custom] Store Request",
+      "settings": {
+        "color_scheme": "color__bg-body color__text"
+      }
+    },
+    "blocks_3Nwfnn": {
+      "type": "_blocks",
+      "blocks": {
+        "ai_gen_block_ac4dfce_UrKFd8": {
+          "type": "ai_gen_block_ac4dfce",
+          "settings": {
+            "image": "shopify://shop_images/landingpage_camp404_01.jpg",
+            "hotspot_size": 880,
+            "hotspot_color": "#000000",
+            "hotspot_opacity": 0,
+            "hotspot_hover_opacity": 5,
+            "hotspot_border_width": 0,
+            "hotspot_border_color": "#ffffff",
+            "hotspot_1_enabled": false,
+            "hotspot_1_x": 50,
+            "hotspot_1_y": 50,
+            "hotspot_1_url": "shopify://collections/camp-404",
+            "hotspot_1_label": "",
+            "hotspot_2_enabled": false,
+            "hotspot_2_x": 50,
+            "hotspot_2_y": 50,
+            "hotspot_2_url": "",
+            "hotspot_2_label": "",
+            "hotspot_3_enabled": false,
+            "hotspot_3_x": 75,
+            "hotspot_3_y": 75,
+            "hotspot_3_url": "",
+            "hotspot_3_label": "",
+            "hotspot_4_enabled": false,
+            "hotspot_4_x": 30,
+            "hotspot_4_y": 70,
+            "hotspot_4_url": "",
+            "hotspot_4_label": "",
+            "hotspot_5_enabled": false,
+            "hotspot_5_x": 70,
+            "hotspot_5_y": 30,
+            "hotspot_5_url": "",
+            "hotspot_5_label": ""
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "ai_gen_block_ac4dfce_UrKFd8"
+      ],
+      "name": "Image",
+      "settings": {}
+    },
+    "product_grid_4PbrCX": {
+      "type": "product-grid",
+      "name": "t:sections.product_grid.name",
+      "settings": {
+        "collection": "color-block-canvas",
+        "products_count": 8,
+        "heading": "",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 20,
+        "spacing_bottom": 0,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--b-width",
+        "row_size_desktop": "md:grid-cols-4",
+        "row_size_mobile": "grid grid-cols-2",
+        "layout_x_alignment": "justify-between",
+        "visibility": ""
+      }
+    },
+    "blocks_C3EHCy": {
+      "type": "_blocks",
+      "blocks": {
+        "ai_gen_block_ac4dfce_WbbfCA": {
+          "type": "ai_gen_block_ac4dfce",
+          "settings": {
+            "image": "shopify://shop_images/landingpage_camp404_02.png",
+            "hotspot_size": 170,
+            "hotspot_color": "#000000",
+            "hotspot_opacity": 0,
+            "hotspot_hover_opacity": 5,
+            "hotspot_border_width": 0,
+            "hotspot_border_color": "#ffffff",
+            "hotspot_1_enabled": true,
+            "hotspot_1_x": 20,
+            "hotspot_1_y": 70,
+            "hotspot_1_url": "https://www.threadwallets.com/products/topo-adventure-pouch-wallet",
+            "hotspot_1_label": "",
+            "hotspot_2_enabled": true,
+            "hotspot_2_x": 50,
+            "hotspot_2_y": 40,
+            "hotspot_2_url": "https://www.threadwallets.com/products/mountain-flowers-crossbody-bag",
+            "hotspot_2_label": "",
+            "hotspot_3_enabled": true,
+            "hotspot_3_x": 75,
+            "hotspot_3_y": 65,
+            "hotspot_3_url": "https://www.threadwallets.com/products/color-block-canvas-belt-bag",
+            "hotspot_3_label": "",
+            "hotspot_4_enabled": false,
+            "hotspot_4_x": 30,
+            "hotspot_4_y": 70,
+            "hotspot_4_url": "",
+            "hotspot_4_label": "",
+            "hotspot_5_enabled": false,
+            "hotspot_5_x": 70,
+            "hotspot_5_y": 30,
+            "hotspot_5_url": "",
+            "hotspot_5_label": ""
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "ai_gen_block_ac4dfce_WbbfCA"
+      ],
+      "name": "Image",
+      "settings": {}
+    },
+    "product_grid_9giWeY": {
+      "type": "product-grid",
+      "name": "t:sections.product_grid.name",
+      "settings": {
+        "collection": "mountain-flowers",
+        "products_count": 4,
+        "heading": "",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 20,
+        "spacing_bottom": 0,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--b-width",
+        "row_size_desktop": "md:grid-cols-4",
+        "row_size_mobile": "grid grid-cols-2",
+        "layout_x_alignment": "justify-between",
+        "visibility": ""
+      }
+    },
+    "blocks_4Ytm9b": {
+      "type": "_blocks",
+      "blocks": {
+        "ai_gen_block_ac4dfce_AJjB9B": {
+          "type": "ai_gen_block_ac4dfce",
+          "settings": {
+            "image": "shopify://shop_images/landingpage_camp404_03.png",
+            "hotspot_size": 250,
+            "hotspot_color": "#000000",
+            "hotspot_opacity": 0,
+            "hotspot_hover_opacity": 5,
+            "hotspot_border_width": 0,
+            "hotspot_border_color": "#ffffff",
+            "hotspot_1_enabled": false,
+            "hotspot_1_x": 25,
+            "hotspot_1_y": 50,
+            "hotspot_1_url": "https://www.threadwallets.com/products/camp-404-vertical-leather-wallet",
+            "hotspot_1_label": "",
+            "hotspot_2_enabled": false,
+            "hotspot_2_x": 50,
+            "hotspot_2_y": 50,
+            "hotspot_2_url": "",
+            "hotspot_2_label": "",
+            "hotspot_3_enabled": false,
+            "hotspot_3_x": 75,
+            "hotspot_3_y": 75,
+            "hotspot_3_url": "",
+            "hotspot_3_label": "",
+            "hotspot_4_enabled": false,
+            "hotspot_4_x": 30,
+            "hotspot_4_y": 70,
+            "hotspot_4_url": "",
+            "hotspot_4_label": "",
+            "hotspot_5_enabled": false,
+            "hotspot_5_x": 70,
+            "hotspot_5_y": 30,
+            "hotspot_5_url": "",
+            "hotspot_5_label": ""
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "ai_gen_block_ac4dfce_AJjB9B"
+      ],
+      "name": "Image",
+      "settings": {}
+    },
+    "product_grid_aVEAAL": {
+      "type": "product-grid",
+      "name": "t:sections.product_grid.name",
+      "settings": {
+        "collection": "topo",
+        "products_count": 4,
+        "heading": "",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 20,
+        "spacing_bottom": 0,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--b-width",
+        "row_size_desktop": "md:grid-cols-4",
+        "row_size_mobile": "grid grid-cols-2",
+        "layout_x_alignment": "justify-between",
+        "visibility": ""
+      }
+    },
+    "blocks_HHjTft": {
+      "type": "_blocks",
+      "blocks": {
+        "ai_gen_block_ac4dfce_mHiUPK": {
+          "type": "ai_gen_block_ac4dfce",
+          "settings": {
+            "image": "shopify://shop_images/landingpage_camp404_04.png",
+            "hotspot_size": 130,
+            "hotspot_color": "#000000",
+            "hotspot_opacity": 0,
+            "hotspot_hover_opacity": 5,
+            "hotspot_border_width": 0,
+            "hotspot_border_color": "#ffffff",
+            "hotspot_1_enabled": true,
+            "hotspot_1_x": 8,
+            "hotspot_1_y": 65,
+            "hotspot_1_url": "https://www.threadwallets.com/products/color-block-canvas-belt-bag",
+            "hotspot_1_label": "",
+            "hotspot_2_enabled": true,
+            "hotspot_2_x": 30,
+            "hotspot_2_y": 65,
+            "hotspot_2_url": "https://www.threadwallets.com/products/color-block-canvas-water-bottle-sling-bag",
+            "hotspot_2_label": "",
+            "hotspot_3_enabled": true,
+            "hotspot_3_x": 53,
+            "hotspot_3_y": 65,
+            "hotspot_3_url": "https://www.threadwallets.com/products/camp-404-chapstick-holder-keychain",
+            "hotspot_3_label": "",
+            "hotspot_4_enabled": true,
+            "hotspot_4_x": 77,
+            "hotspot_4_y": 65,
+            "hotspot_4_url": "https://www.threadwallets.com/products/color-block-canvas-adventure-pouch-wallet",
+            "hotspot_4_label": "",
+            "hotspot_5_enabled": true,
+            "hotspot_5_x": 98,
+            "hotspot_5_y": 65,
+            "hotspot_5_url": "",
+            "hotspot_5_label": ""
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "ai_gen_block_ac4dfce_mHiUPK"
+      ],
+      "name": "Image",
+      "settings": {}
+    },
+    "product_grid_JwcYKd": {
+      "type": "product-grid",
+      "disabled": true,
+      "name": "t:sections.product_grid.name",
+      "settings": {
+        "collection": "forest-critters",
+        "products_count": 4,
+        "heading": "",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 20,
+        "spacing_bottom": 0,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--b-width",
+        "row_size_desktop": "md:grid-cols-4",
+        "row_size_mobile": "grid grid-cols-2",
+        "layout_x_alignment": "justify-between",
+        "visibility": ""
+      }
+    },
+    "blocks_dtT6BU": {
+      "type": "_blocks",
+      "blocks": {
+        "ai_gen_block_ac4dfce_Ha4f7H": {
+          "type": "ai_gen_block_ac4dfce",
+          "settings": {
+            "image": "shopify://shop_images/landingpage_camp404_05.png",
+            "hotspot_size": 350,
+            "hotspot_color": "#000000",
+            "hotspot_opacity": 0,
+            "hotspot_hover_opacity": 5,
+            "hotspot_border_width": 0,
+            "hotspot_border_color": "#ffffff",
+            "hotspot_1_enabled": true,
+            "hotspot_1_x": 75,
+            "hotspot_1_y": 50,
+            "hotspot_1_url": "https://www.threadwallets.com/products/color-block-canvas-water-bottle-sling-bag",
+            "hotspot_1_label": "",
+            "hotspot_2_enabled": false,
+            "hotspot_2_x": 50,
+            "hotspot_2_y": 50,
+            "hotspot_2_url": "",
+            "hotspot_2_label": "",
+            "hotspot_3_enabled": false,
+            "hotspot_3_x": 75,
+            "hotspot_3_y": 75,
+            "hotspot_3_url": "",
+            "hotspot_3_label": "",
+            "hotspot_4_enabled": false,
+            "hotspot_4_x": 30,
+            "hotspot_4_y": 70,
+            "hotspot_4_url": "",
+            "hotspot_4_label": "",
+            "hotspot_5_enabled": false,
+            "hotspot_5_x": 70,
+            "hotspot_5_y": 30,
+            "hotspot_5_url": "",
+            "hotspot_5_label": ""
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "ai_gen_block_ac4dfce_Ha4f7H"
+      ],
+      "name": "Image",
+      "settings": {}
+    },
+    "blocks_bzEdX7": {
+      "type": "_blocks",
+      "blocks": {
+        "ai_gen_block_ac4dfce_yHj6MW": {
+          "type": "ai_gen_block_ac4dfce",
+          "settings": {
+            "image": "shopify://shop_images/landingpage_camp404_06.png",
+            "hotspot_size": 260,
+            "hotspot_color": "#000000",
+            "hotspot_opacity": 0,
+            "hotspot_hover_opacity": 5,
+            "hotspot_border_width": 0,
+            "hotspot_border_color": "#ffffff",
+            "hotspot_1_enabled": true,
+            "hotspot_1_x": 50,
+            "hotspot_1_y": 50,
+            "hotspot_1_url": "shopify://collections/camp-404",
+            "hotspot_1_label": "",
+            "hotspot_2_enabled": false,
+            "hotspot_2_x": 50,
+            "hotspot_2_y": 50,
+            "hotspot_2_url": "",
+            "hotspot_2_label": "",
+            "hotspot_3_enabled": false,
+            "hotspot_3_x": 75,
+            "hotspot_3_y": 75,
+            "hotspot_3_url": "",
+            "hotspot_3_label": "",
+            "hotspot_4_enabled": false,
+            "hotspot_4_x": 30,
+            "hotspot_4_y": 70,
+            "hotspot_4_url": "",
+            "hotspot_4_label": "",
+            "hotspot_5_enabled": false,
+            "hotspot_5_x": 70,
+            "hotspot_5_y": 30,
+            "hotspot_5_url": "",
+            "hotspot_5_label": ""
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "ai_gen_block_ac4dfce_yHj6MW"
+      ],
+      "name": "Image",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main",
+    "text_63HDTf",
+    "page_store_request_UjYYdr",
+    "blocks_3Nwfnn",
+    "product_grid_4PbrCX",
+    "blocks_C3EHCy",
+    "product_grid_9giWeY",
+    "blocks_4Ytm9b",
+    "product_grid_aVEAAL",
+    "blocks_HHjTft",
+    "product_grid_JwcYKd",
+    "blocks_dtT6BU",
+    "blocks_bzEdX7"
+  ]
+}

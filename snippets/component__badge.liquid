@@ -1,0 +1,39 @@
+<!-- snippets/component__badge.liquid -->
+{% comment %} 
+  Badge to display highlighted text.
+
+  Accepts: 
+    - container_class: string to set classes for the container
+    - background: color to use for the background
+    - text: color to use for the text
+    - border: color to use for the border
+    - icon: icon to display from component__icon.liquid
+    - content: content of the badge
+
+  Usage:
+    {% render 'component__badge', 
+      container_class: 'class',
+      background: 'overlay-1',
+      text: 'secondary',
+      border: 'secondary',
+      icon: '',
+      content: taxes_included 
+    %}
+  
+  Possible enhancements:
+    - Add option to show icon in beginning or end.
+
+  Recommendations:
+    - Badges are commonly used to highlight product details like "best sellers"
+    - Use product tags to add badges to product thumbnails. Learn more - https://www.notion.so/brickspacelab/Adding-badges-to-product-thumbnails-on-Paper-63b9e71aea444528b6e05011c2a789d2
+{% endcomment %}
+
+<div 
+  class="border__button--radius inline-flex items-center px-2 py-1
+  color__bg-{{ background | strip }} color__{{ text | strip }} color__border-{{ border | strip }}
+  {{ container_class }}">
+  {% unless icon == blank %}
+    {% render 'component__icon', icon: icon, size: '14', class: 'mr-1' %} 
+  {% endunless %}
+  <span class="type--smaller flex items-center type__nav">{{ content }}</span>
+</div>

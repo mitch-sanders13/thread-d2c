@@ -1,0 +1,105 @@
+<!-- snippets/product__price.liquid -->
+{% comment %} 
+  Block for product price.
+
+  Accepts:
+    - blocksettings: liquid object of block settings
+    - featured: boolean to assign product object from section settings, set this to true if block is used within a section rather than product template
+      
+  Usage:
+    {% render 'product__price', 
+      blocksettings: block.settings, 
+      featured: true %}
+
+  Pro tips:
+    - This will display price, compare at price, and additonal price info.
+    - Prices will update to reflect any changes to variant selection.
+{% endcomment %}
+
+{%- comment -%}price{%- endcomment -%}
+{% if featured %}
+  {%- assign product = section.settings.product -%}
+{% endif %}
+<div class="pdp-price">
+
+  {%- comment -%}product price{%- endcomment -%}
+  <span class="flex">
+    <strong class="pdp-price-regular !leading-tight"
+      data-product-id="{{ product.id }}"
+      data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+      x-text="Shopify.formatMoney(defaultVariantPrice, '{{ cart.currency.symbol }}')"
+      x-show="defaultVariantPrice > 0"></strong>
+    <strong class="pdp-price-regular !leading-tight"
+      data-product-id="{{ product.id }}"
+      data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+      x-show="defaultVariantPrice == 0">{{ product.price_min | money }} </strong>
+    {% if product.price_varies %}
+      <pre class="pdp-price-range !leading-tight m-0"
+        x-show="defaultVariantPrice == 0"> - {{ product.price_max | money }}</pre>
+    {% endif %}
+    {% if product.compare_at_price_max > product.price_min %}
+      <span class="!leading-tight"
+        x-show="sellingGroupId == false">
+        <s class="pdp-price-compare ml-2 !leading-tight"
+          data-product-id="{{ product.id }}"
+          data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+          x-text="Shopify.formatMoney(defaultVariantComparePrice, '{{ cart.currency.symbol }}')"
+          x-show="defaultVariantComparePrice > 0">{{ product.compare_at_price_max | money }}
+        </s>
+      </span>
+    {% endif %}
+    <span class="!leading-tight"
+      x-show="sellingGroupId != false">
+      <s class="pdp-price-compare ml-2 !leading-tight"
+          data-product-id="{{ product.id }}"
+          data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+        x-text="Shopify.formatMoney(defaultVariantComparePrice, '{{ cart.currency.symbol }}')"
+        x-show="defaultVariantComparePrice > defaultVariantPrice"
+        x-cloak>{{ product.compare_at_price_max | money }}</s>
+    </span>
+  </span>
+
+  {%- comment -%}unit price{%- endcomment -%}
+  {% comment %} 
+  <span class="type--small flex" 
+    x-show="defaultVariantUnitPrice > 0" 
+    x-cloak>
+    {% for variant in product.variants limit: 1 %}
+      <span x-text="Shopify.formatMoney(defaultVariantUnitPrice, '{{ cart.currency.symbol }}')">
+        {{ variant.unit_price | money }}
+      </span>
+      <span>/</span>
+      <span x-text="defaultVariantUnitLabel">
+          {{ variant.unit_price_measurement.reference_value }}{{ variant.unit_price_measurement.reference_unit }}
+      </span>
+    {% endfor %}
+  </span> 
+{% endcomment %}
+
+  {%- comment -%}subscription badge{%- endcomment -%}
+  <div class="mt-1" 
+    x-show="sellingGroupId != 0 && defaultHasSellingPlan;" 
+    x-cloak>
+    {% capture subscription_badge %}
+      {{ 'products.general.subscription' | t }} <span x-text="defaultSavingsHighlight"></span>
+    {% endcapture %}
+    {% render 'component__badge', 
+      color: 'overlay-1',
+      icon: '',
+      content: subscription_badge %}
+  </div>
+
+  {%- comment -%}taxes badge{%- endcomment -%}
+  {% if cart.taxes_included %}
+    {%- capture taxes_included -%}
+      {{ 'customer.order.taxes_included' | t }}
+    {%- endcapture -%}
+    <div class="mt-1">
+      {% render 'component__badge', 
+        color: 'overlay-2',
+        icon: '',
+        content: taxes_included %}
+    </div>
+  {% endif %}
+
+</div>

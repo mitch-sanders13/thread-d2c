@@ -1,0 +1,451 @@
+{% comment %}
+  Cart drawer bundle widget — collapsed-by-default inline editor.
+
+  The collapsed summary row uses the SAME structural classes as a
+  regular cart line item (sections/theme__cart.liquid:1179-1419) so
+  fonts, spacing, padding, and positions match exactly. Only the
+  image area (3-stack instead of one image) and the trash slot
+  (chevron toggle instead of trash) differ. A quantity stepper sits
+  in the row's bottom slot and changes ALL THREE bundled line items
+  in lockstep so adjusting it adds/removes whole bundles.
+
+  Rendered once per bundle group inside the cart-drawer x-for loop.
+  Wrapped in its own x-data scope so each bundle has independent
+  selection / dropdown / open-collapse state.
+
+  Reads from parent x-for scope:
+    - item.__bundleGroup: array of the 3 line items sharing _bundle_id
+
+  Inherits from cart drawer root Alpine scope:
+    - changeCartItemQuantity(key, qty, openCart, refresh)
+    - cart_loading
+
+  Relies on (rendered once from sections/theme__cart.liquid):
+    - snippets/bundle__cart-edit-data.liquid — produces the JSON data
+      blob (id="bundle-cart-edit-data") AND the window.bundleCartEdit
+      factory function used here by x-data.
+{% endcomment %}
+
+{%- assign _trash_icon_size = section.settings.trash_icon_size | default: 20 -%}
+
+<div
+  class="cart__bundle-group"
+  :class="{ 'is-open': bundleOpen }"
+  x-data="bundleCartEdit(item.__bundleGroup)"
+  x-init="init(); _applyBundleDiscount()"
+  @cart:updated.window="_applyBundleDiscount()"
+  @keydown.escape.window="bundleOpen ? (dropdownOpen >= 0 ? dropdownOpen = -1 : bundleOpen = false) : null">
+
+  {%- comment -%}
+    Collapsed summary row — mirrors a regular cart line item exactly.
+    Structure (matches sections/theme__cart.liquid:1179-1419):
+      [image area] [details column: title+variant row, then qty+chevron row] [price column inside details]
+    All Tailwind classes are copy-paste from the regular row so fonts,
+    spacing, padding, and positions stay identical. The image area is
+    the only visual departure (3-stack instead of a single image),
+    plus the trash slot is replaced with the expand chevron.
+  {%- endcomment -%}
+  <div
+    class="
+      cart__bundle-summary-row cart__item-row border--b-width flex w-full p-4 gap-2
+      {{ section.settings.main_color_scheme_first }}
+      {{ section.settings.main_color_border }}
+    ">
+
+    {%- comment -%}
+      Image area — matches the regular row's `w-[20%]` width container
+      so the title column aligns identically. Inside, a 3-stack:
+      wallet (large, top), lanyard + chapstick (smaller, side by side
+      below). Image URLs piggyback on the `_240x240` / `_120x120` CDN
+      size suffix the regular line already uses.
+    {%- endcomment -%}
+    <div class="cart__bundle-summary-imgcol w-[20%] h-full" aria-hidden="true">
+      <div class="cart__bundle-summary-stack">
+        <div class="cart__bundle-summary-stack-main">
+          <img
+            class="cart__bundle-summary-img"
+            :src="currentProduct(0).image ? currentProduct(0).image.replace(/\.(jpg|jpeg|png|webp|gif)(\?|$)/i, '_240x240.$1$2') : ''"
+            :alt="currentProduct(0).title || ''"
+            width="160"
+            height="160"
+            loading="eager"
+            decoding="async" />
+        </div>
+        <div class="cart__bundle-summary-stack-row">
+          <div class="cart__bundle-summary-stack-side">
+            <img
+              class="cart__bundle-summary-img"
+              :src="currentProduct(1).image ? currentProduct(1).image.replace(/\.(jpg|jpeg|png|webp|gif)(\?|$)/i, '_120x120.$1$2') : ''"
+              :alt="currentProduct(1).title || ''"
+              width="80"
+              height="80"
+              loading="eager"
+              decoding="async" />
+          </div>
+          <div class="cart__bundle-summary-stack-side">
+            <img
+              class="cart__bundle-summary-img"
+              :src="currentProduct(2).image ? currentProduct(2).image.replace(/\.(jpg|jpeg|png|webp|gif)(\?|$)/i, '_120x120.$1$2') : ''"
+              :alt="currentProduct(2).title || ''"
+              width="80"
+              height="80"
+              loading="eager"
+              decoding="async" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {%- comment -%}
+      Details column — copies the regular row's structure exactly:
+      top sub-row holds the title block (left) + price column (right);
+      bottom sub-row holds the qty stepper (left) + trash slot (right,
+      now a chevron). Same Tailwind utility classes throughout.
+    {%- endcomment -%}
+    <div class="flex flex-col flex-grow animation-500"
+      {% if settings.enable_animations %}
+        :class="{ 'opacity-50' : cart_loading }"
+      {% endif %}>
+      <div class="flex gap-2 justify-between items-start">
+        <div class="no-underline hover:no-underline type__nav">
+          <p class="cart__item-title mb-0 !leading-tight !font-bold{% if item_title_token_class != '' %} {{ item_title_token_class }}{% endif %}">
+            Trifecta Bundle
+          </p>
+          <p class="cart__item-variant mb-0 opacity-75 type--small{% if item_variant_token_class != '' %} {{ item_variant_token_class }}{% endif %}">
+            Wallet &middot; Lanyard &middot; Chapstick
+          </p>
+        </div>
+
+        <div class="cart__item-prices flex flex-col items-end">
+          <span
+            class="cart__item-price !leading-tight{% if item_price_token_class != '' %} {{ item_price_token_class }}{% endif %}"
+            x-text="formatMoney(bundleLineTotal())"></span>
+          <span x-show="totals().savings > 0" x-cloak>
+            <s
+              class="cart__item-compare !leading-tight{% if item_compare_token_class != '' %} {{ item_compare_token_class }}{% endif %}"
+              x-text="formatMoney(bundleLineSubtotal())"></s>
+          </span>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2 mt-2">
+        <div class="flex gap-2 justify-between items-center pr-[14px]">
+          {%- comment -%}
+            Quantity stepper — clones the regular row's stepper markup
+            and classes exactly. Increment / decrement adjust all
+            three bundle line items in lockstep via setBundleQty().
+            Decrementing past 1 removes the whole bundle (mirrors the
+            regular row dropping to qty 0).
+          {%- endcomment -%}
+          <div class="flex items-center gap-4 w-full min-w-0">
+          <div
+            class="cart__qty-stepper max-w-[150px] color__text color__border-divider-1 border--width hover:color__border-selected-1 border__input--radius relative flex w-full overflow-hidden">
+            <button
+              type="button"
+              class="cart__qty-btn btn--smaller shrink-0 !rounded-none border--r-width color__border-divider-1"
+              :disabled="bundleQtyLoading || loading"
+              title="{{ 'cart.general.decrease' | t }}"
+              @click.prevent.stop="bundleQty() <= 1 ? removeBundle() : setBundleQty(bundleQty() - 1)">
+              {% render 'component__icon', icon: 'minus', size: '14', class: '' %}
+            </button>
+            <label class="sr-only" :for="'cart-bundle-' + (bundleId || 'qty')">
+              {{- 'products.general.quantity' | t -}}
+            </label>
+            <input
+              :id="'cart-bundle-' + (bundleId || 'qty')"
+              type="text"
+              inputmode="numeric"
+              class="cart__qty-input form-input !border-0 text-center !rounded-none"
+              :value="bundleQty()"
+              @keydown.enter.prevent.stop="setBundleQty($event.target.value)"
+              @change.debounce.stop="setBundleQty($event.target.value)" />
+            <div
+              class="btn__spinner btn--smaller !w-auto !color__bg-body"
+              :class="{ '!visible color__bg-overlay-1 z-10' : bundleQtyLoading }">
+              {% render 'component__icon', icon: 'spinner', size: '16', class: '' %}
+            </div>
+            <button
+              type="button"
+              class="cart__qty-btn btn--smaller shrink-0 !rounded-none border--l-width color__border-divider-1"
+              :disabled="bundleQtyLoading || loading"
+              title="{{ 'cart.general.increase' | t }}"
+              @click.prevent.stop="setBundleQty(bundleQty() + 1)">
+              {% render 'component__icon', icon: 'plus', size: '14', class: '' %}
+            </button>
+          </div>
+
+          {%- comment -%}
+            Edit/expand chevron sits just left of center, next to the
+            quantity stepper (16px gap + padded hit area for thumbs,
+            per merchant); the TRASH icon keeps the far-right slot
+            matching the regular cart rows.
+          {%- endcomment -%}
+          <button
+            type="button"
+            class="cart__bundle-summary-chevron-btn !p-2 -m-2 shrink-0 !bg-transparent !border-0"
+            :aria-expanded="bundleOpen ? 'true' : 'false'"
+            aria-controls="js:bundle-panel-{{ item.key | default: 'bundle' }}"
+            aria-label="Edit bundle"
+            title="Edit bundle"
+            @click="bundleOpen = !bundleOpen">
+            {% render 'component__icon', icon: 'edit', size: _trash_icon_size, class: '' %}
+          </button>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button
+              type="button"
+              class="cart__bundle-trash cart__trash-btn !py-0 !px-0 !bg-transparent !border-0"
+              :class="{ 'btn--loading' : loading }"
+              :disabled="loading"
+              aria-label="Remove bundle"
+              title="Remove bundle"
+              @click="removeBundle()">
+              {% render 'component__icon', icon: 'trash', size: _trash_icon_size, class: '' %}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%}
+    Collapsible editor panel — the existing 3-card editor renders
+    verbatim. Wrapped in a CSS grid whose template-rows animates
+    0fr ↔ 1fr; the inner clips overflow during the transition.
+    :inert while collapsed pulls every interactive descendant out
+    of the tab order without removing it from the DOM, so the editor
+    state survives close → reopen.
+  {%- endcomment -%}
+  <div
+    class="cart__bundle-collapse"
+    id="js:bundle-panel-{{ item.key | default: 'bundle' }}">
+    <div class="cart__bundle-collapse-inner" :inert="!bundleOpen">
+
+      <ul class="cart__bundle-items" aria-label="Bundle items">
+        <template x-for="(slot, sIdx) in slots" :key="sIdx">
+          <li class="cart__bundle-item" :class="{ 'is-active-dropdown': dropdownOpen === sIdx }">
+            <button
+              type="button"
+              class="cart__bundle-item-button"
+              :disabled="loading"
+              :aria-expanded="dropdownOpen === sIdx"
+              @click="toggleDropdown(sIdx)">
+              <div class="cart__bundle-item-img-wrap">
+                <img
+                  class="cart__bundle-item-img"
+                  :src="currentProduct(sIdx).image ? currentProduct(sIdx).image.replace(/\.(jpg|jpeg|png|webp|gif)(\?|$)/i, '_240x240.$1$2') : ''"
+                  :alt="currentProduct(sIdx).title || ''"
+                  width="160"
+                  height="160"
+                  loading="eager"
+                  decoding="async" />
+              </div>
+              <div class="cart__bundle-item-body">
+                {%- if settings.trifecta_show_slot_label != false -%}
+                <p class="cart__bundle-item-slot" x-text="slot.label"></p>
+                {%- endif -%}
+                {%- comment -%}
+                  Title shows only the color part of the conventional
+                  "<Color> - <Type>" name — same shortName() the dropdown
+                  swatches use. The full type renders on its own line below
+                  when the merchant has the toggle on. Mirrors the PDP card
+                  layout 1:1 so the cart bundle reads the same.
+                {%- endcomment -%}
+                <p class="cart__bundle-item-title" x-text="shortName(currentProduct(sIdx).title || '')"></p>
+                {%- if settings.trifecta_show_item_type != false -%}
+                <p class="cart__bundle-item-type" x-text="currentProduct(sIdx).type || ''"></p>
+                {%- endif -%}
+                <p class="cart__bundle-item-price" x-text="formatMoney(currentProduct(sIdx).price || 0)"></p>
+              </div>
+              <span class="cart__bundle-item-change">
+                <span x-text="dropdownOpen === sIdx ? 'Close' : 'Change'"></span>
+                <span class="cart__bundle-item-caret" aria-hidden="true">▾</span>
+              </span>
+            </button>
+            <button
+              type="button"
+              class="cart__bundle-item-remove"
+              :disabled="loading"
+              @click="removeSlot(sIdx)"
+              :aria-label="'Remove ' + slot.label + ' from bundle'"
+              title="Remove from bundle">
+              <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </li>
+        </template>
+      </ul>
+
+      {%- comment -%}
+        Toolbar above the dropdown panel holds the filter pills (left,
+        horizontally scrollable) and the close X (right) on one row —
+        mirrors the PDP trifecta dropdown. The pills scroll under the X
+        rather than overlapping it.
+      {%- endcomment -%}
+      <div class="cart__bundle-dropdown-toolbar" x-show="dropdownOpen >= 0" x-cloak>
+        <div class="cart__bundle-type-tabs">
+          <button
+            type="button"
+            class="cart__bundle-type-tab"
+            :class="{ 'is-active': dropdownOpen >= 0 && selectedType[dropdownOpen] === '' }"
+            @click="selectType(dropdownOpen, '')">
+            <span>All</span>
+          </button>
+          <template x-for="type in (dropdownOpen >= 0 ? typesForSlot(dropdownOpen) : [])" :key="type">
+            <button
+              type="button"
+              class="cart__bundle-type-tab"
+              :class="{ 'is-active': dropdownOpen >= 0 && selectedType[dropdownOpen] === type }"
+              @click="selectType(dropdownOpen, type)">
+              <span x-text="type"></span>
+            </button>
+          </template>
+        </div>
+        <button
+          type="button"
+          class="cart__bundle-dropdown-close"
+          aria-label="Close"
+          @click="dropdownOpen = -1">✕</button>
+      </div>
+
+      <div
+        class="cart__bundle-dropdown"
+        :class="{ 'is-open': dropdownOpen >= 0 }">
+
+        <div class="cart__bundle-swatches">
+          <template x-for="p in (dropdownOpen >= 0 ? productsForCurrentType(dropdownOpen) : [])" :key="p.handle">
+            <button
+              type="button"
+              class="cart__bundle-swatch"
+              :class="{
+                'is-selected': dropdownOpen >= 0 && currentProduct(dropdownOpen).handle === p.handle,
+                'is-unavailable': !p.available
+              }"
+              :disabled="!p.available || loading"
+              :aria-label="p.title + (p.available ? '' : ' (sold out)')"
+              :title="p.title"
+              @click="selectProduct(dropdownOpen, p)">
+              <span class="cart__bundle-swatch-img">
+                <img :src="p.image ? p.image.replace(/\.(jpg|jpeg|png|webp|gif)(\?|$)/i, '_120x120.$1$2') : ''" :alt="p.title" loading="lazy" decoding="async" />
+              </span>
+              <span class="cart__bundle-swatch-name" x-text="shortName(p.title)"></span>
+            </button>
+          </template>
+        </div>
+      </div>
+
+      <p class="cart__bundle-status cart__bundle-status--loading" x-show="loading" x-cloak>Updating bundle…</p>
+      <p class="cart__bundle-status cart__bundle-status--error" x-show="error" x-text="error" x-cloak></p>
+
+      {%- comment -%}
+        The remove-bundle trash now lives on the collapsed summary row
+        (right-edge slot, matching regular line items) — no duplicate
+        trigger inside the expanded panel.
+      {%- endcomment -%}
+
+    </div>
+  </div>
+
+  {%- comment -%}
+    Scoped styles:
+    1) Neutralize the legacy .cart__bundle-group padding from
+       assets/bundle-builder.css so the new summary row inherits the
+       regular .cart__item-row's own p-4 padding — that's what makes
+       the bundle row align with the rows above and below it.
+    2) Style the image stack (kept from the previous iteration — the
+       merchant approved this look).
+    3) Position the chevron in the trash slot at the regular-row's
+       size and rotation behaviour.
+    4) Collapse animation via grid-template-rows 0fr → 1fr; the inner
+       wrapper holds the editor's horizontal padding so the cards
+       align with the summary above.
+  {%- endcomment -%}
+  <style>
+    /* 1) Reset the legacy group container — summary + collapse each
+          carry their own padding now. */
+    .cart__bundle-group {
+      padding: 0 !important;
+      gap: 0 !important;
+      display: block;
+    }
+
+    /* 2) Image stack inside the regular w-[20%] image column. */
+    .cart__bundle-summary-imgcol { flex: 0 0 20%; }
+    .cart__bundle-summary-stack {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 4px;
+      width: 100%;
+    }
+    .cart__bundle-summary-stack-main {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.04));
+    }
+    .cart__bundle-summary-stack-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+    }
+    .cart__bundle-summary-stack-side {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 4px;
+      overflow: hidden;
+      background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.04));
+    }
+    .cart__bundle-summary-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* 3) Chevron in the regular row's trash slot. Matches the trash
+          icon's size (merchant's trash_icon_size setting) and the
+          regular row's right-edge inset (pr-[14px]). */
+    .cart__bundle-summary-chevron-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: inherit;
+    }
+    .cart__bundle-summary-chevron {
+      display: inline-flex;
+      transition: transform 0.2s ease;
+    }
+    .cart__bundle-summary-chevron.is-flipped {
+      transform: rotate(180deg);
+    }
+
+    /* 4) Collapse: grid-template-rows 0fr → 1fr animates the child's
+          auto height with no measurement step. The editor inside
+          gets horizontal + bottom padding so its cards line up with
+          the summary row's p-4 padding above. */
+    .cart__bundle-collapse {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.28s ease;
+    }
+    .cart__bundle-group.is-open .cart__bundle-collapse {
+      grid-template-rows: 1fr;
+    }
+    .cart__bundle-collapse-inner {
+      overflow: hidden;
+      min-height: 0;
+      padding: 12px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .cart__bundle-group:not(.is-open) .cart__bundle-collapse-inner {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  </style>
+</div>

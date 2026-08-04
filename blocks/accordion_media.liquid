@@ -1,0 +1,266 @@
+{% comment %}
+  blocks/accordion_media.liquid
+
+  An image or video block for an accordion row.
+
+  Media type:
+    - image    : an image_picker (connectable to a file metafield).
+    - video    : a Shopify-hosted video upload (connectable to a
+                 file metafield).
+    - external : a YouTube / Vimeo URL.
+
+  `column` decides which side of the accordion's two-column content grid
+  this block lands in (left / right / full width).
+
+  When no media resolves — e.g. it is bound to a metafield a given
+  product hasn't set — it renders nothing on the live storefront (it
+  still shows a placeholder in the editor so it stays selectable).
+
+  Structural CSS lives in sections/product__details-accordion.liquid.
+{% endcomment %}
+
+{%- liquid
+  assign bs = block.settings
+  assign col = bs.column | default: 'right'
+
+  assign has_media = false
+  case bs.media_type
+    when 'image'
+      if bs.image != blank
+        assign has_media = true
+      endif
+    when 'video'
+      if bs.video != blank
+        assign has_media = true
+      endif
+    when 'external'
+      if bs.video_url != blank
+        assign has_media = true
+      endif
+  endcase
+
+  assign ratio_css = bs.aspect_ratio
+  if bs.media_type == 'external' and bs.aspect_ratio == 'natural'
+    assign ratio_css = '16 / 9'
+  endif
+  assign is_ratio = true
+  if ratio_css == 'natural'
+    assign is_ratio = false
+  endif
+
+  assign muted = bs.mute
+  if bs.autoplay
+    assign muted = true
+  endif
+-%}
+
+{%- if has_media or request.design_mode -%}
+  <div
+    id="pdp-acc-media-{{ block.id }}"
+    class="pdp-acc__media pdp-acc__col--{{ col }}"
+    {{ block.shopify_attributes }}>
+    <div class="pdp-acc__media-frame pdp-acc__media-frame--{% if is_ratio %}ratio{% else %}natural{% endif %}">
+      {%- case bs.media_type -%}
+        {%- when 'image' -%}
+          {%- if bs.image != blank -%}
+            {{
+              bs.image
+              | image_url: width: 1600
+              | image_tag:
+                loading: 'lazy',
+                sizes: '(min-width: 750px) 50vw, 100vw',
+                widths: '400, 600, 800, 1000, 1200, 1600',
+                alt: bs.image.alt
+            }}
+          {%- else -%}
+            {{ 'image' | placeholder_svg_tag: 'pdp-acc__placeholder' }}
+          {%- endif -%}
+
+        {%- when 'video' -%}
+          {%- if bs.video != blank -%}
+            {{
+              bs.video
+              | video_tag:
+                image_size: '1100x',
+                autoplay: bs.autoplay,
+                loop: bs.loop,
+                muted: muted,
+                controls: bs.show_controls,
+                playsinline: true,
+                preload: 'metadata'
+            }}
+          {%- else -%}
+            {{ 'image' | placeholder_svg_tag: 'pdp-acc__placeholder' }}
+          {%- endif -%}
+
+        {%- when 'external' -%}
+          {%- assign vu = bs.video_url -%}
+          {%- if vu != blank -%}
+            {%- if vu.type == 'youtube' -%}
+              {%- capture embed_src -%}https://www.youtube.com/embed/{{ vu.id }}?rel=0&playsinline=1{% if bs.autoplay %}&autoplay=1&mute=1{% endif %}{% if bs.loop %}&loop=1&playlist={{ vu.id }}{% endif %}{% unless bs.show_controls %}&controls=0{% endunless %}{%- endcapture -%}
+            {%- elsif vu.type == 'vimeo' -%}
+              {%- capture embed_src -%}https://player.vimeo.com/video/{{ vu.id }}?playsinline=1&dnt=1{% if bs.autoplay %}&autoplay=1&muted=1{% endif %}{% if bs.loop %}&loop=1{% endif %}{%- endcapture -%}
+            {%- endif -%}
+            {%- if embed_src != blank -%}
+              <iframe
+                src="{{ embed_src }}"
+                loading="lazy"
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                allowfullscreen
+                title="{{ bs.caption | default: 'Product video' | escape }}"></iframe>
+            {%- else -%}
+              {{ 'image' | placeholder_svg_tag: 'pdp-acc__placeholder' }}
+            {%- endif -%}
+          {%- else -%}
+            {{ 'image' | placeholder_svg_tag: 'pdp-acc__placeholder' }}
+          {%- endif -%}
+      {%- endcase -%}
+    </div>
+    {%- if bs.caption != blank -%}
+      <p class="pdp-acc__caption">{{ bs.caption }}</p>
+    {%- endif -%}
+  </div>
+
+  {% style %}
+    #pdp-acc-media-{{ block.id }} {
+      {%- if bs.mb_d > 0 %}margin-bottom: {{ bs.mb_d }}px;{% endif -%}
+    }
+    #pdp-acc-media-{{ block.id }} .pdp-acc__media-frame {
+      {%- if is_ratio %}aspect-ratio: {{ ratio_css }};{% endif -%}
+      {%- if bs.radius > 0 %}border-radius: {{ bs.radius }}px;{% endif -%}
+      {%- if bs.bg_color != blank %}background-color: {{ bs.bg_color }};{% endif -%}
+    }
+    #pdp-acc-media-{{ block.id }} .pdp-acc__caption {
+      {%- case bs.cap_font -%}
+        {%- when 'body' -%}font-family: var(--type-font-body-family);
+        {%- when 'heading' -%}font-family: var(--type-font-header-family);
+        {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family);
+      {%- endcase -%}
+      {%- if bs.cap_size > 0 %} font-size: {{ bs.cap_size }}px;{% endif -%}
+      {%- if bs.cap_weight != blank %} font-weight: {{ bs.cap_weight }};{% endif -%}
+      {%- if bs.cap_color != blank %} color: {{ bs.cap_color }};{% endif -%}
+      text-align: {{ bs.cap_align }};
+    }
+  {% endstyle %}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Image / video",
+  "settings": [
+    { "type": "header", "content": "Media" },
+    {
+      "type": "select",
+      "id": "column",
+      "label": "Placement",
+      "options": [
+        { "value": "left", "label": "Left column" },
+        { "value": "right", "label": "Right column" },
+        { "value": "full", "label": "Full width" }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "select",
+      "id": "media_type",
+      "label": "Media type",
+      "options": [
+        { "value": "image", "label": "Image" },
+        { "value": "video", "label": "Video — upload" },
+        { "value": "external", "label": "Video — YouTube / Vimeo URL" }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Used when media type is Image. Connectable to a file metafield."
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Video upload",
+      "info": "Used when media type is Video — upload."
+    },
+    {
+      "type": "video_url",
+      "id": "video_url",
+      "label": "Video URL",
+      "accept": ["youtube", "vimeo"],
+      "placeholder": "https://www.youtube.com/watch?v=...",
+      "info": "Used when media type is Video — YouTube / Vimeo URL."
+    },
+
+    { "type": "header", "content": "Video playback" },
+    { "type": "checkbox", "id": "autoplay", "label": "Autoplay", "info": "Autoplaying video is always muted (browser requirement).", "default": false },
+    { "type": "checkbox", "id": "loop", "label": "Loop", "default": false },
+    { "type": "checkbox", "id": "mute", "label": "Start muted", "default": true },
+    { "type": "checkbox", "id": "show_controls", "label": "Show playback controls", "default": true },
+
+    { "type": "header", "content": "Appearance" },
+    {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "Aspect ratio",
+      "info": "External videos always use a fixed ratio (defaults to 16:9).",
+      "options": [
+        { "value": "natural", "label": "Natural (image/video's own)" },
+        { "value": "1 / 1", "label": "Square (1:1)" },
+        { "value": "4 / 3", "label": "Landscape (4:3)" },
+        { "value": "3 / 2", "label": "Landscape (3:2)" },
+        { "value": "16 / 9", "label": "Widescreen (16:9)" },
+        { "value": "3 / 4", "label": "Portrait (3:4)" }
+      ],
+      "default": "natural"
+    },
+    { "type": "range", "id": "radius", "label": "Corner radius (px)", "min": 0, "max": 48, "step": 2, "default": 0 },
+    { "type": "color", "id": "bg_color", "label": "Frame background", "info": "Shows behind transparent images or while media loads." },
+
+    { "type": "header", "content": "Caption" },
+    { "type": "text", "id": "caption", "label": "Caption", "info": "Optional. Connectable to a metafield." },
+    {
+      "type": "select",
+      "id": "cap_font",
+      "label": "Caption font",
+      "options": [
+        { "value": "", "label": "Theme default" },
+        { "value": "body", "label": "Body (Forma DJR)" },
+        { "value": "heading", "label": "Heading (PP Right Grotesk)" },
+        { "value": "handwritten", "label": "Handwritten" }
+      ],
+      "default": ""
+    },
+    { "type": "range", "id": "cap_size", "label": "Caption size (px)", "info": "0 = theme default.", "min": 0, "max": 24, "step": 1, "default": 13 },
+    {
+      "type": "select",
+      "id": "cap_weight",
+      "label": "Caption weight",
+      "options": [
+        { "value": "", "label": "Theme default" },
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": ""
+    },
+    { "type": "color", "id": "cap_color", "label": "Caption color" },
+    {
+      "type": "select",
+      "id": "cap_align",
+      "label": "Caption alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "mb_d", "label": "Margin bottom (px)", "min": 0, "max": 64, "step": 2, "default": 0 }
+  ]
+}
+{% endschema %}

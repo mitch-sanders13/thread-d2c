@@ -1,0 +1,343 @@
+{%- comment -%}
+  sections/homepage-quickfilter-bar.liquid
+
+  Homepage-only, mobile-only horizontal-scroll link bar that drops in
+  with the homepage header's white background.
+
+  Visibility mechanic:
+    - The bar starts hidden (transform: translateY(-100%); opacity: 0).
+    - The homepage scroll-state script in layout/theme.liquid:87-113
+      toggles `html.is-scrolled` past 10px of scroll. We hook our
+      reveal off the SAME class, so the bar slides into view together
+      with the header's white background — they animate in lockstep.
+    - The bar is `position: fixed; top: var(--cs-header-h, 56px) + N`
+      so it always sits flush under the header. `--cs-header-h` is
+      published by sections/theme__header.liquid's runtime JS.
+    - `pointer-events: none` while hidden so it doesn't intercept
+      taps over the hero region.
+
+  Customization:
+    - Each tab is a `link` block with a label + URL + optional
+      "force_active" flag (the merchant decides which tab gets the
+      underline; we don't auto-detect "current page" since the
+      homepage links point AWAY from /).
+    - Typography, active-state, chip spacing, and bar-level colors
+      are all customizer-controlled — same surface area as the
+      Collection page quickfilter, but self-contained under the
+      `hpqf_*` setting prefix.
+
+  Mobile only: outer wrapper carries `md:hidden`.
+
+  This section is not added to templates/index.json by default —
+  add it from the customizer's "Add section" button on the
+  homepage when ready.
+{%- endcomment -%}
+
+{%- liquid
+  assign _hp_offset      = section.settings.hpqf_underline_offset    | default: 4
+  assign _hp_thick       = section.settings.hpqf_underline_thickness | default: 3
+  assign _hp_color       = section.settings.hpqf_active_color        | default: 'var(--thread-blue)'
+
+  assign _hp_font        = section.settings.hpqf_font                | default: 'inherit'
+  assign _hp_weight      = section.settings.hpqf_weight              | default: '500'
+  assign _hp_transform   = section.settings.hpqf_text_transform      | default: 'uppercase'
+  assign _hp_ls          = section.settings.hpqf_letter_spacing      | default: '0.05em'
+  assign _hp_size_m      = section.settings.hpqf_size_mobile         | default: 13
+  assign _hp_pv          = section.settings.hpqf_chip_pad_v          | default: 16
+  assign _hp_ph          = section.settings.hpqf_chip_pad_h          | default: 12
+  assign _hp_gap         = section.settings.hpqf_chip_gap            | default: 0
+  assign _hp_text_color  = section.settings.hpqf_text_color
+  assign _hp_edge        = section.settings.hpqf_edge_padding        | default: 8
+
+  assign _hp_top_extra   = section.settings.hpqf_top_offset_extra    | default: 0
+  assign _hp_bar_bg      = section.settings.hpqf_bar_bg
+  assign _hp_bar_border  = section.settings.hpqf_bar_border_color
+  assign _hp_show_in_ed  = section.settings.hpqf_always_visible_in_editor
+-%}
+
+{%- if section.settings.hpqf_enable and section.blocks.size > 0 -%}
+  <div class="hp-qf-bar md:hidden" id="hp-qf-bar-{{ section.id }}">
+    <div class="hp-qf-bar__scroll-wrap">
+      <div class="hp-qf-bar__scroll">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'link' -%}
+            <a
+              href="{{ block.settings.url | default: '#' }}"
+              class="hp-qf-bar__chip{% if block.settings.force_active %} hp-qf-bar__chip--active{% endif %}"
+              {{ block.shopify_attributes }}>
+              <span class="hp-qf-bar__chip-text">{{ block.settings.label | escape }}</span>
+            </a>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* All rules scoped via #hp-qf-bar-{section.id} so multiple
+       instances on the same page (or the same bar surviving a
+       Section Rendering API swap) can't stomp each other. */
+
+    /* ============ Outer wrapper — undocked fallback ============
+       Used only when the docking script below hasn't run (theme
+       editor, or an exotic DOM where no <header> exists). A separate
+       fixed element whose `top` tracks the JS-published --cs-header-h
+       variable. This was the ONLY mode originally, and it glitched on
+       iOS: the bar and header live on two independently-painted
+       layers, and the per-scroll-event variable updates lag/misfire
+       during momentum scrolling and rubber-banding, so the bar could
+       visibly detach from the header mid-scroll. Kept as fallback
+       only. */
+    #hp-qf-bar-{{ section.id }}.hp-qf-bar {
+      position: fixed;
+      /* -2px nudges the bar up to close the gap between the header's
+         bottom border and the bar's top edge. The merchant's
+         hpqf_top_offset_extra still adds positive space on top of
+         this if they want a deliberate gap. */
+      top: calc(var(--cs-header-h, 56px) + {{ _hp_top_extra }}px - 2px);
+      left: 0;
+      right: 0;
+      z-index: 40;
+      background: {% if _hp_bar_bg != blank %}{{ _hp_bar_bg }}{% else %}var(--color-body-background-light, #ffffff){% endif %};
+      border-bottom: 1px solid {% if _hp_bar_border != blank %}{{ _hp_bar_border }}{% else %}var(--color-border-divider-1, #e5e5e5){% endif %};
+      transform: translateY(-100%);
+      opacity: 0;
+      transition: transform 0.25s cubic-bezier(0,0,.3,1), opacity 0.2s ease;
+      pointer-events: none;
+    }
+
+    /* ============ Reveal trigger ============
+       Driven by the `html.is-scrolled` class the homepage scroll
+       listener already toggles (layout/theme.liquid:87-113). */
+    html.is-scrolled #hp-qf-bar-{{ section.id }}.hp-qf-bar {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* ============ Docked mode (storefront default) ============
+       The script below moves the bar INSIDE the fixed <header>
+       wrapper, so header + bar share one containing block and one
+       paint layer — they physically cannot separate during scroll,
+       and no JS-measured `top` is involved at all. In-flow inside
+       the header, the reveal is a max-height collapse instead of a
+       translateY: the header wrapper overlays the hero (it's fixed),
+       so expanding it doesn't push page content around. */
+    #hp-qf-bar-{{ section.id }}.hp-qf-bar--docked {
+      position: static;
+      top: auto;
+      transform: none;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.25s cubic-bezier(0,0,.3,1), opacity 0.2s ease;
+      /* Same -2px nudge the undocked mode folds into its `top` calc:
+         tucks the bar's top edge under the header's bottom border so
+         no gap shows. The merchant's hpqf_top_offset_extra still adds
+         deliberate space on top of it. */
+      margin-top: calc({{ _hp_top_extra }}px - 2px);
+    }
+    html.is-scrolled #hp-qf-bar-{{ section.id }}.hp-qf-bar--docked {
+      transform: none;
+      /* Generous cap — the bar's real height is chip padding + one
+         line of text (< 100px at the maximum settings). */
+      max-height: 120px;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    {%- if _hp_show_in_ed and request.design_mode -%}
+    /* Customizer-only: force the bar visible in the theme editor so
+       the merchant can style it without scrolling. No effect on the
+       live storefront because request.design_mode is false there. */
+    #hp-qf-bar-{{ section.id }}.hp-qf-bar {
+      transform: translateY(0) !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+    {%- endif -%}
+
+    /* ============ Scroll container ============ */
+    #hp-qf-bar-{{ section.id }} .hp-qf-bar__scroll-wrap {
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 0 {{ _hp_edge }}px;
+    }
+    #hp-qf-bar-{{ section.id }} .hp-qf-bar__scroll-wrap::-webkit-scrollbar {
+      display: none;
+    }
+    #hp-qf-bar-{{ section.id }} .hp-qf-bar__scroll {
+      display: inline-flex;
+      align-items: stretch;
+      gap: {{ _hp_gap }}px;
+      white-space: nowrap;
+    }
+
+    /* ============ Chip ============
+       Mirrors the Collection quickfilter: chip-level padding, inner
+       span carries typography rules with !important so theme-wide
+       nav/body type tokens can't outweigh the merchant's settings. */
+    #hp-qf-bar-{{ section.id }} .hp-qf-bar__chip {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+      padding: {{ _hp_pv }}px {{ _hp_ph }}px;
+      text-decoration: none;
+      color: inherit;
+      transition: opacity 0.15s ease;
+    }
+    #hp-qf-bar-{{ section.id }} .hp-qf-bar__chip:active {
+      opacity: 0.7;
+    }
+    #hp-qf-bar-{{ section.id }} .hp-qf-bar__chip-text {
+      display: inline-block;
+      line-height: 1.2 !important;
+      font-size: {{ _hp_size_m }}px !important;
+      font-weight: {{ _hp_weight }} !important;
+      text-transform: {{ _hp_transform }} !important;
+      letter-spacing: {{ _hp_ls }} !important;
+      {% if _hp_font == 'body' %}font-family: var(--type-font-body-family) !important;{% endif %}
+      {% if _hp_font == 'heading' %}font-family: var(--type-font-header-family) !important;{% endif %}
+      {% if _hp_font == 'nav' %}font-family: var(--type-font-nav-family) !important;{% endif %}
+      {% if _hp_font == 'handwritten' %}font-family: var(--type-font-handwritten-family) !important;{% endif %}
+      {% if _hp_text_color != blank %}color: {{ _hp_text_color }} !important;{% endif %}
+    }
+
+    /* ============ Active state ============
+       Same border-bottom + padding-bottom recipe the Collection
+       quickfilter uses (collection__quickfilter.liquid:88-97). */
+    #hp-qf-bar-{{ section.id }} .hp-qf-bar__chip--active .hp-qf-bar__chip-text {
+      color: {{ _hp_color }} !important;
+      padding-bottom: {{ _hp_offset }}px;
+      border-bottom: {{ _hp_thick }}px solid {{ _hp_color }};
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #hp-qf-bar-{{ section.id }}.hp-qf-bar,
+      #hp-qf-bar-{{ section.id }}.hp-qf-bar--docked { transition: none !important; }
+    }
+  </style>
+
+  {%- unless request.design_mode -%}
+  <script>
+    /* Dock the bar into the fixed <header> wrapper so the two share
+       one paint layer. As a standalone fixed element whose `top`
+       tracked the JS-measured --cs-header-h variable, the bar could
+       visibly detach from the header on iOS during momentum scrolling
+       and rubber-banding (mis-timed measurements + independent layer
+       compositing). Inside the header there is nothing to measure and
+       nothing to desynchronize.
+
+       Skipped in the theme editor (request.design_mode): moving DOM
+       out of the section wrapper breaks the editor's section
+       selection/reload, and the customizer already has its own
+       always-visible override. The .hp-qf-bar--docked class gates the
+       in-flow CSS, so if this script doesn't run the bar keeps the
+       original fixed-position behavior as a fallback. */
+    (function () {
+      var bar = document.getElementById('hp-qf-bar-{{ section.id }}');
+      if (!bar || bar.classList.contains('hp-qf-bar--docked')) return;
+      var dock = function () {
+        var header = document.querySelector('body > header');
+        if (!header) return;
+        header.appendChild(bar);
+        bar.classList.add('hp-qf-bar--docked');
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', dock);
+      } else {
+        dock();
+      }
+    })();
+  </script>
+  {%- endunless -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Homepage quickfilter bar",
+  "tag": "section",
+  "class": "homepage-quickfilter-bar-section",
+  "settings": [
+    { "type": "checkbox", "id": "hpqf_enable", "label": "Enable the bar", "default": false, "info": "Mobile only. Shows up below the header once the customer scrolls past the top of the page." },
+    { "type": "checkbox", "id": "hpqf_always_visible_in_editor", "label": "Always show in the theme editor", "default": true, "info": "Customizer-only override so you can style the bar without scrolling. No effect on the live storefront — the bar still only appears once the header's white background slides in." },
+
+    { "type": "header", "content": "Tab typography" },
+    { "type": "select", "id": "hpqf_font", "label": "Font family", "options": [
+      { "value": "inherit",     "label": "Theme default (Nav)" },
+      { "value": "body",        "label": "Body" },
+      { "value": "heading",     "label": "Heading" },
+      { "value": "nav",         "label": "Nav" },
+      { "value": "handwritten", "label": "Handwritten" }
+    ], "default": "inherit" },
+    { "type": "select", "id": "hpqf_weight", "label": "Font weight", "options": [
+      { "value": "300", "label": "Light" },
+      { "value": "400", "label": "Normal" },
+      { "value": "500", "label": "Medium" },
+      { "value": "600", "label": "Semi-bold" },
+      { "value": "700", "label": "Bold" },
+      { "value": "800", "label": "Extra-bold" }
+    ], "default": "500" },
+    { "type": "select", "id": "hpqf_text_transform", "label": "Text transform", "options": [
+      { "value": "none",       "label": "None" },
+      { "value": "uppercase",  "label": "Uppercase" },
+      { "value": "capitalize", "label": "Capitalize" },
+      { "value": "lowercase",  "label": "Lowercase" }
+    ], "default": "uppercase" },
+    { "type": "select", "id": "hpqf_letter_spacing", "label": "Letter spacing", "options": [{ "value": "0.085em", "label": "Brand (0.085em)" }, 
+      { "value": "0em",    "label": "None" },
+      { "value": "0.02em", "label": "Tight" },
+      { "value": "0.05em", "label": "Normal" },
+      { "value": "0.08em", "label": "Wide" },
+      { "value": "0.1em",  "label": "Wider" },
+      { "value": "0.2em",  "label": "Extra wide" }
+    ], "default": "0.05em" },
+    { "type": "range", "id": "hpqf_size_mobile", "label": "Font size", "min": 10, "max": 22, "step": 1, "unit": "px", "default": 13 },
+    { "type": "color", "id": "hpqf_text_color", "label": "Text color", "info": "Leave blank to inherit from the theme." },
+
+    { "type": "header", "content": "Active tab state" },
+    { "type": "paragraph", "content": "Flip 'Force active' on any tab block below to apply this style to that tab. Useful when one of the destinations is the customer's most-likely next stop." },
+    { "type": "color", "id": "hpqf_active_color", "label": "Active color (text + underline)", "default": "#1e7db3" },
+    { "type": "range", "id": "hpqf_underline_offset",    "label": "Underline offset",    "min": 0, "max": 24, "step": 1, "unit": "px", "default": 4 },
+    { "type": "range", "id": "hpqf_underline_thickness", "label": "Underline thickness", "min": 1, "max": 8,  "step": 1, "unit": "px", "default": 3 },
+
+    { "type": "header", "content": "Chip spacing" },
+    { "type": "range", "id": "hpqf_chip_pad_v", "label": "Chip vertical padding",   "min": 0, "max": 32, "step": 1, "unit": "px", "default": 16 },
+    { "type": "range", "id": "hpqf_chip_pad_h", "label": "Chip horizontal padding", "min": 2, "max": 32, "step": 1, "unit": "px", "default": 12 },
+    { "type": "range", "id": "hpqf_chip_gap",   "label": "Gap between chips",       "min": 0, "max": 24, "step": 1, "unit": "px", "default": 0 },
+
+    { "type": "header", "content": "Bar layout" },
+    { "type": "range", "id": "hpqf_edge_padding",     "label": "Bar edge padding (left/right)", "min": 0, "max": 32, "step": 1, "unit": "px", "default": 8 },
+    { "type": "range", "id": "hpqf_top_offset_extra", "label": "Gap below the header",          "info": "Extra space between the header's bottom edge and the top of this bar.", "min": 0, "max": 24, "step": 1, "unit": "px", "default": 0 },
+    { "type": "color", "id": "hpqf_bar_bg",            "label": "Bar background",     "info": "Leave blank for the theme body background." },
+    { "type": "color", "id": "hpqf_bar_border_color",  "label": "Bar bottom border",  "info": "Leave blank for the theme divider color." }
+  ],
+  "blocks": [
+    {
+      "type": "link",
+      "name": "Tab",
+      "settings": [
+        { "type": "text",     "id": "label", "label": "Tab label" },
+        { "type": "url",      "id": "url",   "label": "Tab URL" },
+        { "type": "checkbox", "id": "force_active", "label": "Force active styling", "default": false, "info": "Highlight this tab using the Active tab state settings above." }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "Homepage quickfilter bar",
+      "settings": { "hpqf_enable": true },
+      "blocks": [
+        { "type": "link", "settings": { "label": "Wallets" } },
+        { "type": "link", "settings": { "label": "Lanyards" } },
+        { "type": "link", "settings": { "label": "Bags" } },
+        { "type": "link", "settings": { "label": "New" } }
+      ]
+    }
+  ],
+  "templates": ["index"]
+}
+{% endschema %}

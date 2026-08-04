@@ -1,0 +1,1431 @@
+<!-- sections/collection__sidebar.liquid -->
+{% comment %}
+  Main contents of the collection template (with vertical filters)
+
+  Globals:
+    - settings.layout_horizontal: horizontaly margin
+
+  Possible enhancements:
+    - Add support for global setting to control grid gap.
+    - Add setting so blocks can be set to width of two blocks.
+    - Add new block to support SMS opt-in.
+  Pro tips:
+    - Use blocks to showcase promotional content.
+{% endcomment %}
+
+{% assign sort_by = collection.sort_by | default: collection.default_sort_by | split: '?' | first %}
+{% assign default_sort_by = '' %}
+{% for option in collection.sort_options %}
+  {% if sort_by contains option.value %}
+    {% assign default_sort_by = option.name | split: '?' | first %}
+  {% endif %}
+{% endfor %}
+
+{%- comment -%}
+  Shared values used by the new filter/sort toolbar, the desktop sidebar,
+  the mobile drawer, AND the product grid further down. Hoisted here so
+  there's one source of truth.
+{%- endcomment -%}
+{%- assign _cs_pad_m = section.settings.grid_edge_padding | default: 8 -%}
+{%- assign _cs_pad_d = section.settings.grid_edge_padding_desktop | default: _cs_pad_m -%}
+
+{%- assign _afc = 0 -%}
+{%- for filter in collection.filters -%}
+  {%- comment -%}
+    Skip the Product type filter from the active-filter count and from
+    the applied-pills row. The quickfilter horizontal nav above already
+    surfaces the active Product type via its own underline indicator,
+    so a pill + Clear All below would be a redundant duplicate.
+  {%- endcomment -%}
+  {%- if filter.label == 'Product type' -%}{%- continue -%}{%- endif -%}
+  {%- if filter.active_values.size > 0 -%}{%- assign _afc = _afc | plus: filter.active_values.size -%}{%- endif -%}
+  {%- if filter.type == 'price_range' -%}
+    {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}{%- assign _afc = _afc | plus: 1 -%}{%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- case section.settings.filtersort_font -%}
+  {%- when 'body'        -%}{%- assign _fs_ff = settings.type_body_font.family        | append: ', ' | append: settings.type_body_font.fallback_families        -%}
+  {%- when 'heading'     -%}{%- assign _fs_ff = settings.type_heading_font.family     | append: ', ' | append: settings.type_heading_font.fallback_families     -%}
+  {%- when 'handwritten' -%}{%- assign _fs_ff = settings.type_handwritten_font.family | append: ', ' | append: settings.type_handwritten_font.fallback_families -%}
+  {%- else               -%}{%- assign _fs_ff = 'inherit' -%}
+{%- endcase -%}
+
+<style>
+  /* Suppress the desktop filter-sidebar flash on page load and after
+     section innerHTML swaps. The theme's global [x-cloak] rule isn't
+     !important, so Tailwind's .md:block on the sidebar wins over it
+     until Alpine inits. */
+  #shopify-section-{{ section.id }} [x-cloak] {
+    display: none !important;
+  }
+
+  /* === Layout (toolbar wrapper) === */
+  #shopify-section-{{ section.id }} .cs-filtersort {
+    padding-left: {{ _cs_pad_m }}px;
+    padding-right: {{ _cs_pad_m }}px;
+    padding-top: {{ section.settings.filtersort_row_pad_v_mobile | default: 12 }}px;
+    padding-bottom: {{ section.settings.filtersort_row_pad_v_mobile | default: 12 }}px;
+  }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .cs-filtersort {
+      padding-left: {{ _cs_pad_d }}px;
+      padding-right: {{ _cs_pad_d }}px;
+      padding-top: {{ section.settings.filtersort_row_pad_v_desktop | default: 12 }}px;
+      padding-bottom: {{ section.settings.filtersort_row_pad_v_desktop | default: 12 }}px;
+    }
+  }
+  #shopify-section-{{ section.id }} .cs-filtersort .cs-filtersort__row {
+    gap: {{ section.settings.filtersort_item_gap | default: 12 }}px;
+  }
+
+  /* === Typography zones ============================================
+     The Filter + Sort toolbar — Typography settings apply across the
+     toolbar AND every popup spawned from it (sort dropdown / drawer,
+     mobile filter drawer, desktop filter sidebar). Each zone gets the
+     merchant's chosen font-family / weight / transform / letter-spacing /
+     size / color directly; nested descendants are forced to inherit so
+     theme classes like .btn--small *, .type--smaller *, and .type__nav
+     can't override the chosen size. */
+  #shopify-section-{{ section.id }} .cs-filtersort,
+  #shopify-section-{{ section.id }} .cs-sort-drawer,
+  #shopify-section-{{ section.id }} .cs-filter-drawer,
+  #shopify-section-{{ section.id }} .cs-filter-sidebar {
+    font-family: {{ _fs_ff }} !important;
+    font-weight: {{ section.settings.filtersort_weight | default: '400' }} !important;
+    font-size: {{ section.settings.filtersort_size_mobile | default: 14 }}px !important;
+    text-transform: {{ section.settings.filtersort_text_transform | default: 'capitalize' }} !important;
+    letter-spacing: {{ section.settings.filtersort_letter_spacing | default: '0em' }} !important;
+    {% if section.settings.filtersort_text_color != blank %}color: {{ section.settings.filtersort_text_color }} !important;{% endif %}
+  }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .cs-filtersort,
+    #shopify-section-{{ section.id }} .cs-sort-drawer,
+    #shopify-section-{{ section.id }} .cs-filter-drawer,
+    #shopify-section-{{ section.id }} .cs-filter-sidebar {
+      font-size: {{ section.settings.filtersort_size_desktop | default: 14 }}px !important;
+    }
+  }
+
+  /* Force every descendant (buttons, spans, labels, links, accordion
+     headers, checkbox labels, etc.) to inherit the zone's typography. */
+  #shopify-section-{{ section.id }} .cs-filtersort *,
+  #shopify-section-{{ section.id }} .cs-sort-drawer *,
+  #shopify-section-{{ section.id }} .cs-filter-drawer *,
+  #shopify-section-{{ section.id }} .cs-filter-sidebar * {
+    font-family: inherit !important;
+    font-weight: inherit !important;
+    font-size: inherit !important;
+    font-style: inherit !important;
+    text-transform: inherit !important;
+    letter-spacing: inherit !important;
+  }
+
+  /* Text color cascades to inner text but NOT to color swatches,
+     icons, or buttons that style themselves (e.g. Apply button). */
+  #shopify-section-{{ section.id }} .cs-filtersort a,
+  #shopify-section-{{ section.id }} .cs-filtersort a *,
+  #shopify-section-{{ section.id }} .cs-filtersort button,
+  #shopify-section-{{ section.id }} .cs-filtersort button *,
+  #shopify-section-{{ section.id }} .cs-filtersort span {
+    color: inherit !important;
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+  }
+
+  /* No underline from any state on toolbar buttons / links. */
+  #shopify-section-{{ section.id }} .cs-filtersort a:hover,
+  #shopify-section-{{ section.id }} .cs-filtersort a:hover *,
+  #shopify-section-{{ section.id }} .cs-filtersort a:focus,
+  #shopify-section-{{ section.id }} .cs-filtersort a:focus *,
+  #shopify-section-{{ section.id }} .cs-filtersort button:hover,
+  #shopify-section-{{ section.id }} .cs-filtersort button:hover *,
+  #shopify-section-{{ section.id }} .cs-filtersort button:focus,
+  #shopify-section-{{ section.id }} .cs-filtersort button:focus * {
+    text-decoration: none !important;
+    text-decoration-line: none !important;
+  }
+
+  /* Outline Filter / Sort button — merchant-driven padding so the
+     toolbar can be tightened or loosened from the Customizer. */
+  #shopify-section-{{ section.id }} .cs-filtersort__btn {
+    gap: 8px;
+    padding-top:    {{ section.settings.filtersort_btn_pad_v | default: 6 }}px !important;
+    padding-bottom: {{ section.settings.filtersort_btn_pad_v | default: 6 }}px !important;
+    padding-left:   {{ section.settings.filtersort_btn_pad_h | default: 14 }}px !important;
+    padding-right:  {{ section.settings.filtersort_btn_pad_h | default: 14 }}px !important;
+    min-height: 0;
+    line-height: 1.4;
+    overflow: visible;
+  }
+  #shopify-section-{{ section.id }} .cs-filtersort__btn-chevron {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Product count — subtle secondary tone. */
+  #shopify-section-{{ section.id }} .cs-filtersort__count {
+    opacity: 0.65;
+  }
+
+  /* Thin vertical divider between adjacent toolbar items. */
+  #shopify-section-{{ section.id }} .cs-filtersort__divider {
+    display: inline-block;
+    width: 1px;
+    height: 1em;
+    background: currentColor;
+    opacity: 0.25;
+  }
+
+  /* Applied-filter chip row — top margin between toolbar row and pills. */
+  #shopify-section-{{ section.id }} .cs-filtersort__pills,
+  #shopify-section-{{ section.id }} .cs-filtersort__clear-mobile {
+    margin-top: {{ section.settings.filtersort_pill_row_mt | default: 12 }}px;
+    gap: {{ section.settings.filtersort_pill_gap | default: 8 }}px;
+  }
+
+  /* Applied-filter chip — soft pill with a subtle background and an X. */
+  #shopify-section-{{ section.id }} .cs-filtersort__pill {
+    padding-top:    {{ section.settings.filtersort_pill_pad_v | default: 6 }}px;
+    padding-bottom: {{ section.settings.filtersort_pill_pad_v | default: 6 }}px;
+    padding-left:   {{ section.settings.filtersort_pill_pad_h | default: 12 }}px;
+    padding-right:  {{ section.settings.filtersort_pill_pad_h | default: 12 }}px;
+    border-radius: 9999px;
+    background: rgba(0,0,0,0.04);
+    line-height: 1;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+    gap: 8px;
+  }
+  #shopify-section-{{ section.id }} .cs-filtersort__pill:hover {
+    background: rgba(0,0,0,0.08);
+  }
+</style>
+
+<section id="js:top" class="{{ section.settings.color_scheme }}"
+  x-data="{ filter_drawer_open: false, filter_sidebar_open: false, sort_by: ['{{ sort_by }}'] }">
+  {% render 'collection__sublinks' %}
+  {% render 'collection__subtags' %}
+  {% render 'collection__quickfilter' %}
+
+  {%- comment -%}
+    Filter + Sort toolbar — Outdoor Voices visual model.
+      Left side: "Filter ▾" button. When filters are active, a thin
+                  vertical divider + "Clear All" button appears after it.
+      Right side: "Sort ▾" button. Label shows the selected sort value
+                  (or just "Sort" when no explicit sort is set).
+    Below the row: applied-filter pills (each value as a chip with X).
+
+    Mobile (`md:hidden`):
+      - Filter button opens the bottom-sheet drawer rendered at the end
+        of this section (`{% render 'collection__filter-drawer' %}`).
+
+    Desktop (`hidden md:inline-flex`):
+      - Filter button toggles the inline left sidebar inside the flex
+        row below. Defaults to closed.
+  {%- endcomment -%}
+  {%- if section.settings.enable_filter or section.settings.enable_sort -%}
+    {%- assign _count_label = collection.products_count | append: ' Products' -%}
+
+    <div class="cs-filtersort"
+      style="--cs-pad-d:{{ _cs_pad_d }}px;font-family:{{ _fs_ff }};font-weight:{{ section.settings.filtersort_weight | default: '400' }};text-transform:{{ section.settings.filtersort_text_transform | default: 'capitalize' }};letter-spacing:{{ section.settings.filtersort_letter_spacing | default: '0em' }};{% if section.settings.filtersort_text_color != blank %}color:{{ section.settings.filtersort_text_color }};{% endif %}">
+
+      <div class="cs-filtersort__row flex flex-row items-center w-full">
+        {%- if section.settings.enable_filter -%}
+          {%- comment -%} Mobile filter button — opens the bottom-sheet drawer {%- endcomment -%}
+          <button type="button"
+            class="cs-filtersort__btn btn btn--plain btn--small md:hidden inline-flex items-center"
+            @click="filter_drawer_open = true">
+            <span>Filter</span>
+            <span class="cs-filtersort__btn-chevron">{% render 'component__icon', icon: 'chevron-down', size: '14' %}</span>
+          </button>
+
+          {%- comment -%} Desktop filter button — toggles the inline sidebar {%- endcomment -%}
+          <button type="button"
+            class="cs-filtersort__btn btn btn--plain btn--small hidden md:inline-flex items-center"
+            @click="filter_sidebar_open = !filter_sidebar_open">
+            <span>Filter</span>
+            <span class="cs-filtersort__btn-chevron">{% render 'component__icon', icon: 'chevron-down', size: '14' %}</span>
+          </button>
+        {%- endif -%}
+
+        {%- comment -%}
+          Product count — always left-aligned, sits at the grid's left edge
+          when Filter is off, or immediately right of the Filter button when
+          Filter is on (same on mobile and desktop).
+        {%- endcomment -%}
+        <span class="cs-filtersort__count">{{ _count_label }}</span>
+
+        {%- if section.settings.enable_filter and _afc > 0 -%}
+          <span aria-hidden="true" class="cs-filtersort__divider hidden md:inline-block"></span>
+          <a href="{{ collection.url }}?sort_by={{ collection.sort_by }}"
+            class="hidden md:inline-block hover:opacity-75"
+            @click.prevent="handleFilterDeleteAll();">
+            Clear All
+          </a>
+        {%- endif -%}
+
+        {%- comment -%} Spacer pushes Sort flush to the right edge. {%- endcomment -%}
+        <span class="grow" aria-hidden="true"></span>
+
+        {%- if section.settings.enable_sort and collection.sort_options.size > 0 -%}
+          {%- comment -%}
+            Sort button + drawer wrapped in a relative-positioned anchor
+            so the desktop dropdown CSS can position itself below the
+            button via top: 100%; right: 0. On mobile the drawer escapes
+            this anchor via `position: fixed; inset: 0` (set in the
+            drawer's own CSS), so the mobile bottom-sheet behavior is
+            unaffected by where the drawer lives in the DOM.
+          {%- endcomment -%}
+          <div class="cs-filtersort__sort-anchor relative">
+            <button type="button"
+              class="cs-filtersort__btn btn btn--plain btn--small inline-flex items-center"
+              data-cs-sort-open>
+              <span>
+                {%- if collection.sort_by == blank or collection.sort_by == 'manual' -%}
+                  Sort
+                {%- else -%}
+                  {%- for option in collection.sort_options -%}{%- if collection.sort_by == option.value -%}{{ option.name }}{%- endif -%}{%- endfor -%}
+                {%- endif -%}
+              </span>
+              <span class="cs-filtersort__btn-chevron">{% render 'component__icon', icon: 'chevron-down', size: '14' %}</span>
+            </button>
+
+            {% render 'collection__sort-drawer' %}
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.enable_filter and _afc > 0 -%}
+        {%- comment -%} Mobile "Clear All" — on its own row above the pills since the inline desktop divider doesn't render on mobile. {%- endcomment -%}
+        <div class="cs-filtersort__clear-mobile md:hidden flex items-center">
+          <a href="{{ collection.url }}?sort_by={{ collection.sort_by }}"
+            class="hover:opacity-75"
+            @click.prevent="handleFilterDeleteAll();">
+            Clear All
+          </a>
+        </div>
+      {%- endif -%}
+
+      {%- if _afc > 0 -%}
+        {%- comment -%}
+          Applied filter pills — Outdoor Voices look. Each active value
+          renders as a chip; tapping the X removes that single filter.
+          Row scrolls horizontally on mobile if the chips overflow.
+        {%- endcomment -%}
+        {%- assign _is_collegiate = false -%}
+        {%- if collection.handle contains 'collegiate' -%}{%- assign _is_collegiate = true -%}{%- endif -%}
+        <div class="cs-filtersort__pills flex flex-row items-center flex-wrap">
+          {%- for filter in collection.filters -%}
+            {%- if _is_collegiate and filter.label == 'School' -%}{%- continue -%}{%- endif -%}
+            {%- comment -%} Product type is managed by the quickfilter nav above, not by chips. {%- endcomment -%}
+            {%- if filter.label == 'Product type' -%}{%- continue -%}{%- endif -%}
+            {%- if filter.type == 'price_range' -%}
+              {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+                <a class="cs-filtersort__pill inline-flex items-center gap-2"
+                  href="{{ filter.url_to_remove }}"
+                  @click.prevent="handleFilterDelete('{{ filter.param_name }}');">
+                  {%- assign min_value = filter.min_value.value | default: 0 -%}
+                  {%- assign max_value = filter.max_value.value | default: filter.range_max -%}
+                  <span>{{ min_value | money }} – {{ max_value | money }}</span>
+                  {% render 'component__icon', icon: 'x', size: '14' %}
+                </a>
+              {%- endif -%}
+            {%- else -%}
+              {%- for filter_value in filter.active_values -%}
+                <a class="cs-filtersort__pill inline-flex items-center gap-2"
+                  href="{{ filter_value.url_to_remove }}"
+                  @click.prevent="handleFilterDelete('{{ filter.param_name }}');">
+                  <span>{{ filter_value.label }}</span>
+                  {% render 'component__icon', icon: 'x', size: '14' %}
+                </a>
+              {%- endfor -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  {% comment %}Back to school selection button for collegiate collection (mobile){% endcomment %}
+  {% if collection.handle == 'collegiate' %}
+    <div class="md:hidden border--b-width color__border-divider-1">
+      <div class="px-4 py-4">
+        <a 
+          href="/pages/shop-your-school"
+          class="type__nav type--small no-underline transition-opacity hover:opacity-75"
+        >
+          ← Back to school selection
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="flex flex-wrap max-w-full md:flex-nowrap">
+    {%- comment -%}
+      Desktop inline filter sidebar — Lululemon-style show/hide. Closed
+      by default (`filter_sidebar_open: false` on the parent <section>).
+      The grid wrapper below uses `grow` so it auto-shrinks to fill the
+      remaining width when the sidebar opens.
+    {%- endcomment -%}
+    <div
+      class="cs-filter-sidebar hidden md:block shrink-0 sticky overflow-y-auto color__bg-body border-r color__border-divider-1"
+      x-show="filter_sidebar_open"
+      x-ref="desktop_filter_sidebar"
+      style="width: 280px; top: 0; max-height: 100svh;"
+      {% if settings.header_position == 'sticky' %}
+        x-init="
+          $refs.desktop_filter_sidebar.style.top = $refs.header.offsetHeight + 'px';
+          $refs.desktop_filter_sidebar.style.maxHeight = 'calc(100svh - ' + $refs.header.offsetHeight + 'px)';
+        "
+      {% endif %}
+      x-cloak>
+      <form id="js:sidebarFilter"
+        @change.prevent="
+          handleFilterChange('js:sidebarFilter');
+          scrollToTop('js:top');
+        ">
+        {% render 'collection__filter-bodies', form_id_suffix: 'sidebar' %}
+      </form>
+    </div>
+
+    <div class="grow cs-grid-edge" style="padding-left: {{ _cs_pad_m }}px; padding-right: {{ _cs_pad_m }}px; --cs-pad-d: {{ _cs_pad_d }}px;">
+      {% comment %}
+        {%- unless collection.title == blank -%}
+          <h1 class="mt-12 mb-0 text-center type--big">{{ collection.title }}</h1>
+        {%- endunless -%}
+      {% endcomment %}
+      {% paginate collection.products by section.settings.products_per_page %}
+        {% comment %} Collection description {% endcomment %}
+        {%- if section.settings.collection_enable_description -%}
+          {% assign collection_image = collection.metafields.custom.description_image %}
+          {% assign collection_body = collection.metafields.sf_global.collection_description_body %}
+
+          {%- if collection_image != blank or collection_body != blank -%}
+            <div class="py-8 border--t-width color__border-divider-1">
+              <div
+                class="grid"
+                style="gap: {{ settings.layout_gap_size }}px;"
+              >
+                <div>
+                  <div class="text-center opacity-75">
+                    {{ collection_body }}
+                  </div>
+                </div>
+                {%- unless collection_image == blank -%}
+                  <div class="md:col-span-2">
+                    {{ collection_image | image_url: width: 900 | image_tag: class: 'w-full', loading: lazy_loading }}
+                  </div>
+                {%- endunless -%}
+              </div>
+            </div>
+          {% endif %}
+        {%- endif -%}
+
+        {%- assign _cs_cg_m = section.settings.grid_col_gap         | default: 8 -%}
+        {%- assign _cs_rg_m = section.settings.grid_row_gap         | default: 12 -%}
+        {%- assign _cs_cg_d = section.settings.grid_col_gap_desktop | default: _cs_cg_m -%}
+        {%- assign _cs_rg_d = section.settings.grid_row_gap_desktop | default: _cs_rg_m -%}
+        <style>
+          #shopify-section-{{ section.id }} #js\:results {
+            column-gap: {{ _cs_cg_m }}px !important;
+            row-gap: {{ _cs_rg_m }}px !important;
+            grid-auto-flow: dense;
+          }
+          @media (min-width: 768px) {
+            #shopify-section-{{ section.id }} #js\:results {
+              column-gap: {{ _cs_cg_d }}px !important;
+              row-gap: {{ _cs_rg_d }}px !important;
+            }
+          }
+
+          /* Lifestyle image cell — sized to fill the full grid-row
+             height, so it spans the same vertical space as a product
+             card from image-top down to the area where title + price
+             would sit. CSS Grid's default `align-items: stretch`
+             stretches the cell to the row's tallest sibling (a
+             product card), and we propagate `height: 100%` down to
+             the <img> so the photo fills that whole space. No
+             aspect-ratio constraint on the frame so the image can
+             cover the full card box. */
+          #shopify-section-{{ section.id }} .cs-lifestyle {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            display: block;
+          }
+          #shopify-section-{{ section.id }} .cs-lifestyle > a {
+            display: block;
+            width: 100%;
+            height: 100%;
+          }
+          #shopify-section-{{ section.id }} .cs-lifestyle__frame {
+            position: relative;
+            width: 100%;
+            height: 100%;
+          }
+          #shopify-section-{{ section.id }} .cs-lifestyle__img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+          }
+
+          /* Product + lifestyle pair — every Nth product is wrapped in
+             a .cs-pair that spans 2 outer-grid columns and lays out as
+             its own 2-col grid inside: product card on the left, the
+             product's own 3rd image as a card-sized lifestyle tile on
+             the right. Guarantees same-row pairing on mobile (2-col)
+             AND desktop (4-col). On desktop, grid-auto-flow: dense on
+             the outer grid backfills the leftover gap if a pair would
+             otherwise wrap awkwardly at a column boundary. */
+          #shopify-section-{{ section.id }} .cs-pair {
+            grid-column: span 2;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            column-gap: {{ _cs_cg_m }}px;
+            row-gap: {{ _cs_rg_m }}px;
+          }
+          @media (min-width: 768px) {
+            #shopify-section-{{ section.id }} .cs-pair {
+              column-gap: {{ _cs_cg_d }}px;
+              row-gap: {{ _cs_rg_d }}px;
+            }
+          }
+          #shopify-section-{{ section.id }} .cs-pair__lifestyle {
+            position: relative;
+            display: block;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.04);
+            width: 100%;
+          }
+          #shopify-section-{{ section.id }} .cs-pair__lifestyle-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+          }
+
+        </style>
+        <section
+          id="js:results"
+          class="
+            grid animation-500
+            {{ section.settings.row_size_desktop }}
+            {{ section.settings.row_size_mobile }}
+          "
+          :class="
+            {
+            'opacity-25' : pagination_loading }
+          "
+          style="
+            padding-top: {{ section.settings.grid_top_padding | default: 0 }}px;
+            padding-bottom: {{ section.settings.grid_bottom_padding | default: 16 }}px;
+          "
+        >
+          {% if collection.products.size == 0 %}
+            <div style="grid-column: 1 / -1; padding: 48px 16px; text-align: center;">
+              <p style="font-family: var(--type-font-body-family); font-size: 16px; color: #888888; margin: 0 0 12px;">No products match these filters.</p>
+              <a href="{{ collection.url }}" style="font-family: var(--type-font-body-family); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: var(--thread-ls-label); color: #1c1c1c;">Clear filters</a>
+            </div>
+          {% endif %}
+          {% for product in collection.products %}
+            {% assign gridIndex = forloop.index %}
+
+            {% for block in section.blocks %}
+              {%- case block.type -%}
+                {%- when 'newsletter' -%}
+                  {% assign paginateIndex = block.settings.paginate_index %}
+                  {% if block.settings.index == gridIndex %}
+                    {% if paginate.current_page == paginateIndex %}
+                      {% render 'component__newsletter-item',
+                        title: block.settings.heading,
+                        content: block.settings.content,
+                        button_label: block.settings.button_label,
+                        disclaimer: block.settings.disclaimer,
+                        success: block.settings.success,
+                        size_desktop: block.settings.column_size,
+                        background_image: block.settings.image_background,
+                        background_color: block.settings.background_color_scheme,
+                        index: gridIndex
+                      %}
+                    {% endif %}
+                  {% endif %}
+
+                {%- when 'content' -%}
+                  {% assign paginateIndex = block.settings.paginate_index %}
+                  {% if block.settings.index == gridIndex %}
+                    {% if paginate.current_page == paginateIndex %}
+                      {% render 'component__content-item',
+                        url: block.settings.url,
+                        title: block.settings.heading,
+                        content: block.settings.content,
+                        button_label: block.settings.button_label,
+                        size_desktop: block.settings.column_size,
+                        background_image: block.settings.image_background,
+                        mobile_image: block.settings.mobile_image_background,
+                        background_color: block.settings.background_color_scheme,
+                        video: block.settings.video,
+                        mobile_video: block.settings.mobile_video,
+                        autoplay: block.settings.enable_autoplay,
+                        mute: block.settings.enable_mute_toggle,
+                        loop: block.settings.enable_loop,
+                        index: gridIndex
+                      %}
+                    {% endif %}
+                  {% endif %}
+              {%- endcase -%}
+            {% endfor %}
+
+            {%- comment -%}
+              Product + lifestyle pair — wraps every Nth product in a
+              span-2 grid item with the product card on the left and a
+              card-sized lifestyle tile (the product's own 3rd image)
+              on the right. Skipped when the product has fewer than 3
+              images, when display_mode is 'variants', or when the
+              feature is toggled off.
+            {%- endcomment -%}
+            {%- assign _cs_show_pair = false -%}
+            {%- if section.settings.show_lifestyle_tiles and section.settings.display_mode != 'variants' and product.images.size >= 3 -%}
+              {%- assign _cs_pair_interval = section.settings.lifestyle_tile_interval | default: 6 -%}
+              {%- assign _cs_pair_mod = forloop.index | modulo: _cs_pair_interval -%}
+              {%- if _cs_pair_mod == 0 -%}
+                {%- assign _cs_show_pair = true -%}
+                {%- assign _cs_lifestyle = product.images[2] -%}
+              {%- endif -%}
+            {%- endif -%}
+
+            {%- if _cs_show_pair -%}
+              <div class="cs-pair">
+                <div class="cs-pair__product">
+                  {% render 'component__product-item', product: product, source: 'col_main', forloop: forloop.index %}
+                </div>
+                <a class="cs-pair__lifestyle {{ settings.thumbnails_ratio }}"
+                   href="{{ product.url }}"
+                   aria-label="{{ product.title | escape }}">
+                  <img class="cs-pair__lifestyle-img"
+                       src="{{ _cs_lifestyle | image_url: width: 800 }}"
+                       srcset="{{ _cs_lifestyle | image_url: width: 400 }} 400w, {{ _cs_lifestyle | image_url: width: 600 }} 600w, {{ _cs_lifestyle | image_url: width: 900 }} 900w"
+                       sizes="(min-width: 768px) 25vw, 50vw"
+                       alt="{{ _cs_lifestyle.alt | default: product.title | escape }}"
+                       loading="lazy"
+                       width="{{ _cs_lifestyle.width }}"
+                       height="{{ _cs_lifestyle.height }}">
+                </a>
+              </div>
+            {%- elsif section.settings.display_mode == 'variants' and product.has_only_default_variant == false -%}
+              {%- for variant in product.variants -%}
+                {% render 'component__variant-item', product: product, variant: variant, source: 'col_main' %}
+              {%- endfor -%}
+            {%- else -%}
+              {% render 'component__product-item', product: product, source: 'col_main', forloop: forloop.index %}
+            {%- endif -%}
+
+            {%- comment -%}
+              Lifestyle image insertion.
+
+              After every Nth product card we drop in a lifestyle image
+              grid cell. Multiple lifestyle blocks scoped to the same
+              collection (or unscoped) are cycled in order — the first
+              insertion uses block #0, second uses #1, etc., wrapping
+              with modulo so the cycle continues if we have more
+              insertion slots than scoped blocks.
+
+              The double-pass loop (count first, then pick by index) is
+              the standard Liquid workaround for "give me the Nth match"
+              since Liquid arrays can't be built / indexed dynamically.
+              At a typical merchant block count (< 30 lifestyle blocks)
+              the cost is trivial.
+            {%- endcomment -%}
+            {%- if section.settings.lifestyle_show_in_grid -%}
+              {%- assign _ls_freq = section.settings.lifestyle_frequency | default: 6 -%}
+              {%- assign _ls_pos = forloop.index | modulo: _ls_freq -%}
+              {%- if _ls_pos == 0 -%}
+                {%- assign _ls_match_total = 0 -%}
+                {%- for _ls_blk in section.blocks -%}
+                  {%- if _ls_blk.type != 'lifestyle_image' -%}{%- continue -%}{%- endif -%}
+                  {%- if _ls_blk.settings.image == blank -%}{%- continue -%}{%- endif -%}
+                  {%- assign _ls_filter = _ls_blk.settings.collection_filter -%}
+                  {%- if _ls_filter == blank or _ls_filter.handle == collection.handle -%}
+                    {%- assign _ls_match_total = _ls_match_total | plus: 1 -%}
+                  {%- endif -%}
+                {%- endfor -%}
+
+                {%- if _ls_match_total > 0 -%}
+                  {%- assign _ls_target_idx = forloop.index | divided_by: _ls_freq | minus: 1 | modulo: _ls_match_total -%}
+                  {%- assign _ls_match_seen = 0 -%}
+                  {%- for _ls_blk in section.blocks -%}
+                    {%- if _ls_blk.type != 'lifestyle_image' -%}{%- continue -%}{%- endif -%}
+                    {%- if _ls_blk.settings.image == blank -%}{%- continue -%}{%- endif -%}
+                    {%- assign _ls_filter = _ls_blk.settings.collection_filter -%}
+                    {%- unless _ls_filter == blank or _ls_filter.handle == collection.handle -%}{%- continue -%}{%- endunless -%}
+                    {%- if _ls_match_seen == _ls_target_idx -%}
+                      {%- assign _ls_img = _ls_blk.settings.image -%}
+                      {%- assign _ls_url = _ls_blk.settings.image_url -%}
+                      {%- assign _ls_fit = _ls_blk.settings.object_fit | default: 'cover' -%}
+                      {%- assign _ls_bg  = _ls_blk.settings.background | default: '#f5f3ee' -%}
+                      <div class="cs-lifestyle {% if settings.thumbnails_border_style == 'image' %}border--radius overflow-hidden{% endif %}"
+                        style="background: {{ _ls_bg }};"
+                        {{ _ls_blk.shopify_attributes }}>
+                        {%- if _ls_url != blank -%}<a href="{{ _ls_url }}" class="block w-full h-full">{%- endif -%}
+                          <div class="cs-lifestyle__frame">
+                            <img class="cs-lifestyle__img"
+                              src="{{ _ls_img | image_url: width: 800 }}"
+                              srcset="{{ _ls_img | image_url: width: 400 }} 400w, {{ _ls_img | image_url: width: 600 }} 600w, {{ _ls_img | image_url: width: 900 }} 900w, {{ _ls_img | image_url: width: 1200 }} 1200w"
+                              sizes="(min-width: 768px) 33vw, 50vw"
+                              alt="{{ _ls_blk.settings.image_alt | escape }}"
+                              loading="lazy"
+                              style="object-fit: {{ _ls_fit }};"
+                              width="{{ _ls_img.width }}"
+                              height="{{ _ls_img.height }}">
+                          </div>
+                        {%- if _ls_url != blank -%}</a>{%- endif -%}
+                      </div>
+                    {%- endif -%}
+                    {%- assign _ls_match_seen = _ls_match_seen | plus: 1 -%}
+                  {%- endfor -%}
+                {%- endif -%}
+              {%- endif -%}
+            {%- endif -%}
+          {% endfor %}
+        </section>
+
+        {% if collection.all_products_count == 0 %}
+          <section class="py-4 text-center">
+            <span>{{ 'collections.general.no_matches' | t }}</span>
+          </section>
+        {% else %}
+          {% render 'component__pagination', paginate: paginate %}
+        {% endif %}
+
+        {% render 'script__swatches' %}
+      {% endpaginate %}
+    </div>
+  </div>
+
+  {%- comment -%}
+    Mobile filter drawer — slides up from the bottom when the toolbar's
+    Filter button is tapped on mobile. Renders inside the section's
+    Alpine scope so `filter_drawer_open` is in range.
+  {%- endcomment -%}
+  {%- if section.settings.enable_filter -%}
+    {% render 'collection__filter-drawer', active_filter_count: _afc %}
+  {%- endif -%}
+
+  {%- comment -%}
+    Sort drawer used to live here at the bottom of the section. It now
+    sits inside the toolbar next to the Sort button so the desktop
+    dropdown can position itself relative to that button. On mobile its
+    own CSS escapes the toolbar via `position: fixed; inset: 0` so the
+    bottom-sheet behavior is preserved.
+  {%- endcomment -%}
+</section>
+
+{% schema %}
+{
+  "name": "Collection grid (sidebar)",
+  "settings": [
+    { "type": "header", "content": "Display mode" },
+    { "type": "paragraph", "content": "Products mode renders one card per master product (silhouette-level). Variants mode renders one card per variant of each product — useful for color-broken-out collection pages like 'Vertical Cardholder'." },
+    {
+      "type": "select",
+      "id": "display_mode",
+      "label": "Grid display mode",
+      "options": [
+        { "value": "products", "label": "Products (one card per product)" },
+        { "value": "variants", "label": "Variants (one card per variant)" }
+      ],
+      "default": "products"
+    },
+
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__1.content"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.settings.color_scheme.label",
+      "options": [
+        {
+          "value": "color__bg-body color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value": "color__bg-neutral color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value": "color__bg-overlay-1 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value": "color__bg-overlay-2 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value": "color__bg-overlay-3 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value": "color__bg-primary color__primary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value": "color__bg-secondary color__secondary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value": "color__bg-tertiary color__tertiary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default": "color__bg-body color__text"
+    },
+    {
+      "type": "select",
+      "id": "color_border",
+      "label": "t:sections.all.colors.settings.color_border.label",
+      "options": [
+        {
+          "value": "color__border-divider-1",
+          "label": "t:sections.all.colors.settings.color_border.options__1.label"
+        },
+        {
+          "value": "color__border-selected-1",
+          "label": "t:sections.all.colors.settings.color_border.options__2.label"
+        },
+        {
+          "value": "!color__border-transparent",
+          "label": "t:sections.all.colors.settings.color_border.options__3.label"
+        }
+      ],
+      "default": "color__border-divider-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__3.content"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:sections.all.layout.paragraph__1.content"
+    },
+    {
+      "type": "select",
+      "id": "row_size_desktop",
+      "label": "t:sections.collection_main.settings.row_size_desktop.label",
+      "options": [
+        {
+          "value": "md:grid-cols-2",
+          "label": "2"
+        },
+        {
+          "value": "md:grid-cols-3",
+          "label": "3"
+        },
+        {
+          "value": "md:grid-cols-4",
+          "label": "4"
+        },
+        {
+          "value": "md:grid-cols-5",
+          "label": "5"
+        },
+        {
+          "value": "md:grid-cols-6",
+          "label": "6"
+        }
+      ],
+      "default": "md:grid-cols-4"
+    },
+    {
+      "type": "select",
+      "id": "row_size_mobile",
+      "label": "t:sections.collection_main.settings.row_size_mobile.label",
+      "options": [
+        {
+          "value": "grid-cols-1",
+          "label": "1"
+        },
+        {
+          "value": "grid-cols-2",
+          "label": "2"
+        },
+        {
+          "value": "grid-cols-3",
+          "label": "3"
+        }
+      ],
+      "default": "grid-cols-2"
+    },
+    { "type": "header", "content": "Grid spacing" },
+    { "type": "range", "id": "grid_edge_padding", "label": "Edge padding — mobile", "info": "Space from the screen edge on mobile", "min": 0, "max": 48, "step": 2, "unit": "px", "default": 8 },
+    { "type": "range", "id": "grid_edge_padding_desktop", "label": "Edge padding — desktop", "info": "Space from the screen edge on desktop (≥768px)", "min": 0, "max": 200, "step": 2, "unit": "px", "default": 16 },
+    { "type": "range", "id": "grid_col_gap",         "label": "Column gap — mobile",  "info": "Horizontal space between products on mobile",            "min": 0, "max": 24, "step": 2, "unit": "px", "default": 8 },
+    { "type": "range", "id": "grid_col_gap_desktop", "label": "Column gap — desktop", "info": "Horizontal space between products on desktop (≥768px)",  "min": 0, "max": 48, "step": 2, "unit": "px", "default": 8 },
+    { "type": "range", "id": "grid_row_gap",         "label": "Row gap — mobile",     "info": "Vertical space between products on mobile",              "min": 0, "max": 48, "step": 2, "unit": "px", "default": 12 },
+    { "type": "range", "id": "grid_row_gap_desktop", "label": "Row gap — desktop",    "info": "Vertical space between products on desktop (≥768px)",    "min": 0, "max": 80, "step": 2, "unit": "px", "default": 12 },
+    { "type": "range", "id": "grid_top_padding", "label": "Top padding", "info": "Space above the first row (below the horizontal scroll menu)", "min": 0, "max": 64, "step": 2, "unit": "px", "default": 16 },
+    { "type": "range", "id": "grid_bottom_padding", "label": "Bottom padding", "info": "Space below the last row", "min": 0, "max": 64, "step": 2, "unit": "px", "default": 16 },
+    { "type": "checkbox", "id": "hide_sublinks_divider", "label": "Hide divider below horizontal scroll menu", "info": "Removes the gray line under the sublinks/subtags nav", "default": false },
+    { "type": "color", "id": "quickfilter_active_color", "label": "Active filter underline color", "default": "#1e7db3" },
+    { "type": "range", "id": "quickfilter_underline_offset", "label": "Active filter underline offset", "info": "Distance (px) between the text and the underline on the selected/hovered quickfilter item", "min": 0, "max": 24, "step": 1, "unit": "px", "default": 4 },
+    { "type": "range", "id": "quickfilter_underline_thickness", "label": "Active filter underline thickness", "min": 1, "max": 8, "step": 1, "unit": "px", "default": 3 },
+
+    { "type": "header", "content": "Quick filter — Typography" },
+    {
+      "type": "select",
+      "id": "quickfilter_font",
+      "label": "Font family",
+      "options": [
+        { "value": "inherit",     "label": "Theme default (Nav)" },
+        { "value": "body",        "label": "Forma DJR" },
+        { "value": "heading",     "label": "PP Right Grotesk" },
+        { "value": "handwritten", "label": "Thread Handwritten" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "quickfilter_weight",
+      "label": "Font weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" },
+        { "value": "800", "label": "Extra-bold" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select",
+      "id": "quickfilter_text_transform",
+      "label": "Text transform",
+      "options": [
+        { "value": "none",       "label": "None" },
+        { "value": "uppercase",  "label": "Uppercase" },
+        { "value": "capitalize", "label": "Capitalize" },
+        { "value": "lowercase",  "label": "Lowercase" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "select",
+      "id": "quickfilter_letter_spacing",
+      "label": "Letter spacing",
+      "options": [
+        { "value": "0.085em", "label": "Brand (0.085em)" },
+        { "value": "0em",    "label": "None" },
+        { "value": "0.02em", "label": "Tight" },
+        { "value": "0.05em", "label": "Normal" },
+        { "value": "0.1em",  "label": "Wide" },
+        { "value": "0.2em",  "label": "Extra wide" }
+      ],
+      "default": "0.085em"
+    },
+    { "type": "range", "id": "quickfilter_size_mobile",  "label": "Text size — mobile",  "min": 10, "max": 22, "step": 1, "unit": "px", "default": 13 },
+    { "type": "range", "id": "quickfilter_size_desktop", "label": "Text size — desktop", "min": 10, "max": 24, "step": 1, "unit": "px", "default": 14 },
+    { "type": "color", "id": "quickfilter_text_color",   "label": "Text color", "info": "Leave blank to inherit from the theme." },
+
+    { "type": "header", "content": "Quick filter — Spacing" },
+    { "type": "range", "id": "quickfilter_pad_v_mobile",  "label": "Chip vertical padding — mobile",    "min": 0, "max": 32, "step": 2, "unit": "px", "default": 16 },
+    { "type": "range", "id": "quickfilter_pad_v_desktop", "label": "Chip vertical padding — desktop",   "min": 0, "max": 48, "step": 2, "unit": "px", "default": 24 },
+    { "type": "range", "id": "quickfilter_pad_h_mobile",  "label": "Chip horizontal padding — mobile",  "min": 2, "max": 32, "step": 2, "unit": "px", "default": 12 },
+    { "type": "range", "id": "quickfilter_pad_h_desktop", "label": "Chip horizontal padding — desktop", "min": 2, "max": 48, "step": 2, "unit": "px", "default": 24 },
+    { "type": "range", "id": "quickfilter_gap_mobile",    "label": "Gap between chips — mobile",        "min": 0, "max": 24, "step": 1, "unit": "px", "default": 0 },
+    { "type": "range", "id": "quickfilter_gap_desktop",   "label": "Gap between chips — desktop",       "min": 0, "max": 32, "step": 1, "unit": "px", "default": 0 },
+
+    { "type": "header", "content": "Filter + Sort toolbar — Typography" },
+    {
+      "type": "select", "id": "filtersort_font", "label": "Font family",
+      "options": [
+        { "value": "inherit",     "label": "Theme default (Nav)" },
+        { "value": "body",        "label": "Forma DJR" },
+        { "value": "heading",     "label": "PP Right Grotesk" },
+        { "value": "handwritten", "label": "Thread Handwritten" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select", "id": "filtersort_weight", "label": "Font weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" },
+        { "value": "800", "label": "Extra-bold" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select", "id": "filtersort_text_transform", "label": "Text transform",
+      "options": [
+        { "value": "none",       "label": "None" },
+        { "value": "uppercase",  "label": "Uppercase" },
+        { "value": "capitalize", "label": "Capitalize" },
+        { "value": "lowercase",  "label": "Lowercase" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "select", "id": "filtersort_letter_spacing", "label": "Letter spacing",
+      "options": [
+        { "value": "0.085em", "label": "Brand (0.085em)" },
+        { "value": "0em",    "label": "None" },
+        { "value": "0.02em", "label": "Tight" },
+        { "value": "0.05em", "label": "Normal" },
+        { "value": "0.1em",  "label": "Wide" },
+        { "value": "0.2em",  "label": "Extra wide" }
+      ],
+      "default": "0.085em"
+    },
+    { "type": "range", "id": "filtersort_size_mobile",  "label": "Text size — mobile",  "min": 10, "max": 22, "step": 1, "unit": "px", "default": 14 },
+    { "type": "range", "id": "filtersort_size_desktop", "label": "Text size — desktop", "min": 10, "max": 24, "step": 1, "unit": "px", "default": 14 },
+    { "type": "color", "id": "filtersort_text_color",   "label": "Text color", "info": "Leave blank to inherit from the theme." },
+
+    { "type": "header", "content": "Filter + Sort toolbar — Spacing" },
+    { "type": "range", "id": "filtersort_row_pad_v_mobile",  "label": "Row vertical padding — mobile",  "info": "Space above and below the Filter / count / Sort row.", "min": 0, "max": 48, "step": 2, "unit": "px", "default": 12 },
+    { "type": "range", "id": "filtersort_row_pad_v_desktop", "label": "Row vertical padding — desktop", "min": 0, "max": 48, "step": 2, "unit": "px", "default": 12 },
+    { "type": "range", "id": "filtersort_item_gap",          "label": "Gap between toolbar items",      "info": "Horizontal space between the Filter button, product count, Clear All, and Sort button.", "min": 0, "max": 48, "step": 2, "unit": "px", "default": 12 },
+    { "type": "range", "id": "filtersort_btn_pad_v",         "label": "Button vertical padding",        "info": "Inside the Filter and Sort buttons.", "min": 0, "max": 24, "step": 1, "unit": "px", "default": 6 },
+    { "type": "range", "id": "filtersort_btn_pad_h",         "label": "Button horizontal padding",      "min": 4, "max": 40, "step": 1, "unit": "px", "default": 14 },
+    { "type": "range", "id": "filtersort_pill_row_mt",       "label": "Pill row — top margin",          "info": "Space between the toolbar row and the row of applied-filter chips below.", "min": 0, "max": 32, "step": 2, "unit": "px", "default": 12 },
+    { "type": "range", "id": "filtersort_pill_pad_v",        "label": "Pill vertical padding",          "min": 0, "max": 24, "step": 1, "unit": "px", "default": 6 },
+    { "type": "range", "id": "filtersort_pill_pad_h",        "label": "Pill horizontal padding",        "min": 4, "max": 40, "step": 1, "unit": "px", "default": 12 },
+    { "type": "range", "id": "filtersort_pill_gap",          "label": "Gap between pills",              "min": 0, "max": 32, "step": 2, "unit": "px", "default": 8 },
+
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__8.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sort",
+      "label": "t:sections.collection_main.settings.enable_sort.label",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Sort options shown in the dropdown",
+      "info": "Toggle which Shopify sort options appear when the Sort dropdown is open. Disabled options are hidden from the dropdown; they don't affect the URL or what's possible to deep-link."
+    },
+    { "type": "checkbox", "id": "sort_show_manual",             "label": "Featured (manual)",       "default": true },
+    { "type": "checkbox", "id": "sort_show_best_selling",       "label": "Best selling",            "default": true },
+    { "type": "checkbox", "id": "sort_show_title_ascending",    "label": "Alphabetically, A-Z",     "default": true },
+    { "type": "checkbox", "id": "sort_show_title_descending",   "label": "Alphabetically, Z-A",     "default": true },
+    { "type": "checkbox", "id": "sort_show_price_ascending",    "label": "Price, low to high",      "default": true },
+    { "type": "checkbox", "id": "sort_show_price_descending",   "label": "Price, high to low",      "default": true },
+    { "type": "checkbox", "id": "sort_show_created_ascending",  "label": "Date, old to new",        "default": true },
+    { "type": "checkbox", "id": "sort_show_created_descending", "label": "Date, new to old",        "default": true },
+    {
+      "type": "checkbox",
+      "id": "enable_filter",
+      "label": "t:sections.collection_main.settings.enable_filter.label",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "collection_enable_description",
+      "label": "Show description above",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__5.content"
+    },
+    {
+      "type": "number",
+      "id": "products_per_page",
+      "label": "t:sections.collection_main.settings.products_per_page.label",
+      "default": 12
+    },
+
+    {
+      "type": "header",
+      "content": "Lifestyle images in grid",
+      "info": "Add 'Lifestyle image' blocks (via the section's Add block menu). Each block can be scoped to a specific collection. Blocks scoped to the current collection cycle through the grid at the frequency below."
+    },
+    { "type": "checkbox", "id": "lifestyle_show_in_grid", "label": "Show lifestyle images in the grid", "default": true },
+    { "type": "range", "id": "lifestyle_frequency", "label": "Show every Nth product slot", "min": 3, "max": 12, "step": 1, "default": 6 },
+
+    {
+      "type": "header",
+      "content": "Product lifestyle tiles",
+      "info": "Drops a card-sized lifestyle tile next to every Nth product card, using that product's own 3rd image. The pair sits side-by-side on the same row on mobile and desktop. Skipped automatically when the source product has fewer than 3 images."
+    },
+    { "type": "checkbox", "id": "show_lifestyle_tiles", "label": "Show product lifestyle tiles", "default": false },
+    { "type": "range", "id": "lifestyle_tile_interval", "label": "Show a tile next to every Nth product", "min": 3, "max": 12, "step": 1, "default": 6 }
+  ],
+  "blocks": [
+    {
+      "type": "newsletter",
+      "name": "t:sections.collection_main.blocks.newsletter.name",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__4.content"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_background",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.image_background.label"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.heading.label",
+          "default": {
+            "en": "Block heading",
+            "es": "Encabezado de bloque",
+            "it": "Intestazione del blocco",
+            "de": "Blocküberschrift",
+            "fr": "En-tête de bloc"
+          }
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.content.label",
+          "default": {
+            "en": "<p>Tell customers why they should subscribe to your newsletter.</p>",
+            "es": "<p>Dígales a los clientes por qué deberían suscribirse a su boletín informativo.</p>",
+            "it": "<p>Dì ai clienti perché dovrebbero iscriversi alla tua newsletter.</p>",
+            "de": "<p>Teilen Sie Ihren Kunden mit, warum sie Ihren Newsletter abonnieren sollten.</p>",
+            "fr": "<p>Expliquez aux clients pourquoi ils devraient s'abonner à votre newsletter.</p>"
+          }
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.button_label.label",
+          "default": {
+            "en": "Subscribe",
+            "es": "Subscribir",
+            "it": "Abbonarsi",
+            "de": "Abonnieren",
+            "fr": "S'inscrire"
+          }
+        },
+        {
+          "type": "richtext",
+          "id": "disclaimer",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.disclaimer.label"
+        },
+        {
+          "type": "richtext",
+          "id": "success",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.success.label",
+          "default": {
+            "en": "<p>Success! You've been subscribed.</p>",
+            "es": "<p>Gracias por suscribirte</p>",
+            "it": "<p>Grazie per esserti iscritto</p>",
+            "de": "<p>Vielen Dank für Ihre Anmeldung</p>",
+            "fr": "<p>Merci de vous être abonné</p>"
+          }
+        },
+        {
+          "type": "paragraph",
+          "content": "t:sections.collection_main.paragraph__1.content"
+        },
+        {
+          "type": "number",
+          "id": "index",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.index.label",
+          "default": 6
+        },
+        {
+          "type": "number",
+          "id": "paginate_index",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.paginate_index.label",
+          "default": 1
+        },
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__1.content"
+        },
+        {
+          "type": "select",
+          "id": "background_color_scheme",
+          "label": "t:sections.all.colors.settings.color_scheme.label",
+          "options": [
+            {
+              "value": "color__bg-body color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__1.label"
+            },
+            {
+              "value": "color__bg-neutral color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__2.label"
+            },
+            {
+              "value": "color__bg-overlay-1 color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__3.label"
+            },
+            {
+              "value": "color__bg-overlay-2 color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__4.label"
+            },
+            {
+              "value": "color__bg-overlay-3 color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__5.label"
+            },
+            {
+              "value": "color__bg-primary color__primary",
+              "label": "t:sections.all.colors.settings.color_scheme.options__6.label"
+            },
+            {
+              "value": "color__bg-secondary color__secondary",
+              "label": "t:sections.all.colors.settings.color_scheme.options__7.label"
+            }
+          ],
+          "default": "color__bg-body color__text"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__3.content"
+        },
+        {
+          "type": "select",
+          "id": "column_size",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.column_size.label",
+          "info": "t:sections.collection_main.blocks.newsletter.settings.column_size.info",
+          "options": [
+            {
+              "value": "col-span-1",
+              "label": "1"
+            },
+            {
+              "value": "col-span-2",
+              "label": "2"
+            },
+            {
+              "value": "col-span-3",
+              "label": "3"
+            },
+            {
+              "value": "col-span-4",
+              "label": "4"
+            }
+          ],
+          "default": "col-span-1"
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "name": "t:sections.collection_main.blocks.content.name",
+      "limit": 15,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "t:sections.collection_main.paragraph__1.content"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__4.content",
+          "info": "t:sections.all.content.info"
+        },
+        {
+          "type": "video",
+          "id": "video",
+          "label": "t:sections.all.content.settings.video.label"
+        },
+        {
+          "type": "video",
+          "id": "mobile_video",
+          "label": "Mobile video"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_autoplay",
+          "label": "Enable autoplay",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_mute_toggle",
+          "label": "Enable mute button",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_loop",
+          "label": "Enable autoloop",
+          "default": true
+        },
+        {
+          "type": "image_picker",
+          "id": "image_background",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.image_background.label"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image_background",
+          "label": "Mobile image"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "t:sections.collection_main.blocks.content.settings.url.label"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "t:sections.collection_main.blocks.content.settings.heading.label",
+          "default": {
+            "en": "Block heading",
+            "es": "Encabezado de bloque",
+            "it": "Intestazione del blocco",
+            "de": "Blocküberschrift",
+            "fr": "En-tête de bloc"
+          }
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "t:sections.collection_main.blocks.content.settings.content.label",
+          "default": {
+            "en": "<p>Describe a product, make announcements, or inform customers about a promotion.</p>",
+            "es": "<p>Describa un producto, haga anuncios o informe a los clientes sobre una promoción.</p>",
+            "it": "<p>Descrivi un prodotto, fai annunci o informa i clienti su una promozione.</p>",
+            "de": "<p>Beschreiben Sie ein Produkt, machen Sie Ankündigungen oder informieren Sie Kunden über eine Werbeaktion.</p>",
+            "fr": "<p>Décrivez un produit, faites des annonces ou informez les clients d'une promotion.</p>"
+          }
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "t:sections.collection_main.blocks.content.settings.button_label.label",
+          "default": {
+            "en": "Button",
+            "es": "Botón",
+            "it": "Bottone",
+            "de": "Knopf",
+            "fr": "Bouton"
+          }
+        },
+        {
+          "type": "number",
+          "id": "index",
+          "label": "t:sections.collection_main.blocks.content.settings.index.label",
+          "default": 2
+        },
+        {
+          "type": "number",
+          "id": "paginate_index",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.paginate_index.label",
+          "default": 1
+        },
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__1.content"
+        },
+        {
+          "type": "select",
+          "id": "background_color_scheme",
+          "label": "t:sections.all.colors.settings.color_scheme.label",
+          "options": [
+            {
+              "value": "color__bg-body color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__1.label"
+            },
+            {
+              "value": "color__bg-neutral color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__2.label"
+            },
+            {
+              "value": "color__bg-overlay-1 color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__3.label"
+            },
+            {
+              "value": "color__bg-overlay-2 color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__4.label"
+            },
+            {
+              "value": "color__bg-overlay-3 color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__5.label"
+            },
+            {
+              "value": "color__bg-primary color__primary",
+              "label": "t:sections.all.colors.settings.color_scheme.options__6.label"
+            },
+            {
+              "value": "color__bg-secondary color__secondary",
+              "label": "t:sections.all.colors.settings.color_scheme.options__7.label"
+            }
+          ],
+          "default": "color__bg-body color__text"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__3.content"
+        },
+        {
+          "type": "select",
+          "id": "column_size",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.column_size.label",
+          "info": "t:sections.collection_main.blocks.newsletter.settings.column_size.info",
+          "options": [
+            {
+              "value": "lg:col-span-1",
+              "label": "1"
+            },
+            {
+              "value": "lg:col-span-2",
+              "label": "2"
+            },
+            {
+              "value": "lg:col-span-3",
+              "label": "3"
+            },
+            {
+              "value": "lg:col-span-4",
+              "label": "4"
+            }
+          ],
+          "default": "lg:col-span-2"
+        }
+      ]
+    },
+    {
+      "type": "lifestyle_image",
+      "name": "Lifestyle image (in-grid)",
+      "limit": 30,
+      "settings": [
+        { "type": "header", "content": "Image" },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "image_alt", "label": "Alt text" },
+        { "type": "url", "id": "image_url", "label": "Link URL (optional)" },
+
+        { "type": "header", "content": "Scope" },
+        { "type": "paragraph", "content": "Pick which collection this lifestyle image appears in. Leave blank to show it on every collection page (cycled through the grid at the section's lifestyle frequency)." },
+        { "type": "collection", "id": "collection_filter", "label": "Show only in this collection" },
+
+        { "type": "header", "content": "Layout" },
+        {
+          "type": "select", "id": "object_fit", "label": "Image fit",
+          "options": [
+            { "value": "cover",   "label": "Cover (fill, may crop)" },
+            { "value": "contain", "label": "Contain (no crop, may show bg)" }
+          ],
+          "default": "cover"
+        },
+        { "type": "color", "id": "background", "label": "Background", "info": "Visible behind 'Contain' images and during image load.", "default": "#f5f3ee" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection grid (sidebar)"
+    }
+  ],
+  "templates": ["collection"]
+}
+{% endschema %}

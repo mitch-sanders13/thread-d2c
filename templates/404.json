@@ -1,0 +1,185 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "banner-search",
+      "blocks": {
+        "heading_TRGY6F": {
+          "type": "heading",
+          "disabled": true,
+          "settings": {
+            "content": "404 Error"
+          }
+        }
+      },
+      "block_order": [
+        "heading_TRGY6F"
+      ],
+      "settings": {
+        "url": "",
+        "image_background_desktop": "shopify:\/\/shop_images\/404_page.jpg",
+        "image_background_mobile": "shopify:\/\/shop_images\/404error_mobile_03.jpg",
+        "show_entire_image": true,
+        "enable_lazy_loading": false,
+        "show_video_background_mobile": false,
+        "color_scheme": "color__bg-body color__text",
+        "color_text": "color__light",
+        "color_border": "color__border-divider-1",
+        "enable_gradient": true,
+        "style_border": "border--b-width",
+        "layout_y_spacing": "min-h-[450px] md:min-h-[550px]",
+        "layout_y_alignment": "items-start",
+        "layout_x_alignment": "justify-start",
+        "visibility": ""
+      }
+    },
+    "8f3d3d53-7f15-40ec-aa1f-4665af0c75e7": {
+      "type": "content-grid",
+      "blocks": {
+        "template--15866121027722__8f3d3d53-7f15-40ec-aa1f-4665af0c75e7-1685644581de96baab-0": {
+          "type": "content",
+          "settings": {
+            "heading": "Wallets",
+            "content": "",
+            "button_label": "Shop now",
+            "button_url": "shopify:\/\/collections\/all-wallets",
+            "enable_new_tab": false,
+            "image_background": "shopify:\/\/shop_images\/leather-wallets-mobile.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 300,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__light",
+            "color_button": "btn--minimal-light",
+            "enable_gradient": true,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "text-center justify-center",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": true,
+            "visibility": ""
+          }
+        },
+        "content_6hB9Kg": {
+          "type": "content",
+          "settings": {
+            "heading": "Bags",
+            "content": "",
+            "button_label": "Shop now",
+            "button_url": "shopify:\/\/collections\/all-bags",
+            "enable_new_tab": false,
+            "image_background": "shopify:\/\/shop_images\/Bags.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 300,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__light",
+            "color_button": "btn--minimal-light",
+            "enable_gradient": true,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "text-center justify-center",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": true,
+            "visibility": ""
+          }
+        },
+        "content_KPQz9n": {
+          "type": "content",
+          "settings": {
+            "heading": "Accessories",
+            "content": "",
+            "button_label": "Shop now",
+            "button_url": "shopify:\/\/collections\/all-accessories",
+            "enable_new_tab": false,
+            "image_background": "shopify:\/\/shop_images\/leather-wallets-mobile.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 300,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__light",
+            "color_button": "btn--minimal-light",
+            "enable_gradient": true,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "text-center justify-center",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": true,
+            "visibility": ""
+          }
+        }
+      },
+      "block_order": [
+        "template--15866121027722__8f3d3d53-7f15-40ec-aa1f-4665af0c75e7-1685644581de96baab-0",
+        "content_6hB9Kg",
+        "content_KPQz9n"
+      ],
+      "settings": {
+        "heading": "",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 40,
+        "spacing_bottom": 40,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--b-width",
+        "row_size_desktop": "md:grid-cols-3",
+        "row_size_mobile": "grid-cols-1",
+        "layout_x_alignment": "text-right justify-end flex-col items-end",
+        "layout_horizontal": "window--full",
+        "visibility": ""
+      }
+    },
+    "product_grid_mwBfUB": {
+      "type": "product-grid",
+      "settings": {
+        "collection": "best-sellers",
+        "products_count": 4,
+        "heading": "BEST SELLERS",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 100,
+        "spacing_bottom": 100,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--b-width",
+        "row_size_desktop": "md:grid-cols-4",
+        "row_size_mobile": "grid grid-cols-2",
+        "layout_x_alignment": "text-center justify-center flex-col items-center",
+        "visibility": ""
+      }
+    }
+  },
+  "order": [
+    "main",
+    "8f3d3d53-7f15-40ec-aa1f-4665af0c75e7",
+    "product_grid_mwBfUB"
+  ]
+}

@@ -1,0 +1,97 @@
+<!-- sections/about-image-text-2.liquid -->
+{% comment %} 
+  Custom about page section
+{% endcomment %}
+
+<section
+	data-section-id="{{ section.id }}"
+	class="
+		sec-{{ section.id }}
+		pt-{{ section.settings.padding_top }}
+		pb-{{ section.settings.padding_bottom }}
+		image-text-alt-2
+		h-fit
+		w-screen">
+
+	<div class="flex flex-col items-center">
+		<div class="h-1/2 flex justify-start items-start md:justify-center px-8 pb-8 pt-14  md:px-20 md:pt-20 md:pb-4 2xl:w-[70vw]">
+			<span>
+				<div class="subtext">{{ section.settings.subtext }}</div>
+				<div class="heading md:mt-4 md:mb-8">{{ section.settings.heading }}</div>
+			</span>
+			<span class="body-2 pt-0 px-8 pb-8 hidden md:flex 2xl:w-[50vw] flex-col items-start">
+				{{ section.settings.body }}
+				<a href="{{ section.settings.url }}" class="md:!text-base mt-6 border-b-2 border-blue-700 md:pb-1">LEARN MORE ></a>
+			</span>
+		</div>
+		<div class="h-1/2">
+			<div class="">
+				{% if section.settings.image != blank %}
+					<img src="{{ section.settings.image | image_url }}" alt="{{ section.settings.image.alt | escape }}" loading="lazy" decoding="async" width="{{ section.settings.image.width }}" height="{{ section.settings.image.height }}">
+				{% else %}
+					<div class="placeholder-wrapper">{{ 'collection-1' | placeholder_svg_tag: 'placeholder dark' }}</div>
+				{% endif %}
+			</div>
+		</div>
+		<div class="body-2 p-8 block md:hidden">
+			{{ section.settings.body }}
+			<a href="{{ section.settings.url }}" target="_blank" class="border-b-2 border-blue-700 md:pb-1">LEARN MORE ></a>
+		</div>
+	</div>
+</section>
+
+{% schema %}
+{
+	"name": "[about] Image text 2",
+	"settings": [
+	{
+		"type": "image_picker",
+		"id": "image",
+		"label": "Image"
+	},
+	{
+		"type":"richtext",
+		"id":"subtext",
+		"label":"Subtext"
+	},
+	{
+		"type":"richtext",
+		"id":"heading",
+		"label":"Heading"
+	},
+	{
+		"type":"richtext",
+		"id":"body",
+		"label":"Body"
+	},
+	{
+		"type":"text",
+		"id":"url",
+		"label":"Carry On URL"
+	},
+	{
+	"type": "range",
+	"id": "padding_top",
+	"min": 0,
+	"max": 6,
+	"step": 1,
+	"label": "Top Padding",
+	"default": 0
+	},
+	{
+	"type": "range",
+	"id": "padding_bottom",
+	"min": 0,
+	"max": 6,
+	"step": 1,
+	"label": "Bottom padding",
+	"default": 0
+	}
+	],
+	"presets":[
+		{
+			"name":"[about] Image text 2"
+		}
+	]
+}
+{% endschema %}

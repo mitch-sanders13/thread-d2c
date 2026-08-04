@@ -1,0 +1,167 @@
+<!-- sections/blog__main.liquid -->
+{% comment %} 
+  Grid of blog posts.
+
+  Globals:
+    - settings.layout_horizontal: horizontaly margin
+
+  Possible enhancements:
+    - Add support for global setting to control grid gap.
+
+  Pro tips:
+    - Blog thumbnail cards can be adjusted using the thumbnail settings.
+{% endcomment %}
+
+<section class="{{ section.settings.color_scheme }}">
+  
+  {% paginate blog.articles by section.settings.items_per_page %}
+    <div id="js:results" 
+      class="animation-500 pb-12
+        {{ settings.layout_horizontal }}
+        {{ section.settings.row_size_desktop }}
+        {{ section.settings.row_size_mobile }}"
+      :class="{ 'opacity-25' : pagination_loading }"
+      style="
+        column-gap: {{ settings.layout_gap_size }}px;
+        row-gap: {{ settings.layout_gap_size | times: 1.5 }}px;">
+        {% for article in blog.articles %}
+          {% render 'component__team-item', article: article %}
+        {% endfor %}
+    </div>
+    {% render 'component__pagination', paginate: paginate %}
+  {% endpaginate %}
+</section>
+
+{% schema %}
+{
+  "name":"t:sections.blog_main.name",
+  "settings":[
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__1.content"
+    },
+    {
+      "type":"select",
+      "id":"color_scheme",
+      "label":"t:sections.all.colors.settings.color_scheme.label",
+      "options":[
+        {
+          "value":"color__bg-body color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value":"color__bg-neutral color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value":"color__bg-overlay-1 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value":"color__bg-overlay-2 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value":"color__bg-overlay-3 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value":"color__bg-primary color__primary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value":"color__bg-secondary color__secondary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value":"color__bg-tertiary color__tertiary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default":"color__bg-body color__text"
+    },
+    {
+      "type":"select",
+      "id":"color_border",
+      "label":"t:sections.all.colors.settings.color_border.label",
+      "options":[
+        {
+          "value":"color__border-divider-1",
+          "label":"t:sections.all.colors.settings.color_border.options__1.label"
+        },
+        {
+          "value":"color__border-selected-1",
+          "label":"t:sections.all.colors.settings.color_border.options__2.label"
+        },
+        {
+          "value":"!color__border-transparent",
+          "label":"t:sections.all.colors.settings.color_border.options__3.label"
+        }
+      ],
+      "default":"color__border-divider-1"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__3.content"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:sections.all.layout.paragraph__1.content"
+    },
+    {
+      "type":"select",
+      "id":"row_size_desktop",
+      "label":"t:sections.blog_main.settings.row_size_desktop.label",
+      "options":[
+        {
+          "value":"md:grid-cols-2",
+          "label":"2"
+        },
+        {
+          "value":"md:grid-cols-3",
+          "label":"3"
+        },
+        {
+          "value":"md:grid-cols-4",
+          "label":"4"
+        }
+      ],
+      "default":"md:grid-cols-3"
+    },
+    {
+      "type":"select",
+      "id":"row_size_mobile",
+      "label":"t:sections.blog_main.settings.row_size_mobile.label",
+      "options":[
+        {
+          "value":"grid grid-cols-1",
+          "label":"1"
+        },
+        {
+          "value":"grid grid-cols-2",
+          "label":"2"
+        }
+      ],
+      "default":"grid grid-cols-1"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__5.content"
+    },
+    {
+      "type":"number",
+      "id":"items_per_page",
+      "label":"t:sections.blog_main.settings.items_per_page.label",
+      "default":6
+    }
+  ],
+  "presets":[
+    {
+      "name":"t:sections.blog_main.name"
+    }
+  ],
+  "templates":[
+    "blog"
+  ]
+}
+{% endschema %}

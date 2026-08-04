@@ -1,0 +1,236 @@
+<!-- snippets/theme__scripts.liquid -->
+{% comment %}
+  Site wide variables and JavaScript.
+
+  Usage:
+    {% render 'theme__scripts' %}
+
+  Globals:
+    - settings.cart_behavior: set the cart behavior to either 'drawer' or 'alert'
+
+  Possible enhancements:
+    - Prepare help docs on editing JavaScript and include build files.
+
+  Pro tips:
+    - Build files can be requested from theme support - hello@brickspacelab.com.
+{% endcomment %}
+
+<script>
+  window.__initialData = window.__initialData || {};
+  Object.assign(window.__initialData, {
+
+    swatch_order_groups: '{{ settings.swatch_order_groups }}',
+
+    // Product swatches - unified loading for all product types
+    swatch_products: [
+      {% comment %} Swatch data only renders where swatch UI exists —
+         product + collection templates. Everywhere else ships an
+         empty array instead of the full inline payload. {% endcomment %}
+      {% if template.name == 'product' or template.name == 'collection' %}
+      {% comment %} Load collegiate products {% endcomment %}
+      {% for product in collections[settings.swatch_collegiate_product_types].products %}
+        {
+          handle: '{{ product.handle }}',
+          title: {{ product.title | json }},
+          type: '{{ product.type }}',
+          tags: '{{ product.tags | join: "," }}',
+          image: '{{ product.featured_image | image_url: width: 400 }}'
+        },
+      {% endfor %}
+
+      {% comment %} Load regular products {% endcomment %}
+      {% for product in collections[settings.swatch_product_types].products %}
+        {
+          handle: '{{ product.handle }}',
+          title: {{ product.title | json }},
+          type: '{{ product.type }}',
+          tags: '{{ product.tags | join: "," }}',
+          image: '{{ product.featured_image | image_url: width: 400 }}'
+        },
+      {% endfor %}
+    {% endif %}
+    ],
+
+    // Audio related properties
+    click_audio: '{{ 'click.wav' | asset_url }}',
+    success_audio: '{{ 'success.wav' | asset_url }}',
+    enable_audio: {{ settings.enable_audio }},
+
+    // Color related properties
+    header_border: '',
+    header_default_border: '',
+    header_scrolled_border: '',
+    header_color: '',
+    header_default_color: '',
+    header_scrolled_color: '',
+    body_background_color: '#fff',
+    body_text_color: '#fff',
+
+    // Scroll related properties
+    is_scrolled: false,
+    is_scrolled_down: false,
+    prev_scroll_pos: 0,
+    scroll_up: false,
+    scroll_up_force: true,
+    hide_header: false,
+    header_height: '80px',
+    internal_header_height: '60px',
+    stickyadd: false,
+    bundle_in_view: false,
+
+    // Mouse position properties
+    mouse_x: 0,
+    mouse_y: 0,
+
+    // Menu related properties
+    menu_drawer: false,
+    menu_nested: false,
+
+    // Popup related properties
+    age_popup:  localStorage.getItem("agePopupConfirmed") ? true : false,
+    filter_popup: false,
+    localization_popup: false,
+    audio_popup: false,
+    cookie_popup: false,
+    discount_popup: false,
+
+    // Alert related properties
+    show_alert: false,
+    error_title: 'Something went wrong...',
+    error_message: '',
+
+    // Collection and pagination related properties
+    pagination_loading: false,
+
+    // Product related properties
+    recent_products: localStorage.getItem("recentlyViewedProducts") ? JSON.parse(localStorage.getItem("recentlyViewedProducts")) : [],
+    incomplete_fields: false,
+
+    // Discount properties
+    discount_text: '',
+    discount_code: '',
+
+    // Cart related properties
+    cart_upgrade: 0,
+    cart_drawer: false,
+    cart_loading: false,
+    cart_alert: false,
+    cart_delay: 5000,
+    cart_delay_width: 0,
+    cart_behavior: '{{ settings.cart_behavior }}',
+    cart: {
+      items: [
+        {% for item in cart.items %}
+          {
+            variant_id: {{ item.variant_id }},
+            final_price: {{ item.final_price }},
+            quantity: {{ item.quantity }},
+            unit_price: 0,
+            unit_price_measurement: {}
+          },
+        {% endfor %}
+      ],
+      note: '{{ cart.note }}',
+      item_count: {{ cart.item_count }},
+      total_price: {{ cart.total_price }},
+      original_total_price: {{ cart.original_total_price }},
+      total_discount: {{ cart.total_discount }},
+      shipping_gap: 0,
+      shipping_progress: '0%',
+    },
+
+    // Search related properties
+    search_drawer: false,
+    search_loading: false,
+    search_active: false,
+    search_visible: false,
+    search_term: '',
+    search_items: [],
+    search_focus_index: '',
+    search_focus_url: '',
+    search_items_collections: [],
+    search_items_pages: [],
+    search_items_articles: [],
+    search_items_queries: [],
+  });
+</script>
+
+{% if template.directory == 'customers' %}
+  <script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer="defer"></script>
+{% endif %}
+
+{% comment %} Load swatches for recently viewed products {% endcomment %}
+<script>
+  document.addEventListener('alpine:init', () => {
+    const hydrateRecentSwatches = () => {
+      const app = window.app();
+      if (!app) return;
+
+      app.fetchUnifiedSwatches().then(() => {
+        app.renderAllGridSwatches();
+
+        // Recently viewed cards mount slightly later via Alpine templates.
+        setTimeout(() => app.renderAllGridSwatches(), 350);
+        setTimeout(() => app.renderAllGridSwatches(), 900);
+      });
+    };
+
+    setTimeout(hydrateRecentSwatches, 50);
+  });
+</script>
+
+<script>
+  /* Document-level fallback for the product-card quick-add icon button.
+     The button's `@click.prevent.stop` Alpine handler works fine on
+     initial page load, but after the collection grid's innerHTML is
+     swapped by `fetchAndRenderCollection` (when the merchant uses the
+     quickfilter), Alpine's bindings on the new product cards are not
+     reliably reattached — the cards render but the icon button stops
+     responding to clicks. Per-button Alpine.initTree calls caused a
+     duplicate-init bug elsewhere (PR #82), so instead we delegate at
+     the document level: `data-cs-quick-add` on the button, a single
+     listener here that survives any number of section swaps because
+     it's bound to `document`.
+
+     If Alpine's @click handler fires first (initial page load, before
+     swap), `@click.stop` cancels propagation and this listener never
+     sees the event — so we don't double-fire add-to-cart. After a
+     swap, the @click is dead, the click bubbles, and we run it. */
+  (function () {
+    if (window.__csQuickAddInstalled) return;
+    window.__csQuickAddInstalled = true;
+
+    document.addEventListener('click', function (e) {
+      var btn = e.target && e.target.closest && e.target.closest('[data-cs-quick-add]');
+      if (!btn) return;
+      e.preventDefault();
+
+      if (!window.Alpine || typeof window.Alpine.$data !== 'function') return;
+      var app = window.Alpine.$data(document.documentElement);
+      if (!app) return;
+
+      btn.classList.add('pc-quick-add--loading');
+      setTimeout(function () {
+        btn.classList.remove('pc-quick-add--loading');
+      }, 250);
+
+      var variantId = btn.getAttribute('data-cs-quick-add-variant-id');
+      var handle = btn.getAttribute('data-cs-quick-add-handle');
+      var hasSale = btn.getAttribute('data-cs-quick-add-sale') === 'true';
+
+      if (variantId) {
+        app.cart_drawer = true;
+        var vid = parseInt(variantId, 10);
+        if (hasSale) {
+          app.addCartItem(vid, 0, 1, true, { 'SALE': 'ALL SALES FINAL ON ITEM' });
+        } else {
+          app.addCartItem(vid, 0, 1, true);
+        }
+      } else if (handle && typeof app.fetchAndRenderQuickAdd === 'function') {
+        app.fetchAndRenderQuickAdd(handle, 'product');
+      }
+    });
+  })();
+</script>
+
+{% render 'script__design-mode' %}

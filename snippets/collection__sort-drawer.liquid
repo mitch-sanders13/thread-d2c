@@ -1,0 +1,303 @@
+<!-- snippets/collection__sort-drawer.liquid -->
+{% comment %}
+  Sort UI for the Collection grid (sidebar) section.
+
+    - Mobile (`md:hidden`): full-screen bottom-sheet that slides up.
+                            Includes a backdrop and an Apply footer.
+    - Desktop (`hidden md:block`): inline dropdown anchored under the
+                            Sort button (top: 100%, right: 0).
+                            No backdrop. No Apply button — selection
+                            navigates immediately.
+
+  Driven by plain DOM (`hidden` attribute + data-attribute triggers),
+  not Alpine, so it survives any number of innerHTML swaps that
+  fetchAndRenderCollection performs. Single document-level click listener
+  installed once at page load via `window.__csSortDrawerInstalled`.
+
+  Trigger: any element with `data-cs-sort-open`.
+  Close:   any element with `data-cs-sort-close`, the backdrop, Escape,
+            or any click outside the open dropdown.
+  Pick:    any element with `data-cs-sort-option="<sort_value>"`.
+
+  The selection handler strips any stray `q=null` literal that
+  `buildUrlFilter()` in main.js injects when there's no real search
+  query, before navigating.
+{% endcomment %}
+
+<div role="dialog" aria-modal="true"
+  class="cs-sort-drawer"
+  data-cs-sort-drawer
+  hidden>
+
+  {%- comment -%} Mobile backdrop {%- endcomment -%}
+  <div aria-hidden="true"
+    class="cs-sort-drawer__backdrop"
+    data-cs-sort-close></div>
+
+  {%- comment -%} Panel — bottom-sheet on mobile, dropdown on desktop {%- endcomment -%}
+  <div class="cs-sort-drawer__panel">
+
+    {%- comment -%} Header — mobile only {%- endcomment -%}
+    <div class="cs-sort-drawer__header">
+      <span class="type__nav type--smaller" style="letter-spacing:0.1em;">SORT</span>
+      <button type="button"
+        class="flex items-center justify-center hover:opacity-75"
+        data-cs-sort-close
+        aria-label="{{ 'general.accessibility.close' | t }}">
+        {% render 'component__icon', icon: 'x', size: '24' %}
+      </button>
+    </div>
+
+    {%- comment -%} Options — each Shopify sort_option is gated by a
+      per-option checkbox in the section schema (see "Sort options
+      shown in the dropdown" in collection__sidebar.liquid). Unknown
+      sort_option.value strings (in case Shopify ever adds a new
+      built-in sort) fall through to the `else` branch and stay
+      visible by default. {%- endcomment -%}
+    <div class="cs-sort-drawer__body">
+      {%- for option in collection.sort_options -%}
+        {%- case option.value -%}
+          {%- when 'manual'             -%}{%- assign _cs_sort_show = section.settings.sort_show_manual             -%}
+          {%- when 'best-selling'       -%}{%- assign _cs_sort_show = section.settings.sort_show_best_selling       -%}
+          {%- when 'title-ascending'    -%}{%- assign _cs_sort_show = section.settings.sort_show_title_ascending    -%}
+          {%- when 'title-descending'   -%}{%- assign _cs_sort_show = section.settings.sort_show_title_descending   -%}
+          {%- when 'price-ascending'    -%}{%- assign _cs_sort_show = section.settings.sort_show_price_ascending    -%}
+          {%- when 'price-descending'   -%}{%- assign _cs_sort_show = section.settings.sort_show_price_descending   -%}
+          {%- when 'created-ascending'  -%}{%- assign _cs_sort_show = section.settings.sort_show_created_ascending  -%}
+          {%- when 'created-descending' -%}{%- assign _cs_sort_show = section.settings.sort_show_created_descending -%}
+          {%- else                      -%}{%- assign _cs_sort_show = true                                          -%}
+        {%- endcase -%}
+        {%- if _cs_sort_show == false -%}{%- continue -%}{%- endif -%}
+        <button type="button"
+          class="cs-sort-drawer__option"
+          data-cs-sort-option="{{ option.value }}">
+          <span class="cs-sort-drawer__dot"
+            data-active="{% if collection.sort_by == option.value %}true{% else %}false{% endif %}"></span>
+          <span class="cs-sort-drawer__option-label">{{ option.name }}</span>
+        </button>
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%} Apply footer — mobile only (desktop dismisses on selection) {%- endcomment -%}
+    <div class="cs-sort-drawer__footer">
+      <button type="button"
+        class="btn btn--secondary !w-full"
+        data-cs-sort-close>
+        APPLY
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ===== Mobile default — full-screen bottom-sheet ===== */
+  .cs-sort-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    overflow: hidden;
+  }
+  .cs-sort-drawer__backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
+  .cs-sort-drawer__panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 90svh;
+    background: var(--color__bg-body, #fff);
+    display: flex;
+    flex-direction: column;
+  }
+  .cs-sort-drawer__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    border-bottom: 1px solid var(--color__border-divider-1, rgba(0,0,0,0.1));
+  }
+  .cs-sort-drawer__body {
+    flex: 1;
+    overflow-y: auto;
+  }
+  .cs-sort-drawer__option {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color__border-divider-1, rgba(0,0,0,0.08));
+    cursor: pointer;
+    background: transparent;
+  }
+  .cs-sort-drawer__option:hover {
+    background: var(--color__bg-overlay-1, rgba(0,0,0,0.03));
+  }
+  .cs-sort-drawer__option-label {
+    margin-left: 12px;
+  }
+  .cs-sort-drawer__dot {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid currentColor;
+    border-radius: 9999px;
+    position: relative;
+    flex-shrink: 0;
+    opacity: 0.65;
+  }
+  .cs-sort-drawer__dot[data-active="true"] {
+    opacity: 1;
+  }
+  .cs-sort-drawer__dot[data-active="true"]::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border-radius: 9999px;
+    background: currentColor;
+  }
+  .cs-sort-drawer__footer {
+    padding: 16px;
+    border-top: 1px solid var(--color__border-divider-1, rgba(0,0,0,0.1));
+  }
+
+  /* ===== Desktop — dropdown under the Sort button ===== */
+  @media (min-width: 768px) {
+    .cs-sort-drawer {
+      position: absolute;
+      inset: auto;
+      top: 100%;
+      right: 0;
+      bottom: auto;
+      left: auto;
+      width: 280px;
+      margin-top: 8px;
+      overflow: visible;
+    }
+    .cs-sort-drawer__backdrop,
+    .cs-sort-drawer__header,
+    .cs-sort-drawer__footer {
+      display: none;
+    }
+    .cs-sort-drawer__panel {
+      position: static;
+      max-height: 70vh;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--color__border-divider-1, rgba(0,0,0,0.1));
+      border-radius: 4px;
+    }
+    .cs-sort-drawer__option {
+      border-bottom: none;
+      padding: 10px 14px;
+    }
+    .cs-sort-drawer__option + .cs-sort-drawer__option {
+      border-top: 1px solid var(--color__border-divider-1, rgba(0,0,0,0.06));
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    if (window.__csSortDrawerInstalled) return;
+    window.__csSortDrawerInstalled = true;
+
+    function getDrawerFromTrigger(opener) {
+      // Open the drawer that's a sibling of the trigger (so the desktop
+      // dropdown anchors to its own button if multiple Sort buttons live
+      // on the page).
+      if (!opener) return null;
+      var parent = opener.parentElement;
+      if (parent) {
+        var sibling = parent.querySelector('[data-cs-sort-drawer]');
+        if (sibling) return sibling;
+      }
+      var section = opener.closest('section[id="js:top"]');
+      if (section) {
+        var inSection = section.querySelector('[data-cs-sort-drawer]');
+        if (inSection) return inSection;
+      }
+      return document.querySelector('[data-cs-sort-drawer]');
+    }
+
+    function getDrawerFromInside(el) {
+      return el ? el.closest('[data-cs-sort-drawer]') : null;
+    }
+
+    function openDrawer(drawer) {
+      if (!drawer) return;
+      drawer.hidden = false;
+      // Body scroll lock only matters for the mobile full-screen sheet.
+      if (window.matchMedia('(max-width: 767.98px)').matches) {
+        document.documentElement.style.overflow = 'hidden';
+      }
+    }
+
+    function closeDrawer(drawer) {
+      if (!drawer) return;
+      drawer.hidden = true;
+      document.documentElement.style.overflow = '';
+    }
+
+    function findVisibleDrawer() {
+      return document.querySelector('[data-cs-sort-drawer]:not([hidden])');
+    }
+
+    document.addEventListener('click', function (e) {
+      var target = e.target;
+      if (!target || !target.closest) return;
+
+      var opener = target.closest('[data-cs-sort-open]');
+      if (opener) {
+        e.preventDefault();
+        e.stopPropagation();
+        var drawer = getDrawerFromTrigger(opener);
+        // Toggle if it's the same drawer that's already open (so the
+        // desktop dropdown can be dismissed by re-clicking the button).
+        if (drawer && !drawer.hidden) {
+          closeDrawer(drawer);
+        } else {
+          openDrawer(drawer);
+        }
+        return;
+      }
+
+      var closer = target.closest('[data-cs-sort-close]');
+      if (closer) {
+        e.preventDefault();
+        closeDrawer(getDrawerFromInside(closer));
+        return;
+      }
+
+      var option = target.closest('[data-cs-sort-option]');
+      if (option) {
+        e.preventDefault();
+        var sortValue = option.getAttribute('data-cs-sort-option');
+        var currentUrl = new URL(window.location.href);
+        var params = new URLSearchParams(currentUrl.search);
+        if (params.get('q') === 'null' || params.get('q') === null) {
+          params.delete('q');
+        }
+        params.set('sort_by', sortValue);
+        closeDrawer(getDrawerFromInside(option));
+        window.location.href = currentUrl.pathname + '?' + params.toString();
+        return;
+      }
+
+      // Click outside any open dropdown → close it (desktop only —
+      // mobile already has a backdrop that catches this).
+      var visible = findVisibleDrawer();
+      if (visible && !visible.contains(target)) {
+        closeDrawer(visible);
+      }
+    }, false);
+
+    document.addEventListener('keyup', function (e) {
+      if (e.key !== 'Escape') return;
+      var visible = findVisibleDrawer();
+      if (visible) closeDrawer(visible);
+    });
+  })();
+</script>

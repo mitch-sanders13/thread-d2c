@@ -1,0 +1,64 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "3d9e7d15-dac1-463c-ab59-072fc07ec38c": {
+      "type": "page__carriers-club",
+      "blocks": {
+        "295ed2aa-acae-4932-88ad-26a91ea9e15d": {
+          "type": "svg_logo",
+          "settings": {}
+        },
+        "template--15896775753866__3d9e7d15-dac1-463c-ab59-072fc07ec38c-16869763578acead50-2": {
+          "type": "buttons",
+          "settings": {
+            "button_color": "btn btn--secondary",
+            "button_label": "Sign Up",
+            "button_url": "https:\/\/www.threadwallets.com\/account\/register",
+            "secondary_button_color": "btn btn--secondary",
+            "secondary_button_label": "Log In",
+            "secondary_button_url": "https:\/\/www.threadwallets.com\/account\/login",
+            "button_text_logged_in": "Shop Now",
+            "button_link_logged_in": "shopify:\/\/collections\/carriers-club",
+            "btn_width_logged_in": 120
+          }
+        }
+      },
+      "block_order": [
+        "295ed2aa-acae-4932-88ad-26a91ea9e15d",
+        "template--15896775753866__3d9e7d15-dac1-463c-ab59-072fc07ec38c-16869763578acead50-2"
+      ],
+      "settings": {
+        "image_background_desktop": "shopify:\/\/shop_images\/clouds.jpg",
+        "enable_lazy_loading": false,
+        "color_scheme": "color__bg-neutral color__text",
+        "color_text": "",
+        "color_border": "color__border-divider-1",
+        "style_border": "",
+        "content_width": 50,
+        "image_position": "right",
+        "layout_y_spacing": "min-h-[650px] max-h-[75vh] md:min-h-[70vh]",
+        "layout_y_alignment": "items-center",
+        "layout_x_alignment": "justify-center text-center",
+        "image_text": "Presented by Thread, <strong>Carrier's Club<\/strong> is our brand's exclusive limited run product line inspired by the people, places and passions in our community.",
+        "sub_title_1": "Bi-monthly Releases",
+        "text_area_1": "Bi-monthly releases occuring throughout the year. Releases do not have a set product included and will vary in the current product lineup plus explorations into new products.",
+        "sub_title_2": "Experiences",
+        "text_area_2": "Get your money's worth. Each order will include not only the product but an experience. Say goodbye to boring mailers and hello to an elevated exclusive Carrier's Club shipment.",
+        "sub_title_3": "In-person Events",
+        "text_area_3": "Experiences worth while. With each Carrier's Club release, be on the lookout for exclusive in person events. Call it a celebration if you will, and yes, you're invited.",
+        "visibility": ""
+      }
+    }
+  },
+  "order": [
+    "3d9e7d15-dac1-463c-ab59-072fc07ec38c"
+  ]
+}

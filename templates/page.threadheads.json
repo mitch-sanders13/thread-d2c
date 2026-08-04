@@ -1,0 +1,410 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "aa4bb5d3-2c94-4cc5-a4a0-67fa7bb9b8c2": {
+      "type": "content-slider",
+      "blocks": {
+        "template--15922140283018__aa4bb5d3-2c94-4cc5-a4a0-67fa7bb9b8c2-content-1": {
+          "type": "content",
+          "settings": {
+            "heading": "ACE PELKA",
+            "content": "<p><strong>What is your favorite Thread product and why?<\/strong><\/p><p>My favorite product from Thread would of course be the Mini Backpack! For me this is the perfect day travel pack because ti fits all of my needs and is so light and compact. I take it with me for all of my daily adventures!<br\/><br\/><strong>What does Carry On mean to me?<\/strong><\/p><p>Carrying On means to persevere and push through the hard times and the adversity. Remembering that without darkness there’d be no light.<\/p>",
+            "image_featured": "shopify:\/\/shop_images\/IMG_0919_230d8daf-fb77-418d-9432-82e0c6e40216.jpg",
+            "button_label": "Button",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__dark",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-start",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 4,
+            "layout_mobile_width": 8,
+            "enable_padding": true
+          }
+        },
+        "template--15922140283018__aa4bb5d3-2c94-4cc5-a4a0-67fa7bb9b8c2-content-2": {
+          "type": "content",
+          "settings": {
+            "heading": "MARY RAND",
+            "content": "<p><strong>What is your favorite Thread product and why?<\/strong><\/p><p>I use the Vertical Wallet with a Wrist Lanyard to hold all my cards, I put my car keys on the Neck Lanyard. I put all of that in the Fanny Pack and wear it as a cross body, and then I use the Tote for bigger stuff like my computer, water bottle, sweatshirt, & farmers market goods.<br\/><br\/><strong>What does Carry On mean to me?<\/strong><\/p><p>Carry On means to practicing the ability to move through life with connection, compassion, confidence & clarity given the different obstacles that we all face. Key word there is practice.<\/p>",
+            "image_featured": "shopify:\/\/shop_images\/image0_1.jpg",
+            "button_label": "Button",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__dark",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-start",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 4,
+            "layout_mobile_width": 8,
+            "enable_padding": true
+          }
+        },
+        "template--15922140283018__aa4bb5d3-2c94-4cc5-a4a0-67fa7bb9b8c2-content-3": {
+          "type": "content",
+          "settings": {
+            "heading": "ETHAN JONES",
+            "content": "<p><strong>What is your favorite Thread product and why?<\/strong><\/p><p>My favorite Thread product would be the Crossbody Bag, perfect for being a photographer and always on the go.<br\/><br\/><strong>What does Carry On mean to me?<\/strong><\/p><p>I believe it’s so important to have a good work-life balance. Getting out in the water or out for a run really keeps me sane, that’s how I Carry On!<\/p>",
+            "image_featured": "shopify:\/\/shop_images\/SP002246-25A_5964ff10-b338-41ca-8209-ef8cafdb045a.jpg",
+            "button_label": "Button",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__dark",
+            "color_button": "btn btn--neutral",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-start",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 4,
+            "layout_mobile_width": 8,
+            "enable_padding": true
+          }
+        },
+        "97f94368-d516-49c5-8b64-2b429fc3ba19": {
+          "type": "content",
+          "settings": {
+            "heading": "Ivy Miller",
+            "content": "<p><strong>What is your favorite Thread product and why?<\/strong><\/p><p>I love the Mini Backpack, I can fit just about everything in it. I've taken it on the plane and to events. It's so versatile & perfect for everything!<br\/><br\/><strong>What does Carry On mean to me?<\/strong><\/p><p>Carry On means to accept the roller-coaster of good and bad, light and dark, fun and boring, learning and celebrating—polarity of life.<\/p>",
+            "image_featured": "shopify:\/\/shop_images\/image0_1_25566dfc-d1ca-4d74-be7e-3a406f1acd1c.jpg",
+            "button_label": "Button",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__dark",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-start",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 4,
+            "layout_mobile_width": 8,
+            "enable_padding": true
+          }
+        },
+        "81707c55-d94d-4e7c-abed-2294330105f4": {
+          "type": "content",
+          "settings": {
+            "heading": "JACK SOREN",
+            "content": "<p><strong>What is your favorite Thread product and why?<\/strong><\/p><p>I dig the Crossbody, I like to keep all my nicknacks on me. Always got the small essentials on me.<br\/><br\/><strong>What does Carry On mean to me?<\/strong><\/p><p>Win or lose, I'll still be doing my thing. No matter what comes, keep pushing, keep moving forward.<\/p>",
+            "image_featured": "shopify:\/\/shop_images\/IMG_3738.jpg",
+            "button_label": "Button",
+            "button_url": "",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__dark",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-start",
+            "layout_x_alignment": "",
+            "layout_desktop_width": 4,
+            "layout_mobile_width": 8,
+            "enable_padding": true
+          }
+        }
+      },
+      "block_order": [
+        "template--15922140283018__aa4bb5d3-2c94-4cc5-a4a0-67fa7bb9b8c2-content-1",
+        "template--15922140283018__aa4bb5d3-2c94-4cc5-a4a0-67fa7bb9b8c2-content-2",
+        "template--15922140283018__aa4bb5d3-2c94-4cc5-a4a0-67fa7bb9b8c2-content-3",
+        "97f94368-d516-49c5-8b64-2b429fc3ba19",
+        "81707c55-d94d-4e7c-abed-2294330105f4"
+      ],
+      "settings": {
+        "heading": "Threadheads",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 0,
+        "spacing_bottom": 20,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--b-width",
+        "layout_x_alignment": "text-center justify-center flex-col items-center",
+        "layout_horizontal": "window--full",
+        "visibility": ""
+      }
+    },
+    "0692a6ec-95f3-4b8a-ab5c-8b481ba3b3aa": {
+      "type": "content-grid",
+      "blocks": {
+        "template--15932839297162__0692a6ec-95f3-4b8a-ab5c-8b481ba3b3aa-content-1": {
+          "type": "content",
+          "settings": {
+            "heading": "JANTHAVY NORTON",
+            "content": "<p><a href=\"https:\/\/www.instagram.com\/janthavy\/\" target=\"_blank\" title=\"https:\/\/www.instagram.com\/janthavy\/\">@janthavy<\/a><\/p>",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/image_6483441_48986362-0576-4a27-a5e4-429390a4b131.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "d448808b-705a-4c36-94d3-b672a37dca14": {
+          "type": "content",
+          "settings": {
+            "heading": "ROB ROETHLER",
+            "content": "<p><a href=\"https:\/\/www.instagram.com\/robroethler\/\" target=\"_blank\" title=\"https:\/\/www.instagram.com\/robroethler\/\">@robroethler<\/a><\/p>",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/IMG_0217_aa9a4613-09f1-4067-9e74-7d28d44837e2.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "3a7a88d9-f695-4f45-a183-102ab36db9f5": {
+          "type": "content",
+          "settings": {
+            "heading": "KEANI CANULLO",
+            "content": "<p><a href=\"https:\/\/www.instagram.com\/keanicanullo\/\" target=\"_blank\" title=\"https:\/\/www.instagram.com\/keanicanullo\/\">@keanicanullo<\/a><\/p>",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/sp001511-37_d2862d00-d5dc-437c-a21a-d31cc2bed49a.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "30d2378a-61ec-46f3-a1a3-e3c1d5711306": {
+          "type": "content",
+          "settings": {
+            "heading": "SAWYER LINDBLAD",
+            "content": "<p><a href=\"https:\/\/www.instagram.com\/sawyerlindblad\/\" target=\"_blank\" title=\"https:\/\/www.instagram.com\/sawyerlindblad\/\">@sawyerlindblad<\/a><\/p>",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/alihuxmansummer23-288_541ea799-4d3f-4ea6-bff1-3ba585a7e378.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "0c3f4d18-54e9-4c65-8a29-f7b141cd5c99": {
+          "type": "content",
+          "settings": {
+            "heading": "KELIS KALEOPA'A",
+            "content": "<p><a href=\"https:\/\/www.instagram.com\/keliskaleopaa\/\" target=\"_blank\" title=\"https:\/\/www.instagram.com\/keliskaleopaa\/\">@keliskaleopaa<\/a><\/p>",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/Screenshot_2023-10-16_at_2.29.14_PM_b765a45e-f5f9-425a-b490-bd94617e8190.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "1b30f290-40d7-4575-a0ff-430f7e6c4b47": {
+          "type": "content",
+          "settings": {
+            "heading": "NATE MICELI",
+            "content": "<p><a href=\"https:\/\/www.instagram.com\/lifeof.nate\/\" target=\"_blank\" title=\"https:\/\/www.instagram.com\/lifeof.nate\/\">@lifeof.nate<\/a><\/p>",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/image002_4b0bc6ac-7b6a-4a8f-a0aa-8be52231a529.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "e8633cc9-72a1-4f16-9f7f-612769a04605": {
+          "type": "content",
+          "settings": {
+            "heading": "POE PINSON",
+            "content": "<p><a href=\"https:\/\/www.instagram.com\/poepinson\/\" target=\"_blank\" title=\"https:\/\/www.instagram.com\/poepinson\/\">@poepinson<\/a><\/p>",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/MC5A5946_8a54cec0-9488-4530-949e-87fcf756affd.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "25d3dd24-d7f1-49a3-a6d1-1bf712ebc6ac": {
+          "type": "content",
+          "settings": {
+            "heading": "REX HENNINGS",
+            "content": "<p><a href=\"https:\/\/www.instagram.com\/rex_hennings\/\" target=\"_blank\" title=\"https:\/\/www.instagram.com\/rex_hennings\/\">@rex.hennings<\/a><\/p>",
+            "button_label": "",
+            "button_url": "",
+            "image_featured": "shopify:\/\/shop_images\/big-rexhennings.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        }
+      },
+      "block_order": [
+        "template--15932839297162__0692a6ec-95f3-4b8a-ab5c-8b481ba3b3aa-content-1",
+        "d448808b-705a-4c36-94d3-b672a37dca14",
+        "3a7a88d9-f695-4f45-a183-102ab36db9f5",
+        "30d2378a-61ec-46f3-a1a3-e3c1d5711306",
+        "0c3f4d18-54e9-4c65-8a29-f7b141cd5c99",
+        "1b30f290-40d7-4575-a0ff-430f7e6c4b47",
+        "e8633cc9-72a1-4f16-9f7f-612769a04605",
+        "25d3dd24-d7f1-49a3-a6d1-1bf712ebc6ac"
+      ],
+      "settings": {
+        "heading": "",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 20,
+        "spacing_bottom": 20,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--b-width",
+        "row_size_desktop": "md:grid-cols-4",
+        "row_size_mobile": "grid-cols-1",
+        "layout_x_alignment": "justify-between",
+        "layout_horizontal": "window--full",
+        "visibility": ""
+      }
+    }
+  },
+  "order": [
+    "aa4bb5d3-2c94-4cc5-a4a0-67fa7bb9b8c2",
+    "0692a6ec-95f3-4b8a-ab5c-8b481ba3b3aa"
+  ]
+}

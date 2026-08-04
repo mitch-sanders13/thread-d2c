@@ -1,0 +1,647 @@
+{% comment %}
+  Thread Wallets - "Do What Connects You" Campaign Section
+  Section: thread-campaign.liquid
+  Place in: sections/thread-campaign.liquid
+  Add to a page template via Shopify Editor
+{% endcomment %}
+
+{{ 'thread-campaign.css' | asset_url | stylesheet_tag }}
+
+<section class="thread-campaign" id="thread-campaign">
+
+  {%- if section.settings.show_hero -%}
+  <div class="tc-hero">
+    <div class="tc-hero__bg">
+      {%- if section.settings.hero_video != blank -%}
+        <video autoplay muted loop playsinline class="tc-hero__video">
+          <source src="{{ section.settings.hero_video }}" type="video/mp4">
+        </video>
+      {%- elsif section.settings.hero_image != blank -%}
+        <img src="{{ section.settings.hero_image | img_url: '1600x' }}" alt="Campaign hero" class="tc-hero__img" loading="eager">
+      {%- else -%}
+        <div class="tc-hero__placeholder"></div>
+      {%- endif -%}
+      <div class="tc-hero__overlay"></div>
+    </div>
+    <div class="tc-hero__content tc-window">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="tc-eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      <h1 class="tc-hero__title">{{ section.settings.hero_title | default: 'Do What Connects You' }}</h1>
+      {%- if section.settings.hero_subtitle != blank -%}
+        <p class="tc-hero__subtitle">{{ section.settings.hero_subtitle }}</p>
+      {%- endif -%}
+      <a href="#tc-submit" class="tc-btn tc-btn--primary">{{ section.settings.hero_cta | default: 'Submit Your Video' }}</a>
+    </div>
+    <div class="tc-hero__scroll-hint">
+      <span></span>
+    </div>
+  </div>
+  {%- endif -%}
+
+  {%- if section.settings.show_intro -%}
+  <div class="tc-intro tc-section">
+    <div class="tc-window tc-window tc-window--narrow">
+      <h2 class="tc-section-title">{{ section.settings.intro_title | default: 'We Need You' }}</h2>
+      <div class="tc-richtext">{{ section.settings.intro_body | default: "We're collecting short, real videos that show how you connect. Thread products exist to carry the essentials that move with people through these moments. How do you connect with friends, family, community, co-workers — and the environments around you?" }}</div>
+      {%- if section.settings.intro_deadline != blank -%}
+        <p class="tc-deadline-text">
+          <span class="tc-deadline__label">Submission Deadline</span>
+          <span class="tc-deadline__date">{{ section.settings.intro_deadline }}</span>
+        </p>
+      {%- endif -%}
+      <div class="tc-intro-cta">
+        <a href="{{ section.settings.dropbox_url | default: 'https://www.dropbox.com/request/KVlCuV1loy6gHRAP3uCS' }}" target="_blank" rel="noopener" class="tc-btn tc-btn--primary tc-btn--upload">
+          <span>{{ section.settings.dropbox_btn_text | default: 'Submit Your Video' }}</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  {%- endif -%}
+
+  {%- assign vibe_blocks = section.blocks | where: 'type', 'vibe_item' -%}
+  {%- if vibe_blocks.size > 0 -%}
+  <div class="tc-vibe tc-section tc-section--alt">
+    <div class="tc-window">
+      <h2 class="tc-section-title">{{ section.settings.vibe_title | default: 'The Vibe' }}</h2>
+{%- if section.settings.vibe_subtitle != blank -%}
+  <p class="tc-section-sub">{{ section.settings.vibe_subtitle }}</p>
+{%- endif -%}
+      <div class="tc-vibe__grid">
+        {%- for block in vibe_blocks -%}
+          <div class="tc-vibe__item" {{ block.shopify_attributes }}>
+            <span class="tc-vibe__icon">{{ block.settings.icon | default: '' }}</span>
+            <div>
+              <strong>{{ block.settings.label }}</strong>
+              {%- if block.settings.description != blank -%}
+                <p>{{ block.settings.description }}</p>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+  {%- endif -%}
+
+  {%- assign prompt_blocks = section.blocks | where: 'type', 'prompt' -%}
+  {%- if prompt_blocks.size > 0 -%}
+  <div class="tc-prompts tc-section">
+    <div class="tc-window">
+      <h2 class="tc-section-title">{{ section.settings.prompts_title | default: 'Creative Prompts' }}</h2>
+      <p class="tc-section-sub">{{ section.settings.prompts_subtitle | default: 'Pick one — or make it your own.' }}</p>
+      <div class="tc-prompts__grid">
+        {%- for block in prompt_blocks -%}
+          <div class="tc-prompt-card" {{ block.shopify_attributes }}>
+            <div class="tc-prompt-card__num">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</div>
+            <h3 class="tc-prompt-card__title">{{ block.settings.prompt_title }}</h3>
+            <p class="tc-prompt-card__desc">{{ block.settings.prompt_description }}</p>
+            {%- if block.settings.hook_examples != blank -%}
+              <div class="tc-prompt-card__hooks">
+                <span class="tc-prompt-card__hooks-label">Easy hooks:</span>
+                <div class="tc-prompt-card__hooks-list">{{ block.settings.hook_examples }}</div>
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+  {%- endif -%}
+
+  {%- assign rule_blocks = section.blocks | where: 'type', 'rule' -%}
+  {%- if rule_blocks.size > 0 -%}
+  <div class="tc-rules tc-section tc-section--alt">
+    <div class="tc-window">
+      <h2 class="tc-section-title">{{ section.settings.rules_title | default: 'Quick Rules' }}</h2>
+      {%- if section.settings.rules_subtitle != blank -%}
+  <p class="tc-section-sub">{{ section.settings.rules_subtitle }}</p>
+{%- endif -%}
+      <div class="tc-rules__grid">
+        {%- for block in rule_blocks -%}
+          <div class="tc-rule-item" {{ block.shopify_attributes }}>
+            <span class="tc-rule-item__icon">{{ block.settings.icon | default: '✓' }}</span>
+            <span>{{ block.settings.rule_text }}</span>
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+  {%- endif -%}
+
+  {%- assign award_blocks = section.blocks | where: 'type', 'award' -%}
+  {%- if award_blocks.size > 0 -%}
+  <div class="tc-awards tc-section">
+    <div class="tc-window">
+      <h2 class="tc-section-title">{{ section.settings.awards_title | default: 'Awards & Prizes' }}</h2>
+      {%- if section.settings.awards_subtitle != blank -%}
+        <p class="tc-section-sub">{{ section.settings.awards_subtitle }}</p>
+      {%- endif -%}
+      <div class="tc-awards__grid">
+        {%- for block in award_blocks -%}
+          <div class="tc-award-card" {{ block.shopify_attributes }}>
+            <div class="tc-award-card__emoji">{{ block.settings.emoji | default: '🏆' }}</div>
+            <h3 class="tc-award-card__category">{{ block.settings.category_name }}</h3>
+            <p class="tc-award-card__description">{{ block.settings.award_description }}</p>
+            {%- if block.settings.prize_detail != blank -%}
+              <div class="tc-award-card__prize">{{ block.settings.prize_detail }}</div>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+  {%- endif -%}
+
+  {%- if section.settings.show_submission_form -%}
+  <div class="tc-submit tc-section tc-section--dark" id="tc-submit">
+    <div class="tc-window tc-window--narrow">
+      <h2 class="tc-section-title">{{ section.settings.form_title | default: 'Submit Your Video' }}</h2>
+      <p class="tc-section-sub">{{ section.settings.form_subtitle | default: 'Upload your video directly to our folder. No account required — just drop your file and go.' }}</p>
+
+      <div class="tc-submit-cta">
+        <a href="{{ section.settings.dropbox_url | default: 'https://www.dropbox.com/request/KVlCuV1loy6gHRAP3uCS' }}" target="_blank" rel="noopener" class="tc-btn tc-btn--primary tc-btn--upload">
+          <span>{{ section.settings.dropbox_btn_text | default: 'Upload Your Video' }}</span>
+        </a>
+        {%- if section.settings.submit_note != blank -%}
+          <p class="tc-submit-note">{{ section.settings.submit_note }}</p>
+        {%- else -%}
+          <p class="tc-submit-note">Opens in a new tab. No Dropbox account required.</p>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.terms_text != blank -%}
+        <p class="tc-terms-note">{{ section.settings.terms_text }}</p>
+      {%- endif -%}
+
+    </div>
+  </div>
+  {%- endif -%}
+
+  {%- if section.settings.show_contact -%}
+  <div class="tc-contact tc-section">
+    <div class="tc-window tc-window--narrow tc-text-center">
+      <p class="tc-contact__text">{{ section.settings.contact_text | default: 'Questions? We&#39;d love to hear from you.' }}</p>
+      <a href="mailto:{{ section.settings.contact_email | default: 'mckenzie@threadwallets.com' }}" class="tc-btn tc-btn--outline">Email Us</a>
+    </div>
+  </div>
+  {%- endif -%}
+
+</section>
+
+{% schema %}
+{
+  "name": "Thread Campaign",
+  "tag": "section",
+  "class": "thread-campaign-wrapper",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero Section"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_hero",
+      "label": "Show Hero",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "Operation Content"
+    },
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Hero Title",
+      "default": "Do What Connects You"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_subtitle",
+      "label": "Hero Subtitle",
+      "default": "Share how you live. Win prizes. Be part of something real."
+    },
+    {
+      "type": "text",
+      "id": "hero_cta",
+      "label": "CTA Button Text",
+      "default": "Submit Your Video"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero Background Image"
+    },
+    {
+      "type": "text",
+      "id": "hero_video",
+      "label": "Hero Background Video URL (MP4)",
+      "info": "Paste a direct MP4 URL for autoplay background video"
+    },
+    {
+      "type": "header",
+      "content": "Intro Section"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_intro",
+      "label": "Show Intro",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "intro_title",
+      "label": "Section Title",
+      "default": "We Need You"
+    },
+    {
+      "type": "richtext",
+      "id": "intro_body",
+      "label": "Intro Body"
+    },
+    {
+      "type": "text",
+      "id": "intro_deadline",
+      "label": "Deadline Date",
+      "info": "Displayed as a badge (e.g. June 30, 2025)"
+    },
+    {
+      "type": "header",
+      "content": "Vibe Section"
+    },
+    {
+      "type": "text",
+      "id": "vibe_title",
+      "label": "Section Title",
+      "default": "The Vibe"
+    },
+    { "type": "text", "id": "vibe_subtitle", "label": "Section Subtitle" },
+    {
+      "type": "header",
+      "content": "Prompts Section"
+    },
+    {
+      "type": "text",
+      "id": "prompts_title",
+      "label": "Section Title",
+      "default": "Creative Prompts"
+    },
+    {
+      "type": "text",
+      "id": "prompts_subtitle",
+      "label": "Section Subtitle",
+      "default": "Pick one — or make it your own."
+    },
+    {
+      "type": "header",
+      "content": "Rules Section"
+    },
+    {
+"type": "header", "content": "Rules Section" },
+{ "type": "text", "id": "rules_title", "label": "Section Title", "default": "Quick Rules" },
+{ "type": "text", "id": "rules_subtitle", "label": "Section Subtitle" },
+    
+    {
+      "type": "header",
+      "content": "Awards Section"
+    },
+    {
+      "type": "text",
+      "id": "awards_title",
+      "label": "Section Title",
+      "default": "Awards & Prizes"
+    },
+    {
+      "type": "text",
+      "id": "awards_subtitle",
+      "label": "Section Subtitle"
+    },
+    {
+      "type": "header",
+      "content": "Submission Section"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_submission_form",
+      "label": "Show Submission Section",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "form_title",
+      "label": "Section Title",
+      "default": "Submit Your Video"
+    },
+    {
+      "type": "textarea",
+      "id": "form_subtitle",
+      "label": "Section Subtitle",
+      "default": "Upload your video directly to our folder. No account required — just drop your file and go."
+    },
+    {
+      "type": "url",
+      "id": "dropbox_url",
+      "label": "Dropbox File Request URL",
+      "info": "Your Dropbox File Request link (dropbox.com/request/...)"
+    },
+    {
+      "type": "text",
+      "id": "dropbox_btn_text",
+      "label": "Button Text",
+      "default": "Upload Your Video"
+    },
+    {
+      "type": "text",
+      "id": "submit_note",
+      "label": "Note below button",
+      "default": "Opens in a new tab. No Dropbox account required."
+    },
+    {
+      "type": "text",
+      "id": "terms_text",
+      "label": "Terms note (optional)"
+    },
+    {
+      "type": "header",
+      "content": "Contact"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_contact",
+      "label": "Show Contact Section",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "contact_email",
+      "label": "Contact Email",
+      "default": "mckenzie@threadwallets.com"
+    },
+    {
+      "type": "text",
+      "id": "contact_text",
+      "label": "Contact Text",
+      "default": "Questions? We'd love to hear from you."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "vibe_item",
+      "name": "Vibe Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Icon or Emoji",
+          "default": "→"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Real, not polished"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Description (optional)"
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "name": "Creative Prompt",
+      "settings": [
+        {
+          "type": "text",
+          "id": "prompt_title",
+          "label": "Prompt Title",
+          "default": "What Connects You?"
+        },
+        {
+          "type": "textarea",
+          "id": "prompt_description",
+          "label": "Prompt Description",
+          "default": "Tell a quick story about something that makes you feel alive and connected."
+        },
+        {
+          "type": "textarea",
+          "id": "hook_examples",
+          "label": "Hook Examples",
+          "info": "Separate each hook with a line break"
+        }
+      ]
+    },
+    {
+      "type": "rule",
+      "name": "Quick Rule",
+      "settings": [
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Icon or Emoji",
+          "default": "✓"
+        },
+        {
+          "type": "text",
+          "id": "rule_text",
+          "label": "Rule",
+          "default": "Shoot vertical (9:16)"
+        }
+      ]
+    },
+    {
+      "type": "award",
+      "name": "Award Category",
+      "settings": [
+        {
+          "type": "text",
+          "id": "emoji",
+          "label": "Emoji",
+          "default": "🏆"
+        },
+        {
+          "type": "text",
+          "id": "category_name",
+          "label": "Category Name",
+          "info": "This appears in the form dropdown and as the Google Drive folder name",
+          "default": "Best Hook"
+        },
+        {
+          "type": "textarea",
+          "id": "award_description",
+          "label": "Category Description",
+          "default": "The video that hooks us in the first 2 seconds."
+        },
+        {
+          "type": "text",
+          "id": "prize_detail",
+          "label": "Prize Detail",
+          "default": "$100 Thread Gift Card"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Thread Campaign",
+      "blocks": [
+        {
+          "type": "vibe_item",
+          "settings": {
+            "icon": "📱",
+            "label": "Real, not polished",
+            "description": "Phone quality is perfect"
+          }
+        },
+        {
+          "type": "vibe_item",
+          "settings": {
+            "icon": "📖",
+            "label": "Story-driven, not curated",
+            "description": "We want your life, not a mood board"
+          }
+        },
+        {
+          "type": "vibe_item",
+          "settings": {
+            "icon": "✌️",
+            "label": "Simple and clear",
+            "description": "Not overproduced"
+          }
+        },
+        {
+          "type": "vibe_item",
+          "settings": {
+            "icon": "🫵",
+            "label": "You and your life",
+            "description": "Not a commercial"
+          }
+        },
+        {
+          "type": "prompt",
+          "settings": {
+            "prompt_title": "What Connects You?",
+            "prompt_description": "Tell a quick story about something that makes you feel alive and connected. Pick your thing: a person, place, ritual, hobby, community, or moment — and show why it matters.",
+            "hook_examples": "\"This is what connects me…\"\n\"I found my people when…\"\n\"The best part of my week is…\"\n\"I almost didn't go, but I did — and it changed everything.\""
+          }
+        },
+        {
+          "type": "prompt",
+          "settings": {
+            "prompt_title": "What Do You Carry?",
+            "prompt_description": "Show your everyday essentials and how Thread makes it easier. Quick pack-with-me, product feature, or 'what's in my bag' style video.",
+            "hook_examples": "\"Things I never leave the house without…\"\n\"This is the one thing I use every day…\"\n\"Here's why I switched to Thread…\""
+          }
+        },
+        {
+          "type": "prompt",
+          "settings": {
+            "prompt_title": "Humor Connects",
+            "prompt_description": "Make us laugh. Prove Thread goes everywhere. Low pressure, high shareability.",
+            "hook_examples": "\"POV: you brought Thread somewhere it absolutely didn't need to go…\"\n\"I took my Thread to ____ and here's what happened…\"\n\"Things that should NOT fit in a wallet…\""
+          }
+        },
+        {
+          "type": "rule",
+          "settings": {
+            "icon": "📐",
+            "rule_text": "Shoot vertical (9:16)"
+          }
+        },
+        {
+          "type": "rule",
+          "settings": {
+            "icon": "⏱",
+            "rule_text": "10–30 seconds ideal (up to 45s if it's engaging)"
+          }
+        },
+        {
+          "type": "rule",
+          "settings": {
+            "icon": "⚡",
+            "rule_text": "Start with a hook in the first 1–2 seconds"
+          }
+        },
+        {
+          "type": "rule",
+          "settings": {
+            "icon": "🎒",
+            "rule_text": "Show the Thread product early and naturally"
+          }
+        },
+        {
+          "type": "rule",
+          "settings": {
+            "icon": "☀️",
+            "rule_text": "Good lighting + clear audio (phone quality is great)"
+          }
+        },
+        {
+          "type": "rule",
+          "settings": {
+            "icon": "#",
+            "rule_text": "Use #DoWhatConnectsYou and tag @thread_wallets"
+          }
+        },
+        {
+          "type": "award",
+          "settings": {
+            "emoji": "⚡",
+            "category_name": "Best Hook",
+            "award_description": "Stopped us cold in the first 2 seconds.",
+            "prize_detail": "$150 Thread Gift Card"
+          }
+        },
+        {
+          "type": "award",
+          "settings": {
+            "emoji": "✨",
+            "category_name": "Most Inspiring",
+            "award_description": "Made us feel something real.",
+            "prize_detail": "$150 Thread Gift Card"
+          }
+        },
+        {
+          "type": "award",
+          "settings": {
+            "emoji": "😂",
+            "category_name": "Funniest",
+            "award_description": "We couldn't stop watching (or laughing).",
+            "prize_detail": "$150 Thread Gift Card"
+          }
+        },
+        {
+          "type": "award",
+          "settings": {
+            "emoji": "🔥",
+            "category_name": "Boldest",
+            "award_description": "Biggest swing. Most original. Unforgettable.",
+            "prize_detail": "$150 Thread Gift Card"
+          }
+        },
+        {
+          "type": "award",
+          "settings": {
+            "emoji": "💛",
+            "category_name": "Most Heartfelt",
+            "award_description": "The one that gave us all the feels.",
+            "prize_detail": "$150 Thread Gift Card"
+          }
+        },
+        {
+          "type": "award",
+          "settings": {
+            "emoji": "🎒",
+            "category_name": "Best Product Feature",
+            "award_description": "Showed off Thread in the most natural, compelling way.",
+            "prize_detail": "$150 Thread Gift Card"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

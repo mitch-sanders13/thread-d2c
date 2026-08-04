@@ -1,0 +1,55 @@
+{% comment %}
+  Standalone trifecta promo banner for the cart drawer. Drop into the cart
+  section via a Custom Liquid block:
+
+      {% render 'bundle__cart-banner' %}
+
+  Optional overrides (pass as render arguments):
+    - text: HTML/markdown for the banner body. Defaults to a hardcoded copy.
+    - url: trifecta page URL. Defaults to /pages/build-your-trifecta.
+    - button_label: CTA button text. Defaults to "Build Your Trifecta".
+    - close_var: name of the Alpine variable in the surrounding cart-drawer
+                 scope to set false on click (e.g. "cart_drawer"). Leave blank
+                 to skip the close behavior.
+
+  Renders nothing when the cart is empty.
+{% endcomment %}
+
+{%- assign _text = text | default: '<p><strong>Save 10%</strong> when you build a Trifecta — wallet, lanyard, chapstick.</p>' -%}
+{%- assign _url = url | default: '/pages/build-your-trifecta' -%}
+{%- assign _label = button_label | default: 'Build Your Trifecta' -%}
+{%- assign _close = close_var | default: '' -%}
+
+<div
+  class="bundle-cart-banner"
+  x-show="cart && cart.items && cart.items.length > 0"
+  x-cloak>
+  <div class="bundle-cart-banner__text">
+    {{ _text }}
+  </div>
+  <a
+    href="{{ _url }}"
+    class="bundle-cart-banner__cta btn btn--secondary"
+    {% if _close != blank %}@click="{{ _close }} = false"{% endif %}>
+    {{ _label }}
+  </a>
+</div>
+
+<style>
+  .bundle-cart-banner {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    margin: 8px 12px;
+    border: 1px dashed currentColor;
+    border-radius: 8px;
+    background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.04));
+  }
+  .bundle-cart-banner__text > * {
+    margin: 0;
+    font-size: 0.95em;
+    line-height: 1.4;
+  }
+  .bundle-cart-banner__cta { align-self: flex-start; }
+</style>

@@ -1,0 +1,569 @@
+{% doc %}
+  @prompt
+    Create a clean section for an event venue page called “What’s Included With Event Space Rental.” Match the existing Thread website style. Keep it minimal, modern, and easy to scan.
+    
+    Use a simple layout with small grouped cards.
+    
+    Include these items:
+    - 2,220 sq ft industrial-style event space
+    - Full kitchen access
+    - Stage and large TV
+    - Bluetooth sound system and cordless microphone
+    - Tables, chairs, benches, and linens
+    - Wheelchair accessibility
+    - Private parking lot
+    - Mothers’ room / bridal suite
+    - Restroom access
+    
+    Add a short intro sentence:
+    Everything you need for a seamless and stylish event is included.
+    
+    Keep it visually clean and not text-heavy.
+    
+    Give the ability to upload an image in each card. 
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-event-inclusions-{{ ai_gen_id }} {
+    width: 100%;
+    display: block;
+  }
+
+  .ai-event-inclusions-container-{{ ai_gen_id }} {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 20px;
+  }
+
+  .ai-event-inclusions-header-{{ ai_gen_id }} {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .ai-event-inclusions-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.title_size }}px;
+    color: {{ block.settings.text_color }};
+    margin: 0 0 12px 0;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .ai-event-inclusions-intro-{{ ai_gen_id }} {
+    font-size: {{ block.settings.intro_size }}px;
+    color: {{ block.settings.text_color }};
+    margin: 0 auto;
+    max-width: 600px;
+    line-height: 1.6;
+  }
+
+  .ai-event-inclusions-grid-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: {{ block.settings.card_gap }}px;
+    margin-top: 40px;
+  }
+
+  .ai-event-inclusions-card-{{ ai_gen_id }} {
+    background-color: {{ block.settings.card_bg_color }};
+    border: {{ block.settings.card_border_width }}px solid {{ block.settings.card_border_color }};
+    padding: {{ block.settings.card_padding }}px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.2s ease;
+  }
+
+  .ai-event-inclusions-card-{{ ai_gen_id }}:hover {
+    transform: translateY(-2px);
+  }
+
+  .ai-event-inclusions-card-image-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background-color: #f4f4f4;
+  }
+
+  .ai-event-inclusions-card-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-event-inclusions-card-image-wrapper-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-event-inclusions-card-content-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .ai-event-inclusions-card-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.card_title_size }}px;
+    color: {{ block.settings.text_color }};
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .ai-event-inclusions-card-description-{{ ai_gen_id }} {
+    font-size: {{ block.settings.card_description_size }}px;
+    color: {{ block.settings.text_color }};
+    margin: 0;
+    line-height: 1.5;
+    opacity: 0.8;
+  }
+
+  @media screen and (max-width: 768px) {
+    .ai-event-inclusions-container-{{ ai_gen_id }} {
+      padding: 40px 16px;
+    }
+
+    .ai-event-inclusions-grid-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+      gap: {{ block.settings.card_gap | times: 0.75 }}px;
+    }
+
+    .ai-event-inclusions-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 0.8 }}px;
+    }
+  }
+{% endstyle %}
+
+<event-inclusions-{{ ai_gen_id }} class="ai-event-inclusions-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-event-inclusions-container-{{ ai_gen_id }}">
+    <div class="ai-event-inclusions-header-{{ ai_gen_id }}">
+      {% if block.settings.title != blank %}
+        <h2 class="ai-event-inclusions-title-{{ ai_gen_id }}">{{ block.settings.title }}</h2>
+      {% endif %}
+      {% if block.settings.intro_text != blank %}
+        <p class="ai-event-inclusions-intro-{{ ai_gen_id }}">{{ block.settings.intro_text }}</p>
+      {% endif %}
+    </div>
+
+    <div class="ai-event-inclusions-grid-{{ ai_gen_id }}">
+      {% for i in (1..9) %}
+        {% liquid
+          assign title_key = 'item_' | append: i | append: '_title'
+          assign description_key = 'item_' | append: i | append: '_description'
+          assign image_key = 'item_' | append: i | append: '_image'
+          assign enabled_key = 'item_' | append: i | append: '_enabled'
+
+          assign item_title = block.settings[title_key]
+          assign item_description = block.settings[description_key]
+          assign item_image = block.settings[image_key]
+          assign item_enabled = block.settings[enabled_key]
+        %}
+
+        {% if item_enabled and item_title != blank %}
+          <div class="ai-event-inclusions-card-{{ ai_gen_id }}">
+            {% if item_image != blank or block.settings.show_image_placeholders %}
+              <div class="ai-event-inclusions-card-image-wrapper-{{ ai_gen_id }}">
+                {% if item_image != blank %}
+                  <img
+                    src="{{ item_image | image_url: width: 600 }}"
+                    alt="{{ item_title | escape }}"
+                    class="ai-event-inclusions-card-image-{{ ai_gen_id }}"
+                    loading="lazy"
+                    width="600"
+                    height="338"
+                  >
+                {% else %}
+                  {{ 'image' | placeholder_svg_tag }}
+                {% endif %}
+              </div>
+            {% endif %}
+            <div class="ai-event-inclusions-card-content-{{ ai_gen_id }}">
+              <h3 class="ai-event-inclusions-card-title-{{ ai_gen_id }}">{{ item_title }}</h3>
+              {% if item_description != blank %}
+                <p class="ai-event-inclusions-card-description-{{ ai_gen_id }}">{{ item_description }}</p>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</event-inclusions-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class EventInclusions{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+      }
+    }
+
+    customElements.define('event-inclusions-{{ ai_gen_id }}', EventInclusions{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Event space inclusions",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "What's Included With Event Space Rental"
+    },
+    {
+      "type": "textarea",
+      "id": "intro_text",
+      "label": "Intro text",
+      "default": "Everything you need for a seamless and stylish event is included."
+    },
+    {
+      "type": "header",
+      "content": "Item 1"
+    },
+    {
+      "type": "checkbox",
+      "id": "item_1_enabled",
+      "label": "Enable item 1",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "item_1_title",
+      "label": "Title",
+      "default": "2,220 sq ft industrial-style event space"
+    },
+    {
+      "type": "textarea",
+      "id": "item_1_description",
+      "label": "Description"
+    },
+    {
+      "type": "image_picker",
+      "id": "item_1_image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Item 2"
+    },
+    {
+      "type": "checkbox",
+      "id": "item_2_enabled",
+      "label": "Enable item 2",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "item_2_title",
+      "label": "Title",
+      "default": "Full kitchen access"
+    },
+    {
+      "type": "textarea",
+      "id": "item_2_description",
+      "label": "Description"
+    },
+    {
+      "type": "image_picker",
+      "id": "item_2_image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Item 3"
+    },
+    {
+      "type": "checkbox",
+      "id": "item_3_enabled",
+      "label": "Enable item 3",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "item_3_title",
+      "label": "Title",
+      "default": "Stage and large TV"
+    },
+    {
+      "type": "textarea",
+      "id": "item_3_description",
+      "label": "Description"
+    },
+    {
+      "type": "image_picker",
+      "id": "item_3_image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Item 4"
+    },
+    {
+      "type": "checkbox",
+      "id": "item_4_enabled",
+      "label": "Enable item 4",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "item_4_title",
+      "label": "Title",
+      "default": "Bluetooth sound system and cordless microphone"
+    },
+    {
+      "type": "textarea",
+      "id": "item_4_description",
+      "label": "Description"
+    },
+    {
+      "type": "image_picker",
+      "id": "item_4_image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Item 5"
+    },
+    {
+      "type": "checkbox",
+      "id": "item_5_enabled",
+      "label": "Enable item 5",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "item_5_title",
+      "label": "Title",
+      "default": "Tables, chairs, benches, and linens"
+    },
+    {
+      "type": "textarea",
+      "id": "item_5_description",
+      "label": "Description"
+    },
+    {
+      "type": "image_picker",
+      "id": "item_5_image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Item 6"
+    },
+    {
+      "type": "checkbox",
+      "id": "item_6_enabled",
+      "label": "Enable item 6",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "item_6_title",
+      "label": "Title",
+      "default": "Wheelchair accessibility"
+    },
+    {
+      "type": "textarea",
+      "id": "item_6_description",
+      "label": "Description"
+    },
+    {
+      "type": "image_picker",
+      "id": "item_6_image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Item 7"
+    },
+    {
+      "type": "checkbox",
+      "id": "item_7_enabled",
+      "label": "Enable item 7",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "item_7_title",
+      "label": "Title",
+      "default": "Private parking lot"
+    },
+    {
+      "type": "textarea",
+      "id": "item_7_description",
+      "label": "Description"
+    },
+    {
+      "type": "image_picker",
+      "id": "item_7_image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Item 8"
+    },
+    {
+      "type": "checkbox",
+      "id": "item_8_enabled",
+      "label": "Enable item 8",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "item_8_title",
+      "label": "Title",
+      "default": "Mothers' room / bridal suite"
+    },
+    {
+      "type": "textarea",
+      "id": "item_8_description",
+      "label": "Description"
+    },
+    {
+      "type": "image_picker",
+      "id": "item_8_image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Item 9"
+    },
+    {
+      "type": "checkbox",
+      "id": "item_9_enabled",
+      "label": "Enable item 9",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "item_9_title",
+      "label": "Title",
+      "default": "Restroom access"
+    },
+    {
+      "type": "textarea",
+      "id": "item_9_description",
+      "label": "Description"
+    },
+    {
+      "type": "image_picker",
+      "id": "item_9_image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image_placeholders",
+      "label": "Show image placeholders",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Title size",
+      "min": 20,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "intro_size",
+      "label": "Intro text size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "card_title_size",
+      "label": "Card title size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "card_description_size",
+      "label": "Card description size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Card gap",
+      "min": 12,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "label": "Card padding",
+      "min": 12,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "card_border_width",
+      "label": "Card border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#212121"
+    },
+    {
+      "type": "color",
+      "id": "card_bg_color",
+      "label": "Card background",
+      "default": "#fdfdfd"
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Card border color",
+      "default": "#e7e7e7"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Event space inclusions"
+    }
+  ]
+}
+{% endschema %}

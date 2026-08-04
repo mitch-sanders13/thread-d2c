@@ -1,0 +1,1582 @@
+<!-- sections/theme__footer.liquid -->
+{% comment %} 
+  Site wide footer.
+
+  Globals:
+    - settings.layout_horizontal: horizontaly margin
+    - settings.enable_animations: boolean to enable animations
+    - settings.enable_region: boolean to enable/disable the region selector
+    - settings.enable_language: boolean to enable/disable the language selector
+    - settings.type_seperator: setting to pick the type of seperator between text
+    - settings.social_tiktok_link: link to tiktok
+    - settings.social_instagram_link: link to instagram
+    - settings.social_twitter_link: link to twitter
+    - settings.social_facebook_link: link to facebook
+    - settings.social_pinterest_link: link to pinterest
+    - settings.social_snapchat_link: link to snapchat
+    - settings.social_tumblr_link: link to tumblr
+    - settings.social_discord_link: link to discord
+    - settings.social_linkedin_link: link to linkedin
+    - settings.social_twitch_link: link to twitch
+    - settings.social_youtube_link: link to youtube
+    - settings.social_vimeo_link: link to vimeo
+{% endcomment %}
+
+{%- assign has_content = false -%}
+{% for block in section.blocks %}
+  {%- case block.type -%}
+    {%- when 'newsletter' -%}
+      {%- assign has_content = true -%}
+    {%- when 'content' -%}
+      {%- assign has_content = true -%}
+  {%- endcase -%}
+{% endfor %}
+
+{%- comment -%}
+  ============================================================
+  Footer typography + spacing — scoped to this section. Each
+  text layer (title, link, heading, body) resolves a font family
+  from a select; sizes/weights/etc. are driven by individual
+  settings. Mobile/desktop variants use a media query fence.
+  ============================================================
+{%- endcomment -%}
+{%- assign _ft_title_fam   = section.settings.title_font   | default: 'nav' -%}
+{%- assign _ft_link_fam    = section.settings.link_font    | default: 'body' -%}
+{%- assign _ft_heading_fam = section.settings.heading_font | default: 'heading' -%}
+{%- assign _ft_body_fam    = section.settings.body_font    | default: 'body' -%}
+{%- capture _ft_title_fam_var   -%}var(--type-font-{% if _ft_title_fam == 'heading' %}header{% else %}{{ _ft_title_fam }}{% endif %}-family){%- endcapture -%}
+{%- capture _ft_link_fam_var    -%}var(--type-font-{% if _ft_link_fam == 'heading' %}header{% else %}{{ _ft_link_fam }}{% endif %}-family){%- endcapture -%}
+{%- capture _ft_heading_fam_var -%}var(--type-font-{% if _ft_heading_fam == 'heading' %}header{% else %}{{ _ft_heading_fam }}{% endif %}-family){%- endcapture -%}
+{%- capture _ft_body_fam_var    -%}var(--type-font-{% if _ft_body_fam == 'heading' %}header{% else %}{{ _ft_body_fam }}{% endif %}-family){%- endcapture -%}
+
+<style>
+  /* ---- Block title (desktop column header + mobile accordion label) ---- */
+  #shopify-section-{{ section.id }} .ft-title,
+  #shopify-section-{{ section.id }} .ft-title * {
+    font-family: {{ _ft_title_fam_var }} !important;
+    font-size: {{ section.settings.title_size_m | default: 14 }}px !important;
+    font-weight: {{ section.settings.title_weight | default: '700' }} !important;
+    text-transform: {{ section.settings.title_case | default: 'uppercase' }} !important;
+    letter-spacing: {{ section.settings.title_ls | default: '0.08em' }} !important;
+    line-height: {{ section.settings.title_lh | default: 1.3 }} !important;
+    {% if section.settings.title_color != blank %}color: {{ section.settings.title_color }} !important;{% endif %}
+  }
+  /* ---- Menu link (desktop + mobile accordion items) ---- */
+  #shopify-section-{{ section.id }} .ft-link,
+  #shopify-section-{{ section.id }} .ft-link * {
+    font-family: {{ _ft_link_fam_var }} !important;
+    font-size: {{ section.settings.link_size_m | default: 14 }}px !important;
+    font-weight: {{ section.settings.link_weight | default: '400' }} !important;
+    text-transform: {{ section.settings.link_case | default: 'none' }} !important;
+    letter-spacing: {{ section.settings.link_ls | default: '0em' }} !important;
+    line-height: {{ section.settings.link_lh | default: 1.5 }} !important;
+    opacity: {{ section.settings.link_opacity | default: 100 | divided_by: 100.0 }} !important;
+    {% if section.settings.link_color != blank %}color: {{ section.settings.link_color }} !important;{% endif %}
+  }
+  /* ---- Heading (newsletter, content block heading) ---- */
+  #shopify-section-{{ section.id }} .ft-heading,
+  #shopify-section-{{ section.id }} .ft-heading * {
+    font-family: {{ _ft_heading_fam_var }} !important;
+    font-size: {{ section.settings.heading_size_m | default: 18 }}px !important;
+    font-weight: {{ section.settings.heading_weight | default: '700' }} !important;
+    text-transform: {{ section.settings.heading_case | default: 'none' }} !important;
+    letter-spacing: {{ section.settings.heading_ls | default: '0em' }} !important;
+    line-height: {{ section.settings.heading_lh | default: 1.2 }} !important;
+    {% if section.settings.heading_color != blank %}color: {{ section.settings.heading_color }} !important;{% endif %}
+  }
+  /* ---- Body text (location text, newsletter/content body, disclaimer, sub-footer) ---- */
+  #shopify-section-{{ section.id }} .ft-body,
+  #shopify-section-{{ section.id }} .ft-body * {
+    font-family: {{ _ft_body_fam_var }} !important;
+    font-size: {{ section.settings.body_size_m | default: 14 }}px !important;
+    font-weight: {{ section.settings.body_weight | default: '400' }} !important;
+    letter-spacing: {{ section.settings.body_ls | default: '0em' }} !important;
+    line-height: {{ section.settings.body_lh | default: 1.5 }} !important;
+    {% if section.settings.body_color != blank %}color: {{ section.settings.body_color }} !important;{% endif %}
+  }
+
+  /* ---- Sub-footer copyright text — independent size + opacity ----
+     Uses `.ft-body.ft-sub-text` so the selector specificity is higher
+     than the generic `.ft-body` rule above; otherwise the .ft-body
+     desktop override (emitted later) would beat this even with
+     !important. */
+  #shopify-section-{{ section.id }} .ft-body.ft-sub-text,
+  #shopify-section-{{ section.id }} .ft-body.ft-sub-text * {
+    font-size: {{ section.settings.sub_text_size_m | default: 12 }}px !important;
+    opacity: {{ section.settings.sub_text_opacity | default: 75 | divided_by: 100.0 }};
+    {% if section.settings.sub_text_color != blank %}color: {{ section.settings.sub_text_color }} !important;{% endif %}
+  }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .ft-body.ft-sub-text,
+    #shopify-section-{{ section.id }} .ft-body.ft-sub-text * {
+      font-size: {{ section.settings.sub_text_size_d | default: 12 }}px !important;
+    }
+  }
+
+  /* ---- Desktop typography sizes + spacing ---- */
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .ft-title,
+    #shopify-section-{{ section.id }} .ft-title * { font-size: {{ section.settings.title_size_d | default: 14 }}px !important; }
+    #shopify-section-{{ section.id }} .ft-link,
+    #shopify-section-{{ section.id }} .ft-link * { font-size: {{ section.settings.link_size_d | default: 14 }}px !important; }
+    #shopify-section-{{ section.id }} .ft-heading,
+    #shopify-section-{{ section.id }} .ft-heading * { font-size: {{ section.settings.heading_size_d | default: 20 }}px !important; }
+    #shopify-section-{{ section.id }} .ft-body,
+    #shopify-section-{{ section.id }} .ft-body * { font-size: {{ section.settings.body_size_d | default: 14 }}px !important; }
+
+    #shopify-section-{{ section.id }} .ft-main-d {
+      padding-top: {{ section.settings.main_pt_d | default: 48 }}px !important;
+      padding-bottom: {{ section.settings.main_pb_d | default: 48 }}px !important;
+      padding-left: {{ section.settings.main_pl_d | default: 0 }}px !important;
+      padding-right: {{ section.settings.main_pr_d | default: 0 }}px !important;
+    }
+    #shopify-section-{{ section.id }} .ft-cols-d { gap: {{ section.settings.col_gap_d | default: 80 }}px !important; }
+    {% if section.settings.cols_divider_d %}
+      /* Vertical divider between menu columns (left) and newsletter (right). */
+      #shopify-section-{{ section.id }} .ft-right-d {
+        border-left: {{ section.settings.cols_divider_width_d | default: 1 }}px solid {{ section.settings.cols_divider_color_d | default: 'rgba(0,0,0,0.12)' }} !important;
+        padding-left: {{ section.settings.cols_divider_pad_d | default: 40 }}px !important;
+      }
+    {% endif %}
+    #shopify-section-{{ section.id }} .ft-menu-d {
+      gap: {{ section.settings.menu_gap_d | default: 48 }}px !important;
+      {% case section.settings.menu_layout_d %}
+        {% when 'tight_left'   %}justify-content: flex-start  !important;
+        {% when 'tight_center' %}justify-content: center      !important;
+        {% when 'tight_right'  %}justify-content: flex-end    !important;
+      {% endcase %}
+    }
+    {% if section.settings.menu_layout_d != blank and section.settings.menu_layout_d != 'spread' %}
+    /* Tight mode: let columns shrink to their content so `gap` actually
+       controls the space between them. Overrides Tailwind's w-1/4. */
+    #shopify-section-{{ section.id }} .ft-menu-d > div { width: auto !important; }
+    {% endif %}
+    #shopify-section-{{ section.id }} .ft-title-mb-d { margin-bottom: {{ section.settings.title_mb_d | default: 16 }}px !important; }
+    #shopify-section-{{ section.id }} .ft-link-row-d  { margin-top: 0 !important; margin-bottom: {{ section.settings.link_gap_d | default: 12 }}px !important; }
+    #shopify-section-{{ section.id }} .ft-sub-d {
+      padding-top: {{ section.settings.sub_pt_d | default: 16 }}px !important;
+      padding-bottom: {{ section.settings.sub_pb_d | default: 16 }}px !important;
+      padding-left: {{ section.settings.sub_pl_d | default: 0 }}px !important;
+      padding-right: {{ section.settings.sub_pr_d | default: 0 }}px !important;
+    }
+    {% unless section.settings.sub_border_top_d %}
+      #shopify-section-{{ section.id }} .ft-sub-d { border-top: 0 !important; }
+    {% endunless %}
+
+    {%- comment -%} ----- Desktop background overrides ----- {%- endcomment -%}
+    {% if section.settings.desktop_bg_color != blank %}
+      #shopify-section-{{ section.id }} .ft-nav-d,
+      #shopify-section-{{ section.id }} .ft-sub-d {
+        background: {{ section.settings.desktop_bg_color }} !important;
+      }
+    {% endif %}
+    {% if section.settings.desktop_text_color != blank %}
+      #shopify-section-{{ section.id }} .ft-nav-d,
+      #shopify-section-{{ section.id }} .ft-nav-d a,
+      #shopify-section-{{ section.id }} .ft-sub-d,
+      #shopify-section-{{ section.id }} .ft-sub-d a {
+        color: {{ section.settings.desktop_text_color }} !important;
+      }
+    {% endif %}
+    {% if section.settings.desktop_newsletter_bg_color != blank %}
+      /* Newsletter-specific desktop background (inside the right column) */
+      #shopify-section-{{ section.id }} .ft-nav-d [data-nl-container] {
+        background: {{ section.settings.desktop_newsletter_bg_color }} !important;
+        {% if section.settings.desktop_newsletter_pad and section.settings.desktop_newsletter_pad > 0 %}
+          padding: {{ section.settings.desktop_newsletter_pad }}px;
+        {% endif %}
+        {% if section.settings.desktop_newsletter_radius and section.settings.desktop_newsletter_radius > 0 %}
+          border-radius: {{ section.settings.desktop_newsletter_radius }}px;
+        {% endif %}
+      }
+    {% endif %}
+  }
+
+  /* ============================================================
+     Force-remove any stray horizontal line at the very top of the
+     footer — covers three possible sources:
+       1. Borders on the footer's own outer wrappers / first child.
+       2. A border-bottom on the last element of <main> (the section
+          directly above the footer group).
+       3. The ::before pseudo we draw on the first accordion.
+     ============================================================ */
+  #shopify-section-{{ section.id }},
+  #shopify-section-{{ section.id }} > footer,
+  #shopify-section-{{ section.id }} > footer > *:first-child,
+  #shopify-section-{{ section.id }} .ft-nav-d,
+  #shopify-section-{{ section.id }} .ft-mobile-block:first-of-type,
+  #shopify-section-{{ section.id }} .ft-acc-m:first-of-type {
+    border-top: 0 !important;
+    box-shadow: none !important;
+    margin-top: 0 !important;
+  }
+  #shopify-section-{{ section.id }} .ft-acc-m:first-of-type::before,
+  #shopify-section-{{ section.id }} .ft-acc-m:first-of-type::after + .ft-acc-m::before {
+    display: none !important;
+  }
+  /* The section directly above the footer group can't cleanly be
+     targeted from inside the footer (different DOM subtree), but a
+     last-child selector on <main> works at the document level. */
+  main > *:last-child,
+  main > *:last-child > *:last-child {
+    border-bottom: 0 !important;
+    margin-bottom: 0 !important;
+    box-shadow: none !important;
+  }
+  /* The Footer Group wrapper <section> and any wrapping div Shopify
+     injects around this section — zero any top-edge styling. */
+  section[aria-label="Footer Group"],
+  section[aria-label="Footer Group"] > *:first-child {
+    border-top: 0 !important;
+    margin-top: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* ---- Mobile spacing ---- */
+  @media (max-width: 767.98px) {
+    #shopify-section-{{ section.id }} .ft-accordion-btn {
+      /* Horizontal padding ties to the divider inset so title + `+` icon
+         line up with the divider line no matter what value is chosen. */
+      padding-top:    {{ section.settings.acc_btn_pad_v_m | default: 16 }}px !important;
+      padding-bottom: {{ section.settings.acc_btn_pad_v_m | default: 16 }}px !important;
+      padding-left:   {{ section.settings.acc_divider_inset_m | default: 16 }}px !important;
+      padding-right:  {{ section.settings.acc_divider_inset_m | default: 16 }}px !important;
+    }
+    #shopify-section-{{ section.id }} .ft-accordion-item {
+      padding-top:    {{ section.settings.acc_item_pad_v_m | default: 16 }}px !important;
+      padding-bottom: {{ section.settings.acc_item_pad_v_m | default: 16 }}px !important;
+      padding-left:   {{ section.settings.acc_divider_inset_m | default: 16 }}px !important;
+      padding-right:  {{ section.settings.acc_divider_inset_m | default: 16 }}px !important;
+    }
+    {% unless section.settings.sub_border_top_m %}
+      #shopify-section-{{ section.id }} .ft-sub-m { border-top: 0 !important; }
+    {% endunless %}
+    {% unless section.settings.block_border_top_m %}
+      /* Removes the line that sits above the mobile newsletter / content
+         block (hard-coded `border--t-width` in the markup). */
+      #shopify-section-{{ section.id }} .ft-mobile-block { border-top: 0 !important; }
+    {% endunless %}
+    #shopify-section-{{ section.id }} .ft-mobile-block {
+      padding-top: {{ section.settings.mob_block_pt_m | default: 32 }}px !important;
+      padding-bottom: {{ section.settings.mob_block_pb_m | default: 32 }}px !important;
+    }
+    #shopify-section-{{ section.id }} .ft-social-m {
+      padding-top: {{ section.settings.social_pt_m | default: 32 }}px !important;
+      padding-bottom: {{ section.settings.social_pb_m | default: 32 }}px !important;
+      padding-left: {{ section.settings.social_pad_h_m | default: 16 }}px !important;
+      padding-right: {{ section.settings.social_pad_h_m | default: 16 }}px !important;
+      {% if section.settings.social_border_top_m %}border-top: {{ section.settings.social_border_top_width_m | default: 1 }}px solid {{ section.settings.social_border_top_color_m | default: 'rgba(255,255,255,0.15)' }};{% endif %}
+    }
+    #shopify-section-{{ section.id }} .ft-social-heading-m {
+      margin-bottom: {{ section.settings.social_heading_mb_m | default: 16 }}px !important;
+      font-size: {{ section.settings.social_heading_size_m | default: 14 }}px !important;
+      letter-spacing: {{ section.settings.social_heading_ls_m | default: '0.08em' }} !important;
+      text-transform: {{ section.settings.social_heading_case_m | default: 'uppercase' }} !important;
+      {% if section.settings.social_heading_color_m != blank %}color: {{ section.settings.social_heading_color_m }} !important;{% endif %}
+    }
+    #shopify-section-{{ section.id }} .ft-social-row-m {
+      gap: {{ section.settings.social_gap_m | default: 16 }}px !important;
+    }
+    #shopify-section-{{ section.id }} .ft-social-icon-m {
+      width: {{ section.settings.social_icon_hit_m | default: 40 }}px !important;
+      height: {{ section.settings.social_icon_hit_m | default: 40 }}px !important;
+      opacity: {{ section.settings.social_opacity_m | default: 85 | divided_by: 100.0 }} !important;
+      {% if section.settings.social_icon_color_m != blank %}color: {{ section.settings.social_icon_color_m }} !important;{% endif %}
+      {% if section.settings.social_icon_style_m == 'circle_outline' %}
+        border: {{ section.settings.social_border_width_m | default: 1 }}px solid {{ section.settings.social_border_color_m | default: 'currentColor' }};
+        border-radius: 50%;
+      {% elsif section.settings.social_icon_style_m == 'circle_fill' %}
+        background: {{ section.settings.social_border_color_m | default: '#ffffff' }};
+        color: {{ section.settings.social_icon_color_m | default: '#000000' }} !important;
+        border-radius: 50%;
+      {% endif %}
+    }
+    #shopify-section-{{ section.id }} .ft-social-icon-m svg {
+      width: {{ section.settings.social_icon_size_m | default: 18 }}px !important;
+      height: {{ section.settings.social_icon_size_m | default: 18 }}px !important;
+    }
+    #shopify-section-{{ section.id }} .ft-sub-m {
+      padding-top: {{ section.settings.sub_pt_m | default: 16 }}px !important;
+      padding-bottom: {{ section.settings.sub_pb_m | default: 16 }}px !important;
+    }
+
+    {%- comment -%} ----- Mobile background overrides ----- {%- endcomment -%}
+    {% if section.settings.mobile_bg_color != blank %}
+      #shopify-section-{{ section.id }} .ft-acc-m,
+      #shopify-section-{{ section.id }} .ft-acc-m > button,
+      #shopify-section-{{ section.id }} .ft-acc-m .accordion-content,
+      #shopify-section-{{ section.id }} .ft-acc-m nav,
+      #shopify-section-{{ section.id }} .ft-mobile-block,
+      #shopify-section-{{ section.id }} .ft-social-m,
+      #shopify-section-{{ section.id }} .ft-sub-m {
+        background: {{ section.settings.mobile_bg_color }} !important;
+      }
+    {% endif %}
+    {% if section.settings.mobile_text_color != blank %}
+      #shopify-section-{{ section.id }} .ft-acc-m,
+      #shopify-section-{{ section.id }} .ft-acc-m button,
+      #shopify-section-{{ section.id }} .ft-acc-m a,
+      #shopify-section-{{ section.id }} .ft-mobile-block,
+      #shopify-section-{{ section.id }} .ft-mobile-block a,
+      #shopify-section-{{ section.id }} .ft-social-m,
+      #shopify-section-{{ section.id }} .ft-sub-m {
+        color: {{ section.settings.mobile_text_color }} !important;
+      }
+    {% endif %}
+    {% if section.settings.mobile_newsletter_bg_color != blank %}
+      /* Newsletter block gets its own mobile bg, overriding the footer-wide color. */
+      #shopify-section-{{ section.id }} .ft-mobile-block:has([data-nl-container]) {
+        background: {{ section.settings.mobile_newsletter_bg_color }} !important;
+      }
+    {% endif %}
+
+    {%- comment -%} ----- Accordion dividers (inset from edges) ----- {%- endcomment -%}
+    #shopify-section-{{ section.id }} .ft-acc-m {
+      position: relative;
+      border-bottom: 0 !important;
+    }
+    #shopify-section-{{ section.id }} .ft-acc-m::after {
+      content: "";
+      position: absolute;
+      left:   {{ section.settings.acc_divider_inset_m | default: 0 }}px;
+      right:  {{ section.settings.acc_divider_inset_m | default: 0 }}px;
+      bottom: 0;
+      height: {{ section.settings.acc_divider_width_m | default: 1 }}px;
+      background: {{ section.settings.acc_divider_color_m | default: 'rgba(255,255,255,0.15)' }};
+      pointer-events: none;
+    }
+    {% if section.settings.acc_divider_show_top_m %}
+      #shopify-section-{{ section.id }} .ft-acc-m:first-of-type::before {
+        content: "";
+        position: absolute;
+        left:   {{ section.settings.acc_divider_inset_m | default: 0 }}px;
+        right:  {{ section.settings.acc_divider_inset_m | default: 0 }}px;
+        top: 0;
+        height: {{ section.settings.acc_divider_width_m | default: 1 }}px;
+        background: {{ section.settings.acc_divider_color_m | default: 'rgba(255,255,255,0.15)' }};
+        pointer-events: none;
+      }
+    {% endif %}
+  }
+</style>
+
+<footer class="{{ section.settings.visibility }} relative z-30"
+  x-intersect:enter="scroll_up_force = true;"
+  x-intersect:leave="scroll_up_force = false;"
+  x-data="{ accordion: null }">
+
+  {% comment %} mobile menu {% endcomment %}
+  {% for block in section.blocks %}
+    {%- case block.type -%}
+      {%- when 'menu' -%}
+        {% capture menu_content %}
+          <!-- mobile menu -->
+          <nav class="color__bg-secondary color__light">
+              {%- for link in block.settings.menu.links -%}
+                {% if link.levels >= 1 %}
+                    {% capture accordion_content %}
+                    {% for child_link in link.links %}
+                        <a href="{{ child_link.url }}"
+                        class="ft-link ft-accordion-item type__body border--t-width flex items-center justify-between w-full px-4 py-4 pl-8 no-underline
+                            {{ section.settings.main_color_border }}">
+                        {{ child_link.title }}
+                        </a>
+                        {% for grandchild_link in child_link.links %}
+                        <a href="{{ grandchild_link.url }}"
+                            class="ft-link ft-accordion-item type__body border--t-width flex items-center justify-between w-full px-4 py-4 pl-12 no-underline
+                            {{ section.settings.main_color_border }}">
+                            {{ grandchild_link.title }}
+                        </a>
+                        {% endfor %}
+                    {% endfor %}
+                    {% endcapture %}
+                    {% capture accordion_container_class %}
+                        border--t-width {{ section.settings.main_color_border }} no-js--hide
+                    {% endcapture %}
+                    {% capture accordion_inner_class %}{% endcapture %}
+
+                    {% render 'component__accordion', 
+                    button_label: link.title, 
+                    button_class: "px-4",
+                    container_class: accordion_container_class,
+                    inner_class: accordion_inner_class
+                    content: accordion_content %}
+
+                    <noscript>
+                        <a class="border--t-width {{ section.settings.main_color_border }} block w-full p-4 no-underline" href="{{ link.url }}">{{ link.title }}</a>
+                        {% for child_link in link.links %}
+                            <a class="border--t-width {{ section.settings.main_color_border }} block w-full p-4 !pl-8 no-underline" href="{{ child_link.url }}">{{ child_link.title }}</a>
+                            {% for grandchild_link in child_link.links %}
+                            <a class="border--t-width {{ section.settings.main_color_border }} block w-full p-4 !pl-12 no-underline" href="{{ grandchild_link.url }}">{{ grandchild_link.title }}</a>
+                            {% endfor %}
+                        {% endfor %}
+                    </noscript>
+                {% else %}
+                    
+                  {%- if link.url contains 'https://' -%}
+                    <a href="{{ link.url }}" target="_blank"
+                    class="ft-link ft-accordion-item border--t-width block p-4 no-underline
+                    {{ section.settings.main_color_border }}">
+                        {{ link.title }}
+                    </a>
+                  {%- else -%}
+                      <a href="{{ link.url }}"
+                      class="ft-link ft-accordion-item border--t-width block p-4 no-underline
+                      {{ section.settings.main_color_border }}">
+                          {{ link.title }}
+                      </a>
+                  {%- endif -%}
+
+                {% endif %}
+                
+              {%- endfor -%}
+          </nav>
+          {% capture menu_title %}{{ block.settings.block_title }}{% endcapture %} 
+        {% endcapture %}
+
+        {% render 'component__accordion',
+          open: false,
+          index:forloop.index,
+          container_class: "ft-acc-m md:hidden",
+          icon_class: "color__light",
+          inner_class: "color__bg-overlay-1",
+          button_class: "ft-title ft-accordion-btn px-4 color__bg-secondary color__light focus:outline-0",
+          button_label: menu_title,
+          content: menu_content
+        %}
+
+      {%- when 'location' -%}
+        {% capture location_content %}
+          <!-- mobile location -->
+          <div class="md:hidden color__bg-secondary color__light w-full">
+              <p href="{{ link.url }}" class="ft-body ft-accordion-item block no-underline type__body normal-case !mb-0 p-4">
+                  {{ block.settings.block_text }}
+              </p>
+          </div>
+          {% capture location_title %}{{ block.settings.block_title }}{% endcapture %}
+        {% endcapture %}
+        {% render 'component__accordion',
+          open: false,
+          index:forloop.index,
+          button_label: location_title,
+          button_class: "ft-title ft-accordion-btn px-4 color__bg-secondary color__light focus:outline-0",
+          container_class: "ft-acc-m md:hidden",
+          icon_class: "color__light",
+          inner_class: "color__bg-overlay-1",
+          content: location_content
+        %}
+
+      {%- when 'newsletter' -%}
+        <!-- mobile newsletter (Attentive) -->
+        <section class="ft-mobile-block py-8 md:hidden
+          {{ section.settings.main_color_scheme }}
+          {{ section.settings.main_color_border }}">
+          <div class="{{ settings.layout_horizontal }} ft-nl-{{ block.id }}" data-nl-container>
+            <div data-nl-body>
+              {%- unless block.settings.heading == blank -%}
+                <h3 class="ft-heading type__heading type__heading--bold-5" style="margin:0 0 {{ block.settings.heading_mb | default: 8 }}px 0;">
+                  {{ block.settings.heading }}
+                </h3>
+              {%- endunless -%}
+
+              {%- unless block.settings.content == blank -%}
+                <div class="ft-body m-0--clear" style="margin:0 0 {{ block.settings.content_mb | default: 8 }}px 0;">
+                  {{ block.settings.content }}
+                </div>
+              {%- endunless -%}
+
+              {% render 'footer__newsletter-form', block: block, breakpoint: 'mobile' %}
+
+              {%- unless block.settings.disclaimer == blank -%}
+                <div class="ft-body m-0--clear type--smaller opacity-75" style="margin:{{ block.settings.disclaimer_mt | default: 8 }}px 0 0;">
+                  {{ block.settings.disclaimer }}
+                </div>
+              {%- endunless -%}
+            </div>
+            {% render 'footer__newsletter-success', block: block %}
+          </div>
+        </section>
+        {% render 'footer__newsletter-script', block: block %}
+
+      {%- when 'content' -%}
+        <!-- mobile content -->
+        <div class="ft-mobile-block py-8 md:hidden
+          {{ section.settings.main_color_scheme }}
+          {{ section.settings.main_color_border }}">
+          <div class="{{ settings.layout_horizontal }}">
+          <h3 class="ft-heading type__heading type__heading--bold-5 mb-2">
+              {{ block.settings.heading }}
+          </h3>
+          <div class="ft-body m-0--clear">
+              {{ block.settings.content }}
+          </div>
+
+          {%- unless block.settings.button_url == blank -%}
+              <a href="{{ block.settings.button_url }}" class="btn btn--smaller mt-2 !w-full {{ section.settings.main_color_button }}">
+              {{ block.settings.button_label }}
+              </a>
+          {%- endunless -%}
+
+          </div>
+        </div>
+
+    {%- endcase -%}
+  {% endfor %}
+
+  {% comment %} mobile social icons (Allbirds-style: heading + icons in a row) {% endcomment %}
+  {%- assign _social_platforms = 'tiktok,instagram,twitter,facebook,pinterest,snapchat,tumblr,discord,linkedin,twitch,youtube,vimeo' | split: ',' -%}
+  {%- assign _social_titles = 'TikTok,Instagram,Twitter,Facebook,Pinterest,Snapchat,Tumblr,Discord,LinkedIn,Twitch,YouTube,Vimeo' | split: ',' -%}
+  <section class="ft-social-m md:hidden flex flex-col items-center color__bg-secondary color__light w-full">
+    {%- if section.settings.social_heading_m != blank -%}
+      <div class="ft-social-heading-m ft-title">{{ section.settings.social_heading_m }}</div>
+    {%- endif -%}
+    <div class="ft-social-row-m flex flex-wrap items-center justify-center">
+      {%- for _p in _social_platforms -%}
+        {%- assign _link_key = 'social_' | append: _p | append: '_link' -%}
+        {%- assign _link = settings[_link_key] -%}
+        {%- unless _link == blank -%}
+          <a href="{{ _link }}" target="_blank" rel="noopener" title="{{ _social_titles[forloop.index0] }}" class="ft-social-icon-m inline-flex items-center justify-center no-underline hover:no-underline">
+            {% render 'component__icon', icon: _p, size: '20', class: '' %}
+          </a>
+        {%- endunless -%}
+      {%- endfor -%}
+    </div>
+  </section>
+
+
+  {% comment %} desktop nav {% endcomment %}
+  <nav aria-label="Footer Navigation" class="ft-nav-d hidden md:block
+    {{ section.settings.main_color_scheme }}">
+    <div class="window--wide">
+      <div class="ft-cols-d ft-main-d flex justify-between gap-20 py-12 overflow-hidden relative">
+
+        {% comment %} menu and locations {% endcomment %}
+        <div class="ft-menu-d grow flex justify-between gap-12
+          {% if has_content %}w-3/4 {% else %}w-full {% endif %}">
+          {% for block in section.blocks %}
+          {%- case block.type -%}
+
+            {%- when 'menu' -%}
+              <div class="w-1/4">
+                <strong class="ft-title ft-title-mb-d block type__nav">{{ block.settings.block_title }}</strong>
+                {%- for link in block.settings.menu.links -%}
+
+                        {%- if link.url contains 'https://' -%}
+                            <a href="{{ link.url }}" target='_blank' class="ft-link ft-link-row-d block mb-4 no-underline type__body type--small normal-case
+                                {% if forloop.index > 1 %}mt-4{% else %}mt-6{% endif %}">
+                                {{ link.title }}
+                            </a>
+                        {%- else -%}
+                            <a href="{{ link.url }}" class="ft-link ft-link-row-d block mb-4 no-underline type__body type--small normal-case
+                                {% if forloop.index > 1 %}mt-4{% else %}mt-6{% endif %}">
+                                {{ link.title }}
+                            </a>
+                        {%- endif -%}
+
+                    {% for child_link in link.links %}
+                        <a href="{{ child_link.url }}" class="ft-link block mb-2 no-underline">
+                        {{ child_link.title }}
+                        </a>
+                        {% for grandchild_link in child_link.links %}
+                            <a href="{{ grandchild_link.url }}" class="ft-link block mb-2 no-underline">
+                                {{ grandchild_link.title }}
+                            </a>
+                        {% endfor %}
+                    {% endfor %}
+                {%- endfor -%}
+              </div>
+
+            {%- when 'location' -%}
+              <div class="w-1/4">
+                <strong class="ft-title ft-title-mb-d block type__nav">{{ block.settings.block_title }}</strong>
+                <p href="{{ link.url }}" class="ft-body block mb-4 no-underline type__body type--small mt-6 normal-case">
+                    {{ block.settings.block_text }}
+                </p>
+              </div>
+
+          {%- endcase -%}
+          {% endfor %}
+        </div>
+
+        {% comment %} extra stuff {% endcomment %}
+        {% if has_content %}
+          {%- capture _ft_social_d -%}
+            <div class="md:w-auto flex w-full gap-2">
+              {% unless settings.social_tiktok_link == blank %}
+                <a href="{{ settings.social_tiktok_link }}" target="_blank" title="TikTok" class="hover:no-underline inline-flex no-underline opacity-75 pr-2">
+                  {% render 'component__icon', icon: 'tiktok', size: '20', class: '' %}
+                </a>
+              {% endunless %}
+              {% unless settings.social_instagram_link == blank %}
+                <a href="{{ settings.social_instagram_link }}" target="_blank" title="Instagram" class="hover:no-underline inline-flex no-underline opacity-75 px-2">
+                  {% render 'component__icon', icon: 'instagram', size: '20', class: '' %}
+                </a>
+              {% endunless %}
+              {% unless settings.social_twitter_link == blank %}
+                <a href="{{ settings.social_twitter_link }}" target="_blank" title="Twitter" class="hover:no-underline inline-flex no-underline opacity-75">
+                  {% render 'component__icon', icon: 'twitter', size: '20', class: '' %}
+                </a>
+              {% endunless %}
+              {% unless settings.social_facebook_link == blank %}
+                <a href="{{ settings.social_facebook_link }}" target="_blank" title="Facebook" class="hover:no-underline inline-flex no-underline opacity-75 px-2">
+                  {% render 'component__icon', icon: 'facebook', size: '20', class: '' %}
+                </a>
+              {% endunless %}
+              {% unless settings.social_pinterest_link == blank %}
+                <a href="{{ settings.social_pinterest_link }}" target="_blank" title="Pinterest" class="hover:no-underline inline-flex no-underline opacity-75">
+                  {% render 'component__icon', icon: 'pinterest', size: '20', class: '' %}
+                </a>
+              {% endunless %}
+              {% unless settings.social_snapchat_link == blank %}
+                <a href="{{ settings.social_snapchat_link }}" target="_blank" title="Snapchat" class="hover:no-underline inline-flex no-underline opacity-75">
+                  {% render 'component__icon', icon: 'snapchat', size: '20', class: '' %}
+                </a>
+              {% endunless %}
+              {% unless settings.social_tumblr_link == blank %}
+                <a href="{{ settings.social_tumblr_link }}" target="_blank" title="Tumblr" class="hover:no-underline inline-flex no-underline opacity-75">
+                  {% render 'component__icon', icon: 'tumblr', size: '20', class: '' %}
+                </a>
+              {% endunless %}
+              {% unless settings.social_discord_link == blank %}
+                <a href="{{ settings.social_discord_link }}" target="_blank" title="Discord" class="hover:no-underline inline-flex no-underline opacity-75">
+                  {% render 'component__icon', icon: 'discord', size: '20', class: '' %}
+                </a>
+              {% endunless %}
+              {% unless settings.social_linkedin_link == blank %}
+                <a href="{{ settings.social_linkedin_link }}" target="_blank" title="LinkedIn" class="hover:no-underline inline-flex no-underline opacity-75">
+                  {% render 'component__icon', icon: 'linkedin', size: '20', class: '' %}
+                </a>
+              {% endunless %}
+              {% unless settings.social_twitch_link == blank %}
+                <a href="{{ settings.social_twitch_link }}" target="_blank" title="Twitch" class="hover:no-underline inline-flex no-underline opacity-75">
+                  {% render 'component__icon', icon: 'twitch', size: '20', class: '' %}
+                </a>
+              {% endunless %}
+              {% unless settings.social_youtube_link == blank %}
+                <a href="{{ settings.social_youtube_link }}" target="_blank" title="YouTube" class="hover:no-underline inline-flex no-underline opacity-75 pl-2">
+                  {% render 'component__icon', icon: 'youtube', size: '20', class: '' %}
+                </a>
+              {% endunless %}
+              {% unless settings.social_vimeo_link == blank %}
+                <a href="{{ settings.social_vimeo_link }}" target="_blank" title="Vimeo" class="hover:no-underline inline-flex no-underline opacity-75">
+                  {% render 'component__icon', icon: 'vimeo', size: '20', class: '' %}
+                </a>
+              {% endunless %}
+            </div>
+          {%- endcapture -%}
+
+          <div class="ft-right-d flex flex-col items-end w-1/4 gap-12">
+
+            {% if section.settings.social_position_d != 'below' %}
+              <!-- social icons (above) -->
+              {{ _ft_social_d }}
+            {% endif %}
+
+            {% comment %} newsletter, content {% endcomment %}
+            {% for block in section.blocks %}
+            {%- case block.type -%}
+
+              {%- when 'newsletter' -%}
+                <!-- desktop newsletter (Attentive) -->
+                <div data-nl-container class="ft-nl-{{ block.id }}">
+                  <div data-nl-body>
+                    {%- unless block.settings.heading == blank -%}
+                      <h3 class="ft-heading type__heading type--base" style="margin:0 0 {{ block.settings.heading_mb | default: 8 }}px 0;">
+                        {{ block.settings.heading }}
+                      </h3>
+                    {%- endunless -%}
+
+                    {%- unless block.settings.content == blank -%}
+                      <div class="ft-body m-0--clear" style="margin:0 0 {{ block.settings.content_mb | default: 8 }}px 0;">
+                        {{ block.settings.content }}
+                      </div>
+                    {%- endunless -%}
+
+                    {% render 'footer__newsletter-form', block: block, breakpoint: 'desktop' %}
+
+                    {%- unless block.settings.disclaimer == blank -%}
+                      <div class="ft-body m-0--clear type--smaller opacity-75" style="margin:{{ block.settings.disclaimer_mt | default: 8 }}px 0 0;">
+                        {{ block.settings.disclaimer }}
+                      </div>
+                    {%- endunless -%}
+                  </div>
+                  {% render 'footer__newsletter-success', block: block %}
+                </div>
+
+              {%- when 'content' -%}
+                <div>
+                  <h3 class="ft-heading type__heading type--base mb-2">
+                      {{ block.settings.heading }}
+                  </h3>
+                  <div class="ft-body m-0--clear">
+                      {{ block.settings.content }}
+                  </div>
+                  {%- unless block.settings.button_url == blank -%}
+                      <a href="{{ block.settings.button_url }}" class="btn btn--small mt-2
+                      {{ section.settings.main_color_button }}">
+                      {{ block.settings.button_label }}
+                      </a>
+                  {%- endunless -%}
+                </div>
+
+            {%- endcase -%}
+            {% endfor %}
+
+            {% if section.settings.social_position_d == 'below' %}
+              <!-- social icons (below) -->
+              {{ _ft_social_d }}
+            {% endif %}
+
+          </div>
+        {% endif %}
+
+      </div>
+      
+    </div>
+  </nav>
+
+  {%- comment -%} sub footer {%- endcomment -%}
+  <section class="ft-sub-d ft-sub-m py-4 border--t-width flex flex-wrap gap-4 md:bg-transparent color__bg-secondary color__light">
+    <div class="flex flex-wrap w-full items-center justify-between gap-4 window--wide">
+
+    {% if settings.enable_region or settings.enable_language or settings.enable_audio %}
+      <div class="md:w-auto flex flex-wrap w-full gap-2">
+        {% if settings.enable_audio %}
+          <button  
+            class="btn btn--smaller {{ section.settings.sub_color_button }}"
+            @click="audio_popup = true;">
+            <span x-show="enable_audio == false">{{ 'general.media.audio_off' | t }}</span> 
+            <span x-show="enable_audio == true">{{ 'general.media.audio_on' | t }}</span> 
+          </button>
+      {% endif %}
+          {% if settings.enable_region or settings.enable_language %}
+            <button class="btn btn--smaller {{ section.settings.sub_color_button }}" @click="localization_popup = true;">
+              <span class="fi type--smaller" style="background-image: url(https://flagicons.lipis.dev/flags/4x3/{{ localization.country.iso_code | downcase }}.svg)"></span>
+              <span class="type--smaller ml-1">{{ localization.country.currency.symbol }} {{ localization.country.currency.iso_code }}
+              {% if settings.type_seperator == 'dot' %}·{% else %}|{% endif %}
+              {{ localization.language.iso_code | upcase }}</span> 
+              {% render 'component__icon', icon: 'chevron-down', size: '16' %}
+            </button>
+          {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="text-center md:w-auto md:text-left flex flex-wrap flex-1 w-full gap-1">
+      {% if section.settings.sub_enable_payment_icons %}
+        <ul class="flex flex-wrap w-full gap-2 p-0 list-none" role="list">
+          {%- for type in shop.enabled_payment_types -%}
+            <li>
+              {{ type | payment_type_svg_tag: class: 'icon icon--full-color' }}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {% endif %}
+      <div class="ft-body ft-sub-text m-0--clear type--smaller w-full md:text-black">
+        {{ shop.name }}
+        {% capture current_year %}{{ "now" | date: "%Y" }}{% endcapture %}
+        {{ 'general.footer.copyright' | t: y: current_year }}
+      </div>
+    </div>
+
+    </div>
+  </section>
+  
+</footer>
+
+{% schema %}
+{
+  "name":"t:sections.theme_footer.name",
+  "settings":[
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__13.content"
+    },
+    {
+      "type":"select",
+      "id":"main_color_scheme",
+      "label":"t:sections.all.colors.settings.color_scheme.label",
+      "options":[
+        {
+          "value":"color__bg-body color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value":"color__bg-neutral color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value":"color__bg-overlay-1 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value":"color__bg-overlay-2 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value":"color__bg-overlay-3 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value":"color__bg-primary color__primary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value":"color__bg-secondary color__secondary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value":"color__bg-tertiary color__tertiary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default":"color__bg-body color__text"
+    },
+    {
+      "type":"select",
+      "id":"main_color_border",
+      "label":"t:sections.all.colors.settings.color_border.label",
+      "options":[
+        {
+          "value":"color__border-divider-1",
+          "label":"t:sections.all.colors.settings.color_border.options__1.label"
+        },
+        {
+          "value":"color__border-selected-1",
+          "label":"t:sections.all.colors.settings.color_border.options__2.label"
+        },
+        {
+          "value":"!color__border-transparent",
+          "label":"t:sections.all.colors.settings.color_border.options__3.label"
+        }
+      ],
+      "default":"color__border-divider-1"
+    },
+    {
+      "type":"select",
+      "id":"main_color_button",
+      "label":"t:sections.all.colors.settings.color_button.label",
+      "options":[
+        {
+          "value":"btn",
+          "label":"t:sections.all.colors.settings.color_button.options__1.label"
+        },
+        {
+          "value":"btn btn--secondary",
+          "label":"t:sections.all.colors.settings.color_button.options__2.label"
+        },
+        {
+          "value":"btn btn--tertiary",
+          "label":"t:sections.all.colors.settings.color_button.options__5.label"
+        },
+        {
+          "value":"btn btn--neutral",
+          "label":"t:sections.all.colors.settings.color_button.options__3.label"
+        },
+        {
+          "value":"btn btn--plain",
+          "label":"t:sections.all.colors.settings.color_button.options__4.label"
+        },
+        {
+          "value":"btn--minimal-light",
+          "label":"t:sections.all.colors.settings.color_button.options__6.label"
+        },
+        {
+          "value":"btn--minimal-dark",
+          "label":"t:sections.all.colors.settings.color_button.options__7.label"
+        }
+      ],
+      "default":"btn btn--secondary"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__14.content"
+    },
+    {
+      "type":"select",
+      "id":"sub_color_scheme",
+      "label":"t:sections.all.colors.settings.color_scheme.label",
+      "options":[
+        {
+          "value":"color__bg-body color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value":"color__bg-neutral color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value":"color__bg-overlay-1 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value":"color__bg-overlay-2 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value":"color__bg-overlay-3 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value":"color__bg-primary color__primary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value":"color__bg-secondary color__secondary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value":"color__bg-tertiary color__tertiary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default":"color__bg-overlay-1 color__text"
+    },
+    {
+      "type":"select",
+      "id":"sub_color_border",
+      "label":"t:sections.all.colors.settings.color_border.label",
+      "options":[
+        {
+          "value":"color__border-divider-1",
+          "label":"t:sections.all.colors.settings.color_border.options__1.label"
+        },
+        {
+          "value":"color__border-selected-1",
+          "label":"t:sections.all.colors.settings.color_border.options__2.label"
+        },
+        {
+          "value":"!color__border-transparent",
+          "label":"t:sections.all.colors.settings.color_border.options__3.label"
+        }
+      ],
+      "default":"color__border-divider-1"
+    },
+    {
+      "type":"select",
+      "id":"sub_color_button",
+      "label":"t:sections.all.colors.settings.color_button.label",
+      "options":[
+        {
+          "value":"btn",
+          "label":"t:sections.all.colors.settings.color_button.options__1.label"
+        },
+        {
+          "value":"btn btn--secondary",
+          "label":"t:sections.all.colors.settings.color_button.options__2.label"
+        },
+        {
+          "value":"btn btn--tertiary",
+          "label":"t:sections.all.colors.settings.color_button.options__5.label"
+        },
+        {
+          "value":"btn btn--neutral",
+          "label":"t:sections.all.colors.settings.color_button.options__3.label"
+        },
+        {
+          "value":"btn btn--plain",
+          "label":"t:sections.all.colors.settings.color_button.options__4.label"
+        }
+      ],
+      "default":"btn btn--secondary"
+    },
+    {
+      "type":"checkbox",
+      "id":"sub_enable_payment_icons",
+      "label":"t:sections.theme_footer.settings.sub_enable_payment_icons.label",
+      "default":false
+    },
+    {
+      "type": "select", "id": "social_position_d", "label": "Social icon position (desktop)",
+      "info": "Mobile social icons always appear at the bottom above the sub-footer.",
+      "options": [
+        { "value": "above", "label": "Above newsletter / content" },
+        { "value": "below", "label": "Below newsletter / content" }
+      ],
+      "default": "above"
+    },
+
+    { "type": "header", "content": "Typography — Block title" },
+    { "type": "paragraph", "content": "Desktop column headings and mobile accordion labels." },
+    {
+      "type": "select", "id": "title_font", "label": "Font",
+      "options": [
+        { "value": "body",        "label": "Body (Forma)" },
+        { "value": "heading",     "label": "Heading (PP Right Grotesk)" },
+        { "value": "nav",         "label": "Nav" },
+        { "value": "handwritten", "label": "Handwritten" }
+      ],
+      "default": "nav"
+    },
+    { "type": "range", "id": "title_size_m", "label": "Size (mobile)",  "min": 10, "max": 28, "step": 1, "unit": "px", "default": 14 },
+    { "type": "range", "id": "title_size_d", "label": "Size (desktop)", "min": 10, "max": 32, "step": 1, "unit": "px", "default": 14 },
+    {
+      "type": "select", "id": "title_weight", "label": "Weight",
+      "options": [
+        { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }, { "value": "800", "label": "Extra-bold" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select", "id": "title_case", "label": "Case",
+      "options": [
+        { "value": "none", "label": "Normal" }, { "value": "uppercase", "label": "UPPERCASE" },
+        { "value": "lowercase", "label": "lowercase" }, { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "select", "id": "title_ls", "label": "Letter spacing",
+      "options": [
+        { "value": "0em", "label": "None" }, { "value": "0.02em", "label": "Tight" },
+        { "value": "0.05em", "label": "Normal" }, { "value": "0.08em", "label": "Wide" },
+        { "value": "0.12em", "label": "Wider" }, { "value": "0.16em", "label": "Widest" }
+      ],
+      "default": "0.08em"
+    },
+    { "type": "range", "id": "title_lh", "label": "Line height", "min": 0.9, "max": 2.0, "step": 0.1, "default": 1.3 },
+    { "type": "color", "id": "title_color", "label": "Color (optional)" },
+
+    { "type": "header", "content": "Typography — Menu link" },
+    { "type": "paragraph", "content": "Desktop nav links and mobile accordion link items." },
+    {
+      "type": "select", "id": "link_font", "label": "Font",
+      "options": [
+        { "value": "body",        "label": "Body (Forma)" },
+        { "value": "heading",     "label": "Heading (PP Right Grotesk)" },
+        { "value": "nav",         "label": "Nav" },
+        { "value": "handwritten", "label": "Handwritten" }
+      ],
+      "default": "body"
+    },
+    { "type": "range", "id": "link_size_m", "label": "Size (mobile)",  "min": 10, "max": 24, "step": 1, "unit": "px", "default": 14 },
+    { "type": "range", "id": "link_size_d", "label": "Size (desktop)", "min": 10, "max": 24, "step": 1, "unit": "px", "default": 14 },
+    {
+      "type": "select", "id": "link_weight", "label": "Weight",
+      "options": [
+        { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select", "id": "link_case", "label": "Case",
+      "options": [
+        { "value": "none", "label": "Normal" }, { "value": "uppercase", "label": "UPPERCASE" },
+        { "value": "lowercase", "label": "lowercase" }, { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "select", "id": "link_ls", "label": "Letter spacing",
+      "options": [
+        { "value": "0em", "label": "None" }, { "value": "0.02em", "label": "Tight" },
+        { "value": "0.05em", "label": "Normal" }, { "value": "0.08em", "label": "Wide" }
+      ],
+      "default": "0em"
+    },
+    { "type": "range", "id": "link_lh", "label": "Line height", "min": 1.0, "max": 2.5, "step": 0.1, "default": 1.5 },
+    { "type": "range", "id": "link_opacity", "label": "Opacity (%)", "min": 30, "max": 100, "step": 5, "default": 100 },
+    { "type": "color", "id": "link_color", "label": "Color (optional)" },
+
+    { "type": "header", "content": "Typography — Headings" },
+    { "type": "paragraph", "content": "Newsletter heading, Content block heading." },
+    {
+      "type": "select", "id": "heading_font", "label": "Font",
+      "options": [
+        { "value": "body",        "label": "Body (Forma)" },
+        { "value": "heading",     "label": "Heading (PP Right Grotesk)" },
+        { "value": "nav",         "label": "Nav" },
+        { "value": "handwritten", "label": "Handwritten" }
+      ],
+      "default": "heading"
+    },
+    { "type": "range", "id": "heading_size_m", "label": "Size (mobile)",  "min": 12, "max": 40, "step": 1, "unit": "px", "default": 18 },
+    { "type": "range", "id": "heading_size_d", "label": "Size (desktop)", "min": 12, "max": 48, "step": 1, "unit": "px", "default": 20 },
+    {
+      "type": "select", "id": "heading_weight", "label": "Weight",
+      "options": [
+        { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }, { "value": "800", "label": "Extra-bold" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select", "id": "heading_case", "label": "Case",
+      "options": [
+        { "value": "none", "label": "Normal" }, { "value": "uppercase", "label": "UPPERCASE" },
+        { "value": "lowercase", "label": "lowercase" }, { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "select", "id": "heading_ls", "label": "Letter spacing",
+      "options": [
+        { "value": "0em", "label": "None" }, { "value": "0.02em", "label": "Tight" },
+        { "value": "0.05em", "label": "Normal" }, { "value": "0.08em", "label": "Wide" }
+      ],
+      "default": "0em"
+    },
+    { "type": "range", "id": "heading_lh", "label": "Line height", "min": 0.9, "max": 2.0, "step": 0.1, "default": 1.2 },
+    { "type": "color", "id": "heading_color", "label": "Color (optional)" },
+
+    { "type": "header", "content": "Typography — Body text" },
+    { "type": "paragraph", "content": "Newsletter content, content block text, location text, disclaimer, sub-footer copyright." },
+    {
+      "type": "select", "id": "body_font", "label": "Font",
+      "options": [
+        { "value": "body",        "label": "Body (Forma)" },
+        { "value": "heading",     "label": "Heading (PP Right Grotesk)" },
+        { "value": "nav",         "label": "Nav" },
+        { "value": "handwritten", "label": "Handwritten" }
+      ],
+      "default": "body"
+    },
+    { "type": "range", "id": "body_size_m", "label": "Size (mobile)",  "min": 10, "max": 20, "step": 1, "unit": "px", "default": 14 },
+    { "type": "range", "id": "body_size_d", "label": "Size (desktop)", "min": 10, "max": 20, "step": 1, "unit": "px", "default": 14 },
+    {
+      "type": "select", "id": "body_weight", "label": "Weight",
+      "options": [
+        { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select", "id": "body_ls", "label": "Letter spacing",
+      "options": [
+        { "value": "0em",    "label": "None" },
+        { "value": "0.02em", "label": "Tight" },
+        { "value": "0.05em", "label": "Normal" },
+        { "value": "0.08em", "label": "Wide" }
+      ],
+      "default": "0em"
+    },
+    { "type": "range", "id": "body_lh", "label": "Line height", "min": 1.0, "max": 2.2, "step": 0.1, "default": 1.5 },
+    { "type": "color", "id": "body_color", "label": "Color (optional)" },
+
+    { "type": "header", "content": "Typography — Sub-footer copyright" },
+    { "type": "paragraph", "content": "The \"© 2026 Thread Wallets…\" line at the very bottom. Independent from body text above." },
+    { "type": "range", "id": "sub_text_size_m", "label": "Size (mobile)",  "min": 8, "max": 18, "step": 1, "unit": "px", "default": 12 },
+    { "type": "range", "id": "sub_text_size_d", "label": "Size (desktop)", "min": 8, "max": 18, "step": 1, "unit": "px", "default": 12 },
+    { "type": "range", "id": "sub_text_opacity", "label": "Opacity (%)", "min": 30, "max": 100, "step": 5, "default": 75 },
+    { "type": "color", "id": "sub_text_color", "label": "Color (optional)" },
+
+    { "type": "header", "content": "Spacing — Desktop" },
+    { "type": "range", "id": "main_pt_d",   "label": "Main area top padding",    "min": 0, "max": 160, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "main_pb_d",   "label": "Main area bottom padding", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "main_pl_d",   "label": "Main area left padding",   "info": "Distance from the left edge of the columns.", "min": 0, "max": 240, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "main_pr_d",   "label": "Main area right padding",  "info": "Distance from the right edge of the columns.", "min": 0, "max": 240, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "col_gap_d",   "label": "Gap between left & right groups", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 80 },
+    { "type": "checkbox", "id": "cols_divider_d",       "label": "Vertical divider between columns & newsletter (desktop)", "default": false },
+    { "type": "range",    "id": "cols_divider_width_d", "label": "Divider thickness (px)", "min": 1, "max": 4, "step": 1, "default": 1 },
+    { "type": "color",    "id": "cols_divider_color_d", "label": "Divider color" },
+    { "type": "range",    "id": "cols_divider_pad_d",   "label": "Space between divider and newsletter (px)", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40 },
+    {
+      "type": "select", "id": "menu_layout_d", "label": "Menu column layout",
+      "info": "\"Spread\" pushes columns evenly across the full width (gap is ignored). \"Tight\" packs columns together using the gap below.",
+      "options": [
+        { "value": "spread",       "label": "Spread — fill width" },
+        { "value": "tight_left",   "label": "Tight — left" },
+        { "value": "tight_center", "label": "Tight — center" },
+        { "value": "tight_right",  "label": "Tight — right" }
+      ],
+      "default": "spread"
+    },
+    { "type": "range", "id": "menu_gap_d",  "label": "Gap between menu columns (tight mode)", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "title_mb_d",  "label": "Space below block title",  "min": 0, "max": 48,  "step": 2, "unit": "px", "default": 16 },
+    { "type": "range", "id": "link_gap_d",  "label": "Space between links",      "min": 0, "max": 32,  "step": 1, "unit": "px", "default": 12 },
+    { "type": "range", "id": "sub_pt_d",    "label": "Sub-footer top padding",    "min": 0, "max": 64,  "step": 2, "unit": "px", "default": 16 },
+    { "type": "range", "id": "sub_pb_d",    "label": "Sub-footer bottom padding", "min": 0, "max": 64,  "step": 2, "unit": "px", "default": 16 },
+    { "type": "range", "id": "sub_pl_d",    "label": "Sub-footer left padding",   "min": 0, "max": 240, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "sub_pr_d",    "label": "Sub-footer right padding",  "min": 0, "max": 240, "step": 4, "unit": "px", "default": 0 },
+
+    { "type": "header", "content": "Spacing — Mobile" },
+    { "type": "range", "id": "acc_btn_pad_v_m",  "label": "Accordion button vertical padding", "min": 0, "max": 40, "step": 2, "unit": "px", "default": 16 },
+    { "type": "range", "id": "acc_item_pad_v_m", "label": "Accordion item vertical padding",   "min": 0, "max": 40, "step": 2, "unit": "px", "default": 16 },
+    { "type": "range", "id": "mob_block_pt_m",   "label": "Newsletter / content block — top padding",    "min": 0, "max": 80, "step": 4, "unit": "px", "default": 32 },
+    { "type": "range", "id": "mob_block_pb_m",   "label": "Newsletter / content block — bottom padding", "min": 0, "max": 80, "step": 4, "unit": "px", "default": 32 },
+    { "type": "range", "id": "social_pt_m",      "label": "Social icons — top padding",    "min": 0, "max": 80, "step": 4, "unit": "px", "default": 32 },
+    { "type": "range", "id": "social_pb_m",      "label": "Social icons — bottom padding", "min": 0, "max": 80, "step": 4, "unit": "px", "default": 32 },
+    { "type": "range", "id": "sub_pt_m",         "label": "Sub-footer top padding",    "min": 0, "max": 64, "step": 2, "unit": "px", "default": 16 },
+    { "type": "range", "id": "sub_pb_m",         "label": "Sub-footer bottom padding", "min": 0, "max": 64, "step": 2, "unit": "px", "default": 16 },
+
+    { "type": "header", "content": "Desktop — Colors" },
+    { "type": "paragraph", "content": "Overrides the desktop footer's default color scheme. Leave blank to inherit the theme's Main / Sub color scheme above." },
+    { "type": "color", "id": "desktop_bg_color",            "label": "Desktop footer background" },
+    { "type": "color", "id": "desktop_text_color",          "label": "Desktop text color" },
+    { "type": "color", "id": "desktop_newsletter_bg_color", "label": "Email signup block background", "info": "Applies only to the newsletter block in the right column on desktop." },
+    { "type": "range", "id": "desktop_newsletter_pad",      "label": "Newsletter block padding (px)", "info": "Use with a background color to make the newsletter visually distinct. 0 = no padding.", "min": 0, "max": 48, "step": 2, "default": 0 },
+    { "type": "range", "id": "desktop_newsletter_radius",   "label": "Newsletter block corner radius (px)", "min": 0, "max": 32, "step": 1, "default": 0 },
+
+    { "type": "header", "content": "Mobile — Colors & dividers" },
+    { "type": "paragraph", "content": "Overrides the mobile footer's default color scheme. Leave blank to keep the theme's Main / Sub color scheme." },
+    { "type": "color", "id": "mobile_bg_color",            "label": "Mobile footer background (all sections)" },
+    { "type": "color", "id": "mobile_text_color",          "label": "Mobile text color" },
+    { "type": "color", "id": "mobile_newsletter_bg_color", "label": "Email signup block background", "info": "Overrides the mobile background above, only for the newsletter block." },
+    { "type": "range", "id": "acc_divider_inset_m",     "label": "Accordion inset (left/right px)", "info": "Controls both the divider line AND the title / + icon horizontal position — they stay aligned.", "min": 0, "max": 80, "step": 2, "default": 16 },
+    { "type": "range", "id": "acc_divider_width_m",     "label": "Accordion divider thickness (px)", "min": 0, "max": 4,  "step": 1, "default": 1 },
+    { "type": "color", "id": "acc_divider_color_m",     "label": "Accordion divider color" },
+    { "type": "checkbox", "id": "acc_divider_show_top_m", "label": "Show divider above first accordion", "default": false },
+    { "type": "checkbox", "id": "sub_border_top_m",       "label": "Show divider above sub-footer (mobile)", "info": "The line between the social icons / social section and the copyright row.", "default": false },
+    { "type": "checkbox", "id": "sub_border_top_d",       "label": "Show divider above sub-footer (desktop)", "info": "The line above the copyright row on desktop.", "default": false },
+    { "type": "checkbox", "id": "block_border_top_m",     "label": "Show divider above newsletter / content blocks (mobile)", "info": "The white line at the top of the mobile newsletter and content blocks.", "default": false },
+
+    { "type": "header", "content": "Mobile — Follow section (social icons)" },
+    { "type": "text",  "id": "social_heading_m",            "label": "Heading text",         "info": "Leave blank to hide. Uses the Block title font from above.", "default": "Follow us" },
+    { "type": "range", "id": "social_heading_size_m",       "label": "Heading font size (px)", "min": 8,  "max": 28, "step": 1, "default": 14 },
+    {
+      "type": "select", "id": "social_heading_case_m", "label": "Heading case",
+      "options": [
+        { "value": "none",       "label": "Normal" },
+        { "value": "uppercase",  "label": "UPPERCASE" },
+        { "value": "lowercase",  "label": "lowercase" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "select", "id": "social_heading_ls_m", "label": "Heading letter spacing",
+      "options": [
+        { "value": "0em", "label": "None" }, { "value": "0.02em", "label": "Tight" },
+        { "value": "0.05em", "label": "Normal" }, { "value": "0.08em", "label": "Wide" },
+        { "value": "0.12em", "label": "Wider" }, { "value": "0.2em",  "label": "Widest" }
+      ],
+      "default": "0.08em"
+    },
+    { "type": "color", "id": "social_heading_color_m",      "label": "Heading color (optional)" },
+    { "type": "range", "id": "social_heading_mb_m",         "label": "Space below heading (px)", "min": 0,  "max": 48, "step": 1, "default": 16 },
+    {
+      "type": "select", "id": "social_icon_style_m", "label": "Icon style",
+      "options": [
+        { "value": "plain",          "label": "Plain icon" },
+        { "value": "circle_outline", "label": "Circle outline" },
+        { "value": "circle_fill",    "label": "Filled circle" }
+      ],
+      "default": "plain"
+    },
+    { "type": "range", "id": "social_icon_size_m",    "label": "Icon size (px)",         "min": 10, "max": 40, "step": 1, "default": 18 },
+    { "type": "range", "id": "social_icon_hit_m",     "label": "Touch target / circle size (px)", "info": "Tap area — outer circle diameter when style is circular.", "min": 20, "max": 72, "step": 1, "default": 40 },
+    { "type": "range", "id": "social_border_width_m", "label": "Circle border thickness (px)", "info": "Only applies when icon style is \"Circle outline\".", "min": 0, "max": 4, "step": 1, "default": 1 },
+    { "type": "color", "id": "social_border_color_m", "label": "Circle border / fill color", "info": "Border color for outline style, background color for filled style. Leave blank to inherit from icon color." },
+    { "type": "color", "id": "social_icon_color_m",   "label": "Icon color (optional)" },
+    { "type": "range", "id": "social_opacity_m",      "label": "Icon opacity (%)", "min": 30, "max": 100, "step": 5, "default": 85 },
+    { "type": "range", "id": "social_gap_m",          "label": "Gap between icons (px)", "min": 0, "max": 32, "step": 1, "default": 16 },
+    { "type": "range", "id": "social_pad_h_m",        "label": "Horizontal padding (px)", "min": 0, "max": 48, "step": 2, "default": 16 },
+    { "type": "checkbox", "id": "social_border_top_m",       "label": "Show top divider", "default": false },
+    { "type": "range",    "id": "social_border_top_width_m", "label": "Top divider thickness (px)", "min": 0, "max": 4, "step": 1, "default": 1 },
+    { "type": "color",    "id": "social_border_top_color_m", "label": "Top divider color" },
+
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__8.content"
+    },
+    {
+      "type":"select",
+      "id":"visibility",
+      "label":"t:sections.all.visibility.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.visibility.options__1.label"
+        },
+        {
+          "value":"md:hidden",
+          "label":"t:sections.all.visibility.options__2.label"
+        },
+        {
+          "value":"hidden md:block",
+          "label":"t:sections.all.visibility.options__3.label"
+        }
+      ],
+      "default":""
+    }
+  ],
+  "blocks":[
+    {
+      "type":"menu",
+      "name":"t:sections.theme_footer.blocks.menu.name",
+      "limit":8,
+      "settings":[
+        {
+          "type":"link_list",
+          "id":"menu",
+          "label":"t:sections.theme_footer.blocks.menu.settings.menu.label"
+        },
+        {
+            "type": "text",
+            "id": "block_title",
+            "label": "Block Title",
+            "default": "TITLE"
+        }
+      ]
+    },    {
+        "type":"location",
+        "name":"LOCATION",
+        "limit":8,
+        "settings":[
+          {
+              "type": "text",
+              "id": "block_title",
+              "label": "Block Title",
+              "default": "LOCATION"
+          },
+          {
+              "type": "html",
+              "id": "block_text",
+              "label": "Location Text",
+              "default": "Location goes here"
+          }
+        ]
+      },
+    {
+      "type":"content",
+      "name":"t:sections.theme_footer.blocks.content.name",
+      "limit":3,
+      "settings":[
+        {
+          "type":"text",
+          "id":"heading",
+          "label":"t:sections.theme_footer.blocks.content.settings.heading.label",
+          "default":{
+            "en":"Block heading",
+            "es": "Encabezado de bloque",
+            "it": "Intestazione del blocco",
+            "de": "Blocküberschrift",
+            "fr": "En-tête de bloc"
+          }
+        },
+        {
+          "type":"richtext",
+          "id":"content",
+          "label":"t:sections.theme_footer.blocks.content.settings.content.label",
+          "default": {
+            "en": "<p>Remind customers of offers like free shipping and lifetime warranty</p>",
+            "es": "<p>Recuerde a los clientes ofertas como envío gratuito y garantía de por vida</p>",
+            "it": "<p>Ricorda ai clienti offerte come la spedizione gratuita e la garanzia a vita</p>",
+            "de": "<p>Erinnern Sie Kunden an Angebote wie kostenlosen Versand und lebenslange Garantie</p>",
+            "fr": "<p>Rappelez aux clients des offres telles que la livraison gratuite et la garantie à vie</p>"
+          }
+        },
+        {
+          "type":"text",
+          "id":"button_label",
+          "label":"t:sections.theme_footer.blocks.content.settings.button_label.label",
+          "default":{
+            "en":"Button",
+            "es": "Botón",
+            "it": "Bottone",
+            "de": "Knopf",
+            "fr": "Bouton"
+          }
+        },
+        {
+          "type":"url",
+          "id":"button_url",
+          "label":"t:sections.all.content.settings.button_url.label",
+          "default":"/collections/all"
+        }
+      ]
+    },
+    {
+      "type":"newsletter",
+      "name":"t:sections.theme_footer.blocks.newsletter.name",
+      "limit":1,
+      "settings":[
+        {
+          "type":"text",
+          "id":"heading",
+          "label":"t:sections.theme_footer.blocks.newsletter.settings.heading.label",
+          "default":{
+            "en":"Newsletter",
+            "es":"Boletín",
+            "it":"Newsletter",
+            "de":"Newsletter",
+            "fr":"Bulletin"
+          }
+        },
+        {
+          "type":"richtext",
+          "id":"content",
+          "label":"t:sections.theme_footer.blocks.newsletter.settings.content.label",
+          "default":{
+            "en":"<p>Tell customers why they should subscribe to your newsletter.</p>",
+            "es": "<p>Dígales a los clientes por qué deberían suscribirse a su boletín informativo.</p>",
+            "it": "<p>Dì ai clienti perché dovrebbero iscriversi alla tua newsletter.</p>",
+            "de": "<p>Teilen Sie Ihren Kunden mit, warum sie Ihren Newsletter abonnieren sollten.</p>",
+            "fr": "<p>Expliquez aux clients pourquoi ils devraient s’abonner à votre newsletter.</p>"
+          }
+        },
+        {
+          "type":"text",
+          "id":"button",
+          "label":"t:sections.theme_footer.blocks.newsletter.settings.button.label",
+          "default":{
+            "en":"Subscribe",
+            "es": "Subscribir",
+            "it": "Abbonarsi",
+            "de": "Abonnieren",
+            "fr": "S’inscrire"
+          }
+        },
+        {
+          "type":"richtext",
+          "id":"disclaimer",
+          "label":"t:sections.theme_footer.blocks.newsletter.settings.disclaimer.label"
+        },
+        {
+          "type":"richtext",
+          "id":"success",
+          "label":"t:sections.theme_footer.blocks.newsletter.settings.success.label",
+          "default":{
+            "en":"<p>Success! You’ve been subscribed.</p>",
+            "es": "<p>Gracias por suscribirte</p>",
+            "it": "<p>Grazie per esserti iscritto</p>",
+            "de": "<p>Vielen Dank für Ihre Anmeldung</p>",
+            "fr": "<p>Merci de vous être abonné</p>"
+          }
+        },
+        { "type": "text", "id": "placeholder", "label": "Label text (empty-state)", "info": "Shown as the placeholder and floats up when the field is focused or filled.", "default": "Email address" },
+        { "type": "text", "id": "error_message", "label": "Error message", "default": "Please enter a valid email." },
+
+        { "type": "header", "content": "Attentive integration" },
+        { "type": "paragraph", "content": "On submit, the email is passed to your Attentive popup (pre-filled). Paste the creative IDs from your Attentive dashboard. Leave blank to fall back to email-only identify." },
+        { "type": "text", "id": "attentive_desktop_id", "label": "Desktop creative ID" },
+        { "type": "text", "id": "attentive_mobile_id",  "label": "Mobile creative ID" },
+
+        { "type": "header", "content": "Layout" },
+        {
+          "type": "select", "id": "heading_align_d", "label": "Heading alignment — desktop",
+          "options": [
+            { "value": "left",   "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right",  "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "select", "id": "heading_align_m", "label": "Heading alignment — mobile",
+          "options": [
+            { "value": "left",   "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right",  "label": "Right" }
+          ],
+          "default": "center"
+        },
+        { "type": "range", "id": "mobile_pad_h", "label": "Mobile horizontal inset (px)", "info": "Extra padding on the sides of heading, field, description, and disclaimer — mobile only.", "min": 0, "max": 40, "step": 1, "default": 0 },
+        { "type": "range", "id": "form_max_width", "label": "Form max width (px)", "info": "0 = fill its column", "min": 0, "max": 700, "step": 10, "default": 0 },
+        { "type": "range", "id": "form_mt", "label": "Space above form (px)", "min": 0, "max": 40, "step": 1, "default": 0 },
+        { "type": "range", "id": "form_mb", "label": "Space below form (px)", "min": 0, "max": 40, "step": 1, "default": 0 },
+        { "type": "range", "id": "heading_mb",    "label": "Space below heading (px)",     "min": 0, "max": 40, "step": 1, "default": 8 },
+        { "type": "range", "id": "content_mb",    "label": "Space below description (px)", "min": 0, "max": 40, "step": 1, "default": 8 },
+        { "type": "range", "id": "disclaimer_mt", "label": "Space above disclaimer (px)",  "min": 0, "max": 40, "step": 1, "default": 8 },
+
+        { "type": "header", "content": "Email field" },
+        { "type": "range", "id": "field_height",      "label": "Field height (px)",       "min": 40, "max": 96, "step": 1, "default": 64 },
+        { "type": "range", "id": "input_radius",      "label": "Field border radius (px)","min": 0,  "max": 48, "step": 1, "default": 28 },
+        { "type": "range", "id": "input_border_width","label": "Border thickness (px)",   "min": 0,  "max": 4,  "step": 1, "default": 1 },
+        { "type": "color", "id": "input_bg",           "label": "Background",             "default": "#ffffff" },
+        { "type": "color", "id": "input_border_color", "label": "Border color",           "default": "#1a1a1a" },
+        { "type": "color", "id": "input_border_focus", "label": "Border color (on focus)", "default": "#1a1a1a" },
+        { "type": "range", "id": "input_focus_ring",   "label": "Focus ring thickness (px)", "info": "Halo around the field when focused. 0 = off.", "min": 0, "max": 6, "step": 1, "default": 0 },
+        { "type": "range", "id": "field_pad_l",        "label": "Left padding inside field (px)", "min": 8, "max": 40, "step": 1, "default": 20 },
+
+        { "type": "header", "content": "Email input text" },
+        {
+          "type": "select", "id": "input_font", "label": "Font",
+          "options": [
+            { "value": "body",        "label": "Body (Forma)" },
+            { "value": "heading",     "label": "Heading (PP Right Grotesk)" },
+            { "value": "nav",         "label": "Nav" },
+            { "value": "handwritten", "label": "Handwritten" }
+          ],
+          "default": "body"
+        },
+        { "type": "range", "id": "input_size",        "label": "Typed text size — desktop (px)", "min": 12, "max": 22, "step": 1, "default": 16 },
+        { "type": "range", "id": "input_size_mobile", "label": "Typed text size — mobile (px)",  "info": "Clamped to ≥16px on mobile so iOS doesn't zoom the page on focus.", "min": 14, "max": 22, "step": 1, "default": 16 },
+        { "type": "color", "id": "input_text_color",  "label": "Typed text color",     "default": "#1a1a1a" },
+
+        { "type": "header", "content": "Floating label" },
+        {
+          "type": "select", "id": "label_font", "label": "Font",
+          "options": [
+            { "value": "body",        "label": "Body (Forma)" },
+            { "value": "heading",     "label": "Heading (PP Right Grotesk)" },
+            { "value": "nav",         "label": "Nav" },
+            { "value": "handwritten", "label": "Handwritten" }
+          ],
+          "default": "body"
+        },
+        { "type": "range", "id": "label_size",       "label": "Size when empty (px)",   "min": 12, "max": 20, "step": 1, "default": 16 },
+        { "type": "range", "id": "label_size_small", "label": "Size when floated up (px)", "min": 9,  "max": 16, "step": 1, "default": 12 },
+        { "type": "range", "id": "label_top_small",  "label": "Top offset when floated (px)", "min": 4, "max": 24, "step": 1, "default": 14 },
+        { "type": "color", "id": "label_color",       "label": "Label color",              "default": "#6b6b6b" },
+        { "type": "color", "id": "label_color_small", "label": "Label color when floated", "default": "#6b6b6b" },
+
+        { "type": "header", "content": "Submit button (inside field)" },
+        { "type": "paragraph", "content": "Hidden until the user starts typing, then appears inside the right edge of the field." },
+        { "type": "range", "id": "button_size_px",    "label": "Button size (px)",      "min": 28, "max": 64, "step": 1, "default": 44 },
+        { "type": "range", "id": "button_radius",     "label": "Button border radius (px)", "info": "Match the field radius for a nested look (e.g. field 28 → button 12).", "min": 0, "max": 40, "step": 1, "default": 12 },
+        { "type": "range", "id": "button_inset",      "label": "Inset from field edge (px)", "min": 0, "max": 20, "step": 1, "default": 8 },
+        { "type": "range", "id": "button_icon_size",  "label": "Arrow icon size (px)",  "min": 12, "max": 32, "step": 1, "default": 20 },
+        { "type": "color", "id": "button_bg",         "label": "Background",            "default": "#1e40af" },
+        { "type": "color", "id": "button_text_color", "label": "Icon color",            "default": "#ffffff" },
+
+        { "type": "header", "content": "Error message (inline)" },
+        { "type": "range", "id": "message_size", "label": "Font size (px)",   "min": 10, "max": 18, "step": 1, "default": 13 },
+        { "type": "range", "id": "message_mt",   "label": "Space above (px)", "min": 0,  "max": 24, "step": 1, "default": 10 },
+        { "type": "color", "id": "error_color",   "label": "Error color",   "default": "#b00020" },
+
+        { "type": "header", "content": "Success message (replaces the whole signup)" },
+        { "type": "paragraph", "content": "After a successful submit, the heading / description / form / disclaimer are hidden and replaced with this panel. All pieces are optional — leave a field blank to skip it." },
+        {
+          "type": "select", "id": "success_align", "label": "Alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        { "type": "image_picker", "id": "success_image",      "label": "Image / GIF" },
+        { "type": "range",        "id": "success_image_width","label": "Image max width (px)", "info": "0 = full width of column", "min": 0, "max": 600, "step": 10, "default": 240 },
+        { "type": "range",        "id": "success_image_radius","label": "Image border radius (px)", "min": 0, "max": 40, "step": 1, "default": 0 },
+        { "type": "range",        "id": "success_image_mb",   "label": "Space below image (px)", "min": 0, "max": 32, "step": 1, "default": 12 },
+        { "type": "text",         "id": "success_icon",       "label": "Icon / emoji", "info": "Paste an emoji (🎉, ✨, ✅) or a single glyph.", "default": "🎉" },
+        { "type": "range",        "id": "success_icon_size",  "label": "Icon size (px)", "min": 16, "max": 120, "step": 2, "default": 40 },
+        { "type": "range",        "id": "success_icon_mb",    "label": "Space below icon (px)", "min": 0, "max": 24, "step": 1, "default": 8 },
+        { "type": "text",         "id": "success_title",      "label": "Title", "default": "You're in!" },
+        {
+          "type": "select", "id": "success_title_font", "label": "Title font",
+          "options": [
+            { "value": "body",        "label": "Body (Forma)" },
+            { "value": "heading",     "label": "Heading (PP Right Grotesk)" },
+            { "value": "nav",         "label": "Nav" },
+            { "value": "handwritten", "label": "Handwritten" }
+          ],
+          "default": "heading"
+        },
+        { "type": "range", "id": "success_title_size",  "label": "Title size (px)", "min": 14, "max": 48, "step": 1, "default": 20 },
+        {
+          "type": "select", "id": "success_title_weight", "label": "Title weight",
+          "options": [
+            { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+            { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" },
+            { "value": "700", "label": "Bold" }, { "value": "800", "label": "Extra-bold" }
+          ],
+          "default": "700"
+        },
+        { "type": "range", "id": "success_title_mb",    "label": "Space below title (px)", "min": 0, "max": 24, "step": 1, "default": 8 },
+        { "type": "color", "id": "success_title_color", "label": "Title color (optional)" },
+        { "type": "color", "id": "success_body_color",  "label": "Body color (optional)" }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["custom.overlay"]
+  }
+}
+{% endschema %}

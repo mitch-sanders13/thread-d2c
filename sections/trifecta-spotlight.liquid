@@ -1,0 +1,460 @@
+<!-- sections/trifecta-spotlight.liquid -->
+{% comment %}
+  Trifecta Spotlight — full-bleed Thread-blue bundle feature.
+
+  Desktop: media | content split. Mobile: the ENTIRE section (image,
+  title, includes, price, CTA) fits one ~390x844 viewport minus the
+  header — media height is capped in svh and the includes list is a
+  single chip row, per merchant requirement.
+
+  Price and compare-at come from the picked product object — never
+  hardcoded. The rotating badge ring uses textLength on the textPath
+  so the circular text always fills the ring exactly (no gap/overlap
+  regardless of font metrics).
+{% endcomment %}
+
+{%- assign ts_id = section.id -%}
+{%- assign ts_product = section.settings.product -%}
+{%- assign ts_img = section.settings.image -%}
+{%- assign ts_img_mobile = section.settings.image_mobile | default: ts_img -%}
+
+<section id="ts-{{ ts_id }}" class="ts-section{% if section.settings.visibility != blank %} {{ section.settings.visibility }}{% endif %}">
+  <div class="ts-wrap">
+
+    {%- comment -%} Media + rotating badge {%- endcomment -%}
+    <div class="ts-media ts-reveal">
+      {%- if ts_img != blank -%}
+        <picture>
+          {%- if ts_img_mobile != ts_img -%}
+            <source media="(max-width: 767px)"
+              srcset="{{ ts_img_mobile | image_url: width: 500 }} 500w, {{ ts_img_mobile | image_url: width: 800 }} 800w, {{ ts_img_mobile | image_url: width: 1100 }} 1100w"
+              sizes="100vw">
+          {%- endif -%}
+          <img
+            src="{{ ts_img | image_url: width: 900 }}"
+            srcset="{{ ts_img | image_url: width: 600 }} 600w, {{ ts_img | image_url: width: 900 }} 900w, {{ ts_img | image_url: width: 1200 }} 1200w, {{ ts_img | image_url: width: 1600 }} 1600w"
+            sizes="(min-width: 768px) 50vw, 100vw"
+            alt="{{ ts_img.alt | default: section.settings.heading | escape }}"
+            loading="lazy"
+            width="{{ ts_img.width }}"
+            height="{{ ts_img.height }}">
+        </picture>
+      {%- else -%}
+        <div class="ts-media__placeholder"></div>
+      {%- endif -%}
+
+      {%- if section.settings.show_badge -%}
+        {%- comment -%}
+          Ring text fills the circle exactly: path r=38 in a 100-unit
+          viewBox → circumference 2π·38 ≈ 238.76; textLength="238"
+          with lengthAdjust="spacingAndGlyphs" stretches/tracks the
+          string to that length.
+        {%- endcomment -%}
+        {%- comment -%}
+          Two stacked SVGs: the RING svg spins as a whole (CSS box
+          rotation — reliable everywhere, unlike transforms on SVG
+          internals, which iOS WebKit won't animate for textPath), the
+          MARK svg stays static underneath.
+        {%- endcomment -%}
+        <div class="ts-badge" aria-hidden="true">
+          <svg viewBox="0 0 100 100" class="ts-badge__ring-svg">
+            <defs>
+              <path id="ts-ring-{{ ts_id }}" d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0"/>
+            </defs>
+            <text class="ts-badge__text">
+              <textPath href="#ts-ring-{{ ts_id }}" textLength="238" lengthAdjust="spacingAndGlyphs">{{ section.settings.badge_text | escape }}</textPath>
+            </text>
+          </svg>
+          <svg viewBox="0 0 100 100" class="ts-badge__mark-svg">
+            <image href="{{ 'threadwallets-logomark-invert.svg' | asset_url }}" x="33" y="33" width="34" height="34"/>
+          </svg>
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Content {%- endcomment -%}
+    <div class="ts-content">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="ts-eyebrow ts-reveal" style="--ts-d: 0s;">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.heading != blank -%}
+        <h2 class="ts-heading ts-reveal" style="--ts-d: 0.07s;">{{ section.settings.heading }}</h2>
+      {%- endif -%}
+
+      {%- if section.settings.lede != blank -%}
+        <p class="ts-lede ts-reveal" style="--ts-d: 0.14s;">{{ section.settings.lede }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.includes_text != blank -%}
+        <div class="ts-chips ts-reveal" style="--ts-d: 0.21s;">
+          {%- assign ts_chips = section.settings.includes_text | split: '+' -%}
+          {%- for chip in ts_chips -%}
+            {%- assign chip_text = chip | strip -%}
+            {%- if chip_text != blank -%}
+              <span class="ts-chip">{{ chip_text }}</span>
+              {%- unless forloop.last -%}<span class="ts-chip-plus">+</span>{%- endunless -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- if ts_product != blank -%}
+        <div class="ts-price-row ts-reveal" style="--ts-d: 0.28s;">
+          <span class="ts-price">{{ ts_product.price | money }}</span>
+          {%- if ts_product.compare_at_price > ts_product.price -%}
+            <s class="ts-compare">{{ ts_product.compare_at_price | money }}</s>
+            {%- assign ts_savings = ts_product.compare_at_price | minus: ts_product.price -%}
+            <span class="ts-save">Save {{ ts_savings | money_without_trailing_zeros }}</span>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.cta_label != blank -%}
+        <div class="ts-cta-row ts-reveal" style="--ts-d: 0.35s;">
+          <a class="ts-cta" href="{{ section.settings.cta_url | default: ts_product.url | default: '/collections/all' }}">
+            <span>{{ section.settings.cta_label }}</span>
+          </a>
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.show_proof and section.settings.proof_quote != blank -%}
+        <p class="ts-proof ts-reveal{% if section.settings.proof_desktop_only %} ts-proof--desktop{% endif %}" style="--ts-d: 0.42s;">
+          <span class="ts-proof__stars" aria-hidden="true">★★★★★</span>
+          {{ section.settings.proof_quote }}
+        </p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  #ts-{{ ts_id }} {
+    background: {{ section.settings.bg_color | default: 'var(--thread-blue)' }};
+    color: #ffffff;
+    overflow: hidden;
+  }
+  #ts-{{ ts_id }} .ts-wrap {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* --- Media --- */
+  #ts-{{ ts_id }} .ts-media {
+    position: relative;
+    height: {{ section.settings.media_height_mobile | default: 40 }}vh;
+    height: {{ section.settings.media_height_mobile | default: 40 }}svh;
+    max-height: 420px;
+    min-height: 220px;
+  }
+  #ts-{{ ts_id }} .ts-media img,
+  #ts-{{ ts_id }} .ts-media__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  #ts-{{ ts_id }} .ts-media__placeholder {
+    background: linear-gradient(160deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04));
+  }
+
+  /* --- Rotating badge --- */
+  /* Mobile: badge straddles the image/content boundary — 3/4 on the
+     image, 1/4 hanging into the text section (badge is 96px → 24px
+     below the media edge). */
+  #ts-{{ ts_id }} .ts-badge {
+    position: absolute;
+    right: 14px;
+    bottom: -24px;
+    width: 96px;
+    height: 96px;
+    pointer-events: none;
+    z-index: 2;
+  }
+  #ts-{{ ts_id }} .ts-badge__ring-svg,
+  #ts-{{ ts_id }} .ts-badge__mark-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  #ts-{{ ts_id }} .ts-badge__ring-svg {
+    /* The whole svg box rotates (default 50%/50% origin) — animating
+       the svg element itself works everywhere, unlike CSS transforms
+       on SVG-internal groups, which iOS won't animate for textPath. */
+    will-change: transform;
+    animation: ts-spin-{{ ts_id }} 16s linear infinite;
+  }
+  #ts-{{ ts_id }} .ts-badge__text {
+    fill: #ffffff;
+    font-family: var(--type-font-body-family);
+    font-weight: 700;
+    font-size: 8px;
+    letter-spacing: 0.08em;
+  }
+  @keyframes ts-spin-{{ ts_id }} {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* --- Content (mobile-first, compact so the section fits one screen) --- */
+  #ts-{{ ts_id }} .ts-content {
+    padding: 20px 16px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  #ts-{{ ts_id }} .ts-eyebrow {
+    margin: 0 0 6px;
+    font-family: var(--type-font-body-family);
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: var(--thread-ls-eyebrow);
+    color: {{ section.settings.accent_color | default: 'var(--thread-gold)' }};
+  }
+  #ts-{{ ts_id }} .ts-heading {
+    margin: 0 0 8px;
+    font-family: var(--type-font-header-family);
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 0.94;
+    font-size: {{ section.settings.heading_size_m | default: 36 }}px;
+    color: #ffffff;
+  }
+  #ts-{{ ts_id }} .ts-lede {
+    margin: 0 0 12px;
+    font-family: var(--type-font-body-family);
+    font-weight: 400; /* base <p> rule is 300 — too thin on blue */
+    font-size: 16px;
+    line-height: 1.35;
+    letter-spacing: var(--thread-ls-body);
+    color: rgba(255,255,255,0.92);
+    max-width: 46ch;
+  }
+  #ts-{{ ts_id }} .ts-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 12px;
+  }
+  #ts-{{ ts_id }} .ts-chip {
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: var(--thread-radius-pill);
+    padding: 5px 12px;
+    font-family: var(--type-font-body-family);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: var(--thread-ls-label);
+    white-space: nowrap;
+  }
+  #ts-{{ ts_id }} .ts-chip-plus {
+    color: {{ section.settings.accent_color | default: 'var(--thread-gold)' }};
+    font-weight: 700;
+    font-size: 13px;
+  }
+  #ts-{{ ts_id }} .ts-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 0 0 14px;
+    font-family: var(--type-font-body-family);
+  }
+  #ts-{{ ts_id }} .ts-price { font-size: 22px; font-weight: 700; }
+  #ts-{{ ts_id }} .ts-compare { font-size: 17px; font-weight: 500; color: rgba(255,255,255,0.65); }
+  #ts-{{ ts_id }} .ts-save {
+    background: {{ section.settings.accent_color | default: 'var(--thread-gold)' }};
+    color: #1c1c1c;
+    border-radius: var(--thread-radius-pill);
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: var(--thread-ls-label);
+  }
+  #ts-{{ ts_id }} .ts-cta-row { width: 100%; }
+  #ts-{{ ts_id }} .ts-cta {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 52px;
+    padding: 0 32px;
+    /* Solid CTA buttons share the PDP Add to Cart radius (theme
+       button-radius setting) — chips/circles stay fully round. */
+    border-radius: var(--sizes-border-button-radius);
+    background: #ffffff;
+    color: #1c1c1c;
+    /* Type matches the Shop Best Sellers pill exactly */
+    font-family: var(--type-font-body-family);
+    font-weight: 700;
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: var(--thread-ls-label);
+    text-decoration: none;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  #ts-{{ ts_id }} .ts-cta span {
+    position: relative;
+    z-index: 1;
+    /* The theme's base stylesheet styles bare <span>s (body family,
+       weight 300, 1rem, body tracking) — force the button label back
+       to the anchor's button type. */
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: inherit;
+    line-height: 1;
+  }
+  #ts-{{ ts_id }} .ts-proof {
+    margin: 12px 0 0;
+    font-family: var(--type-font-body-family);
+    font-size: 13px;
+    letter-spacing: var(--thread-ls-body);
+    color: rgba(255,255,255,0.9);
+  }
+  #ts-{{ ts_id }} .ts-proof__stars {
+    color: {{ section.settings.accent_color | default: 'var(--thread-gold)' }};
+    letter-spacing: 2px;
+    margin-right: 6px;
+  }
+  #ts-{{ ts_id }} .ts-proof--desktop { display: none; }
+
+  /* --- Desktop split --- */
+  @media (min-width: 768px) {
+    #ts-{{ ts_id }} .ts-wrap {
+      flex-direction: row;
+      align-items: stretch;
+      min-height: {{ section.settings.height_desktop | default: 560 }}px;
+    }
+    #ts-{{ ts_id }} .ts-media {
+      width: 50%;
+      height: auto;
+      max-height: none;
+      min-height: 100%;
+    }
+    #ts-{{ ts_id }} .ts-badge {
+      width: 128px;
+      height: 128px;
+      right: 24px;
+      bottom: 24px; /* desktop: fully on the image */
+    }
+    #ts-{{ ts_id }} .ts-content {
+      width: 50%;
+      justify-content: center;
+      padding: 56px clamp(32px, 6vw, 96px);
+    }
+    #ts-{{ ts_id }} .ts-heading { font-size: {{ section.settings.heading_size_d | default: 76 }}px; }
+    #ts-{{ ts_id }} .ts-lede { font-size: 18px; }
+    #ts-{{ ts_id }} .ts-cta { width: auto; align-self: flex-start; display: inline-flex; }
+    #ts-{{ ts_id }} .ts-cta-row { width: auto; }
+    #ts-{{ ts_id }} .ts-proof--desktop { display: block; }
+  }
+
+  /* --- Motion (hover + scroll reveals), disabled under reduced motion --- */
+  @media (prefers-reduced-motion: no-preference) {
+    #ts-{{ ts_id }} .ts-cta {
+      transition: transform 0.25s cubic-bezier(0,0,.3,1), box-shadow 0.25s cubic-bezier(0,0,.3,1);
+    }
+    #ts-{{ ts_id }} .ts-cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: {{ section.settings.accent_color | default: 'var(--thread-gold)' }};
+      transform: translateY(101%);
+      transition: transform 0.3s cubic-bezier(0,0,.3,1);
+      z-index: 0;
+    }
+    #ts-{{ ts_id }} .ts-cta:hover::before { transform: translateY(0); }
+    #ts-{{ ts_id }} .ts-cta:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.22);
+    }
+    #ts-{{ ts_id }} .ts-cta:active { transform: translateY(-1px) scale(0.98); }
+
+    /* Reveals arm only when JS tags the section, so no-JS never hides content */
+    #ts-{{ ts_id }}.ts-armed .ts-reveal {
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.55s cubic-bezier(0,0,.3,1), transform 0.55s cubic-bezier(0,0,.3,1);
+      transition-delay: var(--ts-d, 0s);
+    }
+    #ts-{{ ts_id }}.ts-armed.ts-in .ts-reveal {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #ts-{{ ts_id }} .ts-badge__ring-svg { animation: none; }
+  }
+</style>
+
+<script>
+  (function () {
+    var section = document.getElementById('ts-{{ ts_id }}');
+    if (!section) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!('IntersectionObserver' in window)) return;
+    section.classList.add('ts-armed');
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          section.classList.add('ts-in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.18 });
+    io.observe(section);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Trifecta Spotlight",
+  "settings": [
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The Trifecta" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Everything. Together." },
+    { "type": "range", "id": "heading_size_m", "label": "Heading size — mobile (px)", "min": 16, "max": 160, "step": 2, "default": 36 },
+    { "type": "range", "id": "heading_size_d", "label": "Heading size — desktop (px)", "min": 16, "max": 160, "step": 2, "default": 76 },
+    { "type": "text", "id": "lede", "label": "Lede (keep to one line on mobile)", "default": "Your whole carry, clipped into one." },
+    { "type": "text", "id": "includes_text", "label": "Includes (separate items with +)", "default": "Wallet + Wristlet + Chapstick Holder", "info": "Rendered as one compact chip row." },
+    { "type": "header", "content": "Product & CTA" },
+    { "type": "product", "id": "product", "label": "Bundle product", "info": "Price and compare-at price are pulled from this product." },
+    { "type": "text", "id": "cta_label", "label": "CTA label", "default": "Build Your Trifecta" },
+    { "type": "url", "id": "cta_url", "label": "CTA link", "info": "Point at the bundle builder page. Falls back to the picked product." },
+    { "type": "header", "content": "Media" },
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    { "type": "image_picker", "id": "image_mobile", "label": "Mobile image (optional)" },
+    { "type": "range", "id": "media_height_mobile", "label": "Mobile image height (% of screen)", "min": 32, "max": 46, "step": 2, "default": 40, "info": "Keep low enough that the whole section fits one phone screen." },
+    { "type": "range", "id": "height_desktop", "label": "Desktop min height (px)", "min": 440, "max": 720, "step": 20, "default": 560 },
+    { "type": "header", "content": "Rotating badge" },
+    { "type": "checkbox", "id": "show_badge", "label": "Show rotating badge", "default": true },
+    { "type": "text", "id": "badge_text", "label": "Ring text", "default": "DO WHAT CONNECTS YOU™ · THREAD® · EST. 2015 ·" },
+    { "type": "header", "content": "Proof line" },
+    { "type": "checkbox", "id": "show_proof", "label": "Show proof line", "default": true },
+    { "type": "checkbox", "id": "proof_desktop_only", "label": "Desktop only", "default": true },
+    { "type": "text", "id": "proof_quote", "label": "Quote", "default": "“The grab-and-go setup I didn’t know I needed.”" },
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "bg_color", "label": "Background", "default": "#1e7db3" },
+    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#eebc2c" },
+    { "type": "header", "content": "Visibility" },
+    {
+      "type": "select", "id": "visibility", "label": "Show on",
+      "options": [
+        { "value": "", "label": "All devices" },
+        { "value": "md:hidden", "label": "Mobile only" },
+        { "value": "hidden md:block", "label": "Desktop only" }
+      ],
+      "default": ""
+    }
+  ],
+  "presets": [{ "name": "Trifecta Spotlight" }],
+  "disabled_on": { "groups": ["custom.overlay"] }
+}
+{% endschema %}

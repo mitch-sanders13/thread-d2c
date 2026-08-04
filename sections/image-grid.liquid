@@ -1,0 +1,704 @@
+<!-- sections/image-grid.liquid -->
+{% comment %}
+  Image Grid section — flexible grid of image cards.
+  Each card can be:
+    - "label" mode: image + simple text label below
+    - "rich" mode: image + heading, subtext, and button below
+
+  Supports 1-3 columns on mobile/tablet/desktop independently.
+  Title, image padding, border radius, gaps — all editor-controlled.
+{% endcomment %}
+
+<section class="{{ section.settings.visibility }}{% if section.settings.use_global_spacing == 'global' %} spacing-global{% elsif section.settings.use_global_spacing == 'global-sides' %} spacing-sides{% endif %}"
+  style="background:{{ section.settings.bg_color }};{% if section.settings.use_global_spacing == 'custom' %}padding:{{ section.settings.sec_pt }}px 0 {{ section.settings.sec_pb }}px;{% elsif section.settings.use_global_spacing == 'global-sides' %}padding-top:{{ section.settings.sec_pt }}px;padding-bottom:{{ section.settings.sec_pb }}px;{% endif %}">
+
+  {%- comment -%} Resolve font tokens for all font settings {%- endcomment -%}
+  {% assign ig_title_use_token = false %}
+  {% assign ig_title_token_class = '' %}
+  {% if section.settings.title_font contains 'token-' %}
+    {% assign ig_title_use_token = true %}
+    {% assign ig_title_token_class = section.settings.title_font | replace: 'token-', 'type-' %}
+  {% endif %}
+
+  {% assign ig_label_use_token = false %}
+  {% assign ig_label_token_class = '' %}
+  {% if section.settings.label_font contains 'token-' %}
+    {% assign ig_label_use_token = true %}
+    {% assign ig_label_token_class = section.settings.label_font | replace: 'token-', 'type-' %}
+  {% endif %}
+
+  {% assign ig_rh_use_token = false %}
+  {% assign ig_rh_token_class = '' %}
+  {% if section.settings.rh_font contains 'token-' %}
+    {% assign ig_rh_use_token = true %}
+    {% assign ig_rh_token_class = section.settings.rh_font | replace: 'token-', 'type-' %}
+  {% endif %}
+
+  {% assign ig_rs_use_token = false %}
+  {% assign ig_rs_token_class = '' %}
+  {% if section.settings.rs_font contains 'token-' %}
+    {% assign ig_rs_use_token = true %}
+    {% assign ig_rs_token_class = section.settings.rs_font | replace: 'token-', 'type-' %}
+  {% endif %}
+
+  {% assign ig_rb_use_token = false %}
+  {% assign ig_rb_token_class = '' %}
+  {% if section.settings.rb_font contains 'token-' %}
+    {% assign ig_rb_use_token = true %}
+    {% assign ig_rb_token_class = section.settings.rb_font | replace: 'token-', 'type-' %}
+  {% endif %}
+
+  {%- comment -%} Section head: optional eyebrow + title + header text link ("Shop everything") {%- endcomment -%}
+  {%- assign ig_show_title = false -%}
+  {%- if section.settings.show_title and section.settings.title_text != blank -%}{%- assign ig_show_title = true -%}{%- endif -%}
+  {%- assign ig_has_headlink = false -%}
+  {%- if section.settings.show_header_link and section.settings.header_link_label != blank and section.settings.header_link_url != blank -%}{%- assign ig_has_headlink = true -%}{%- endif -%}
+  {%- assign ig_has_eyebrow = false -%}
+  {%- if section.settings.eyebrow_text != blank -%}{%- assign ig_has_eyebrow = true -%}{%- endif -%}
+  {% if ig_show_title or ig_has_headlink or ig_has_eyebrow %}
+    <div style="padding:{{ section.settings.title_pt }}px {{ section.settings.title_ph }}px {{ section.settings.title_gap }}px;">
+    {% if ig_has_eyebrow %}
+      <p style="margin:0 0 6px;font-family:var(--type-font-body-family);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing: var(--thread-ls-label);color:{{ section.settings.eyebrow_color | default: 'var(--thread-blue)' }};{% unless ig_has_headlink %}text-align:{{ section.settings.title_align }};{% endunless %}">{{ section.settings.eyebrow_text }}</p>
+    {% endif %}
+    <div style="{% if ig_has_headlink %}display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;row-gap:4px;{% else %}text-align:{{ section.settings.title_align }};{% endif %}">
+      {% if ig_show_title %}
+      <span {% if ig_title_use_token %}class="{{ ig_title_token_class }}"{% endif %} style="
+        {% unless ig_title_use_token %}
+          font-family:var(--type-font-{{ section.settings.title_font }}-family);
+          font-size:{{ section.settings.title_size }}px;
+          font-weight:{{ section.settings.title_weight }};
+          text-transform:{{ section.settings.title_case }};
+          letter-spacing:{{ section.settings.title_ls }}em;
+          color:{{ section.settings.title_color }};
+          line-height:1.1;
+        {% endunless %}
+        {% if ig_has_headlink %}display:inline-block;{% else %}display:block;{% endif %}
+      ">{{ section.settings.title_text }}</span>
+      {% endif %}
+      {% if ig_has_headlink %}
+        <a class="ig-headlink-{{ section.id }}" href="{{ section.settings.header_link_url }}">
+          <span class="ig-headlink__txt">{{ section.settings.header_link_label }}</span>
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+        </a>
+      {% endif %}
+    </div>
+    </div>
+  {% endif %}
+
+  {%- comment -%} Grid CSS — scoped to this section instance {%- endcomment -%}
+  <style>
+    #img-grid-{{ section.id }} {
+      display: grid;
+      grid-template-columns: repeat({{ section.settings.cols_mob }}, 1fr);
+      gap: {{ section.settings.row_gap }}px {{ section.settings.col_gap }}px;
+      padding: 0 {{ section.settings.sec_ph }}px;
+    }
+    @media (min-width: 640px) {
+      #img-grid-{{ section.id }} {
+        grid-template-columns: repeat({{ section.settings.cols_tabl }}, 1fr);
+      }
+    }
+    @media (min-width: 1024px) {
+      #img-grid-{{ section.id }} {
+        grid-template-columns: repeat({{ section.settings.cols_desk }}, 1fr);
+      }
+    }
+    /* Per-card visibility (mobile/desktop/both). Breakpoint: 768px. */
+    @media (max-width: 767.98px) {
+      #img-grid-{{ section.id }} .ig-card--desktop-only { display: none !important; }
+    }
+    @media (min-width: 768px) {
+      #img-grid-{{ section.id }} .ig-card--mobile-only { display: none !important; }
+    }
+    {%- if section.settings.img_ratio_desktop != 'same' and section.settings.img_ratio_desktop != blank -%}
+    @media (min-width: 768px) {
+      #img-grid-{{ section.id }} .ig-img-{{ section.id }} { padding-bottom: {{ section.settings.img_ratio_desktop }}% !important; }
+    }
+    {%- endif -%}
+
+    /* Header text link — underlined at rest; on hover the underline wipes
+       out right and redraws left-to-right while the arrow nudges. */
+    .ig-headlink-{{ section.id }} {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: {{ section.settings.title_color | default: '#1c1c1c' }};
+      /* Same type as the hero's underlined text buttons — but unlined
+         (per merchant). Hover feedback lives on the arrow alone. */
+      font-family: var(--type-font-body-family);
+      font-weight: 600;
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: var(--thread-ls-label);
+      white-space: nowrap;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .ig-headlink-{{ section.id }} svg {
+        transition: transform 0.25s cubic-bezier(0,0,.3,1);
+      }
+      .ig-headlink-{{ section.id }}:hover svg { transform: translateX(4px); }
+    }
+
+    /* Overlay label mode — white caps label + circular arrow chip on the
+       image over a bottom scrim. Hover: zoom 1.03 + arrow nudge. */
+    #img-grid-{{ section.id }} .ig-ov-scrim {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.42), rgba(0,0,0,0) 55%);
+      pointer-events: none;
+    }
+    #img-grid-{{ section.id }} .ig-ov-row {
+      position: absolute;
+      left: 14px;
+      right: 12px;
+      bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    #img-grid-{{ section.id }} .ig-ov-label {
+      color: #ffffff;
+      font-family: var(--type-font-body-family);
+      font-weight: 700;
+      font-size: {{ section.settings.overlay_label_size | default: 15 }}px;
+      text-transform: uppercase;
+      letter-spacing: var(--thread-ls-label);
+      text-shadow: 0 1px 8px rgba(0,0,0,0.35);
+      line-height: 1.1;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      #img-grid-{{ section.id }} .ig-ov img {
+        transition: transform 0.9s cubic-bezier(0,0,.3,1);
+      }
+      #img-grid-{{ section.id }} .ig-card:hover .ig-ov img { transform: scale(1.03); }
+    }
+
+    /* Armed scroll-reveal — cards rise in with a stagger. */
+    @media (prefers-reduced-motion: no-preference) {
+      #img-grid-{{ section.id }}.ig-armed .ig-card {
+        opacity: 0;
+        transform: translateY(14px);
+        transition: opacity 0.55s cubic-bezier(0,0,.3,1), transform 0.55s cubic-bezier(0,0,.3,1);
+      }
+      #img-grid-{{ section.id }}.ig-armed .ig-card:nth-child(2) { transition-delay: 0.06s; }
+      #img-grid-{{ section.id }}.ig-armed .ig-card:nth-child(3) { transition-delay: 0.12s; }
+      #img-grid-{{ section.id }}.ig-armed .ig-card:nth-child(n+4) { transition-delay: 0.18s; }
+      #img-grid-{{ section.id }}.ig-armed.ig-in .ig-card { opacity: 1; transform: none; }
+    }
+  </style>
+
+  <div id="img-grid-{{ section.id }}">
+    {% for block in section.blocks %}
+      {% if block.type == 'card' %}
+        {%- assign ig_card_vis_class = 'ig-card' -%}
+        {%- if block.settings.visibility == 'mobile' -%}{%- assign ig_card_vis_class = 'ig-card ig-card--mobile-only' -%}
+        {%- elsif block.settings.visibility == 'desktop' -%}{%- assign ig_card_vis_class = 'ig-card ig-card--desktop-only' -%}
+        {%- endif -%}
+        <div class="{{ ig_card_vis_class }}" {{ block.shopify_attributes }}>
+
+          {%- comment -%} Card image {%- endcomment -%}
+          {% assign card_link = block.settings.link %}
+          {% assign has_link = false %}
+          {% if card_link != blank %}{% assign has_link = true %}{% endif %}
+
+          {% if has_link %}<a href="{{ card_link }}" style="display:block;text-decoration:none;color:inherit;">{% endif %}
+
+          {%- assign ig_overlay_card = false -%}
+          {%- if block.settings.card_mode == 'label' and section.settings.label_position == 'overlay' -%}
+            {%- assign ig_overlay_card = true -%}
+          {%- endif -%}
+
+          <div style="padding:0 {{ section.settings.img_ph }}px;">
+            <div class="ig-img-{{ section.id }}{% if ig_overlay_card %} ig-ov{% endif %}" style="width:100%;padding-bottom:{{ section.settings.img_ratio }}%;position:relative;overflow:hidden;border-radius:{{ section.settings.img_radius }}px;">
+              {% if block.settings.image != blank %}
+                {{ block.settings.image | image_url: width: 800 | image_tag:
+                  loading: 'lazy',
+                  style: 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;',
+                  alt: block.settings.image.alt
+                }}
+              {% else %}
+                <div style="position:absolute;inset:0;background:{{ block.settings.bg_color | default: 'var(--thread-putty)' }};"></div>
+              {% endif %}
+              {% if ig_overlay_card and block.settings.label != blank %}
+                <div class="ig-ov-scrim"></div>
+                <div class="ig-ov-row">
+                  <span class="ig-ov-label">{{ block.settings.label }}</span>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          {%- comment -%} Card content — label mode (below image; skipped in overlay mode) {%- endcomment -%}
+          {% if block.settings.card_mode == 'label' and ig_overlay_card == false %}
+            {% if block.settings.label != blank %}
+              {%- assign ig_label_align = block.settings.label_align | default: 'inherit' -%}
+              {%- if ig_label_align == 'inherit' or ig_label_align == blank -%}
+                {%- assign ig_label_align = section.settings.label_align -%}
+              {%- endif -%}
+              <div style="padding:{{ section.settings.label_pt }}px {{ section.settings.label_ph }}px {{ section.settings.label_pb }}px;text-align:{{ ig_label_align }} !important;">
+                <span {% if ig_label_use_token %}class="{{ ig_label_token_class }}"{% endif %} style="{% unless ig_label_use_token %}font-family:var(--type-font-{{ section.settings.label_font }}-family) !important;font-size:{{ section.settings.label_size }}px !important;font-weight:{{ section.settings.label_weight }} !important;text-transform:{{ section.settings.label_case }} !important;letter-spacing:{{ section.settings.label_ls }}em !important;{% endunless %}color:{{ section.settings.label_color }} !important;">{{ block.settings.label }}</span>
+              </div>
+            {% endif %}
+
+          {%- comment -%} Card content — rich mode {%- endcomment -%}
+          {% elsif block.settings.card_mode == 'rich' %}
+            <div style="padding:{{ block.settings.rich_pv }}px {{ block.settings.rich_ph }}px;display:flex;flex-direction:column;gap:{{ block.settings.rich_gap }}px;">
+              {% if block.settings.heading != blank %}
+                <h3 {% if ig_rh_use_token %}class="{{ ig_rh_token_class }}"{% endif %} style="margin:0;{% unless ig_rh_use_token %}font-family:var(--type-font-{{ section.settings.rh_font }}-family);font-size:{{ section.settings.rh_size }}px;font-weight:{{ section.settings.rh_weight }};text-transform:{{ section.settings.rh_case }};letter-spacing:{{ section.settings.rh_ls }}em;line-height:{{ section.settings.rh_lh | divided_by: 100.0 }};{% endunless %}color:{{ section.settings.rh_color }};">
+                  {{ block.settings.heading }}
+                </h3>
+              {% endif %}
+              {% if block.settings.subtext != blank %}
+                <p {% if ig_rs_use_token %}class="{{ ig_rs_token_class }}"{% endif %} style="margin:0;{% unless ig_rs_use_token %}font-family:var(--type-font-{{ section.settings.rs_font }}-family);font-size:{{ section.settings.rs_size }}px;font-weight:{{ section.settings.rs_weight }};text-transform:{{ section.settings.rs_case }};letter-spacing:{{ section.settings.rs_ls }}em;line-height:{{ section.settings.rs_lh | divided_by: 100.0 }};{% endunless %}color:{{ section.settings.rs_color }};">
+                  {{ block.settings.subtext }}
+                </p>
+              {% endif %}
+              {% if block.settings.btn_label != blank %}
+                {% assign btn_link = block.settings.btn_link | default: block.settings.link %}
+                <div>
+                  <a href="{{ btn_link }}"
+                    {% if ig_rb_use_token %}class="{{ ig_rb_token_class }}"{% endif %}
+                    style="
+                      display:inline-block;
+                      text-decoration:none;
+                      {% unless ig_rb_use_token %}
+                      font-family:var(--type-font-{{ section.settings.rb_font }}-family);
+                      font-size:{{ section.settings.rb_size }}px;
+                      font-weight:{{ section.settings.rb_weight }};
+                      text-transform:{{ section.settings.rb_case }};
+                      letter-spacing:{{ section.settings.rb_ls }}em;
+                      {% endunless %}
+                      padding:{{ section.settings.rb_pv }}px {{ section.settings.rb_ph }}px;
+                      {% if section.settings.rb_style == 'solid' %}
+                        background:{{ section.settings.rb_bg }};
+                        color:{{ section.settings.rb_text }};
+                        border:{{ section.settings.rb_border_w }}px solid {{ section.settings.rb_bg }};
+                        border-radius:{{ section.settings.rb_radius }}px;
+                      {% elsif section.settings.rb_style == 'outline' %}
+                        background:transparent;
+                        color:{{ section.settings.rb_border_color }};
+                        border:{{ section.settings.rb_border_w }}px solid {{ section.settings.rb_border_color }};
+                        border-radius:{{ section.settings.rb_radius }}px;
+                      {% else %}
+                        background:transparent;
+                        color:{{ section.settings.rb_border_color }};
+                        border:{{ section.settings.rb_border_w }}px solid {{ section.settings.rb_border_color }};
+                        border-radius:var(--thread-radius-pill);
+                      {% endif %}
+                    ">
+                    {{ block.settings.btn_label }}
+                  </a>
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {% if has_link %}</a>{% endif %}
+
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+</section>
+
+
+<script>
+  (function () {
+    var grid = document.getElementById('img-grid-{{ section.id }}');
+    if (!grid) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!('IntersectionObserver' in window)) return;
+    grid.classList.add('ig-armed');
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) { grid.classList.add('ig-in'); io.unobserve(entry.target); }
+      });
+    }, { threshold: 0.1 });
+    io.observe(grid);
+  })();
+</script>
+{% schema %}
+{
+  "name": "Image Grid",
+  "settings": [
+    { "type": "header", "content": "Section" },
+    {
+      "type": "select", "id": "visibility", "label": "Visibility",
+      "options": [
+        { "value": "", "label": "All devices" },
+        { "value": "md:hidden", "label": "Mobile only" },
+        { "value": "hidden md:block", "label": "Desktop only" }
+      ],
+      "default": ""
+    },
+    { "type": "color", "id": "bg_color", "label": "Background color", "default": "#ffffff" },
+    {
+      "type": "select",
+      "id": "use_global_spacing",
+      "label": "Spacing mode",
+      "options": [
+        { "value": "global", "label": "↳ Use global spacing" },
+        { "value": "global-sides", "label": "↳ Use global sides only" },
+        { "value": "custom", "label": "Custom (use settings below)" }
+      ],
+      "default": "custom",
+      "info": "Global spacing is set in Theme Settings > Typography tokens"
+    },
+    { "type": "range", "id": "sec_pt", "label": "Padding top", "min": 0, "max": 80, "step": 4, "default": 20 },
+    { "type": "range", "id": "sec_pb", "label": "Padding bottom", "min": 0, "max": 80, "step": 4, "default": 20 },
+    { "type": "range", "id": "sec_ph", "label": "Padding sides", "min": 0, "max": 48, "step": 4, "default": 16 },
+    { "type": "header", "content": "Section title" },
+    { "type": "checkbox", "id": "show_title", "label": "Show title", "default": false },
+    { "type": "text", "id": "title_text", "label": "Title text", "default": "Shop By Category" },
+    {
+      "type": "select", "id": "title_font", "label": "Font",
+      "options": [
+        { "value": "token-display", "label": "↳ Use theme token (Display)" },
+        { "value": "token-h1", "label": "↳ Use theme token (H1)" },
+        { "value": "token-h2", "label": "↳ Use theme token (H2)" },
+        { "value": "token-h3", "label": "↳ Use theme token (H3)" },
+        { "value": "token-body", "label": "↳ Use theme token (Body)" },
+        { "value": "token-small", "label": "↳ Use theme token (Small)" },
+        { "value": "token-label", "label": "↳ Use theme token (Label)" },
+        { "value": "header", "label": "PP Right Grotesk" },
+        { "value": "body", "label": "Forma DJR" },
+        { "value": "handwritten", "label": "Thread Handwritten" }
+      ],
+      "default": "body"
+    },
+    { "type": "range", "id": "title_size", "label": "Size", "min": 12, "max": 80, "step": 2, "default": 22 },
+    {
+      "type": "select", "id": "title_weight", "label": "Weight",
+      "options": [{ "value": "400", "label": "Regular" }, { "value": "700", "label": "Bold" }],
+      "default": "700"
+    },
+    {
+      "type": "select", "id": "title_case", "label": "Case",
+      "options": [{ "value": "none", "label": "Normal" }, { "value": "uppercase", "label": "UPPERCASE" }, { "value": "capitalize", "label": "Capitalize" }],
+      "default": "none"
+    },
+    {
+      "type": "select", "id": "title_ls", "label": "Letter spacing",
+      "options": [{ "value": "0", "label": "None" }, { "value": "0.02", "label": "Tight" }, { "value": "0.05", "label": "Normal" }, { "value": "0.10", "label": "Wide" }],
+      "default": "0"
+    },
+    { "type": "color", "id": "title_color", "label": "Color", "default": "#1c1c1c" },
+    { "type": "range", "id": "title_ph", "label": "Title padding sides", "min": 0, "max": 60, "step": 2, "default": 0 },
+    { "type": "range", "id": "title_pt", "label": "Title padding top", "min": 0, "max": 60, "step": 2, "default": 0 },
+    { "type": "range", "id": "title_gap", "label": "Title gap to grid", "min": 4, "max": 48, "step": 2, "default": 16 },
+    {
+      "type": "select", "id": "title_align", "label": "Title alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    { "type": "header", "content": "Eyebrow" },
+    { "type": "text", "id": "eyebrow_text", "label": "Eyebrow text", "info": "Small caps line above the title, e.g. 'Find your carry'." },
+    { "type": "color", "id": "eyebrow_color", "label": "Eyebrow color", "default": "#1e7db3" },
+    { "type": "header", "content": "Header link" },
+    { "type": "checkbox", "id": "show_header_link", "label": "Show header link", "info": "Uncheck to hide the header text link (e.g. 'Shop all') without deleting its label/URL.", "default": true },
+    { "type": "text", "id": "header_link_label", "label": "Link label", "info": "Optional text link in the section header, e.g. 'Shop everything'. Shown top-right when a title is set." },
+    { "type": "url", "id": "header_link_url", "label": "Link URL" },
+    { "type": "header", "content": "Label position (label mode cards)" },
+    {
+      "type": "select", "id": "label_position", "label": "Label position",
+      "options": [
+        { "value": "below", "label": "Below image" },
+        { "value": "overlay", "label": "On image (white text + arrow chip)" }
+      ],
+      "default": "below",
+      "info": "Overlay puts the label on the image over a gradient scrim with a circular arrow chip; hover zooms the image and nudges the arrow."
+    },
+    { "type": "range", "id": "overlay_label_size", "label": "Overlay label size", "min": 11, "max": 24, "step": 1, "unit": "px", "default": 15 },
+    { "type": "header", "content": "Grid layout" },
+    {
+      "type": "select", "id": "cols_mob", "label": "Mobile columns",
+      "options": [{ "value": "1", "label": "1" }, { "value": "2", "label": "2" }, { "value": "3", "label": "3" }],
+      "default": "1"
+    },
+    {
+      "type": "select", "id": "cols_tabl", "label": "Tablet columns",
+      "options": [{ "value": "1", "label": "1" }, { "value": "2", "label": "2" }, { "value": "3", "label": "3" }],
+      "default": "2"
+    },
+    {
+      "type": "select", "id": "cols_desk", "label": "Desktop columns",
+      "options": [{ "value": "1", "label": "1" }, { "value": "2", "label": "2" }, { "value": "3", "label": "3" }, { "value": "4", "label": "4" }],
+      "default": "3"
+    },
+    { "type": "range", "id": "col_gap", "label": "Column gap", "min": 0, "max": 40, "step": 2, "default": 8 },
+    { "type": "range", "id": "row_gap", "label": "Row gap", "min": 0, "max": 60, "step": 2, "default": 24 },
+    { "type": "header", "content": "Card image" },
+    {
+      "type": "select", "id": "img_ratio", "label": "Aspect ratio — mobile",
+      "options": [
+        { "value": "75", "label": "4:3 landscape" },
+        { "value": "100", "label": "1:1 square" },
+        { "value": "120", "label": "4:5 portrait" },
+        { "value": "133", "label": "3:4 tall" },
+        { "value": "56", "label": "16:9 wide" }
+      ],
+      "default": "100"
+    },
+    {
+      "type": "select", "id": "img_ratio_desktop", "label": "Aspect ratio — desktop",
+      "info": "Applies at 768px and up. Choose 'Same as mobile' to use one ratio everywhere.",
+      "options": [
+        { "value": "same", "label": "Same as mobile" },
+        { "value": "75", "label": "4:3 landscape" },
+        { "value": "100", "label": "1:1 square" },
+        { "value": "120", "label": "4:5 portrait" },
+        { "value": "133", "label": "3:4 tall" },
+        { "value": "56", "label": "16:9 wide" }
+      ],
+      "default": "same"
+    },
+    { "type": "range", "id": "img_ph", "label": "Image side padding", "min": 0, "max": 32, "step": 2, "default": 0 },
+    { "type": "range", "id": "img_radius", "label": "Image border radius", "min": 0, "max": 24, "step": 1, "default": 0 },
+    { "type": "header", "content": "Label style (label mode cards)" },
+    {
+      "type": "select", "id": "label_font", "label": "Font",
+      "options": [
+        { "value": "token-display", "label": "↳ Use theme token (Display)" },
+        { "value": "token-h1", "label": "↳ Use theme token (H1)" },
+        { "value": "token-h2", "label": "↳ Use theme token (H2)" },
+        { "value": "token-h3", "label": "↳ Use theme token (H3)" },
+        { "value": "token-body", "label": "↳ Use theme token (Body)" },
+        { "value": "token-small", "label": "↳ Use theme token (Small)" },
+        { "value": "token-label", "label": "↳ Use theme token (Label)" },
+        { "value": "body", "label": "Forma DJR" },
+        { "value": "header", "label": "PP Right Grotesk" },
+        { "value": "handwritten", "label": "Thread Handwritten" }
+      ],
+      "default": "body"
+    },
+    { "type": "range", "id": "label_size", "label": "Size", "min": 10, "max": 40, "step": 1, "default": 16 },
+    {
+      "type": "select", "id": "label_weight", "label": "Weight",
+      "options": [{ "value": "400", "label": "Regular" }, { "value": "700", "label": "Bold" }],
+      "default": "700"
+    },
+    {
+      "type": "select", "id": "label_case", "label": "Case",
+      "options": [{ "value": "none", "label": "Normal" }, { "value": "uppercase", "label": "UPPERCASE" }, { "value": "capitalize", "label": "Capitalize" }],
+      "default": "none"
+    },
+    {
+      "type": "select", "id": "label_ls", "label": "Letter spacing",
+      "options": [{ "value": "0", "label": "None" }, { "value": "0.02", "label": "Tight" }, { "value": "0.05", "label": "Normal" }, { "value": "0.10", "label": "Wide" }],
+      "default": "0"
+    },
+    { "type": "color", "id": "label_color", "label": "Color", "default": "#1c1c1c" },
+    { "type": "range", "id": "label_pt", "label": "Label padding top", "min": 0, "max": 32, "step": 2, "default": 12 },
+    { "type": "range", "id": "label_ph", "label": "Label padding sides", "min": 0, "max": 32, "step": 2, "default": 0 },
+    { "type": "range", "id": "label_pb", "label": "Label padding bottom", "min": 0, "max": 32, "step": 2, "default": 4 },
+    {
+      "type": "select", "id": "label_align", "label": "Label alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    { "type": "header", "content": "Rich card — heading" },
+    {
+      "type": "select", "id": "rh_font", "label": "Font",
+      "options": [
+        { "value": "token-display", "label": "↳ Use theme token (Display)" },
+        { "value": "token-h1", "label": "↳ Use theme token (H1)" },
+        { "value": "token-h2", "label": "↳ Use theme token (H2)" },
+        { "value": "token-h3", "label": "↳ Use theme token (H3)" },
+        { "value": "token-body", "label": "↳ Use theme token (Body)" },
+        { "value": "token-small", "label": "↳ Use theme token (Small)" },
+        { "value": "token-label", "label": "↳ Use theme token (Label)" },
+        { "value": "body", "label": "Forma DJR" },
+        { "value": "header", "label": "PP Right Grotesk" },
+        { "value": "handwritten", "label": "Thread Handwritten" }
+      ],
+      "default": "body"
+    },
+    { "type": "range", "id": "rh_size", "label": "Size", "min": 12, "max": 48, "step": 1, "default": 20 },
+    {
+      "type": "select", "id": "rh_weight", "label": "Weight",
+      "options": [{ "value": "400", "label": "Regular" }, { "value": "700", "label": "Bold" }],
+      "default": "700"
+    },
+    {
+      "type": "select", "id": "rh_case", "label": "Case",
+      "options": [{ "value": "none", "label": "Normal" }, { "value": "uppercase", "label": "UPPERCASE" }, { "value": "capitalize", "label": "Capitalize" }],
+      "default": "none"
+    },
+    {
+      "type": "select", "id": "rh_ls", "label": "Letter spacing",
+      "options": [{ "value": "0", "label": "None" }, { "value": "0.02", "label": "Tight" }, { "value": "0.05", "label": "Normal" }],
+      "default": "0"
+    },
+    { "type": "range", "id": "rh_lh", "label": "Line height %", "min": 100, "max": 180, "step": 5, "default": 130 },
+    { "type": "color", "id": "rh_color", "label": "Color", "default": "#1c1c1c" },
+    { "type": "header", "content": "Rich card — subtext" },
+    {
+      "type": "select", "id": "rs_font", "label": "Font",
+      "options": [
+        { "value": "token-display", "label": "↳ Use theme token (Display)" },
+        { "value": "token-h1", "label": "↳ Use theme token (H1)" },
+        { "value": "token-h2", "label": "↳ Use theme token (H2)" },
+        { "value": "token-h3", "label": "↳ Use theme token (H3)" },
+        { "value": "token-body", "label": "↳ Use theme token (Body)" },
+        { "value": "token-small", "label": "↳ Use theme token (Small)" },
+        { "value": "token-label", "label": "↳ Use theme token (Label)" },
+        { "value": "body", "label": "Forma DJR" },
+        { "value": "header", "label": "PP Right Grotesk" },
+        { "value": "handwritten", "label": "Thread Handwritten" }
+      ],
+      "default": "body"
+    },
+    { "type": "range", "id": "rs_size", "label": "Size", "min": 10, "max": 32, "step": 1, "default": 15 },
+    {
+      "type": "select", "id": "rs_weight", "label": "Weight",
+      "options": [{ "value": "400", "label": "Regular" }, { "value": "700", "label": "Bold" }],
+      "default": "400"
+    },
+    {
+      "type": "select", "id": "rs_case", "label": "Case",
+      "options": [{ "value": "none", "label": "Normal" }, { "value": "uppercase", "label": "UPPERCASE" }, { "value": "capitalize", "label": "Capitalize" }],
+      "default": "none"
+    },
+    {
+      "type": "select", "id": "rs_ls", "label": "Letter spacing",
+      "options": [{ "value": "0", "label": "None" }, { "value": "0.01", "label": "Tiny" }, { "value": "0.02", "label": "Tight" }],
+      "default": "0.01"
+    },
+    { "type": "range", "id": "rs_lh", "label": "Line height %", "min": 100, "max": 200, "step": 5, "default": 150 },
+    { "type": "color", "id": "rs_color", "label": "Color", "default": "#1c1c1c" },
+    { "type": "header", "content": "Rich card — button" },
+    {
+      "type": "select", "id": "rb_style", "label": "Button style",
+      "options": [
+        { "value": "outline-pill", "label": "Outline pill" },
+        { "value": "outline", "label": "Outline square" },
+        { "value": "solid", "label": "Solid" }
+      ],
+      "default": "outline-pill"
+    },
+    {
+      "type": "select", "id": "rb_font", "label": "Font",
+      "options": [
+        { "value": "token-display", "label": "↳ Use theme token (Display)" },
+        { "value": "token-h1", "label": "↳ Use theme token (H1)" },
+        { "value": "token-h2", "label": "↳ Use theme token (H2)" },
+        { "value": "token-h3", "label": "↳ Use theme token (H3)" },
+        { "value": "token-body", "label": "↳ Use theme token (Body)" },
+        { "value": "token-small", "label": "↳ Use theme token (Small)" },
+        { "value": "token-label", "label": "↳ Use theme token (Label)" },
+        { "value": "body", "label": "Forma DJR" },
+        { "value": "header", "label": "PP Right Grotesk" },
+        { "value": "handwritten", "label": "Thread Handwritten" }
+      ],
+      "default": "body"
+    },
+    { "type": "range", "id": "rb_size", "label": "Size", "min": 10, "max": 20, "step": 1, "default": 13 },
+    {
+      "type": "select", "id": "rb_weight", "label": "Weight",
+      "options": [{ "value": "400", "label": "Regular" }, { "value": "700", "label": "Bold" }],
+      "default": "400"
+    },
+    {
+      "type": "select", "id": "rb_case", "label": "Case",
+      "options": [{ "value": "uppercase", "label": "UPPERCASE" }, { "value": "none", "label": "Normal" }, { "value": "capitalize", "label": "Capitalize" }],
+      "default": "uppercase"
+    },
+    {
+      "type": "select", "id": "rb_ls", "label": "Letter spacing",
+      "options": [{ "value": "0", "label": "None" }, { "value": "0.05", "label": "Tight" }, { "value": "0.08", "label": "Normal" }, { "value": "0.12", "label": "Wide" }],
+      "default": "0.08"
+    },
+    { "type": "range", "id": "rb_pv", "label": "Padding vertical", "min": 4, "max": 20, "step": 1, "default": 10 },
+    { "type": "range", "id": "rb_ph", "label": "Padding horizontal", "min": 8, "max": 40, "step": 2, "default": 24 },
+    { "type": "range", "id": "rb_border_w", "label": "Border thickness", "min": 1, "max": 4, "step": 1, "default": 2 },
+    { "type": "range", "id": "rb_radius", "label": "Border radius (square style)", "min": 0, "max": 20, "step": 1, "default": 4 },
+    { "type": "color", "id": "rb_bg", "label": "Solid bg color", "default": "#1c1c1c" },
+    { "type": "color", "id": "rb_text", "label": "Solid text color", "default": "#ffffff" },
+    { "type": "color", "id": "rb_border_color", "label": "Outline/text color", "default": "#1c1c1c" }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "settings": [
+        {
+          "type": "select", "id": "card_mode", "label": "Card type",
+          "options": [
+            { "value": "label", "label": "Image + label" },
+            { "value": "rich", "label": "Image + heading, text, button" }
+          ],
+          "default": "label"
+        },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "color", "id": "bg_color", "label": "Placeholder color (no image)", "default": "#e0ddd8" },
+        { "type": "url", "id": "link", "label": "Card link URL" },
+        { "type": "header", "content": "Label mode" },
+        { "type": "text", "id": "label", "label": "Label text", "default": "Category" },
+        {
+          "type": "select", "id": "label_align", "label": "Label alignment",
+          "options": [
+            { "value": "inherit", "label": "Use section default" },
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "inherit",
+          "info": "Overrides the section's Label alignment for just this tile."
+        },
+        { "type": "header", "content": "Rich mode" },
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Heading" },
+        { "type": "textarea", "id": "subtext", "label": "Subtext", "default": "Add a description here." },
+        { "type": "text", "id": "btn_label", "label": "Button label", "default": "Shop now" },
+        { "type": "url", "id": "btn_link", "label": "Button URL (overrides card link)" },
+        { "type": "range", "id": "rich_ph", "label": "Content padding sides", "min": 0, "max": 40, "step": 2, "default": 16 },
+        { "type": "range", "id": "rich_pv", "label": "Content padding top/bottom", "min": 0, "max": 40, "step": 2, "default": 16 },
+        { "type": "range", "id": "rich_gap", "label": "Content gap", "min": 4, "max": 32, "step": 2, "default": 12 },
+        {
+          "type": "select",
+          "id": "visibility",
+          "label": "Show on",
+          "options": [
+            { "value": "both", "label": "Mobile & desktop" },
+            { "value": "mobile", "label": "Mobile only" },
+            { "value": "desktop", "label": "Desktop only" }
+          ],
+          "default": "both",
+          "info": "Hides this card on the other breakpoint. Breakpoint: 768px."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image Grid",
+      "settings": {
+        "show_title": true,
+        "title_text": "Shop By Category",
+        "cols_mob": "1",
+        "cols_tabl": "2",
+        "cols_desk": "3",
+        "col_gap": 8,
+        "row_gap": 24,
+        "img_ratio": "100"
+      },
+      "blocks": [
+        { "type": "card", "settings": { "card_mode": "label", "label": "Wallets" } },
+        { "type": "card", "settings": { "card_mode": "label", "label": "Bags" } },
+        { "type": "card", "settings": { "card_mode": "label", "label": "Accessories" } }
+      ]
+    }
+  ],
+  "disabled_on": { "groups": ["custom.overlay"] }
+}
+{% endschema %}

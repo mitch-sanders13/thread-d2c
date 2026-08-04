@@ -1,0 +1,443 @@
+{% doc %}
+  @prompt
+    full width image with link support, allow me to set the link as a hotspot; and add the ability to add up to 5 links. Make the max hot spot size be 500, make the hotspot visibile but with the option to enable transparency by percentage. Do not include any + or other icon in the hot spot., do not change the hotspot opacity when hovering over it with the mouse., set max hotspot size to 1000, add accessibility text for the links, Do not change the hot spot opacity when hovering over it with a mouse., enable a custom setting to set hotspto opacity when hovered over
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-hotspot-image-container-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    display: block;
+  }
+
+  .ai-hotspot-image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .ai-hotspot-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .ai-hotspot-image-placeholder-{{ ai_gen_id }} {
+    background-color: #f4f4f4;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 400px;
+  }
+
+  .ai-hotspot-empty-state-{{ ai_gen_id }} {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 20px;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .ai-hotspot-image-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 500px;
+    max-height: 500px;
+  }
+
+  .ai-hotspot-{{ ai_gen_id }} {
+    position: absolute;
+    top: var(--ai-hotspot-y-{{ ai_gen_id }});
+    left: var(--ai-hotspot-x-{{ ai_gen_id }});
+    transform: translate(-50%, -50%);
+    z-index: 2;
+  }
+
+  .ai-hotspot-link-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.hotspot_size }}px;
+    height: {{ block.settings.hotspot_size }}px;
+    border-radius: 50%;
+    background-color: {{ block.settings.hotspot_color }};
+    opacity: {{ block.settings.hotspot_opacity | divided_by: 100.0 }};
+    border: {{ block.settings.hotspot_border_width }}px solid {{ block.settings.hotspot_border_color }};
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+  }
+
+  .ai-hotspot-link-{{ ai_gen_id }}:hover {
+    opacity: {{ block.settings.hotspot_hover_opacity | divided_by: 100.0 }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-hotspot-link-{{ ai_gen_id }} {
+      width: calc({{ block.settings.hotspot_size }}px * 0.7);
+      height: calc({{ block.settings.hotspot_size }}px * 0.7);
+    }
+  }
+{% endstyle %}
+
+<hotspot-image-{{ ai_gen_id }}
+  class="ai-hotspot-image-container-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-hotspot-image-wrapper-{{ ai_gen_id }}">
+    {% if block.settings.image %}
+      <img
+        src="{{ block.settings.image | image_url: width: 2000 }}"
+        alt="{{ block.settings.image.alt | escape }}"
+        loading="lazy"
+        width="{{ block.settings.image.width }}"
+        height="{{ block.settings.image.height }}"
+        class="ai-hotspot-image-{{ ai_gen_id }}"
+      >
+    {% else %}
+      <div class="ai-hotspot-image-placeholder-{{ ai_gen_id }}">
+        {{ 'image' | placeholder_svg_tag }}
+        <div class="ai-hotspot-empty-state-{{ ai_gen_id }}">
+          Add an image to get started
+        </div>
+      </div>
+    {% endif %}
+
+    {% for i in (1..5) %}
+      {% liquid
+        assign hotspot_enabled_key = 'hotspot_' | append: i | append: '_enabled'
+        assign hotspot_x_key = 'hotspot_' | append: i | append: '_x'
+        assign hotspot_y_key = 'hotspot_' | append: i | append: '_y'
+        assign hotspot_url_key = 'hotspot_' | append: i | append: '_url'
+        assign hotspot_label_key = 'hotspot_' | append: i | append: '_label'
+
+        assign hotspot_enabled = block.settings[hotspot_enabled_key]
+        assign hotspot_x = block.settings[hotspot_x_key]
+        assign hotspot_y = block.settings[hotspot_y_key]
+        assign hotspot_url = block.settings[hotspot_url_key]
+        assign hotspot_label = block.settings[hotspot_label_key]
+      %}
+
+      {% if hotspot_enabled %}
+        <div
+          class="ai-hotspot-{{ ai_gen_id }} ai-hotspot-{{ ai_gen_id }}-{{ i }}"
+          style="
+            --ai-hotspot-x-{{ ai_gen_id }}: {{ hotspot_x }}%;
+            --ai-hotspot-y-{{ ai_gen_id }}: {{ hotspot_y }}%;
+          "
+        >
+          {% if hotspot_url != blank %}
+            <a
+              href="{{ hotspot_url }}"
+              class="ai-hotspot-link-{{ ai_gen_id }}"
+              aria-label="{% if hotspot_label != blank %}{{ hotspot_label }}{% else %}Hotspot {{ i }}{% endif %}"
+            ></a>
+          {% else %}
+            <span class="ai-hotspot-link-{{ ai_gen_id }}"></span>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</hotspot-image-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class HotspotImage{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.style.display = 'block';
+      }
+    }
+
+    customElements.define('hotspot-image-{{ ai_gen_id }}', HotspotImage{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Image with hotspots",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Hotspot style"
+    },
+    {
+      "type": "range",
+      "id": "hotspot_size",
+      "min": 20,
+      "max": 1000,
+      "step": 10,
+      "unit": "px",
+      "label": "Hotspot size",
+      "default": 50
+    },
+    {
+      "type": "color",
+      "id": "hotspot_color",
+      "label": "Hotspot color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "hotspot_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Hotspot opacity",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "hotspot_hover_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Hover opacity",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "hotspot_border_width",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Border width",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "hotspot_border_color",
+      "label": "Border color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Hotspot 1"
+    },
+    {
+      "type": "checkbox",
+      "id": "hotspot_1_enabled",
+      "label": "Enable hotspot 1",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "hotspot_1_x",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Horizontal position",
+      "default": 25
+    },
+    {
+      "type": "range",
+      "id": "hotspot_1_y",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Vertical position",
+      "default": 25
+    },
+    {
+      "type": "url",
+      "id": "hotspot_1_url",
+      "label": "Link"
+    },
+    {
+      "type": "text",
+      "id": "hotspot_1_label",
+      "label": "Accessibility label"
+    },
+    {
+      "type": "header",
+      "content": "Hotspot 2"
+    },
+    {
+      "type": "checkbox",
+      "id": "hotspot_2_enabled",
+      "label": "Enable hotspot 2",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "hotspot_2_x",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Horizontal position",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "hotspot_2_y",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Vertical position",
+      "default": 50
+    },
+    {
+      "type": "url",
+      "id": "hotspot_2_url",
+      "label": "Link"
+    },
+    {
+      "type": "text",
+      "id": "hotspot_2_label",
+      "label": "Accessibility label"
+    },
+    {
+      "type": "header",
+      "content": "Hotspot 3"
+    },
+    {
+      "type": "checkbox",
+      "id": "hotspot_3_enabled",
+      "label": "Enable hotspot 3",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "hotspot_3_x",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Horizontal position",
+      "default": 75
+    },
+    {
+      "type": "range",
+      "id": "hotspot_3_y",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Vertical position",
+      "default": 75
+    },
+    {
+      "type": "url",
+      "id": "hotspot_3_url",
+      "label": "Link"
+    },
+    {
+      "type": "text",
+      "id": "hotspot_3_label",
+      "label": "Accessibility label"
+    },
+    {
+      "type": "header",
+      "content": "Hotspot 4"
+    },
+    {
+      "type": "checkbox",
+      "id": "hotspot_4_enabled",
+      "label": "Enable hotspot 4",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "hotspot_4_x",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Horizontal position",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "hotspot_4_y",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Vertical position",
+      "default": 70
+    },
+    {
+      "type": "url",
+      "id": "hotspot_4_url",
+      "label": "Link"
+    },
+    {
+      "type": "text",
+      "id": "hotspot_4_label",
+      "label": "Accessibility label"
+    },
+    {
+      "type": "header",
+      "content": "Hotspot 5"
+    },
+    {
+      "type": "checkbox",
+      "id": "hotspot_5_enabled",
+      "label": "Enable hotspot 5",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "hotspot_5_x",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Horizontal position",
+      "default": 70
+    },
+    {
+      "type": "range",
+      "id": "hotspot_5_y",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Vertical position",
+      "default": 30
+    },
+    {
+      "type": "url",
+      "id": "hotspot_5_url",
+      "label": "Link"
+    },
+    {
+      "type": "text",
+      "id": "hotspot_5_label",
+      "label": "Accessibility label"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image with hotspots"
+    }
+  ]
+}
+{% endschema %}

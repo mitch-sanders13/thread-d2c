@@ -1,0 +1,560 @@
+<!-- sections/brand-statement.liquid -->
+{% comment %}
+  Brand statement section — centered heading, subheading, and star rating.
+  Fully customizable via the theme editor.
+{% endcomment %}
+
+<section class="{{ section.settings.visibility }}{% if section.settings.use_global_spacing == 'global' %} spacing-global{% elsif section.settings.use_global_spacing == 'global-sides' %} spacing-sides{% endif %}"
+  style="
+    {% if section.settings.use_global_spacing == 'custom' %}
+      padding-top:{{ section.settings.spacing_top }}px;
+      padding-bottom:{{ section.settings.spacing_bottom }}px;
+      padding-left:{{ section.settings.spacing_sides }}px;
+      padding-right:{{ section.settings.spacing_sides }}px;
+    {% elsif section.settings.use_global_spacing == 'global-sides' %}
+      padding-top:{{ section.settings.spacing_top }}px;
+      padding-bottom:{{ section.settings.spacing_bottom }}px;
+    {% endif %}
+    {% if section.settings.background_color != blank %}
+      background-color:{{ section.settings.background_color }};
+    {% endif %}
+    text-align:center;">
+
+  {%- comment -%} Resolve heading font token vs manual {%- endcomment -%}
+  {% assign bs_heading_use_token = false %}
+  {% assign bs_heading_token_class = '' %}
+  {% assign bs_heading_font_style = '' %}
+  {% if section.settings.heading_font contains 'token-' %}
+    {% assign bs_heading_use_token = true %}
+    {% assign bs_heading_token_class = section.settings.heading_font | replace: 'token-', 'type-' %}
+  {% elsif section.settings.heading_font == 'body' %}
+    {% assign bs_heading_font_style = 'font-family:var(--type-font-body-family);' %}
+  {% elsif section.settings.heading_font == 'heading' %}
+    {% assign bs_heading_font_style = 'font-family:var(--type-font-header-family);' %}
+  {% elsif section.settings.heading_font == 'nav' %}
+    {% assign bs_heading_font_style = 'font-family:var(--type-font-nav-family);' %}
+  {% elsif section.settings.heading_font == 'handwritten' %}
+    {% assign bs_heading_font_style = 'font-family:var(--type-font-handwritten-family);' %}
+  {% endif %}
+
+  {%- comment -%} Resolve subheading font token vs manual {%- endcomment -%}
+  {% assign bs_sub_use_token = false %}
+  {% assign bs_sub_token_class = '' %}
+  {% assign bs_sub_font_style = '' %}
+  {% if section.settings.sub_font contains 'token-' %}
+    {% assign bs_sub_use_token = true %}
+    {% assign bs_sub_token_class = section.settings.sub_font | replace: 'token-', 'type-' %}
+  {% elsif section.settings.sub_font == 'body' %}
+    {% assign bs_sub_font_style = 'font-family:var(--type-font-body-family);' %}
+  {% elsif section.settings.sub_font == 'heading' %}
+    {% assign bs_sub_font_style = 'font-family:var(--type-font-header-family);' %}
+  {% elsif section.settings.sub_font == 'nav' %}
+    {% assign bs_sub_font_style = 'font-family:var(--type-font-nav-family);' %}
+  {% elsif section.settings.sub_font == 'handwritten' %}
+    {% assign bs_sub_font_style = 'font-family:var(--type-font-handwritten-family);' %}
+  {% endif %}
+
+  {%- comment -%} Heading {%- endcomment -%}
+  {%- unless section.settings.heading == blank -%}
+    <{{ section.settings.heading_tag }} style="
+      margin:0 auto;
+      max-width:{{ section.settings.heading_max_width }}px;
+      {% unless bs_heading_use_token %}
+        font-size:{{ section.settings.heading_size_mobile }}px;
+        font-weight:{{ section.settings.heading_weight }};
+        line-height:{{ section.settings.heading_line_height }};
+        letter-spacing:{{ section.settings.heading_letter_spacing }}em;
+        text-transform:{{ section.settings.heading_transform }};
+        {{ bs_heading_font_style }}
+      {% endunless %}
+      {% if section.settings.heading_color != blank %}
+        color:{{ section.settings.heading_color }};
+      {% endif %}"
+      class="{% if bs_heading_use_token %}{{ bs_heading_token_class }}{% endif %}">
+      {{ section.settings.heading }}
+    </{{ section.settings.heading_tag }}>
+  {%- endunless -%}
+
+  {%- comment -%} Subheading {%- endcomment -%}
+  {%- unless section.settings.subheading == blank -%}
+    <p style="
+      margin:{{ section.settings.heading_sub_spacing }}px auto 0;
+      {% unless bs_sub_use_token %}
+        font-size:{{ section.settings.sub_size_mobile }}px;
+        font-weight:{{ section.settings.sub_weight }};
+        line-height:{{ section.settings.sub_line_height }};
+        letter-spacing:{{ section.settings.sub_letter_spacing }}em;
+        text-transform:{{ section.settings.sub_transform }};
+        {{ bs_sub_font_style }}
+      {% endunless %}
+      {% if section.settings.sub_color != blank %}
+        color:{{ section.settings.sub_color }};
+      {% endif %}"
+      class="{% if bs_sub_use_token %}{{ bs_sub_token_class }}{% endif %}">
+      {{ section.settings.subheading }}
+    </p>
+  {%- endunless -%}
+
+  {%- comment -%} Star rating row {%- endcomment -%}
+  {%- if section.settings.show_stars -%}
+    <div style="
+      margin-top:{{ section.settings.sub_stars_spacing }}px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+      flex-wrap:wrap;">
+
+      {%- unless section.settings.rating_number == blank -%}
+        <span style="
+          font-size:{{ section.settings.stars_text_size }}px;
+          font-weight:{{ section.settings.stars_text_weight }};
+          letter-spacing:{{ section.settings.stars_text_letter_spacing }}em;
+          {% if section.settings.stars_text_color != blank %}
+            color:{{ section.settings.stars_text_color }};
+          {% endif %}">
+          {{ section.settings.rating_number }}
+        </span>
+      {%- endunless -%}
+
+      <span style="
+        display:inline-flex;
+        gap:{{ section.settings.stars_gap }}px;
+        font-size:{{ section.settings.star_size }}px;
+        {% if section.settings.star_color != blank %}
+          color:{{ section.settings.star_color }};
+        {% endif %}">
+        {%- for i in (1..5) -%}
+          <span>★</span>
+        {%- endfor -%}
+      </span>
+
+      {%- unless section.settings.review_count_text == blank -%}
+        <span style="
+          font-size:{{ section.settings.stars_text_size }}px;
+          font-weight:{{ section.settings.stars_text_weight }};
+          letter-spacing:{{ section.settings.stars_text_letter_spacing }}em;
+          {% if section.settings.stars_text_color != blank %}
+            color:{{ section.settings.stars_text_color }};
+          {% endif %}">
+          | {{ section.settings.review_count_text }}
+        </span>
+      {%- endunless -%}
+    </div>
+  {%- endif -%}
+
+  <style>
+    @media (min-width: 768px) {
+      {% unless bs_heading_use_token %}
+      #shopify-section-{{ section.id }} {{ section.settings.heading_tag }} {
+        font-size: {{ section.settings.heading_size_desktop }}px !important;
+      }
+      {% endunless %}
+      {% unless bs_sub_use_token %}
+      #shopify-section-{{ section.id }} p {
+        font-size: {{ section.settings.sub_size_desktop }}px !important;
+      }
+      {% endunless %}
+    }
+  </style>
+
+</section>
+
+{% schema %}
+{
+  "name": "Brand statement",
+  "class": "section",
+  "settings": [
+
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Consciously Crafted Objects That Invite Touch"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" },
+        { "value": "p", "label": "Paragraph" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "select",
+      "id": "heading_font",
+      "label": "Heading font",
+      "options": [
+        { "value": "token-display", "label": "↳ Use theme token (Display)" },
+        { "value": "token-h1", "label": "↳ Use theme token (H1)" },
+        { "value": "token-h2", "label": "↳ Use theme token (H2)" },
+        { "value": "token-h3", "label": "↳ Use theme token (H3)" },
+        { "value": "token-body", "label": "↳ Use theme token (Body)" },
+        { "value": "token-small", "label": "↳ Use theme token (Small)" },
+        { "value": "token-label", "label": "↳ Use theme token (Label)" },
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "body", "label": "Forma DJR" },
+        { "value": "heading", "label": "PP Right Grotesk" },
+        { "value": "handwritten", "label": "Thread Handwritten" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "label": "Heading size — mobile (px)",
+      "min": 16,
+      "max": 72,
+      "step": 1,
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "heading_size_desktop",
+      "label": "Heading size — desktop (px)",
+      "min": 16,
+      "max": 96,
+      "step": 1,
+      "default": 40
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Heading weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" },
+        { "value": "800", "label": "Extra-bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "heading_transform",
+      "label": "Heading text transform",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "uppercase", "label": "Uppercase" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height",
+      "label": "Heading line height",
+      "min": 0.8,
+      "max": 2.0,
+      "step": 0.1,
+      "default": 1.2
+    },
+    {
+      "type": "range",
+      "id": "heading_letter_spacing",
+      "label": "Heading letter spacing (em)",
+      "min": -0.1,
+      "max": 0.3,
+      "step": 0.1,
+      "default": 0.0
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#1c1c1c"
+    },
+    {
+      "type": "range",
+      "id": "heading_max_width",
+      "label": "Heading max width (px)",
+      "min": 300,
+      "max": 1200,
+      "step": 10,
+      "default": 800
+    },
+
+    {
+      "type": "header",
+      "content": "Subheading"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Heritage Bags Since 1989"
+    },
+    {
+      "type": "select",
+      "id": "sub_font",
+      "label": "Subheading font",
+      "options": [
+        { "value": "token-display", "label": "↳ Use theme token (Display)" },
+        { "value": "token-h1", "label": "↳ Use theme token (H1)" },
+        { "value": "token-h2", "label": "↳ Use theme token (H2)" },
+        { "value": "token-h3", "label": "↳ Use theme token (H3)" },
+        { "value": "token-body", "label": "↳ Use theme token (Body)" },
+        { "value": "token-small", "label": "↳ Use theme token (Small)" },
+        { "value": "token-label", "label": "↳ Use theme token (Label)" },
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "body", "label": "Forma DJR" },
+        { "value": "heading", "label": "PP Right Grotesk" },
+        { "value": "handwritten", "label": "Thread Handwritten" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "range",
+      "id": "sub_size_mobile",
+      "label": "Subheading size — mobile (px)",
+      "min": 10,
+      "max": 36,
+      "step": 1,
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "sub_size_desktop",
+      "label": "Subheading size — desktop (px)",
+      "min": 10,
+      "max": 48,
+      "step": 1,
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "sub_weight",
+      "label": "Subheading weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "sub_transform",
+      "label": "Subheading text transform",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "uppercase", "label": "Uppercase" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "sub_line_height",
+      "label": "Subheading line height",
+      "min": 1.0,
+      "max": 2.0,
+      "step": 0.1,
+      "default": 1.4
+    },
+    {
+      "type": "range",
+      "id": "sub_letter_spacing",
+      "label": "Subheading letter spacing (em)",
+      "min": -0.1,
+      "max": 0.3,
+      "step": 0.1,
+      "default": 0.0
+    },
+    {
+      "type": "color",
+      "id": "sub_color",
+      "label": "Subheading color",
+      "default": "#1c1c1c"
+    },
+
+    {
+      "type": "header",
+      "content": "Star rating"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_stars",
+      "label": "Show star rating",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "rating_number",
+      "label": "Rating number",
+      "default": "4.8"
+    },
+    {
+      "type": "text",
+      "id": "review_count_text",
+      "label": "Review count text",
+      "default": "16K Reviews"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star color",
+      "default": "#1c1c1c"
+    },
+    {
+      "type": "range",
+      "id": "star_size",
+      "label": "Star size (px)",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "stars_text_size",
+      "label": "Rating text size (px)",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "default": 13
+    },
+    {
+      "type": "select",
+      "id": "stars_text_weight",
+      "label": "Rating text weight",
+      "options": [
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "color",
+      "id": "stars_text_color",
+      "label": "Rating text color",
+      "default": "#1c1c1c"
+    },
+    {
+      "type": "select",
+      "id": "stars_text_letter_spacing",
+      "label": "Rating text letter spacing",
+      "options": [
+        { "value": "0", "label": "None" },
+        { "value": "0.02", "label": "Tight" },
+        { "value": "0.05", "label": "Normal" },
+        { "value": "0.1", "label": "Wide" },
+        { "value": "0.2", "label": "Extra wide" }
+      ],
+      "default": "0"
+    },
+    {
+      "type": "range",
+      "id": "stars_gap",
+      "label": "Gap between stars (px)",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "default": 1
+    },
+
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "select",
+      "id": "use_global_spacing",
+      "label": "Spacing mode",
+      "options": [
+        { "value": "global", "label": "↳ Use global spacing" },
+        { "value": "global-sides", "label": "↳ Use global sides only" },
+        { "value": "custom", "label": "Custom (use settings below)" }
+      ],
+      "default": "custom",
+      "info": "Global spacing is set in Theme Settings > Typography tokens"
+    },
+    {
+      "type": "range",
+      "id": "heading_sub_spacing",
+      "label": "Heading to subheading spacing (px)",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "sub_stars_spacing",
+      "label": "Subheading to stars spacing (px)",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "spacing_top",
+      "label": "Section padding top (px)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "spacing_bottom",
+      "label": "Section padding bottom (px)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "spacing_sides",
+      "label": "Section side padding (px)",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "default": 16
+    },
+
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#f4f1ea"
+    },
+    {
+      "type": "select",
+      "id": "visibility",
+      "label": "Visibility",
+      "options": [
+        { "value": "", "label": "All devices" },
+        { "value": "hidden md:block", "label": "Desktop only" },
+        { "value": "md:hidden", "label": "Mobile only" }
+      ],
+      "default": ""
+    }
+  ],
+
+  "presets": [
+    {
+      "name": "Brand statement"
+    }
+  ]
+}
+{% endschema %}

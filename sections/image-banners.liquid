@@ -1,0 +1,445 @@
+<!-- sections/image-banners.liquid -->
+{% comment %}
+  Image banners — Skims-style grid of full-bleed image tiles with overlaid text
+  (heading + subtitle + underlined link) in a corner. Each tile is a block.
+{% endcomment %}
+
+{% assign col_mob = section.settings.columns_mobile | plus: 0 %}
+{% assign col_desk = section.settings.columns_desktop | plus: 0 %}
+
+<section class="{{ section.settings.visibility }} {{ section.settings.color_scheme }}"
+  style="padding-top:{{ section.settings.padding_top }}px;padding-bottom:{{ section.settings.padding_bottom }}px;">
+
+  {%- comment -%} Determine how to size tiles: fixed height (when set) wins over aspect ratio {%- endcomment -%}
+  {% assign _use_fixed_mobile_h = false %}
+  {% assign _use_fixed_desktop_h = false %}
+  {% if section.settings.height_mobile > 0 %}{% assign _use_fixed_mobile_h = true %}{% endif %}
+  {% if section.settings.height_desktop > 0 %}{% assign _use_fixed_desktop_h = true %}{% endif %}
+
+  <div class="ib-grid-{{ section.id }}"
+    style="display:grid;grid-template-columns:repeat({{ col_mob }},1fr);gap:{{ section.settings.gap }}px;padding:0 {{ section.settings.side_padding }}px;">
+    {% for block in section.blocks %}
+      {% if block.type == 'banner' %}
+        {%- assign tile_vis_class = '' -%}
+        {%- if block.settings.visibility == 'mobile' -%}{%- assign tile_vis_class = ' ib-tile--mobile-only' -%}
+        {%- elsif block.settings.visibility == 'desktop' -%}{%- assign tile_vis_class = ' ib-tile--desktop-only' -%}
+        {%- endif -%}
+
+        {%- comment -%} Per-tile text position → flexbox alignment. {%- endcomment -%}
+        {%- case block.settings.text_position -%}
+          {%- when 'top-left'      -%}{%- assign _jc = 'flex-start' -%}{%- assign _ai = 'flex-start' -%}{%- assign _ta = 'left'   -%}
+          {%- when 'top-center'    -%}{%- assign _jc = 'flex-start' -%}{%- assign _ai = 'center'     -%}{%- assign _ta = 'center' -%}
+          {%- when 'top-right'     -%}{%- assign _jc = 'flex-start' -%}{%- assign _ai = 'flex-end'   -%}{%- assign _ta = 'right'  -%}
+          {%- when 'center'        -%}{%- assign _jc = 'center'     -%}{%- assign _ai = 'center'     -%}{%- assign _ta = 'center' -%}
+          {%- when 'bottom-center' -%}{%- assign _jc = 'flex-end'   -%}{%- assign _ai = 'center'     -%}{%- assign _ta = 'center' -%}
+          {%- when 'bottom-right'  -%}{%- assign _jc = 'flex-end'   -%}{%- assign _ai = 'flex-end'   -%}{%- assign _ta = 'right'  -%}
+          {%- else                 -%}{%- assign _jc = 'flex-end'   -%}{%- assign _ai = 'flex-start' -%}{%- assign _ta = 'left'   -%}
+        {%- endcase -%}
+        {%- comment -%}
+          Per-side padding. Falls back to legacy text_pad (which was a single
+          inset-from-edge control) so tiles created before the per-side
+          controls existed don't lose their padding until they're edited.
+        {%- endcomment -%}
+        {%- assign _legacy_pad = block.settings.text_pad | default: 32 -%}
+        {%- assign _pt = block.settings.text_pad_top    | default: _legacy_pad -%}
+        {%- assign _pr = block.settings.text_pad_right  | default: _legacy_pad -%}
+        {%- assign _pb = block.settings.text_pad_bottom | default: _legacy_pad -%}
+        {%- assign _pl = block.settings.text_pad_left   | default: _legacy_pad -%}
+
+        {%- comment -%} Per-tile heading font: token class OR font-family style {%- endcomment -%}
+        {%- assign ib_h_use_token = false -%}
+        {%- assign ib_h_token_class = '' -%}
+        {%- assign ib_h_font_style = '' -%}
+        {%- if block.settings.heading_font contains 'token-' -%}
+          {%- assign ib_h_use_token = true -%}
+          {%- assign ib_h_token_class = block.settings.heading_font | replace: 'token-', 'type-' -%}
+        {%- elsif block.settings.heading_font == 'body' -%}
+          {%- assign ib_h_font_style = 'font-family:var(--type-font-body-family);' -%}
+        {%- elsif block.settings.heading_font == 'heading' -%}
+          {%- assign ib_h_font_style = 'font-family:var(--type-font-header-family);' -%}
+        {%- elsif block.settings.heading_font == 'nav' -%}
+          {%- assign ib_h_font_style = 'font-family:var(--type-font-nav-family);' -%}
+        {%- elsif block.settings.heading_font == 'handwritten' -%}
+          {%- assign ib_h_font_style = 'font-family:var(--type-font-handwritten-family);' -%}
+        {%- endif -%}
+
+        <a href="{{ block.settings.link_url | default: '#' }}"
+          class="ib-tile{{ tile_vis_class }}"
+          style="position:relative;display:block;overflow:hidden;text-decoration:none;color:inherit;border-radius:{{ section.settings.radius }}px;{% unless _use_fixed_mobile_h %}{% if section.settings.aspect_ratio != '' %}aspect-ratio:{{ section.settings.aspect_ratio }};{% endif %}{% endunless %}"
+          {{ block.shopify_attributes }}>
+
+          {% if block.settings.image != blank %}
+            <img
+              src="{{ block.settings.image | image_url: width: 1800 }}"
+              alt="{{ block.settings.heading | default: block.settings.image.alt | escape }}"
+              loading="lazy"
+              decoding="async"
+              style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;">
+          {% else %}
+            <div style="position:absolute;inset:0;background:#e8e8e8;"></div>
+          {% endif %}
+
+          {%- comment -%}
+            Image overlay — per-tile. Three modes:
+              - none     → nothing rendered
+              - solid    → full-bleed solid color at the configured opacity
+              - gradient → linear-gradient with three stops:
+                             0%   → opaque
+                             start% → opaque (extends the solid-color edge)
+                             end%   → transparent
+
+            Falls back to the legacy section-level dark gradient
+            (`overlay_strength` / `overlay_extent`) when a tile has no
+            per-tile overlay set — preserves existing behavior.
+          {%- endcomment -%}
+          {%- liquid
+            assign ot = block.settings.overlay_type | default: 'none'
+            assign overlay_color = block.settings.overlay_color | default: '#000000'
+            assign overlay_alpha = block.settings.overlay_opacity | default: 40 | times: 1.0 | divided_by: 100.0
+            assign overlay_rgba = overlay_color | color_modify: 'alpha', overlay_alpha
+            assign overlay_zero = overlay_color | color_modify: 'alpha', 0
+          -%}
+          {%- if ot == 'solid' -%}
+            <div style="position:absolute;inset:0;background:{{ overlay_rgba }};pointer-events:none;"></div>
+          {%- elsif ot == 'gradient' -%}
+            {%- assign gd = block.settings.gradient_direction | default: 'to top' -%}
+            {%- assign gs = block.settings.gradient_start | default: 0 -%}
+            {%- assign ge = block.settings.gradient_end | default: 60 -%}
+            <div style="position:absolute;inset:0;background:linear-gradient({{ gd }}, {{ overlay_rgba }} 0%, {{ overlay_rgba }} {{ gs }}%, {{ overlay_zero }} {{ ge }}%);pointer-events:none;"></div>
+          {%- elsif section.settings.overlay_strength > 0 -%}
+            <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,{{ section.settings.overlay_strength | divided_by: 100.0 }}) 0%, rgba(0,0,0,0) {{ section.settings.overlay_extent }}%);pointer-events:none;"></div>
+          {%- endif -%}
+
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:{{ _jc }};align-items:{{ _ai }};padding:{{ _pt }}px {{ _pr }}px {{ _pb }}px {{ _pl }}px;text-align:{{ _ta }};">
+            <div style="max-width:100%;">
+              {% if block.settings.heading != blank %}
+                <h2 class="{% if ib_h_use_token %}{{ ib_h_token_class }}{% endif %}"
+                  style="margin:0 0 {{ block.settings.heading_mb }}px 0;{% unless ib_h_use_token %}{{ ib_h_font_style }}font-size:{{ block.settings.heading_size }}px;font-weight:{{ block.settings.heading_weight }};text-transform:{{ block.settings.heading_transform }};letter-spacing:{{ block.settings.heading_ls }};line-height:{{ block.settings.heading_lh }};{% endunless %}color:{{ block.settings.heading_color }};">
+                  {{ block.settings.heading }}
+                </h2>
+              {% endif %}
+              {% if block.settings.subtitle != blank %}
+                <p style="margin:0 0 {{ block.settings.subtitle_mb }}px 0;max-width:{{ block.settings.subtitle_max_width }}ch;font-family:var(--type-font-{% if block.settings.subtitle_font == 'heading' %}header{% else %}{{ block.settings.subtitle_font }}{% endif %}-family);font-size:{{ block.settings.subtitle_size }}px;font-weight:{{ block.settings.subtitle_weight }};letter-spacing:{{ block.settings.subtitle_ls }};line-height:{{ block.settings.subtitle_lh }};color:{{ block.settings.subtitle_color }};">
+                  {{ block.settings.subtitle }}
+                </p>
+              {% endif %}
+              {% if block.settings.link_label != blank %}
+                <span style="display:inline-block;font-family:var(--type-font-{% if block.settings.link_font == 'heading' %}header{% else %}{{ block.settings.link_font }}{% endif %}-family);font-size:{{ block.settings.link_size }}px;font-weight:{{ block.settings.link_weight }};text-transform:{{ block.settings.link_transform }};letter-spacing:{{ block.settings.link_ls }};color:{{ block.settings.link_color }};{% if block.settings.link_underline %}text-decoration:underline;text-underline-offset:4px;{% endif %}">
+                  {{ block.settings.link_label }}
+                </span>
+              {% endif %}
+            </div>
+          </div>
+        </a>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <style>
+    /* Per-tile visibility (mobile/desktop/both). Breakpoint: 768px. */
+    @media (max-width: 767.98px) {
+      .ib-grid-{{ section.id }} .ib-tile--desktop-only { display: none !important; }
+    }
+    @media (min-width: 768px) {
+      .ib-grid-{{ section.id }} .ib-tile--mobile-only { display: none !important; }
+    }
+    {% if _use_fixed_mobile_h %}
+      .ib-grid-{{ section.id }} .ib-tile {
+        height: {{ section.settings.height_mobile }}px;
+        aspect-ratio: auto !important;
+      }
+    {% endif %}
+    @media (min-width: 768px) {
+      .ib-grid-{{ section.id }} {
+        grid-template-columns: repeat({{ col_desk }}, 1fr) !important;
+      }
+      {% if _use_fixed_desktop_h %}
+        .ib-grid-{{ section.id }} .ib-tile {
+          height: {{ section.settings.height_desktop }}px;
+          aspect-ratio: auto !important;
+        }
+      {% elsif _use_fixed_mobile_h %}
+        .ib-grid-{{ section.id }} .ib-tile {
+          height: auto;
+          {% if section.settings.aspect_ratio != '' %}aspect-ratio: {{ section.settings.aspect_ratio }} !important;{% endif %}
+        }
+      {% endif %}
+    }
+  </style>
+</section>
+
+{% schema %}
+{
+  "name": "Image banners",
+  "settings": [
+    { "type": "header", "content": "Section" },
+    {
+      "type": "select", "id": "color_scheme", "label": "Background",
+      "options": [
+        { "value": "color__bg-body color__text", "label": "Body" },
+        { "value": "color__bg-neutral color__text", "label": "Neutral" },
+        { "value": "color__bg-overlay-1 color__text", "label": "Accent 1" }
+      ],
+      "default": "color__bg-body color__text"
+    },
+    { "type": "range", "id": "padding_top", "label": "Padding top", "min": 0, "max": 100, "step": 4, "default": 0 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding bottom", "min": 0, "max": 100, "step": 4, "default": 0 },
+    { "type": "range", "id": "side_padding", "label": "Side padding", "min": 0, "max": 48, "step": 2, "default": 0 },
+    { "type": "range", "id": "gap", "label": "Gap between tiles", "min": 0, "max": 48, "step": 2, "default": 8 },
+    { "type": "range", "id": "radius", "label": "Tile corner radius", "min": 0, "max": 40, "step": 1, "default": 0 },
+    {
+      "type": "select", "id": "columns_desktop", "label": "Desktop columns",
+      "options": [{ "value": "1", "label": "1" }, { "value": "2", "label": "2" }, { "value": "3", "label": "3" }, { "value": "4", "label": "4" }],
+      "default": "2"
+    },
+    {
+      "type": "select", "id": "columns_mobile", "label": "Mobile columns",
+      "options": [{ "value": "1", "label": "1" }, { "value": "2", "label": "2" }],
+      "default": "1"
+    },
+    {
+      "type": "select", "id": "aspect_ratio", "label": "Tile aspect ratio",
+      "info": "Used when a fixed height is not set below.",
+      "options": [
+        { "value": "", "label": "Use image's own ratio" },
+        { "value": "1 / 1", "label": "Square (1:1)" },
+        { "value": "4 / 5", "label": "Portrait (4:5)" },
+        { "value": "3 / 4", "label": "Portrait (3:4)" },
+        { "value": "2 / 3", "label": "Portrait (2:3)" },
+        { "value": "16 / 9", "label": "Wide (16:9)" },
+        { "value": "3 / 2", "label": "Landscape (3:2)" }
+      ],
+      "default": "1 / 1"
+    },
+    { "type": "range", "id": "height_desktop", "label": "Tile height — desktop (px)", "info": "0 = use aspect ratio instead", "min": 0, "max": 1000, "step": 10, "default": 0 },
+    { "type": "range", "id": "height_mobile", "label": "Tile height — mobile (px)", "info": "0 = use aspect ratio instead", "min": 0, "max": 800, "step": 10, "default": 0 },
+    {
+      "type": "select", "id": "visibility", "label": "Visibility",
+      "options": [
+        { "value": "", "label": "All devices" },
+        { "value": "md:hidden", "label": "Mobile only" },
+        { "value": "hidden md:block", "label": "Desktop only" }
+      ],
+      "default": ""
+    },
+
+    { "type": "header", "content": "Text overlay" },
+    { "type": "range", "id": "overlay_strength", "label": "Dark overlay strength (%)", "info": "Gradient behind text for readability. 0 = no overlay.", "min": 0, "max": 80, "step": 5, "default": 0 },
+    { "type": "range", "id": "overlay_extent", "label": "Overlay extent (% of tile)", "info": "How far up from the bottom the overlay fades.", "min": 20, "max": 100, "step": 5, "default": 60 },
+    { "type": "paragraph", "content": "Text position, inset, and typography (heading / subtitle / link) are now set per-tile. Open any Banner tile block to customize." }
+  ],
+  "blocks": [
+    {
+      "type": "banner",
+      "name": "Banner tile",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "heading", "label": "Heading", "default": "SWIM" },
+        { "type": "text", "id": "subtitle", "label": "Subtitle", "default": "Beat the heat in all-new swim, statement accessories, and more" },
+        { "type": "text", "id": "link_label", "label": "Link label", "default": "Shop Now" },
+        { "type": "url", "id": "link_url", "label": "Link URL" },
+        {
+          "type": "select",
+          "id": "visibility",
+          "label": "Show on",
+          "options": [
+            { "value": "both", "label": "Mobile & desktop" },
+            { "value": "mobile", "label": "Mobile only" },
+            { "value": "desktop", "label": "Desktop only" }
+          ],
+          "default": "both",
+          "info": "Hides this tile on the other breakpoint. Breakpoint: 768px."
+        },
+
+        { "type": "header", "content": "Text position" },
+        {
+          "type": "select", "id": "text_position", "label": "Position",
+          "options": [
+            { "value": "top-left", "label": "Top left" },
+            { "value": "top-center", "label": "Top center" },
+            { "value": "top-right", "label": "Top right" },
+            { "value": "center", "label": "Center" },
+            { "value": "bottom-left", "label": "Bottom left" },
+            { "value": "bottom-center", "label": "Bottom center" },
+            { "value": "bottom-right", "label": "Bottom right" }
+          ],
+          "default": "bottom-left"
+        },
+        { "type": "range", "id": "text_pad_top",    "label": "Padding top (px)",    "min": 0, "max": 160, "step": 2, "default": 32 },
+        { "type": "range", "id": "text_pad_right",  "label": "Padding right (px)",  "min": 0, "max": 160, "step": 2, "default": 32 },
+        { "type": "range", "id": "text_pad_bottom", "label": "Padding bottom (px)", "min": 0, "max": 160, "step": 2, "default": 32 },
+        { "type": "range", "id": "text_pad_left",   "label": "Padding left (px)",   "min": 0, "max": 160, "step": 2, "default": 32 },
+
+        { "type": "header", "content": "Heading typography" },
+        {
+          "type": "select", "id": "heading_font", "label": "Font",
+          "options": [
+            { "value": "token-display", "label": "↳ Use theme token (Display)" },
+            { "value": "token-h1", "label": "↳ Use theme token (H1)" },
+            { "value": "token-h2", "label": "↳ Use theme token (H2)" },
+            { "value": "token-h3", "label": "↳ Use theme token (H3)" },
+            { "value": "token-body", "label": "↳ Use theme token (Body)" },
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "body", "label": "Forma DJR" },
+            { "value": "heading", "label": "PP Right Grotesk" },
+            { "value": "handwritten", "label": "Thread Handwritten" }
+          ],
+          "default": "heading"
+        },
+        { "type": "range", "id": "heading_size", "label": "Size (px)", "min": 16, "max": 80, "step": 1, "default": 32 },
+        {
+          "type": "select", "id": "heading_weight", "label": "Weight",
+          "options": [
+            { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+            { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" },
+            { "value": "700", "label": "Bold" }, { "value": "800", "label": "Extra-bold" }
+          ],
+          "default": "700"
+        },
+        {
+          "type": "select", "id": "heading_transform", "label": "Text transform",
+          "options": [
+            { "value": "uppercase", "label": "Uppercase" },
+            { "value": "none", "label": "None" },
+            { "value": "capitalize", "label": "Capitalize" }
+          ],
+          "default": "uppercase"
+        },
+        {
+          "type": "select", "id": "heading_ls", "label": "Letter spacing",
+          "options": [
+            { "value": "0em", "label": "None" },
+            { "value": "0.02em", "label": "Tight" },
+            { "value": "0.05em", "label": "Normal" },
+            { "value": "0.08em", "label": "Wide" },
+            { "value": "0.12em", "label": "Wider" }
+          ],
+          "default": "0.02em"
+        },
+        { "type": "range", "id": "heading_lh", "label": "Line height", "min": 0.9, "max": 1.8, "step": 0.1, "default": 1.1 },
+        { "type": "color", "id": "heading_color", "label": "Color", "default": "#ffffff" },
+        { "type": "range", "id": "heading_mb", "label": "Space below heading (px)", "min": 0, "max": 32, "step": 1, "default": 8 },
+
+        { "type": "header", "content": "Subtitle typography" },
+        {
+          "type": "select", "id": "subtitle_font", "label": "Font",
+          "options": [
+            { "value": "body", "label": "Forma DJR" },
+            { "value": "heading", "label": "PP Right Grotesk" },
+            { "value": "handwritten", "label": "Thread Handwritten" }
+          ],
+          "default": "body"
+        },
+        { "type": "range", "id": "subtitle_size", "label": "Size (px)", "min": 10, "max": 24, "step": 1, "default": 14 },
+        {
+          "type": "select", "id": "subtitle_weight", "label": "Weight",
+          "options": [
+            { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+            { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" },
+            { "value": "700", "label": "Bold" }
+          ],
+          "default": "400"
+        },
+        {
+          "type": "select", "id": "subtitle_ls", "label": "Letter spacing",
+          "options": [
+            { "value": "0em", "label": "None" }, { "value": "0.02em", "label": "Tight" },
+            { "value": "0.05em", "label": "Normal" }, { "value": "0.1em", "label": "Wide" }
+          ],
+          "default": "0em"
+        },
+        { "type": "range", "id": "subtitle_lh", "label": "Line height", "min": 1.0, "max": 2.0, "step": 0.1, "default": 1.4 },
+        { "type": "color", "id": "subtitle_color", "label": "Color", "default": "#ffffff" },
+        { "type": "range", "id": "subtitle_max_width", "label": "Max width (characters)", "min": 20, "max": 80, "step": 2, "default": 50 },
+        { "type": "range", "id": "subtitle_mb", "label": "Space below subtitle (px)", "min": 0, "max": 32, "step": 1, "default": 12 },
+
+        { "type": "header", "content": "Link typography" },
+        {
+          "type": "select", "id": "link_font", "label": "Font",
+          "options": [
+            { "value": "body", "label": "Forma DJR" },
+            { "value": "heading", "label": "PP Right Grotesk" },
+            { "value": "handwritten", "label": "Thread Handwritten" }
+          ],
+          "default": "body"
+        },
+        { "type": "range", "id": "link_size", "label": "Size (px)", "min": 10, "max": 20, "step": 1, "default": 13 },
+        {
+          "type": "select", "id": "link_weight", "label": "Weight",
+          "options": [
+            { "value": "400", "label": "Regular" }, { "value": "500", "label": "Medium" },
+            { "value": "600", "label": "Semi-bold" }, { "value": "700", "label": "Bold" }
+          ],
+          "default": "600"
+        },
+        {
+          "type": "select", "id": "link_transform", "label": "Text transform",
+          "options": [
+            { "value": "none", "label": "None" }, { "value": "uppercase", "label": "Uppercase" },
+            { "value": "capitalize", "label": "Capitalize" }
+          ],
+          "default": "none"
+        },
+        {
+          "type": "select", "id": "link_ls", "label": "Letter spacing",
+          "options": [
+            { "value": "0em", "label": "None" }, { "value": "0.02em", "label": "Tight" },
+            { "value": "0.05em", "label": "Normal" }, { "value": "0.1em", "label": "Wide" }
+          ],
+          "default": "0em"
+        },
+        { "type": "checkbox", "id": "link_underline", "label": "Underline link", "default": true },
+        { "type": "color", "id": "link_color", "label": "Color", "default": "#ffffff" },
+
+        { "type": "header", "content": "Image overlay" },
+        {
+          "type": "select", "id": "overlay_type", "label": "Overlay type",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "solid", "label": "Solid color" },
+            { "value": "gradient", "label": "Gradient" }
+          ],
+          "default": "none"
+        },
+        { "type": "color", "id": "overlay_color", "label": "Color", "default": "#000000" },
+        { "type": "range", "id": "overlay_opacity", "label": "Opacity (%)", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 40 },
+        {
+          "type": "select", "id": "gradient_direction", "label": "Gradient direction",
+          "info": "Direction the gradient fades toward (transparent end). Used for Gradient type only.",
+          "options": [
+            { "value": "to top",          "label": "Bottom → Top" },
+            { "value": "to bottom",       "label": "Top → Bottom" },
+            { "value": "to right",        "label": "Left → Right" },
+            { "value": "to left",         "label": "Right → Left" },
+            { "value": "to top left",     "label": "Bottom-right → Top-left" },
+            { "value": "to top right",    "label": "Bottom-left → Top-right" },
+            { "value": "to bottom left",  "label": "Top-right → Bottom-left" },
+            { "value": "to bottom right", "label": "Top-left → Bottom-right" }
+          ],
+          "default": "to top"
+        },
+        {
+          "type": "range", "id": "gradient_start", "label": "Solid color extent (%)",
+          "info": "How far the solid color extends before the fade begins. 0 = no solid portion, fade starts immediately.",
+          "min": 0, "max": 100, "step": 5, "unit": "%", "default": 0
+        },
+        {
+          "type": "range", "id": "gradient_end", "label": "Fade end (%)",
+          "info": "How far across the image the fade reaches fully transparent. Higher = larger overlay area.",
+          "min": 5, "max": 100, "step": 5, "unit": "%", "default": 60
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image banners",
+      "blocks": [
+        { "type": "banner", "settings": { "heading": "SWIM", "subtitle": "Beat the heat in all-new swim, statement accessories, and more" } },
+        { "type": "banner", "settings": { "heading": "COVER-UPS", "subtitle": "Chic swim cover-ups for the pool, beach, and beyond" } }
+      ]
+    }
+  ],
+  "disabled_on": { "groups": ["custom.overlay"] }
+}
+{% endschema %}

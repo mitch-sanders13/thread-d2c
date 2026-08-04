@@ -1,0 +1,271 @@
+<!-- snippets/component__collection-vertical-filter.liquid -->
+{% comment %} 
+  Collection sorting and filtering.
+  Usage:
+    {% render 'component__collection-filter' %}
+  
+  Globals:
+    - settings.layout_horizontal: horizontaly margin
+  Possible enhancements:
+    - Alternative template so filters are visible on left hand side.
+    - Open filters in dropdown instead of popup.
+  Pro tips:
+    - Use this snippet on a collection template.
+{% endcomment %}
+
+{%- comment -%}check if filter active{%- endcomment -%}
+{% assign active_filter_count = 0 %}
+{%- for filter in collection.filters -%}
+  {%- if filter.active_values.size > 0 -%}
+    {% assign active_filter_count = active_filter_count | plus: filter.active_values.size %}
+  {%- endif -%}
+  {%- if filter.type == "price_range" -%}
+    {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+      {% assign active_filter_count = active_filter_count | plus: 1 %}
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{% assign sort_by = collection.sort_by | default: collection.default_sort_by | split: "?" | first %}
+{% assign default_sort_by = '' %}
+{% for option in collection.sort_options %}
+  {% if sort_by contains option.value %}
+    {% assign default_sort_by = option.name | split: "?" | first %}
+  {% endif %}
+{% endfor %}
+
+<section class="sticky top-0 z-20
+  {{ section.settings.color_border }}
+  {{ section.settings.color_scheme }}"
+  x-ref="destop_filter"
+  x-data="{ 
+    sort_by : ['{{ sort_by }}'],
+    height: 0,
+    filter_popup: false,
+    school_popup: false
+  }"
+  {% if settings.header_position == 'sticky' %}
+    x-init="
+      height = $refs.header.offsetHeight;
+      $refs.destop_filter.style.top = height + 'px';
+    "
+  {% endif %}>
+
+  {%- comment -%}mobile filterbar{%- endcomment -%}
+  {% if section.settings.enable_sort or section.settings.enable_filter %}
+    <form id="js:mobileFilter"
+      class="md:hidden bottom-0 z-50 left-0 right-0 border--b-width color__border-divider-1
+      {{ section.settings.color_scheme }}">
+      
+      {% comment %} Include active School filter as hidden input {% endcomment %}
+      {% if collection.handle contains 'collegiate' %}
+        {% for filter in collection.filters %}
+          {% if filter.label == 'School' %}
+            {% for filter_value in filter.values %}
+              {% if filter_value.active %}
+                <input type="hidden" name="{{ filter_value.param_name }}" value="{{ filter_value.value }}">
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+      
+      <div class="flex flex-row items-center justify-between md:hidden flex-nowrap">
+
+        {% capture popup_content %}
+          {% capture accordion_content %}              
+            <div class="">
+              {% for option in collection.sort_options %}
+                <label class="flex items-center w-full mb-4">
+                  <input type="radio" class="form-radio mr-3" value="{{ option.value }}" name="sort_by" autocomplete="off" x-model="sort_by"
+                  {% if sort_by == option.value %}checked{% endif %}
+
+                  <span class="type--base">{{ option.name }}</span>
+                </label>
+              {% endfor %}
+              
+              <div class="px-4 py-2 border-t border-gray-200">
+                <button type="button" 
+                  class="btn btn--small btn--secondary w-full"
+                  @click="
+                    filter_popup = false;
+                    $el.closest('form').submit();
+                  ">
+                  Apply Sort
+                </button>
+              </div>
+            </div>
+          {% endcapture %}
+          {% capture accordion_title %}
+            {{ 'collections.sorting.sort' | t }}  {% if collection.sort_by.size > 0 %}({{ default_sort_by }}){% endif %}
+          {% endcapture %}
+          {% render 'component__accordion', 
+            container_class: 'border--b-width color__border-divider-1',
+            inner_class: 'px-4',
+            button_class: "type--smaller",
+            button_label: accordion_title, 
+            content: accordion_content,
+            open: true %}
+        {% endcapture %}
+
+        <div class="w-full flex gap-2 p-4">
+          {% if section.settings.enable_sort %}
+            <button type="button" class="btn btn--small btn--plain flex-1" @click="filter_popup = true;">
+              {{ 'collections.sorting.sort' | t }}: {% if sort_by == blank or sort_by == 'manual' %}Featured{% else %}{% for option in collection.sort_options %}{% if sort_by == option.value %}{{ option.name }}{% endif %}{% endfor %}{% endif %}
+            </button>
+          {% endif %}
+          
+          {% comment %} School filter button for Collegiate collections (mobile only) {% endcomment %}
+          {% if collection.handle contains 'collegiate' %}
+            {% assign school_filter = nil %}
+            {% for f in collection.filters %}
+              {% if f.label == 'School' %}
+                {% assign school_filter = f %}
+              {% endif %}
+            {% endfor %}
+            {% if school_filter %}
+              <button type="button" class="btn btn--small btn--plain flex-1" @click="school_popup = true;">
+                Filter: School
+                {%- if school_filter.active_values.size > 0 -%}
+                  <span class="ml-1">({{ school_filter.active_values.size }})</span>
+                {%- endif -%}
+              </button>
+            {% endif %}
+          {% endif %}
+        </div>
+
+        {% render 'component__popup', 
+          popup_id: 'filter_popup',
+          content: popup_content,
+          hide_close_button: true %}
+
+        {% comment %} School filter popup for Collegiate collections {% endcomment %}
+        {% if collection.handle contains 'collegiate' %}
+          {% if school_filter %}
+            {% capture school_popup_content %}
+              {% capture school_accordion_content %}              
+                <div class="py-4">
+                  {%- comment -%} Add "All Schools" option to clear filter {%- endcomment -%}
+                  <label class="flex items-center w-full mb-4">
+                    <input type="radio" 
+                      class="form-radio mr-3" 
+                      name="{{ school_filter.param_name }}" 
+                      value=""
+                      {% unless school_filter.active_values.size > 0 -%}checked{%- endunless %}
+                      @change="
+                        school_popup = false;
+                        $el.closest('form').submit();
+                      ">
+                    <span class="type--base">All Schools</span>
+                    <span class="ml-1 type--base opacity-75">({{ collection.products.size }})</span>
+                  </label>
+                  
+                  {%- for filter_value in school_filter.values -%}
+                    <label class="flex items-center w-full mb-4">
+                      <input type="radio" 
+                        class="form-radio mr-3" 
+                        name="{{ school_filter.param_name }}" 
+                        value="{{ filter_value.value }}"
+                        {% if filter_value.active -%}checked{%- endif %}
+                        {% if filter_value.count == 0 and filter_value.active == false -%}disabled{%- endif %}
+                        @change="
+                          school_popup = false;
+                          $el.closest('form').submit();
+                        ">
+                      <span class="type--base">{{ filter_value.label }}</span>
+                      <span class="ml-1 type--base opacity-75">({{ filter_value.count }})</span>
+                    </label>
+                  {%- endfor -%}
+                </div>
+              {% endcapture %}
+              {% capture school_accordion_title %}
+                School
+              {% endcapture %}
+              {% render 'component__accordion', 
+                container_class: 'border--b-width color__border-divider-1',
+                inner_class: 'px-4',
+                button_class: "type--smaller",
+                button_label: school_accordion_title, 
+                content: school_accordion_content,
+                open: true %}
+            {% endcapture %}
+
+            {% render 'component__popup', 
+              popup_id: 'school_popup',
+              content: school_popup_content,
+              hide_close_button: true %}
+          {% endif %}
+        {% endif %}
+      </div>
+    </form>
+  {% endif %}
+
+  {%- comment -%}active filters{%- endcomment -%}
+  {%- if active_filter_count > 0 -%}
+    <section class="relative -z-10 hidden flex-wrap p-2
+      {{ section.settings.color_scheme }}">
+      <div 
+        class="relative flex w-full"
+        x-data="{
+          index: 0,
+          index_scroll: 0,
+          index_size: {{ collection.filters.size }}
+        }">
+        <div class="inline-flex w-full gap-2 overflow-x-auto whitespace-nowrap md:snap-x md:overflow-hidden md:flex md:flex-col md:items-start" x-ref="slider">
+          {% assign is_collegiate = false %}
+          {% if collection.handle contains 'collegiate' %}{% assign is_collegiate = true %}{% endif %}
+          {%- for filter in collection.filters -%}
+            {% if is_collegiate and filter.label == 'School' %}
+              {% continue %}
+            {% endif %}
+            {%- if filter.type == "price_range" -%}
+              {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+                <div class="flex justify-center flex-none mr-2 snap-center" 
+                  x-intersect:enter.full="index = {{ forloop.index0 }};"
+                  x-bind:data-slide="{{ forloop.index0 }}">
+                  <a class="btn btn--small btn--plain" href="{{ filter.url_to_remove }}"
+                    @click.prevent="handleFilterDelete('{{ filter.param_name }}');">
+                    {%- assign min_value = filter.min_value.value | default: 0 -%}
+                    {%- assign max_value = filter.max_value.value | default: filter.range_max -%}
+                    {% render 'component__icon', icon: 'x', size: '16', class: 'mr-1' %}
+                    {{ min_value | money }} - {{ max_value | money }}
+                  </a>
+                </div>
+              {%- endif -%}
+            {%- else -%}
+              {%- for filter_value in filter.active_values -%}
+                <div class="flex justify-center flex-none mr-2 snap-center" 
+                  x-intersect:enter.full="index = {{ forloop.index0 }};"
+                  x-bind:data-slide="{{ forloop.index0 }}">
+                  <a class="btn btn--small btn--plain" href="{{ filter_value.url_to_remove }}"
+                    @click.prevent="handleFilterDelete('{{ filter.param_name }}');">
+                    {% render 'component__icon', icon: 'x', size: '16', class: 'mr-1' %}
+                    {{ filter.label }}: {{ filter_value.label }}
+                  </a>
+                </div>
+              {%- endfor -%}
+            {%- endif -%}
+          {%- endfor -%}
+
+        </div>
+      </div>
+    </section>
+  {%- endif -%}
+
+  {%- for filter in collection.filters -%}
+    {%- if filter.type == "price_range" -%}
+      <script>
+        window.__initialData = window.__initialData || {};
+        Object.assign(window.__initialData, {
+          filter_min_price: {% if filter.min_value.value -%}{{ filter.min_value.value | money_without_currency | replace: ',', '' }}{% else %}0{% endif %}, 
+          filter_max_price: {% if filter.max_value.value -%}{{ filter.max_value.value | money_without_currency | replace: ',', '' }}{% else %}{{ filter.range_max | money_without_currency | replace: ',', '' }}{% endif %},
+          filter_min: 0, 
+          filter_max: {{ filter.range_max | money_without_currency | replace: ',', '' }},
+          filter_min_thumb: 0,
+          filter_max_thumb: 0, 
+        });
+      </script>
+    {%- endif -%}
+  {%- endfor -%}
+
+</section>

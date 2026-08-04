@@ -1,0 +1,81 @@
+{% comment %}
+  Reusable sort options component
+
+  Parameters:
+    - sort_by: current sort option
+    - collection: current collection
+    - dropdown: boolean for dropdown state (Alpine.js)
+    - position: 'left' (default) or 'right' — which edge of the trigger
+      the dropdown panel anchors to. Use 'right' when the trigger sits
+      near the right edge of the viewport so the panel grows leftward
+      and stays on-screen.
+    - compact: when true, the trigger label drops the "Sort: " prefix
+      and shows just the selected option name (or the word "Sort" when
+      no explicit sort is set). Matches the Outdoor Voices pattern.
+{% endcomment %}
+
+{%- assign _sort_pos = position | default: 'left' -%}
+
+{% capture dropdown_content %}
+  {%- comment -%} Per-option visibility checkboxes are defined in the
+    parent section schema (collection__sidebar.liquid → "Sort options
+    shown in the dropdown"). Unknown sort_option.value strings fall
+    through to the `else` branch and remain visible. {%- endcomment -%}
+  {% for option in collection.sort_options %}
+    {%- case option.value -%}
+      {%- when 'manual'             -%}{%- assign _cs_sort_show = section.settings.sort_show_manual             -%}
+      {%- when 'best-selling'       -%}{%- assign _cs_sort_show = section.settings.sort_show_best_selling       -%}
+      {%- when 'title-ascending'    -%}{%- assign _cs_sort_show = section.settings.sort_show_title_ascending    -%}
+      {%- when 'title-descending'   -%}{%- assign _cs_sort_show = section.settings.sort_show_title_descending   -%}
+      {%- when 'price-ascending'    -%}{%- assign _cs_sort_show = section.settings.sort_show_price_ascending    -%}
+      {%- when 'price-descending'   -%}{%- assign _cs_sort_show = section.settings.sort_show_price_descending   -%}
+      {%- when 'created-ascending'  -%}{%- assign _cs_sort_show = section.settings.sort_show_created_ascending  -%}
+      {%- when 'created-descending' -%}{%- assign _cs_sort_show = section.settings.sort_show_created_descending -%}
+      {%- else                      -%}{%- assign _cs_sort_show = true                                          -%}
+    {%- endcase -%}
+    {%- if _cs_sort_show == false -%}{%- continue -%}{%- endif -%}
+    <label class="flex items-center w-full px-4 py-2 color__text hover:color__bg-overlay-1"
+      @click="
+        dropdown = false;
+        let currentUrl = new URL(window.location.href);
+        let params = new URLSearchParams(currentUrl.search);
+        params.set('sort_by', '{{ option.value }}');
+        window.location.href = currentUrl.pathname + '?' + params.toString();
+      ">
+      <input type="radio"
+        class="form-radio"
+        value="{{ option.value }}"
+        name="sort_by"
+        autocomplete="off"
+        x-model="sort_by"
+        {% if collection.sort_by == option.value %}checked{% endif %}>
+      <span class="ml-2 type--base">{{ option.name }}</span>
+    </label>
+  {% endfor %}
+{% endcapture %}
+
+{% capture dropdown_label %}
+  {%- if compact -%}
+    <span class="inline-flex items-center gap-1">
+      <span>
+        {%- if collection.sort_by == blank or collection.sort_by == 'manual' -%}
+          Sort
+        {%- else -%}
+          {%- for option in collection.sort_options -%}{%- if collection.sort_by == option.value -%}{{ option.name }}{%- endif -%}{%- endfor -%}
+        {%- endif -%}
+      </span>
+      {% render 'component__icon', icon: 'chevron-down', size: '14' %}
+    </span>
+  {%- else -%}
+    {{ 'collections.sorting.sort' | t }}: {% if collection.sort_by == blank or collection.sort_by == 'manual' %}Featured{% else %}{% for option in collection.sort_options %}{% if collection.sort_by == option.value %}{{ option.name }}{% endif %}{% endfor %}{% endif %}
+  {%- endif -%}
+{% endcapture %}
+
+{% render 'component__dropdown',
+  container_class: 'h-full flex',
+  button_class: 'type--smaller type__nav',
+  button_label: dropdown_label,
+  content: dropdown_content,
+  position: _sort_pos,
+  direction: 'down'
+%}

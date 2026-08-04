@@ -1,0 +1,793 @@
+<!-- sections/best-sellers.liquid -->
+{% comment %}
+  Best Sellers section with horizontal scrolling filter tabs.
+  Each filter tab links to a Shopify collection — clicking fetches that collection's products.
+{% endcomment %}
+
+<style>
+  #shopify-section-{{ section.id }} .border__button--radius span {
+    font-size: 10px;
+    line-height: 1;
+  }
+  #shopify-section-{{ section.id }} .border__button--radius {
+    padding: 2px 6px;
+    border-width: 0 !important;
+  }
+  /* Canonical pill sizing (design system) */
+  .bs-cta {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--thread-btn-height);
+    box-sizing: border-box;
+  }
+
+  /* CTA full-width on mobile (opt-in per section) */
+  @media (max-width: 767px) {
+    .bs-cta-full-mobile-{{ section.id }} {
+      display: block !important;
+      width: 100%;
+      white-space: normal !important;
+    }
+  }
+
+  /* Filter button styling — scoped so theme CSS can't override */
+  .bs-filter-btn-{{ section.id }} {
+    flex-shrink: 0;
+    padding: 15px {{ section.settings.tab_spacing }}px !important; /* >=44px touch target */
+    border: none !important;
+    background: transparent !important;
+    cursor: pointer;
+    {%- comment -%}
+      Font family is picked from a select rather than hard-coded so the
+      filter bar can use a font that actually ships all the weights the
+      merchant can choose from. The default Nav font (PP Right Grotesk)
+      only has 500 and 700 in the bundle, which made the seven Weight
+      options collapse to two visible weights. Forma DJR ships 300/400/
+      500/700/800/900 so semi-bold actually reads as semi-bold.
+    {%- endcomment -%}
+    {%- assign _bs_filter_font = section.settings.filter_font | default: 'body' -%}
+    {%- if _bs_filter_font == 'body' -%}
+      font-family: var(--type-font-body-family) !important;
+    {%- elsif _bs_filter_font == 'heading' -%}
+      font-family: var(--type-font-header-family) !important;
+    {%- elsif _bs_filter_font == 'handwritten' -%}
+      font-family: var(--type-font-handwritten-family) !important;
+    {%- else -%}
+      font-family: var(--type-font-nav-family) !important;
+    {%- endif %}
+    font-size: {{ section.settings.filter_size }}px !important;
+    font-weight: {{ section.settings.filter_weight }} !important;
+    /* Synthesize bolder/lighter weights when the loaded font file
+     * doesn't ship that exact weight (FormaDJR has 300/400/500/700/800/900,
+     * PP Right Grotesk only 500/700) so the merchant's pick is visibly
+     * applied instead of silently falling back to the nearest available. */
+    font-synthesis: weight style !important;
+    -webkit-font-synthesis: weight style !important;
+    text-transform: {{ section.settings.filter_case }} !important;
+    letter-spacing: {{ section.settings.filter_ls }} !important;
+    transition: color 0.15s;
+  }
+  #shopify-section-{{ section.id }} #js\:bsTitle-{{ section.id }} {
+    font-synthesis: weight style !important;
+    -webkit-font-synthesis: weight style !important;
+  }
+  .bs-filter-btn-{{ section.id }} .bs-tab-text {
+    display: inline-block;
+    padding-bottom: {{ section.settings.underline_offset | default: 3 }}px;
+    border-bottom: {{ section.settings.underline_width }}px solid transparent;
+    transition: border-color 0.15s;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    letter-spacing: inherit !important;
+    text-transform: inherit !important;
+  }
+
+  /* Armed scroll-reveal (arm from JS so content never hides if JS fails). */
+  @media (prefers-reduced-motion: no-preference) {
+    #shopify-section-{{ section.id }}.bs-armed .bs-product-item,
+    #shopify-section-{{ section.id }}.bs-armed #js\:bsTitle-{{ section.id }} {
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.55s cubic-bezier(0,0,.3,1), transform 0.55s cubic-bezier(0,0,.3,1);
+    }
+    #shopify-section-{{ section.id }}.bs-armed .bs-product-item:nth-child(2) { transition-delay: 0.06s; }
+    #shopify-section-{{ section.id }}.bs-armed .bs-product-item:nth-child(3) { transition-delay: 0.12s; }
+    #shopify-section-{{ section.id }}.bs-armed .bs-product-item:nth-child(4) { transition-delay: 0.18s; }
+    #shopify-section-{{ section.id }}.bs-armed .bs-product-item:nth-child(n+5) { transition-delay: 0.24s; }
+    #shopify-section-{{ section.id }}.bs-armed.bs-in .bs-product-item,
+    #shopify-section-{{ section.id }}.bs-armed.bs-in #js\:bsTitle-{{ section.id }} {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bs-filter-btn-{{ section.id }},
+    .bs-filter-btn-{{ section.id }} .bs-tab-text { transition: none !important; }
+  }
+</style>
+<section class="{{ section.settings.visibility }} {{ section.settings.color_scheme }}{% if section.settings.use_global_spacing == 'global' %} spacing-global{% elsif section.settings.use_global_spacing == 'global-sides' %} spacing-sides{% endif %}"
+  style="{% if section.settings.use_global_spacing == 'custom' %}padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;{% elsif section.settings.use_global_spacing == 'global-sides' %}padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;{% endif %}">
+
+  {%- comment -%} Resolve CTA for initial render {%- endcomment -%}
+  {%- assign cta_href = section.settings.cta_url -%}
+  {%- assign cta_text = section.settings.cta_label -%}
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'filter_tab' and forloop.first -%}
+      {%- if block.settings.cta_url != blank -%}{%- assign cta_href = block.settings.cta_url -%}{%- endif -%}
+      {%- if block.settings.cta_label != blank -%}{%- assign cta_text = block.settings.cta_label -%}{%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- comment -%} Resolve title font token vs manual {%- endcomment -%}
+  {% assign bs_title_use_token = false %}
+  {% assign bs_title_token_class = '' %}
+  {% assign bs_title_font_style = '' %}
+  {% if section.settings.title_font contains 'token-' %}
+    {% assign bs_title_use_token = true %}
+    {% assign bs_title_token_class = section.settings.title_font | replace: 'token-', 'type-' %}
+  {% elsif section.settings.title_font == 'body' %}
+    {% assign bs_title_font_style = 'font-family:var(--type-font-body-family);' %}
+  {% elsif section.settings.title_font == 'heading' %}
+    {% assign bs_title_font_style = 'font-family:var(--type-font-header-family);' %}
+  {% elsif section.settings.title_font == 'nav' %}
+    {% assign bs_title_font_style = 'font-family:var(--type-font-nav-family);' %}
+  {% elsif section.settings.title_font == 'handwritten' %}
+    {% assign bs_title_font_style = 'font-family:var(--type-font-handwritten-family);' %}
+  {% endif %}
+
+  {%- comment -%} Section title + inline CTA {%- endcomment -%}
+  {% if section.settings.show_title or section.settings.cta_show and section.settings.cta_position == 'above' %}
+    {% assign has_inline_cta = false %}
+    {% if section.settings.cta_show and section.settings.cta_position == 'above' %}
+      {% assign has_inline_cta = true %}
+    {% endif %}
+    <div style="padding:{{ section.settings.title_padding_top }}px {{ section.settings.header_padding_sides }}px {{ section.settings.title_padding_bottom }}px;display:flex;{% if has_inline_cta %}justify-content:space-between;{% else %}justify-content:{{ section.settings.title_align }};{% endif %}align-items:center;flex-wrap:wrap;gap:8px;">
+      {% if section.settings.show_title %}
+        <h2 id="js:bsTitle-{{ section.id }}" class="{% if bs_title_use_token %}{{ bs_title_token_class }}{% endif %}" style="margin:0;{% unless bs_title_use_token %}{{ bs_title_font_style }}font-size:{{ section.settings.title_size }}px;font-weight:{{ section.settings.title_weight }};text-transform:{{ section.settings.title_case }};letter-spacing:{{ section.settings.title_ls }};{% endunless %}color:{{ section.settings.title_color }};line-height:1;">
+          {{ section.settings.title_text }}
+        </h2>
+      {% endif %}
+      {% if has_inline_cta %}
+        <a id="js:bsCta-{{ section.id }}"
+          href="{{ cta_href }}"
+          class="thread-pill"
+          style="display:inline-block;font-family:var(--type-font-nav-family);font-size:{{ section.settings.cta_size }}px;font-weight:{{ section.settings.cta_weight }};text-transform:{{ section.settings.cta_case }};letter-spacing:{{ section.settings.cta_ls }};color:{{ section.settings.cta_text_color }};background:{{ section.settings.cta_bg_color }};border:{{ section.settings.cta_border_width }}px solid {{ section.settings.cta_border_color }};border-radius:{{ section.settings.cta_radius }}px;padding:{{ section.settings.cta_pad_v }}px {{ section.settings.cta_pad_h }}px;text-decoration:none;white-space:nowrap;">
+          {{ cta_text }}
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {%- comment -%} CTA — centered between title and filter {%- endcomment -%}
+  {% if section.settings.cta_show and section.settings.cta_position == 'between' %}
+    <div style="display:flex;justify-content:center;padding:{{ section.settings.cta_between_spacing_top }}px {{ section.settings.header_padding_sides }}px {{ section.settings.cta_between_spacing_bottom }}px;">
+      <a id="js:bsCta-{{ section.id }}"
+        href="{{ cta_href }}"
+        class="bs-cta thread-pill{% if section.settings.cta_full_width_mobile %} bs-cta-full-mobile-{{ section.id }}{% endif %}"
+        style="display:inline-block;text-align:center;font-family:var(--type-font-nav-family);font-size:{{ section.settings.cta_size }}px;font-weight:{{ section.settings.cta_weight }};text-transform:{{ section.settings.cta_case }};letter-spacing:{{ section.settings.cta_ls }};color:{{ section.settings.cta_text_color }};background:{{ section.settings.cta_bg_color }};border:{{ section.settings.cta_border_width }}px solid {{ section.settings.cta_border_color }};border-radius:{{ section.settings.cta_radius }}px;padding:{{ section.settings.cta_pad_v }}px {{ section.settings.cta_pad_h }}px;text-decoration:none;white-space:nowrap;">
+        {{ cta_text }}
+      </a>
+    </div>
+  {% endif %}
+
+  {%- comment -%} Filter bar {%- endcomment -%}
+  {% if section.settings.show_filter %}
+    <div style="background:{{ section.settings.filter_bg }};border-bottom:1px solid {{ section.settings.filter_border }};overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:none;overscroll-behavior-y:none;padding-left:{{ section.settings.header_padding_sides }}px;padding-right:{{ section.settings.header_padding_sides }}px;">
+      <div id="js:filterBar-{{ section.id }}" style="display:flex;justify-content:{{ section.settings.filter_align }};min-width:100%;">
+        {% for block in section.blocks %}
+          {% if block.type == 'filter_tab' %}
+            {% assign is_first = forloop.first %}
+            <button
+              class="js:filterBtn-{{ section.id }} bs-filter-btn-{{ section.id }}"
+              data-handle="{{ block.settings.collection_handle }}"
+              data-cta-label="{{ block.settings.cta_label | default: 'Shop all' }}"
+              data-cta-url="{{ block.settings.cta_url }}"
+              onclick="bsFilter('{{ section.id }}', '{{ block.settings.collection_handle }}', this)"
+              style="color:{% if is_first %}{{ section.settings.active_color }}{% else %}{{ section.settings.inactive_color }}{% endif %};"
+              {{ block.shopify_attributes }}>
+              <span class="bs-tab-text" style="border-bottom-color:{% if is_first %}{{ section.settings.active_color }}{% else %}transparent{% endif %};">
+                {{ block.settings.tab_label }}
+              </span>
+            </button>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  {%- comment -%} Product grid {%- endcomment -%}
+  {%- comment -%}
+    Resolve which collection to show on load.
+    Use the default_collection setting if set, otherwise fall back to the first filter tab.
+    The 'collection' setting type returns the collection handle as a string.
+  {%- endcomment -%}
+  {%- comment -%}
+    When fetched via Section Rendering API (/collections/[handle]?section_id=...),
+    the `collection` object is populated with the requested collection — use it directly.
+    On initial page load, fall back to default_collection setting, then first tab.
+  {%- endcomment -%}
+  {% if collection != blank %}
+    {% assign active_collection = collection %}
+  {% elsif section.settings.default_collection != blank %}
+    {% assign active_collection = collections[section.settings.default_collection] %}
+  {% else %}
+    {% assign active_collection = blank %}
+    {% for block in section.blocks %}
+      {% if block.type == 'filter_tab' and active_collection == blank %}
+        {% assign active_collection = collections[block.settings.collection_handle] %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  {% assign col_mob = section.settings.columns_mobile | plus: 0 %}
+  {% assign col_desk = section.settings.columns_desktop | plus: 0 %}
+
+  {% assign col_desk_minus = col_desk | minus: 1 %}
+  {% assign col_mob_minus = col_mob | minus: 1 %}
+
+  {%- comment -%} CTA — below filter, above grid {%- endcomment -%}
+  {% if section.settings.cta_show and section.settings.cta_position == 'below_filter' %}
+    <div style="display:flex;justify-content:center;padding:{{ section.settings.cta_between_spacing_top }}px {{ section.settings.header_padding_sides }}px {{ section.settings.cta_between_spacing_bottom }}px;">
+      <a id="js:bsCta-{{ section.id }}"
+        href="{{ cta_href }}"
+        class="bs-cta thread-pill{% if section.settings.cta_full_width_mobile %} bs-cta-full-mobile-{{ section.id }}{% endif %}"
+        style="display:inline-block;text-align:center;font-family:var(--type-font-nav-family);font-size:{{ section.settings.cta_size }}px;font-weight:{{ section.settings.cta_weight }};text-transform:{{ section.settings.cta_case }};letter-spacing:{{ section.settings.cta_ls }};color:{{ section.settings.cta_text_color }};background:{{ section.settings.cta_bg_color }};border:{{ section.settings.cta_border_width }}px solid {{ section.settings.cta_border_color }};border-radius:{{ section.settings.cta_radius }}px;padding:{{ section.settings.cta_pad_v }}px {{ section.settings.cta_pad_h }}px;text-decoration:none;white-space:nowrap;">
+        {{ cta_text }}
+      </a>
+    </div>
+  {% endif %}
+
+  <div id="js:bsGrid-{{ section.id }}" class="bs-grid-wrap-{{ section.id }}"
+    style="padding: 16px {{ section.settings.grid_padding }}px 0;">
+
+    {%- comment -%} Pre-render products for each filter tab {%- endcomment -%}
+    {% for block in section.blocks %}
+      {% if block.type == 'filter_tab' %}
+        {%- comment -%} Collect promo cards for this tab {%- endcomment -%}
+        {%- assign current_handle = block.settings.collection_handle | handle -%}
+
+        {%- capture tab_products -%}
+          {% assign tab_collection = collections[block.settings.collection_handle] %}
+          {% assign product_index = 0 %}
+          {% if tab_collection != blank %}
+            {% for product in tab_collection.products limit: 80 %}
+              {%- comment -%}
+                Skip Trifecta Bundle products — they share tags with the
+                individual silhouettes so smart collections pick them up,
+                but they shouldn't appear as a "product" tile here.
+                Mirrors the exclusion in product__related-styles.liquid.
+                The loop runs without `limit:` (skipped items would eat
+                into it) and breaks manually once product_count cards
+                have rendered.
+              {%- endcomment -%}
+              {% if product.type == 'Bundle' or product.tags contains 'trifecta' %}{% continue %}{% endif %}
+              {% assign product_index = product_index | plus: 1 %}
+
+              {%- comment -%} Insert promo cards at their specified position {%- endcomment -%}
+              {% for inner_block in section.blocks %}
+                {% if inner_block.type == 'promo_card' and inner_block.settings.position == product_index %}
+                  {% assign show_promo = true %}
+                  {% if show_promo and inner_block.settings.image != blank %}
+                    <div class="bs-product-item">
+                      <a href="{{ inner_block.settings.link }}" style="text-decoration:none;color:inherit;display:block;" {{ inner_block.shopify_attributes }}>
+                        <div style="position:relative;overflow:hidden;background:#f5f5f5;">
+                          <img
+                            src="{{ inner_block.settings.image | image_url: width: 800 }}"
+                            alt="{{ inner_block.settings.title | escape }}"
+                            loading="lazy"
+                            style="width:100%;display:block;aspect-ratio:{{ inner_block.settings.image.aspect_ratio }};">
+                        </div>
+                        <div style="padding: {{ settings.product_card_content_pad_v | default: 8 }}px {{ settings.product_card_content_pad_h | default: 8 }}px 0;">
+                          {% if inner_block.settings.title != blank %}
+                            <h3 style="margin:0 0 {{ settings.product_card_title_mb | default: 4 }}px 0;font-family:var({{ settings.product_card_title_font | default: '--type-font-body-family' }});font-size:{{ settings.product_card_title_size_desktop | default: 16 }}px;font-weight:{{ settings.product_card_title_weight | default: '500' }};text-transform:{{ settings.product_card_title_case | default: 'none' }};letter-spacing:{{ settings.product_card_title_ls | default: '0em' }};line-height:1.2;{% if settings.product_card_title_color %}color:{{ settings.product_card_title_color }};{% endif %}">
+                              {{ inner_block.settings.title }}
+                            </h3>
+                          {% endif %}
+                          {% if inner_block.settings.subtitle != blank %}
+                            <div style="font-family:var({{ settings.product_card_price_font | default: '--type-font-body-family' }});font-size:{{ settings.product_card_price_size | default: 12 }}px;opacity:0.75;">
+                              {{ inner_block.settings.subtitle }}
+                            </div>
+                          {% endif %}
+                        </div>
+                      </a>
+                    </div>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+
+              <div class="bs-product-item">{% render 'component__product-item', product: product, source: 'best-sellers' %}</div>
+              {% if product_index >= section.settings.product_count %}{% break %}{% endif %}
+            {% endfor %}
+          {% endif %}
+
+          {%- comment -%} Append promo cards with position beyond product count {%- endcomment -%}
+          {% for inner_block in section.blocks %}
+            {% if inner_block.type == 'promo_card' and inner_block.settings.position > product_index %}
+              {% assign show_promo = false %}
+              {% if inner_block.settings.tab_filter == blank %}
+                {% assign show_promo = true %}
+              {% elsif inner_block.settings.tab_filter == current_handle %}
+                {% assign show_promo = true %}
+              {% elsif inner_block.settings.tab_filter == block.settings.tab_label %}
+                {% assign show_promo = true %}
+              {% endif %}
+              {% if show_promo and inner_block.settings.image != blank %}
+                <div class="bs-product-item">
+                  <a href="{{ inner_block.settings.link }}" style="text-decoration:none;color:inherit;display:block;" {{ inner_block.shopify_attributes }}>
+                    <div style="position:relative;overflow:hidden;background:#f5f5f5;">
+                      <img
+                        src="{{ inner_block.settings.image | image_url: width: 800 }}"
+                        alt="{{ inner_block.settings.title | escape }}"
+                        loading="lazy"
+                        style="width:100%;display:block;aspect-ratio:{{ inner_block.settings.image.aspect_ratio }};">
+                    </div>
+                    <div style="padding: {{ settings.product_card_content_pad_v | default: 8 }}px {{ settings.product_card_content_pad_h | default: 8 }}px 0;">
+                      {% if inner_block.settings.title != blank %}
+                        <h3 style="margin:0 0 {{ settings.product_card_title_mb | default: 4 }}px 0;font-family:var({{ settings.product_card_title_font | default: '--type-font-body-family' }});font-size:{{ settings.product_card_title_size_desktop | default: 16 }}px;font-weight:{{ settings.product_card_title_weight | default: '500' }};text-transform:{{ settings.product_card_title_case | default: 'none' }};letter-spacing:{{ settings.product_card_title_ls | default: '0em' }};line-height:1.2;{% if settings.product_card_title_color %}color:{{ settings.product_card_title_color }};{% endif %}">
+                          {{ inner_block.settings.title }}
+                        </h3>
+                      {% endif %}
+                      {% if inner_block.settings.subtitle != blank %}
+                        <div style="font-family:var({{ settings.product_card_price_font | default: '--type-font-body-family' }});font-size:{{ settings.product_card_price_size | default: 12 }}px;opacity:0.75;">
+                          {{ inner_block.settings.subtitle }}
+                        </div>
+                      {% endif %}
+                    </div>
+                  </a>
+                </div>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        {%- endcapture -%}
+
+        <div class="bs-tab-content-{{ section.id }}"
+          data-handle="{{ block.settings.collection_handle }}"
+          style="{% unless forloop.first %}display:none;{% endunless %}">
+
+          {% if section.settings.grid_mode == 'carousel' %}
+            <div style="position:relative;"
+              x-data="{
+                scrollNext() {
+                  const slider = this.$refs.bsSlider;
+                  slider.scrollBy({ left: slider.offsetWidth, behavior: 'smooth' });
+                },
+                scrollBack() {
+                  const slider = this.$refs.bsSlider;
+                  slider.scrollBy({ left: -slider.offsetWidth, behavior: 'smooth' });
+                }
+              }">
+              <div x-ref="bsSlider"
+                class="bs-slider-{{ section.id }}"
+                style="overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;display:flex;gap:{{ section.settings.col_gap }}px;">
+                {{ tab_products }}
+              </div>
+              <button
+                @click="scrollBack()"
+                style="position:absolute;top:50%;left:8px;transform:translateY(-50%);z-index:5;display:none;"
+                class="bs-arrow--desktop btn btn--plain btn--small shadow-sm"
+                title="Previous">
+                {% render 'component__icon', icon: 'arrow-left', size: '20', class: '' %}
+              </button>
+              <button
+                @click="scrollNext()"
+                style="position:absolute;top:50%;right:8px;transform:translateY(-50%);z-index:5;display:none;"
+                class="bs-arrow--desktop btn btn--plain btn--small shadow-sm"
+                title="Next">
+                {% render 'component__icon', icon: 'arrow-right', size: '20', class: '' %}
+              </button>
+            </div>
+          {% else %}
+            <div class="bs-grid-{{ section.id }}" style="display:grid;grid-template-columns:repeat({{ col_mob }},1fr);gap:{{ section.settings.row_gap }}px {{ section.settings.col_gap }}px;">
+              {{ tab_products }}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    {%- comment -%} Fallback if no filter tabs — use active_collection {%- endcomment -%}
+    {% if section.blocks.size == 0 %}
+      {%- capture fallback_products -%}
+        {% if active_collection != blank %}
+          {% assign fallback_rendered = 0 %}
+          {% for product in active_collection.products limit: 80 %}
+            {% if product.type == 'Bundle' or product.tags contains 'trifecta' %}{% continue %}{% endif %}
+            {% assign fallback_rendered = fallback_rendered | plus: 1 %}
+            <div class="bs-product-item">{% render 'component__product-item', product: product, source: 'best-sellers' %}</div>
+            {% if fallback_rendered >= section.settings.product_count %}{% break %}{% endif %}
+          {% endfor %}
+        {% endif %}
+      {%- endcapture -%}
+      {% if section.settings.grid_mode == 'carousel' %}
+        <div style="position:relative;" x-data="{ scrollNext() { this.$refs.bsSlider.scrollBy({ left: this.$refs.bsSlider.offsetWidth, behavior: 'smooth' }); }, scrollBack() { this.$refs.bsSlider.scrollBy({ left: -this.$refs.bsSlider.offsetWidth, behavior: 'smooth' }); } }">
+          <div x-ref="bsSlider" class="bs-slider-{{ section.id }}" style="overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;display:flex;gap:{{ section.settings.col_gap }}px;">
+            {{ fallback_products }}
+          </div>
+        </div>
+      {% else %}
+        <div class="bs-grid-{{ section.id }}" style="display:grid;grid-template-columns:repeat({{ col_mob }},1fr);gap:{{ section.settings.row_gap }}px {{ section.settings.col_gap }}px;">
+          {{ fallback_products }}
+        </div>
+      {% endif %}
+    {% endif %}
+
+    <style>
+      .bs-slider-{{ section.id }}::-webkit-scrollbar { display: none; }
+      .bs-grid-wrap-{{ section.id }} .bs-product-item {
+        flex: 0 0 calc((100% - {{ section.settings.col_gap | times: col_mob_minus }}px) / {{ col_mob }} - {{ section.settings.carousel_peek | default: 20 }}px);
+        scroll-snap-align: start;
+        min-width: calc((100% - {{ section.settings.col_gap | times: col_mob_minus }}px) / {{ col_mob }} - {{ section.settings.carousel_peek | default: 20 }}px);
+        box-sizing: border-box;
+      }
+      @media (min-width: 768px) {
+        .bs-grid-wrap-{{ section.id }} .bs-product-item {
+          flex: 0 0 calc((100% - {{ section.settings.col_gap | times: col_desk_minus }}px) / {{ col_desk }});
+          min-width: calc((100% - {{ section.settings.col_gap | times: col_desk_minus }}px) / {{ col_desk }});
+        }
+        .bs-grid-wrap-{{ section.id }} .bs-grid-{{ section.id }} {
+          grid-template-columns: repeat({{ col_desk }}, 1fr) !important;
+        }
+        .bs-grid-wrap-{{ section.id }} .bs-arrow--desktop {
+          display: flex !important;
+        }
+      }
+    </style>
+  </div>
+
+  {%- comment -%} CTA — below product grid (only when position is "below") {%- endcomment -%}
+  {% if section.settings.cta_show and section.settings.cta_position == 'below' %}
+    <div style="padding:{{ section.settings.cta_pad_v | times: 2 }}px {{ section.settings.header_padding_sides }}px {{ section.settings.cta_pad_v }}px;display:flex;justify-content:center;">
+      <a id="js:bsCta-{{ section.id }}"
+        href="{{ cta_href }}"
+        class="bs-cta thread-pill{% if section.settings.cta_full_width_mobile %} bs-cta-full-mobile-{{ section.id }}{% endif %}"
+        style="display:inline-block;text-align:center;font-family:var(--type-font-nav-family);font-size:{{ section.settings.cta_size }}px;font-weight:{{ section.settings.cta_weight }};text-transform:{{ section.settings.cta_case }};letter-spacing:{{ section.settings.cta_ls }};color:{{ section.settings.cta_text_color }};background:{{ section.settings.cta_bg_color }};border:{{ section.settings.cta_border_width }}px solid {{ section.settings.cta_border_color }};border-radius:{{ section.settings.cta_radius }}px;padding:{{ section.settings.cta_pad_v }}px {{ section.settings.cta_pad_h }}px;text-decoration:none;white-space:nowrap;">
+        {{ cta_text }}
+      </a>
+    </div>
+  {% endif %}
+
+</section>
+
+<script>
+function bsFilter(sid, handle, clickedBtn) {
+  // Update tab styles
+  document.querySelectorAll('.js\\:filterBtn-' + sid).forEach(function(b) {
+    b.style.color = '{{ section.settings.inactive_color }}';
+    var span = b.querySelector('.bs-tab-text');
+    if (span) span.style.borderBottomColor = 'transparent';
+  });
+  clickedBtn.style.color = '{{ section.settings.active_color }}';
+  var clickedSpan = clickedBtn.querySelector('.bs-tab-text');
+  if (clickedSpan) clickedSpan.style.borderBottomColor = '{{ section.settings.active_color }}';
+
+  // Swap visible tab content
+  document.querySelectorAll('.bs-tab-content-' + sid).forEach(function(tab) {
+    if (tab.getAttribute('data-handle') === handle) {
+      tab.style.display = '';
+      // Reset scroll position on the carousel
+      var slider = tab.querySelector('[x-ref="bsSlider"]');
+      if (slider) slider.scrollLeft = 0;
+
+      // Re-anchor every product-card image carousel inside this tab
+      // to its first real image.
+      //
+      // The card carousel (.pc-media) clones the first/last slides and
+      // sets `track.scrollLeft = track.clientWidth` to land on the
+      // first real slide. That setup ran on page load, when this tab
+      // was display:none and clientWidth was 0 — so scrollLeft landed
+      // at position 0, which is the cloned LAST slide. When the tab
+      // becomes visible (now), clientWidth is real but scrollLeft is
+      // still 0, so the customer sees the cloned-last image instead
+      // of the merchant's primary.
+      //
+      // Two rAFs to let layout settle (display change → reflow →
+      // proper clientWidth) before we re-snap each track.
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          tab.querySelectorAll('.pc-media').forEach(function(media) {
+            var track = media.querySelector('[data-pc-track]');
+            if (!track) return;
+            var slideW = track.clientWidth;
+            if (slideW <= 0) return;
+            var prev = track.style.scrollBehavior;
+            track.style.scrollBehavior = 'auto';
+            track.scrollLeft = slideW;
+            requestAnimationFrame(function() {
+              track.style.scrollBehavior = prev;
+            });
+          });
+        });
+      });
+    } else {
+      tab.style.display = 'none';
+    }
+  });
+
+  // Update CTA button to match this tab
+  var ctaEl = document.getElementById('js:bsCta-' + sid);
+  if (ctaEl) {
+    var ctaLabel = clickedBtn.getAttribute('data-cta-label');
+    var ctaUrl = clickedBtn.getAttribute('data-cta-url');
+    if (ctaLabel) ctaEl.textContent = ctaLabel;
+    if (ctaUrl) ctaEl.setAttribute('href', ctaUrl);
+  }
+}
+</script>
+
+
+<script>
+  (function () {
+    var section = document.getElementById('shopify-section-{{ section.id }}');
+    if (!section) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!('IntersectionObserver' in window)) return;
+    section.classList.add('bs-armed');
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) { section.classList.add('bs-in'); io.unobserve(entry.target); }
+      });
+    }, { threshold: 0.1 });
+    io.observe(section);
+  })();
+</script>
+{% schema %}
+{
+  "name": "Best Sellers",
+  "settings": [
+    { "type": "header", "content": "Section" },
+    {
+      "type": "select", "id": "color_scheme", "label": "Background",
+      "options": [
+        { "value": "color__bg-body color__text", "label": "Body" },
+        { "value": "color__bg-overlay-1 color__text", "label": "Accent 1" },
+        { "value": "color__bg-secondary color__secondary", "label": "Secondary" }
+      ],
+      "default": "color__bg-body color__text"
+    },
+    {
+      "type": "select",
+      "id": "use_global_spacing",
+      "label": "Spacing mode",
+      "options": [
+        { "value": "global", "label": "↳ Use global spacing" },
+        { "value": "global-sides", "label": "↳ Use global sides only" },
+        { "value": "custom", "label": "Custom (use settings below)" }
+      ],
+      "default": "custom",
+      "info": "Global spacing is set in Theme Settings > Typography tokens"
+    },
+    { "type": "range", "id": "padding_top", "label": "Padding top", "min": 0, "max": 80, "step": 4, "default": 24 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding bottom", "min": 0, "max": 80, "step": 4, "default": 24 },
+    { "type": "range", "id": "grid_padding", "label": "Grid padding sides", "min": 0, "max": 48, "step": 4, "default": 16 },
+    {
+      "type": "select", "id": "visibility", "label": "Visibility",
+      "options": [
+        { "value": "", "label": "All devices" },
+        { "value": "md:hidden", "label": "Mobile only" },
+        { "value": "hidden md:block", "label": "Desktop only" }
+      ],
+      "default": ""
+    },
+    { "type": "header", "content": "Title" },
+    { "type": "checkbox", "id": "show_title", "label": "Show title", "default": true },
+    { "type": "text", "id": "title_text", "label": "Title text", "default": "Best Sellers" },
+    {
+      "type": "select", "id": "title_font", "label": "Title font family",
+      "options": [
+        { "value": "token-display", "label": "↳ Use theme token (Display)" },
+        { "value": "token-h1", "label": "↳ Use theme token (H1)" },
+        { "value": "token-h2", "label": "↳ Use theme token (H2)" },
+        { "value": "token-h3", "label": "↳ Use theme token (H3)" },
+        { "value": "token-body", "label": "↳ Use theme token (Body)" },
+        { "value": "token-small", "label": "↳ Use theme token (Small)" },
+        { "value": "token-label", "label": "↳ Use theme token (Label)" },
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "body", "label": "Forma DJR" },
+        { "value": "heading", "label": "PP Right Grotesk" },
+        { "value": "handwritten", "label": "Thread Handwritten" }
+      ],
+      "default": "heading"
+    },
+    { "type": "range", "id": "title_size", "label": "Font size", "min": 16, "max": 80, "step": 2, "default": 40 },
+    {
+      "type": "select", "id": "title_weight", "label": "Weight",
+      "options": [
+        { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }, { "value": "800", "label": "Extra-bold" },
+        { "value": "900", "label": "Black" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select", "id": "title_case", "label": "Case",
+      "options": [{ "value": "uppercase", "label": "UPPERCASE" }, { "value": "none", "label": "Normal" }, { "value": "capitalize", "label": "Capitalize" }],
+      "default": "uppercase"
+    },
+    { "type": "color", "id": "title_color", "label": "Color", "default": "#1c1c1c" },
+    { "type": "range", "id": "header_padding_sides", "label": "Header area side padding", "info": "Applies to title, filter bar, and CTA button", "min": 0, "max": 100, "step": 2, "default": 16 },
+    { "type": "range", "id": "title_padding_top", "label": "Title padding top", "min": 0, "max": 60, "step": 2, "default": 0 },
+    { "type": "range", "id": "title_padding_bottom", "label": "Title padding bottom", "min": 0, "max": 48, "step": 2, "default": 12 },
+    {
+      "type": "select", "id": "title_align", "label": "Title alignment",
+      "options": [
+        { "value": "flex-start", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "flex-end", "label": "Right" }
+      ],
+      "default": "flex-start"
+    },
+    {
+      "type": "select", "id": "title_ls", "label": "Title letter spacing",
+      "options": [
+        { "value": "0em", "label": "None" },
+        { "value": "0.02em", "label": "Tight" },
+        { "value": "0.05em", "label": "Normal" },
+        { "value": "0.10em", "label": "Wide" },
+        { "value": "0.16em", "label": "Wider" }
+      ],
+      "default": "0em"
+    },
+    { "type": "header", "content": "Filter bar" },
+    { "type": "checkbox", "id": "show_filter", "label": "Show filter bar", "default": true },
+    { "type": "collection", "id": "default_collection", "label": "Default collection (shown on load)" },
+    { "type": "color", "id": "filter_bg", "label": "Bar background", "default": "#ffffff" },
+    { "type": "color", "id": "filter_border", "label": "Bar bottom border", "default": "#e3ded2" },
+    { "type": "color", "id": "active_color", "label": "Active tab color", "default": "#1e7db3" },
+    { "type": "color", "id": "inactive_color", "label": "Inactive tab color", "default": "#1c1c1c" },
+    { "type": "range", "id": "underline_width", "label": "Underline thickness", "min": 1, "max": 6, "step": 1, "default": 3 },
+    { "type": "range", "id": "underline_offset", "label": "Underline gap below word (px)", "min": 0, "max": 12, "step": 1, "default": 3 },
+    { "type": "range", "id": "filter_size", "label": "Label size", "min": 10, "max": 20, "step": 1, "default": 13 },
+    {
+      "type": "select", "id": "filter_font", "label": "Label font family",
+      "info": "Forma DJR ships all weights; Nav (PP Right Grotesk) only ships 500/700 so most weight choices collapse.",
+      "options": [
+        { "value": "inherit",     "label": "Theme default (Nav)" },
+        { "value": "body",        "label": "Forma DJR" },
+        { "value": "heading",     "label": "PP Right Grotesk" },
+        { "value": "handwritten", "label": "Thread Handwritten" }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "select", "id": "filter_weight", "label": "Label weight",
+      "options": [
+        { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }, { "value": "800", "label": "Extra-bold" },
+        { "value": "900", "label": "Black" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select", "id": "filter_case", "label": "Label case",
+      "options": [{ "value": "uppercase", "label": "UPPERCASE" }, { "value": "none", "label": "Normal" }, { "value": "capitalize", "label": "Capitalize" }],
+      "default": "uppercase"
+    },
+    {
+      "type": "select", "id": "filter_ls", "label": "Label letter spacing",
+      "options": [{ "value": "0.085em", "label": "Brand (0.085em)" }, { "value": "0em", "label": "None" }, { "value": "0.05em", "label": "Tight" }, { "value": "0.08em", "label": "Normal" }, { "value": "0.12em", "label": "Wide" }, { "value": "0.2em", "label": "Extra-wide" }],
+      "default": "0.08em"
+    },
+    { "type": "range", "id": "tab_spacing", "label": "Tab padding", "min": 8, "max": 48, "step": 4, "default": 24 },
+    {
+      "type": "select", "id": "filter_align", "label": "Filter bar alignment",
+      "options": [
+        { "value": "flex-start", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "flex-end", "label": "Right" }
+      ],
+      "default": "flex-start"
+    },
+    { "type": "header", "content": "CTA button" },
+    { "type": "checkbox", "id": "cta_show", "label": "Show button", "default": false },
+    {
+      "type": "select", "id": "cta_position", "label": "Button position",
+      "options": [
+        { "value": "above", "label": "Right of title" },
+        { "value": "between", "label": "Between title and filter (centered)" },
+        { "value": "below_filter", "label": "Below filter, above grid (centered)" },
+        { "value": "below", "label": "Below grid (centered)" }
+      ],
+      "default": "above"
+    },
+    { "type": "range", "id": "cta_between_spacing_top", "label": "CTA spacing above (between mode)", "min": 0, "max": 40, "step": 2, "default": 8 },
+    { "type": "range", "id": "cta_between_spacing_bottom", "label": "CTA spacing below (between mode)", "min": 0, "max": 40, "step": 2, "default": 8 },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Shop all" },
+    { "type": "url", "id": "cta_url", "label": "Button URL" },
+    {
+      "type": "select", "id": "cta_case", "label": "Text case",
+      "options": [
+        { "value": "uppercase", "label": "UPPERCASE" },
+        { "value": "none", "label": "Normal" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "select", "id": "cta_weight", "label": "Weight",
+      "options": [{ "value": "400", "label": "Regular" }, { "value": "700", "label": "Bold" }],
+      "default": "400"
+    },
+    { "type": "range", "id": "cta_size", "label": "Font size", "min": 10, "max": 20, "step": 1, "default": 13 },
+    {
+      "type": "select", "id": "cta_ls", "label": "Letter spacing",
+      "options": [{ "value": "0.085em", "label": "Brand (0.085em)" }, 
+        { "value": "0em", "label": "None" },
+        { "value": "0.05em", "label": "Tight" },
+        { "value": "0.08em", "label": "Normal" },
+        { "value": "0.12em", "label": "Wide" }
+      ],
+      "default": "0.08em"
+    },
+    { "type": "color", "id": "cta_text_color", "label": "Text color", "default": "#1c1c1c" },
+    { "type": "color", "id": "cta_bg_color", "label": "Background color", "default": "#ffffff" },
+    { "type": "color", "id": "cta_border_color", "label": "Border color", "default": "#1c1c1c" },
+    { "type": "range", "id": "cta_border_width", "label": "Border thickness", "min": 0, "max": 4, "step": 0.5, "default": 1.5 },
+    { "type": "range", "id": "cta_radius", "label": "Border radius", "min": 0, "max": 50, "step": 2, "default": 50 },
+    { "type": "range", "id": "cta_pad_h", "label": "Padding horizontal", "min": 8, "max": 40, "step": 2, "default": 20 },
+    { "type": "range", "id": "cta_pad_v", "label": "Padding vertical", "min": 4, "max": 20, "step": 1, "default": 9 },
+    { "type": "checkbox", "id": "cta_full_width_mobile", "label": "Full-width on mobile", "info": "Button spans container width on mobile. Does not apply to 'Right of title' position.", "default": false },
+    { "type": "header", "content": "Product grid" },
+    {
+      "type": "select", "id": "grid_mode", "label": "Display mode",
+      "options": [
+        { "value": "grid", "label": "Grid" },
+        { "value": "carousel", "label": "Carousel" }
+      ],
+      "default": "grid"
+    },
+    { "type": "range", "id": "product_count", "label": "Products to show", "min": 2, "max": 12, "step": 1, "default": 4 },
+    {
+      "type": "select", "id": "columns_mobile", "label": "Mobile columns",
+      "options": [{ "value": "1", "label": "1" }, { "value": "2", "label": "2" }],
+      "default": "2"
+    },
+    {
+      "type": "select", "id": "columns_desktop", "label": "Desktop columns",
+      "options": [{ "value": "2", "label": "2" }, { "value": "3", "label": "3" }, { "value": "4", "label": "4" }, { "value": "5", "label": "5" }],
+      "default": "4"
+    },
+    { "type": "range", "id": "col_gap", "label": "Column gap", "min": 0, "max": 32, "step": 2, "default": 12 },
+    { "type": "range", "id": "row_gap", "label": "Row gap", "min": 0, "max": 48, "step": 2, "default": 20 },
+    { "type": "range", "id": "carousel_peek", "label": "Mobile carousel peek", "info": "How much the next product peeks in on mobile", "min": 0, "max": 150, "step": 2, "unit": "px", "default": 20 }
+  ],
+  "blocks": [
+    {
+      "type": "filter_tab",
+      "name": "Filter tab",
+      "settings": [
+        { "type": "text", "id": "tab_label", "label": "Tab label", "default": "All Products" },
+        { "type": "collection", "id": "collection_handle", "label": "Collection" },
+        { "type": "text", "id": "cta_label", "label": "CTA button label", "default": "Shop all" },
+        { "type": "url", "id": "cta_url", "label": "CTA button URL" }
+      ]
+    },
+    {
+      "type": "promo_card",
+      "name": "Promo card",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "url", "id": "link", "label": "Link URL" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Shop Wallets" },
+        { "type": "text", "id": "subtitle", "label": "Subtitle", "info": "e.g. '24 Styles | From $19.99'" },
+        { "type": "range", "id": "position", "label": "Position in feed", "info": "Where this card appears (1 = first)", "min": 1, "max": 20, "step": 1, "default": 3 },
+        { "type": "text", "id": "tab_filter", "label": "Show on tab (collection handle)", "info": "Leave blank to show on all tabs. Enter a collection handle to only show on that tab." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Best Sellers",
+      "blocks": [
+        { "type": "filter_tab", "settings": { "tab_label": "All Products" } },
+        { "type": "filter_tab", "settings": { "tab_label": "Wallets" } },
+        { "type": "filter_tab", "settings": { "tab_label": "Bags" } }
+      ]
+    }
+  ],
+  "disabled_on": { "groups": ["custom.overlay"] }
+}
+{% endschema %}

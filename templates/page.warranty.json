@@ -1,0 +1,308 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "page__main",
+      "disabled": true,
+      "settings": {
+        "color_scheme": "color__bg-body color__text",
+        "layout_horizontal": "window"
+      }
+    },
+    "5fcc800a-b0d7-4551-a79a-32446bcbbfcd": {
+      "type": "content-grid",
+      "blocks": {
+        "template--15936565903498__5fcc800a-b0d7-4551-a79a-32446bcbbfcd-content-1": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "button_label": "",
+            "button_url": "",
+            "enable_new_tab": false,
+            "image_background": "shopify://shop_images/vertical-wallet.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": true,
+            "visibility": ""
+          }
+        },
+        "template--15936565903498__5fcc800a-b0d7-4551-a79a-32446bcbbfcd-content-2": {
+          "type": "content",
+          "settings": {
+            "heading": "WE STAND BY OUR PRODUCTS",
+            "content": "",
+            "button_label": "",
+            "button_url": "",
+            "enable_new_tab": false,
+            "image_background": "shopify://shop_images/Utility-Tote.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 180,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__light",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-center",
+            "layout_x_alignment": "text-center justify-center",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "template--15936565903498__5fcc800a-b0d7-4551-a79a-32446bcbbfcd-content-3": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "button_label": "",
+            "button_url": "",
+            "enable_new_tab": false,
+            "image_featured": "shopify://shop_images/seo-elastic-wallets.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-overlay-1 color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": true,
+            "visibility": ""
+          }
+        }
+      },
+      "block_order": [
+        "template--15936565903498__5fcc800a-b0d7-4551-a79a-32446bcbbfcd-content-1",
+        "template--15936565903498__5fcc800a-b0d7-4551-a79a-32446bcbbfcd-content-2",
+        "template--15936565903498__5fcc800a-b0d7-4551-a79a-32446bcbbfcd-content-3"
+      ],
+      "disabled": true,
+      "settings": {
+        "heading": "",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 0,
+        "spacing_bottom": 0,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "",
+        "row_size_desktop": "md:grid-cols-3",
+        "row_size_mobile": "grid-cols-1",
+        "layout_x_alignment": "justify-between",
+        "layout_horizontal": "window--full",
+        "visibility": ""
+      }
+    },
+    "a1b2c3d4-e5f6-7890-abcd-ef1234567890": {
+      "type": "attentive-warranty-bar",
+      "settings": {
+        "desktop_id": "1277019",
+        "mobile_id": "1277031",
+        "heading": "Register Warranty",
+        "content": "<p>Register your product to activate your warranty and make support quick and easy. Having your product on file helps us assist you faster if an issue comes up. We'll also share product care tips to help extend the life of your Thread® product. Occasionally, you may receive updates related to your purchase.</p>",
+        "button_label": "Register Now",
+        "spacing_top": 100,
+        "spacing_bottom": 0,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "",
+        "layout_horizontal": "window",
+        "visibility": ""
+      }
+    },
+    "7e30fd14-429f-43cb-8dd1-5eb55d915bfd": {
+      "type": "text",
+      "settings": {
+        "heading": "WARRANTY POLICY",
+        "content": "<p>We stand by our products. Each one is made using durable materials and checked for quality before shipping. Thread products are made to help you Carry On, which is why we have a one-year warranty on most of our products. If an item is defective, you may qualify for a <strong>one-time</strong> replacement.</p><p><strong> </strong></p><p><strong>WHAT DOESN'T COUNT AS DEFECTIVE?</strong></p><ul><li>Products that have been stretched out or worn due to over-stuffing, water damage, normal day-to-day wear and tear, etc. will not qualify for a replacement.</li><li>Mystery products and final sale items found on our \"Sales\" page are reviewed on a case-by-case basis and may be ineligible for replacement.</li><li>Wallets that were included in an order for promotional reasons, awarded as a giveaway item, or purchased as part of a monthly drop are not eligible for replacement. Often, these wallets are released in limited quantities and when the designs are gone, we cannot offer a replacement.</li></ul><p><strong> </strong></p><p><strong>HOW TO SUBMIT A WARRANTY CLAIM</strong></p><p>If you feel like you qualify for a replacement, please contact us and we'll happily verify the warranty for you! To request a replacement of any defective item, please fill out the link <a href=\"https://www.threadwallets.com/apps/redo/returns-portal/login\" title=\"https://www.threadwallets.com/apps/redo/returns-portal/login\">here</a>. </p><p></p>",
+        "button_label": "Start Claim",
+        "button_url": "https://www.threadwallets.com/apps/redo/returns-portal/login",
+        "spacing_top": 80,
+        "spacing_bottom": 100,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "",
+        "layout_x_alignment": "text-center justify-center",
+        "content_x_alignment": "text-left",
+        "visibility": ""
+      }
+    },
+    "cb328978-913e-4ffa-afba-f4c59972c73a": {
+      "type": "content-grid",
+      "blocks": {
+        "63b05fce-e5c0-4833-a979-fb2c466f3b08": {
+          "type": "content",
+          "settings": {
+            "heading": "Wallets",
+            "content": "<p>Use recommended amount of cards in each product:</p><ul><li>Phone case: 2-4 cards/cash</li><li>Elastic: 2-10 cards/cash</li><li>Vertical: 2-8 cards/cash</li><li>Bifold: 4-10 cards/cash</li><li>Magnetic: 8-10 cards/cash</li><li>Pull cards/cash up and not out.</li></ul><p><strong> </strong></p><p><strong>HOW TO CLEAN</strong></p><ul><li>Elastic products are washable, remove metal key rings to prevent rust.</li><li>The logo is designed to withstand machine washing, but there is always the small possibility that they can detach just from everyday wear and tear!</li><li>Leather and magnetic products are not machine-washable, but any elastic on our bifolds, verticals, phone cases, or magnetic wallets can be spot-treated.</li></ul>",
+            "button_label": "",
+            "button_url": "",
+            "enable_new_tab": false,
+            "image_featured": "shopify://shop_images/all-wallets-mobile.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-start",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "1008ca4d-9570-40c1-bdf4-e8f8e4c0adc5": {
+          "type": "content",
+          "settings": {
+            "heading": "Lanyards/Keychains",
+            "content": "<p>Lanyards and keychains are made to hold the essentials, but they are not built to hold everything. When the clasps are weighed down with multiple items, there is an increased chance that something will fall off.</p><p>We have found that the lanyards function best with just a few keys, a Thread wallet, and Thread lip balm holder!</p><p>For keychains, your keys and any other items are meant to be attached to the keyring end of the keychain, and the clip can be attached to bags and belt loops.</p><p><strong> </strong></p><p><strong>HOW TO CLEAN</strong></p><ul><li>Hand wash and spot clean, being careful to avoid getting the leather wet.</li></ul>",
+            "button_label": "",
+            "button_url": "",
+            "enable_new_tab": false,
+            "image_featured": "shopify://shop_images/lanyards-mobile.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-start",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "25175d62-27fb-4954-9d51-847479024d2d": {
+          "type": "content",
+          "settings": {
+            "heading": "Bags",
+            "content": "<p></p><p><strong>HOW TO CLEAN</strong></p><ul><li>Tote Bag: Do not machine wash, do not bleach, do not tumble dry, do not iron. Hand wash and dry flat.</li><li>Crossbody bags, fanny packs, & backpacks: Machine wash; we recommend using a delicate setting in cold water, dry flat.</li><li>Clear Crossbody Bag & Fanny Pack: Hand wash only, wipe clean.</li><li>Honey Crossbody Bag: Hand wash only.</li><li>﻿Off-white Crossbody Bag & Fanny Pack: Hand wash only.</li></ul>",
+            "button_label": "",
+            "button_url": "",
+            "enable_new_tab": false,
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": false,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-start",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        }
+      },
+      "block_order": [
+        "63b05fce-e5c0-4833-a979-fb2c466f3b08",
+        "1008ca4d-9570-40c1-bdf4-e8f8e4c0adc5",
+        "25175d62-27fb-4954-9d51-847479024d2d"
+      ],
+      "disabled": true,
+      "settings": {
+        "heading": "CARE INSTRUCTIONS BY PRODUCT",
+        "content": "",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 40,
+        "spacing_bottom": 40,
+        "color_scheme": "color__bg-overlay-1 color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "",
+        "row_size_desktop": "md:grid-cols-3",
+        "row_size_mobile": "grid-cols-1",
+        "layout_x_alignment": "text-center justify-center flex-col items-center",
+        "layout_horizontal": "window--wide",
+        "visibility": ""
+      }
+    },
+    "liquid_MjTLpT": {
+      "type": "liquid",
+      "name": "t:sections.liquid.name",
+      "settings": {
+        "liquid": "{% comment %}\n  Custom Liquid block to make \"Start Claim\" button open in a new tab.\n  Add this as a \"Custom liquid\" section on the warranty page.\n{% endcomment %}\n\n<script>\n(function() {\n  function makeStartClaimOpenInNewTab() {\n    // Find the \"Start Claim\" button link\n    const startClaimLinks = Array.from(document.querySelectorAll('a')).filter(link => {\n      const text = link.textContent.trim();\n      const href = link.getAttribute('href') || '';\n      return text === 'Start Claim' || href.includes('returns-portal/login');\n    });\n\n    startClaimLinks.forEach(link => {\n      link.setAttribute('target', '_blank');\n      link.setAttribute('rel', 'noopener noreferrer');\n    });\n  }\n\n  // Run when DOM is ready\n  if (document.readyState === 'loading') {\n    document.addEventListener('DOMContentLoaded', makeStartClaimOpenInNewTab);\n  } else {\n    makeStartClaimOpenInNewTab();\n  }\n})();\n</script>",
+        "spacing_top": 0,
+        "spacing_bottom": 0,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "style_border": "border--b-width",
+        "layout_padding": true,
+        "visibility": ""
+      }
+    }
+  },
+  "order": [
+    "main",
+    "5fcc800a-b0d7-4551-a79a-32446bcbbfcd",
+    "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "7e30fd14-429f-43cb-8dd1-5eb55d915bfd",
+    "cb328978-913e-4ffa-afba-f4c59972c73a",
+    "liquid_MjTLpT"
+  ]
+}

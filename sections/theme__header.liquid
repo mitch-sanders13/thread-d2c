@@ -1,0 +1,1875 @@
+<!-- sections/theme__header.liquid -->
+{% comment %}
+{% endcomment %}
+
+<style>
+  #shopify-section-{{ section.id }} .header__nav-link,
+  #shopify-section-{{ section.id }} .header__nav-link *,
+  #shopify-section-{{ section.id }} .header__nav-link .header__link-text {
+    font-family: var({{ section.settings.nav_font_family | default: '--type-font-nav-family' }}) !important;
+    font-size: {{ section.settings.nav_font_size | default: 14 }}px !important;
+    font-weight: {{ section.settings.nav_font_weight | default: '600' }} !important;
+    letter-spacing: {{ section.settings.nav_letter_spacing | default: '0.08em' }} !important;
+    text-transform: {{ section.settings.nav_text_transform | default: 'uppercase' }} !important;
+    color: {{ section.settings.nav_text_color | default: 'inherit' }};
+  }
+  #shopify-section-{{ section.id }} .cart-count-badge {
+    /* Badge straddles the bag icon's right edge (center sits ON the
+       edge = 50% overlap, per merchant). The cart anchors are
+       position:relative; offsets account for each bar's right
+       padding (desktop pl-4 only -> icon flush right; mobile px-2
+       -> 8px right padding). */
+    position: absolute !important;
+    top: 2px !important;
+    right: -9px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    min-height: 18px !important;
+    max-width: 18px !important;
+    max-height: 18px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    margin-left: 0 !important;
+    font-family: var(--type-font-body-family) !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    text-indent: 0 !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+  @media (max-width: 1279.98px) {
+    #shopify-section-{{ section.id }} .cart-count-badge {
+      /* 14px tap padding - 9px half-badge, +2px left nudge per merchant */
+      right: 7px !important;
+    }
+  }
+  {% if section.settings.bar_layout_desktop == "left-inline" or section.settings.bar_layout_desktop == "left-center" %}
+  /* Page-centered nav: split desktop bar into a 3-column grid
+     (1fr | auto | 1fr). The nav sits in the auto middle column and is
+     therefore always centered to the page regardless of the logo / cart
+     column widths. */
+  @media (min-width: 1280px) {
+    #shopify-section-{{ section.id }} .js-header-desktop-bar {
+      display: grid !important;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: stretch;
+    }
+    #shopify-section-{{ section.id }} .js-header-desktop-bar > .js-header-col--left   { justify-self: start; }
+    #shopify-section-{{ section.id }} .js-header-desktop-bar > .js-header-col--center { justify-self: center; }
+    #shopify-section-{{ section.id }} .js-header-desktop-bar > .js-header-col--right  { justify-self: end; }
+    /* The nav's inner flex wrapper uses flex-grow for left-inline — disable
+       it so the nav hugs its content and the grid auto column can center. */
+    #shopify-section-{{ section.id }} .js-header-col--center .flex-grow { flex-grow: 0 !important; }
+  }
+  {% endif %}
+
+  /* Keep the mega-menu dropdown open while the cursor is anywhere over
+     the wrapper that contains both the nav link and the dropdown panel.
+     The transparent ::after pseudo is a hover bridge below the link
+     that spans the entire gap from the nav-link bottom down to where
+     the dropdown begins, so the cursor doesn't cross a dead zone where
+     neither :hover applies. Sized generously (40px) to cover header
+     padding-bottom + transition rounding. */
+  #shopify-section-{{ section.id }} .js-header-nav-item {
+    position: relative;
+  }
+  #shopify-section-{{ section.id }} .js-header-nav-item::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: transparent;
+  }
+
+  /* Mega-menu dropdown panel — pinned below the sticky header at the
+     viewport edges so it spans full width regardless of where the
+     individual nav-item sits in the bar. The --cs-header-h CSS variable
+     is set by the small inline script at the bottom of this section
+     file so the panel always lands directly below the actual header
+     height with no gap.
+
+     pointer-events: none on the wrapper so the full-viewport empty
+     area to the left and right of the centered card doesn't capture
+     hover (which was keeping the dropdown open while the cursor was
+     visibly outside it). pointer-events: auto on .mega-menu-card
+     re-enables hover on the actual visible panel — matching the
+     Herschel-style behavior where hovering off the visible card
+     immediately starts the close timer. */
+  #shopify-section-{{ section.id }} .header__dropdown {
+    position: fixed !important;
+    /* -2px nudge to close the hairline gap between the header's
+       bottom edge and the dropdown card. getBoundingClientRect().bottom
+       can land a sub-pixel below where the visible header reads,
+       depending on borders and sub-pixel rounding. */
+    top: calc(var(--cs-header-h, 80px) - 2px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    z-index: 49;
+    pointer-events: none;
+  }
+  #shopify-section-{{ section.id }} .header__dropdown .mega-menu-card {
+    pointer-events: auto;
+  }
+
+  /* Hover OPEN — driven by:
+       1. The `header__nav-item--open` class added by the hover-with-
+          intent script at the bottom of this section. This is the
+          primary mechanism; it survives the cursor moving between
+          the nav link and the dropdown panel.
+       2. Pure-CSS :hover / :focus-within as a graceful-degradation
+          fallback if the script doesn't load. Keep in mind these
+          can collapse the dropdown mid-traverse (the very bug the
+          script is here to solve), but they're still useful for
+          keyboard a11y and no-JS environments. */
+  #shopify-section-{{ section.id }} .js-header-nav-item.header__nav-item--open > .header__dropdown,
+  #shopify-section-{{ section.id }} .js-header-nav-item:hover > .header__dropdown,
+  #shopify-section-{{ section.id }} .js-header-nav-item:focus-within > .header__dropdown,
+  #shopify-section-{{ section.id }} .header__dropdown:hover,
+  #shopify-section-{{ section.id }} .header__dropdown:focus-within {
+    height: auto !important;
+    opacity: 1 !important;
+  }
+
+  {%- comment -%}
+    Search bar styling. Targets both the mobile (#search-mobile) and
+    desktop (#search-desktop) inputs at the same time. Variables are
+    set on this section's wrapper so the input inherits — overrides
+    have !important to beat the global .form-input rule.
+  {%- endcomment -%}
+  {%- assign hd_search_font_var = '--type-font-body-family' -%}
+  {%- case section.settings.search_font_family -%}
+    {%- when 'heading' -%}{%- assign hd_search_font_var = '--type-font-header-family' -%}
+    {%- when 'nav' -%}{%- assign hd_search_font_var = '--type-font-nav-family' -%}
+    {%- when 'handwritten' -%}{%- assign hd_search_font_var = '--type-font-handwritten-family' -%}
+  {%- endcase -%}
+  #shopify-section-{{ section.id }} {
+    --hd-search-font: var({{ hd_search_font_var }});
+    --hd-search-weight: {{ section.settings.search_font_weight | default: '400' }};
+    --hd-search-case: {{ section.settings.search_font_case | default: 'none' }};
+    --hd-search-size: {{ section.settings.search_font_size | default: 14 }}px;
+    --hd-search-ls: {{ section.settings.search_letter_spacing | default: '0em' }};
+    --hd-search-bg: {{ section.settings.search_input_bg | default: '#ffffff' }};
+    --hd-search-text: {{ section.settings.search_input_text_color | default: '#1a1a1a' }};
+    --hd-search-border: {{ section.settings.search_input_border_color | default: '#cccccc' }};
+    --hd-search-placeholder: {{ section.settings.search_placeholder_color | default: '#888888' }};
+    --hd-search-icon: {{ section.settings.search_icon_color | default: '#1a1a1a' }};
+  }
+  #shopify-section-{{ section.id }} #search-mobile,
+  #shopify-section-{{ section.id }} #search-desktop {
+    font-family: var(--hd-search-font) !important;
+    font-weight: var(--hd-search-weight) !important;
+    text-transform: var(--hd-search-case) !important;
+    font-size: var(--hd-search-size) !important;
+    letter-spacing: var(--hd-search-ls) !important;
+    background-color: var(--hd-search-bg) !important;
+    color: var(--hd-search-text) !important;
+    border-color: var(--hd-search-border) !important;
+  }
+  #shopify-section-{{ section.id }} #search-mobile::placeholder,
+  #shopify-section-{{ section.id }} #search-desktop::placeholder {
+    color: var(--hd-search-placeholder) !important;
+    font-family: var(--hd-search-font) !important;
+    font-weight: var(--hd-search-weight) !important;
+    font-size: var(--hd-search-size) !important;
+    text-transform: var(--hd-search-case) !important;
+    letter-spacing: var(--hd-search-ls) !important;
+    opacity: 1; /* Firefox lowers placeholder opacity by default */
+  }
+  /* Magnifying glass + X close button inside the search input wrapper */
+  #shopify-section-{{ section.id }} #search-mobile ~ * svg,
+  #shopify-section-{{ section.id }} #search-desktop ~ * svg {
+    color: var(--hd-search-icon) !important;
+    stroke: var(--hd-search-icon);
+  }
+  /* iOS Safari auto-zooms any focused input with computed font-size < 16px.
+     On mobile we force the input to at least 16px so tapping the search
+     bar doesn't zoom the page. Desktop keeps the merchant's chosen size. */
+  @media (max-width: 767px) {
+    #shopify-section-{{ section.id }} #search-mobile,
+    #shopify-section-{{ section.id }} #search-desktop {
+      font-size: max(16px, var(--hd-search-size)) !important;
+    }
+  }
+
+  {%- comment -%}
+    Search RESULTS typography — the dropdown under the input: suggestion
+    links, section labels (Products / Collections / Top searches), product
+    titles, type/vendor meta, and prices. Scoped via the .hd-search-results
+    class on both the desktop and mobile dropdown containers. The input
+    itself is excluded (its #search-mobile/#search-desktop ID rules above
+    out-rank these class selectors).
+  {%- endcomment -%}
+  {%- assign hd_sr_font_var = '--type-font-body-family' -%}
+  {%- case section.settings.search_results_font_family -%}
+    {%- when 'heading' -%}{%- assign hd_sr_font_var = '--type-font-header-family' -%}
+    {%- when 'nav' -%}{%- assign hd_sr_font_var = '--type-font-nav-family' -%}
+    {%- when 'handwritten' -%}{%- assign hd_sr_font_var = '--type-font-handwritten-family' -%}
+  {%- endcase -%}
+  /* Family / case / letter-spacing apply everywhere in the dropdown. */
+  #shopify-section-{{ section.id }} .hd-search-results,
+  #shopify-section-{{ section.id }} .hd-search-results a,
+  #shopify-section-{{ section.id }} .hd-search-results button,
+  #shopify-section-{{ section.id }} .hd-search-results span,
+  #shopify-section-{{ section.id }} .hd-search-results p,
+  #shopify-section-{{ section.id }} .hd-search-results li,
+  #shopify-section-{{ section.id }} .hd-search-results strong,
+  #shopify-section-{{ section.id }} .hd-search-results s {
+    font-family: var({{ hd_sr_font_var }}) !important;
+    text-transform: {{ section.settings.search_results_font_case | default: 'none' }} !important;
+    letter-spacing: {{ section.settings.search_results_letter_spacing | default: '0em' }} !important;
+    {% if section.settings.search_results_text_color != blank %}color: {{ section.settings.search_results_text_color }} !important;{% endif %}
+  }
+  /* Base size + weight for links, labels, and buttons. <strong> labels
+     keep their bold because we don't touch strong's weight here. */
+  #shopify-section-{{ section.id }} .hd-search-results {
+    font-size: {{ section.settings.search_results_text_size | default: 14 }}px !important;
+  }
+  #shopify-section-{{ section.id }} .hd-search-results a,
+  #shopify-section-{{ section.id }} .hd-search-results button,
+  #shopify-section-{{ section.id }} .hd-search-results span,
+  #shopify-section-{{ section.id }} .hd-search-results p,
+  #shopify-section-{{ section.id }} .hd-search-results li {
+    font-size: inherit !important;
+    font-weight: {{ section.settings.search_results_font_weight | default: '400' }} !important;
+  }
+  /* Product title (the p.type--base inside each result card). */
+  #shopify-section-{{ section.id }} .hd-search-results .type--base {
+    font-size: {{ section.settings.search_results_title_size | default: 15 }}px !important;
+    font-weight: {{ section.settings.search_results_title_weight | default: '500' }} !important;
+  }
+  /* Meta (type / vendor) + price rows inside each result card. */
+  #shopify-section-{{ section.id }} .hd-search-results li.type--small,
+  #shopify-section-{{ section.id }} .hd-search-results a p.type--small,
+  #shopify-section-{{ section.id }} .hd-search-results a .type--small {
+    font-size: {{ section.settings.search_results_meta_size | default: 12 }}px !important;
+  }
+</style>
+
+{% capture desktop_logo %}
+  <div class="md:py-4 flex items-center max-w-xs py-2{% if section.settings.bar_layout_desktop == "center-below" %} justify-center{% endif %}">
+    <a class="inline-block relative items-center hover:!opacity-100"
+      href="{{ routes.root_url }}"
+      rel="nofollow"
+      title="{{ shop.name }}">
+      <img
+        src="{{ 'Thread-Stitch.png' | asset_url }}"
+        alt="{{ shop.name }}"
+        style="height: 35px; width: auto;">
+    </a>
+  </div>
+{% endcapture %}
+
+{% capture desktop_navigation %}
+  {%- comment -%}
+    hidescrollbar: overflow-x-auto computes overflow-y to auto too, so
+    a 1px content overflow spawned a visible vertical scrollbar beside
+    the last nav link on Windows-style non-overlay scrollbars.
+  {%- endcomment -%}
+  <div class="flex flex-wrap items-center overflow-x-auto hidescrollbar
+    type__nav
+    {{ settings.type_header_capitilization }}
+    {% if section.settings.bar_layout_desktop == "center-below" %}w-full justify-center{% endif %}
+    {% if section.settings.bar_layout_desktop == "left-below" %}w-full{% endif %}
+    {% if section.settings.bar_layout_desktop == "left-inline" %}flex-grow justify-start{% endif %}
+    {% if section.settings.bar_layout_desktop == "left-center" %}justify-center flex-nowrap{% endif %}
+    {% if section.settings.bar_layout_desktop == "center-inline" %}justify-start flex-nowrap{% endif %}">
+
+    {% assign activeLinkCounter = 0 %}
+    {%- for link in section.settings.dropdown_links.links -%}
+      {% if link.child_active %}
+        {% assign activeLinkCounter = activeLinkCounter | plus: 1 %}
+      {% else %}
+        {% if link.active %}
+          {% assign activeLinkCounter = activeLinkCounter | plus: 1 %}
+        {% endif %}
+      {% endif %}
+
+      <div class="flex-shrink h-full js-header-nav-item">
+        <a
+          href="{{ link.url }}"
+          onclick=""
+          class="header__link header__nav-link type__nav type--small h-full flex items-center mr-2 block no-underline hover:no-underline
+          {{ settings.type_header_capitilization }}
+          {% if section.settings.bar_layout_desktop == "center-below" %}px-4 md:py-6 py-2 type--small{% endif %}
+          {% if section.settings.bar_layout_desktop == "left-below" %}pr-4 pt-2 pb-4 type--small{% endif %}
+          {% if section.settings.bar_layout_desktop == "left-inline" %}px-4 md:py-6 py-2{% endif %}
+          {% if activeLinkCounter <= 1 %}
+            {% if link.child_active %}header__link--hover{% endif %}
+            {% if link.active %}header__link--hover{% endif %}
+          {% endif %}
+          {% if section.settings.bar_layout_desktop == "center-below" %}
+            px-4 mx-2
+          {% elsif section.settings.bar_layout_desktop == "left-center" or section.settings.bar_layout_desktop == "center-inline" %}
+            px-4
+          {% else %}
+            mr-2 pr-4
+          {% endif %}">
+          <span class="header__link-text">{{ link.title }}</span>
+
+          {%- comment -%}
+            {% if link.levels >= 1 %}
+                {% render 'component__icon', icon: 'chevron-down', class: 'ml-1', size: '16' %}
+            {% endif %}
+          {%- endcomment -%}
+        </a>
+
+        {%- comment -%}
+          Render the dropdown wrapper when the nav link has Shopify-menu
+          children OR when the merchant has attached any mega-menu blocks
+          to this link via the block's "Attach to nav link (title)"
+          setting. Previously this guarded on `link.levels >= 1` alone,
+          so a merchant who only configured blocks (no menu children)
+          got no dropdown wrapper at all and hovering revealed nothing.
+        {%- endcomment -%}
+        {%- assign _mm_has_blocks = false -%}
+        {%- if link.levels < 1 -%}
+          {%- assign _mm_link_key = link.title | strip | downcase -%}
+          {%- for block in section.blocks -%}
+            {%- assign _mm_block_key = block.settings.parent_link_title | default: '' | strip | downcase -%}
+            {%- if _mm_block_key != '' and _mm_block_key == _mm_link_key -%}
+              {%- assign _mm_has_blocks = true -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+
+        {% if link.levels >= 1 or _mm_has_blocks %}
+          <div class="header__dropdown animation-300 block h-0 overflow-hidden normal-case opacity-0">
+            {% render 'mega-menu__panel', link: link, section: section %}
+          </div>
+        {% endif %}
+        
+      </div>
+    {%- endfor -%}
+
+  </div>
+{% endcapture %}
+
+{% capture desktop_search %}
+  {% if section.settings.enable_search %}
+    {% render 'header__search-desktop' %} 
+  {% endif %}
+{% endcapture %}
+
+{% capture desktop_actions %}
+  <div class="flex items-center justify-end flex-shrink pl-2 text-right">
+
+    {% if section.settings.enable_search %}
+      {% if section.settings.bar_button_search_type == "text" %}
+        <a
+          class="hover:underline inline-flex pl-4 ml-2 no-underline
+          type__nav
+          {{ settings.type_header_capitilization }}"
+          href="{{ routes.search_url }}"
+          rel="nofollow"
+          @click.prevent="search_visible = true; search_active = true; $nextTick(() => { document.querySelector('#search-desktop').focus(); });">
+          {{ 'general.search.search' | t }}
+        </a>
+      {% else %}
+        <a
+          class="type__nav hover:underline inline-flex pl-4 ml-2 no-underline"
+          href="{{ routes.search_url }}"
+          rel="nofollow"
+          title="{{ 'general.search.search' | t }}"
+          @click.prevent="search_visible = true; search_active = true; $nextTick(() => { document.querySelector('#search-desktop').focus(); });">
+          {% render 'component__icon', icon: 'search', size: '24', class: '' %}
+        </a>
+      {% endif %}
+    {% endif %}
+
+    {%- if shop.customer_accounts_enabled -%}
+     {% unless section.settings.bar_button_login_type == "none" %}
+      {% if section.settings.bar_button_login_type == "text" %}
+        <a
+          class="hover:underline inline-flex pl-4 ml-2 no-underline
+          type__nav
+          {{ settings.type_header_capitilization }}"
+          href="{{ routes.account_url }}"
+          rel="nofollow">
+          {% if customer %}
+            {{ 'general.navigation.account' | t }}
+          {% else %}
+            {{ 'customer.account.log_in' | t }}
+          {% endif %}
+
+        </a>
+      {% else %}
+        <a
+          class="type__nav hover:underline inline-flex pl-4 ml-2 no-underline"
+          href="{{ routes.account_url }}"
+          rel="nofollow"
+          title=" {% if customer %}{{ 'general.navigation.account' | t }}{% else %}{{ 'customer.account.log_in' | t }}{% endif %}">
+          {% render 'component__icon', icon: 'account', size: '24', class: '' %} 
+        </a>
+      {% endif %}
+     {% endunless %}
+    {% endif %}
+
+    {% if section.settings.bar_button_cart_type == "text" %}
+      <a
+        class="inline-flex pl-4 ml-2 no-underline items-center
+        type__nav
+        {{ settings.type_header_capitilization }}"
+        {% if settings.enable_audio %}
+          {% assign audio = 'const click_audio = new Audio(window.__initialData.click_audio); click_audio.play();' %}
+        {% endif %}
+        {% if settings.cart_icon_behavior == "open_cart_drawer" %}@click.prevent="cart_drawer = true; {{ audio }}"{% endif %}
+        {% if settings.enable_audio %}  {% endif %} 
+        href="{{ routes.cart_url }}"
+        rel="nofollow"
+        >
+        {{ 'cart.general.title' | t }} 
+        <span class="ml-1
+        type__nav
+        {{ settings.type_header_capitilization }}" 
+          x-show="cart.item_count > 0" 
+          x-cloak>(<span class="
+          type__nav
+          {{ settings.type_header_capitilization }}" x-text="cart.item_count">{{ cart.item_count }}</span>)</span>
+      </a>
+    {% else %}
+      <a
+        class="type__nav relative inline-flex items-center pl-4 ml-2 !no-underline"
+        href="{{ routes.cart_url }}"
+        rel="nofollow"
+        title="{{ 'cart.general.title' | t }}"
+        {% if settings.enable_audio %}
+          {% assign audio = 'const click_audio = new Audio(window.__initialData.click_audio); click_audio.play();' %}
+        {% endif %}
+        {% if settings.cart_icon_behavior == "open_cart_drawer" %}@click.prevent="cart_drawer = true; {{ audio }}"{% endif %}>
+        {% render 'component__icon', icon: 'cart', size: '24', class: '' %} 
+        <span
+          class="cart-count-badge color__bg-primary color__primary"
+          x-show="cart.item_count > 0"
+          x-cloak
+          x-text="cart.item_count">{{ cart.item_count }}</span>
+      </a>
+    {% endif %}
+
+  </div>
+{% endcapture %}
+
+{% capture desktop_actions--minor %}
+  <div class="basis-0 flex items-center justify-start flex-grow flex-shrink pr-2
+    {% if section.settings.bar_layout_desktop == "center-below" %}grow-0{% endif %}">
+
+    {% if section.settings.enable_search %}
+      {% unless section.settings.bar_layout_desktop == "left-below" %}
+        {% if section.settings.bar_button_search_type == "text" %}
+          <a
+            class="hover:underline inline-flex pl-0 ml-0 no-underline
+            type__nav
+            {{ settings.type_header_capitilization }}"
+            href="{{ routes.search_url }}"
+            rel="nofollow"
+            @click.prevent="search_visible = true; search_active = true; $nextTick(() => { document.querySelector('#search-desktop').focus(); });">
+            {{ 'general.search.search' | t }}
+          </a>
+        {% else %}
+          <a
+            class="type__nav hover:underline inline-flex pl-0 ml-0 no-underline"
+            href="{{ routes.search_url }}"
+            rel="nofollow"
+            title="{{ 'general.search.search' | t }}"
+            @click.prevent="search_visible = true; search_active = true; $nextTick(() => { document.querySelector('#search-desktop').focus(); });">
+            {% render 'component__icon', icon: 'search', size: '24', class: '' %} 
+          </a>
+        {% endif %}
+      {% endunless %}
+    {% endif %}
+    
+  </div>
+{% endcapture %}
+
+{% capture desktop_search %}
+  {% if section.settings.enable_search %}
+    {% render 'header__search-desktop' %} 
+  {% endif %}
+{% endcapture %}
+
+{% if template.name == 'index' %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var header = document.querySelector('header.header--transparent');
+      if (header) header.classList.add('header--text-{{ section.settings.transparent_text_color }}');
+    });
+  </script>
+{% endif %}
+
+<nav
+  aria-label="Header Navigation"
+  class="
+    border--b-width
+    {{ section.settings.visibility }}
+    {{ section.settings.bar_color_scheme }}
+    {{ section.settings.bar_color_border }}
+  ">
+  
+  <div class="relative">
+    
+    {%- comment -%} mobile {%- endcomment -%}
+    <div
+      style="padding-left: 20px; padding-right: 20px;"
+      class="
+        xl:hidden flex flex-wrap items-center py-2
+      ">
+      
+      {%- comment -%} mobile bar — logo far left (per merchant) {%- endcomment -%}
+      <div class="basis-0 flex items-center justify-start flex-grow flex-shrink max-w-[45%] sm:max-w-[70%]">
+        <a
+          class="inline-block relative items-center"
+          href="{{ routes.root_url }}"
+          rel="nofollow"
+          title="{{ shop.name }}">
+            <img
+              src="{{ 'Thread-Stitch.png' | asset_url }}"
+              alt="{{ shop.name }}"
+              style="height: 38px; width: auto;">
+        </a>
+      </div>
+
+      {%- comment -%} mobile bar — right: search, cart, hamburger (per merchant) {%- endcomment -%}
+      <div class="basis-0 flex items-center justify-end flex-grow flex-shrink text-right">
+        <button
+          @click="search_visible = true; search_active = true; $nextTick(() => { var el = document.querySelector('#search-mobile'); if (el) el.focus(); });"
+          class="type__nav no-js--hide inline-flex py-2 no-underline"
+          style="padding-left: 14px; padding-right: 14px;"
+          title="{{ 'general.search.title' | t | default: 'Search' }}"
+          aria-label="{{ 'general.search.title' | t | default: 'Search' }}">
+          {% render 'component__icon', icon: 'search', size: '24', class: '' %}
+        </button>
+        {% if section.settings.bar_button_cart_type == 'text' %}
+          <a
+            class="
+              inline-flex py-2 no-underline
+              type__nav
+              {{ settings.type_header_capitilization }}
+            "
+            style="padding-left: 14px; padding-right: 14px;"
+            href="{{ routes.cart_url }}"
+            rel="nofollow"
+            {% if settings.enable_audio %}
+              {% assign audio = 'const click_audio = new Audio(window.__initialData.click_audio); click_audio.play();' %}
+            {% endif %}
+            {% if settings.cart_icon_behavior == "open_cart_drawer" %}@click.prevent="cart_drawer = true; {{ audio }}"{% endif %}>
+            {{ 'cart.general.title' | t }}
+            <span
+              class="
+                ml-1
+                type__nav
+                {{ settings.type_header_capitilization }}
+              "
+              x-show="cart.item_count > 0"
+              x-cloak
+              >(<span
+                class="
+                  type__nav
+                  {{ settings.type_header_capitilization }}
+                "
+                x-text="cart.item_count"
+              >
+                {{- cart.item_count -}}</span
+              >)
+            </span>
+          </a>
+        {% else %}
+          <a
+            class="type__nav relative inline-flex items-center py-2 no-underline"
+            style="padding-left: 14px; padding-right: 14px;"
+            href="{{ routes.cart_url }}"
+            rel="nofollow"
+            title="{{ 'cart.general.title' | t }}"
+            {% if settings.enable_audio %}
+              {% assign audio = 'const click_audio = new Audio(window.__initialData.click_audio); click_audio.play();' %}
+            {% endif %}
+            {% if settings.cart_icon_behavior == "open_cart_drawer" %}@click.prevent="cart_drawer = true; {{ audio }}"{% endif %}>
+            {% render 'component__icon', icon: 'cart', size: '24', class: '' %}
+            <span
+              class="cart-count-badge color__bg-primary color__primary"
+              x-show="cart.item_count > 0"
+              x-cloak
+              x-text="cart.item_count">{{- cart.item_count -}}</span>
+          </a>
+        {% endif %}
+        {% if section.settings.bar_button_menu_type == 'text' %}
+          <button
+            class="
+              no-js--hide inline-flex py-2 no-underline
+              type__nav
+              {{ settings.type_header_capitilization }}
+            "
+            style="padding-left: 14px;"
+            @click="
+              menu_drawer = true; {% if settings.enable_audio %} const click_audio = new Audio(window.__initialData.click_audio); click_audio.play(); {% endif %}
+            ">
+            {{ 'general.navigation.menu' | t }}
+          </button>
+        {% else %}
+          <button
+            @click="menu_drawer = true; {% if settings.enable_audio %} const click_audio = new Audio(window.__initialData.click_audio); click_audio.play(); {% endif %}"
+            class="type__nav no-js--hide inline-flex py-2 no-underline"
+            style="padding-left: 14px;"
+            title="{{ 'general.navigation.menu' | t }}">
+            {% render 'component__icon', icon: 'menu', size: '24', class: '' %}
+          </button>
+        {% endif %}
+        <noscript>
+          {% if section.settings.bar_button_menu_type == 'text' %}
+            <button
+              class="type__nav peer inline-flex py-2 no-underline" style="padding-left: 14px;"
+              @click="menu_drawer = true; {% if settings.enable_audio %} const click_audio = new Audio(window.__initialData.click_audio); click_audio.play(); {% endif %}"
+            >
+              {{ 'general.navigation.menu' | t }}
+            </button>
+          {% else %}
+            <button
+              @click="menu_drawer = true; {% if settings.enable_audio %} const click_audio = new Audio(window.__initialData.click_audio); click_audio.play(); {% endif %}"
+              class="type__nav peer inline-flex py-2 no-underline" style="padding-left: 14px;"
+              title="{{ 'general.navigation.menu' | t }}"
+            >
+              {% render 'component__icon',
+                icon: 'menu',
+                size: '24',
+                class: ''
+              %}
+            </button>
+          {% endif %}
+          <div class="peer-focus:block hover:block focus-within:block hidden bottom-0 fixed color__bg-body w-full left-0 right-0 -z-10 max-h-[70vh] mt-28 border--t-width color__border-divider-1 overflow-scroll">
+            {%- for link in section.settings.dropdown_links.links -%}
+              <a
+                class="border--b-width color__border-divider-1 block w-full p-4 no-underline"
+                href="{{ link.url }}"
+              >
+                {{- link.title -}}
+              </a>
+              {% for child_link in link.links %}
+                <a
+                  class="border--b-width color__border-divider-1 block w-full p-4 !pl-8 no-underline"
+                  href="{{ child_link.url }}"
+                >
+                  {{- child_link.title -}}
+                </a>
+                {% for grandchild_link in child_link.links %}
+                  <a
+                    class="border--b-width color__border-divider-1 block w-full p-4 !pl-12 no-underline"
+                    href="{{ grandchild_link.url }}"
+                  >
+                    {{- grandchild_link.title -}}
+                  </a>
+                {% endfor %}
+              {% endfor %}
+            {%- endfor -%}
+          </div>
+        </noscript>
+      </div>
+
+      {%- comment -%}mobile search{%- endcomment -%}
+      {% if section.settings.enable_search %}
+        {% render 'header__search-mobile' %}
+      {% endif %}
+      
+    </div>
+
+    {%- comment -%} desktop {%- endcomment -%}
+    <div
+      style="padding-left: 50px; padding-right: 50px; position: relative;"
+      class="
+        js-header-desktop-bar
+        xl:flex items-stretch justify-between hidden
+        {{ settings.layout_horizontal }}
+        {% if section.settings.bar_layout_desktop == "left-inline" or section.settings.bar_layout_desktop == "center-inline" or section.settings.bar_layout_desktop == "left-center" %}
+          flex-nowrap
+        {% endif %}
+        {% if section.settings.bar_layout_desktop == "left-below" %}
+          flex-wrap
+        {% endif %}
+        {% if section.settings.bar_layout_desktop == "center-below" %}
+          flex-wrap
+        {% endif %}
+      ">
+      
+      {% if section.settings.bar_layout_desktop == 'left-inline' %}
+        <div class="js-header-col--left flex items-center">
+          {{ desktop_logo }}
+        </div>
+        <div class="js-header-col--center flex items-center flex-grow">
+          {{ desktop_navigation }}
+        </div>
+        <div class="js-header-col--right flex items-center justify-end">
+          {{ desktop_search }}
+          {{ desktop_actions }}
+        </div>
+      {% endif %}
+
+      {% if section.settings.bar_layout_desktop == 'center-inline' %}
+        <div class="flex items-center" style="flex:1 1 0%;min-width:0;">
+          {{ desktop_navigation }}
+        </div>
+        <div class="flex items-center justify-center" style="flex:0 0 auto;">
+          {{ desktop_logo }}
+        </div>
+        <div class="flex items-center justify-end" style="flex:1 1 0%;min-width:0;">
+          {{ desktop_search }}
+          {{ desktop_actions }}
+        </div>
+      {% endif %}
+
+      {% if section.settings.bar_layout_desktop == 'left-center' %}
+        <div class="js-header-col--left flex items-center" style="flex:0 0 auto;">
+          {{ desktop_logo }}
+        </div>
+        <div class="js-header-col--center flex items-center justify-center" style="flex:1 1 0%;min-width:0;">
+          {{ desktop_navigation }}
+        </div>
+        <div class="js-header-col--right flex items-center justify-end" style="flex:0 0 auto;">
+          {{ desktop_search }}
+          {{ desktop_actions }}
+        </div>
+      {% endif %}
+
+      {% if section.settings.bar_layout_desktop == 'left-below' %}
+        {{ desktop_logo }}
+        {{ desktop_search }}
+        {{ desktop_actions }}
+        {{ desktop_navigation }}
+      {% endif %}
+
+      {% if section.settings.bar_layout_desktop == 'center-below' %}
+        {{ desktop_search }}
+        {{ desktop_actions--minor }}
+        {{ desktop_logo }}
+        {{ desktop_actions }}
+        {{ desktop_navigation }}
+      {% endif %}
+    </div>
+
+  </div>
+</nav>
+
+<script>
+  /* Publish the y-coordinate of the header's bottom edge as a CSS
+     custom property (--cs-header-h) on the document root so the
+     mega-menu dropdown panel can pin itself directly below the
+     header without hard-coding a pixel value or leaving a gap.
+
+     Why .bottom instead of .height: when the page is at the top and
+     a notification/announcement bar is visible ABOVE the sticky
+     header, the header's actual viewport-y bottom = announcement
+     height + header height. Using .height alone left a gap exactly
+     equal to the announcement bar height. .bottom resolves to the
+     true bottom edge in viewport space, which is what fixed-position
+     uses anyway. After the user scrolls past the announcement bar,
+     the header sticks to top: 0 and .bottom == .height naturally.
+
+     Recomputes on load, resize, scroll (passive), and on the next
+     animation frame after fonts/images settle. */
+  (function () {
+    if (window.__csHeaderHInstalled) return;
+    window.__csHeaderHInstalled = true;
+
+    function updateHeaderH() {
+      var headerEl = document.querySelector('header');
+      if (!headerEl) return;
+      var b = Math.round(headerEl.getBoundingClientRect().bottom);
+      if (b > 0) {
+        document.documentElement.style.setProperty('--cs-header-h', b + 'px');
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', updateHeaderH);
+    } else {
+      updateHeaderH();
+    }
+    window.addEventListener('load', updateHeaderH);
+    window.addEventListener('resize', updateHeaderH, { passive: true });
+    window.addEventListener('scroll', updateHeaderH, { passive: true });
+    // Belt-and-suspenders: rAF once more after first paint settles.
+    requestAnimationFrame(updateHeaderH);
+  })();
+
+  /* Hover-with-intent for the mega-menu dropdowns.
+
+     Pure CSS :hover has a browser-quirk failure mode here: the moment
+     the cursor exits `.js-header-nav-item`'s :hover area (the link +
+     its ::after bridge), the scoped `height: 0; opacity: 0` rule
+     instantly collapses the dropdown's bounding box to zero. With
+     bounding-box height 0, the cursor isn't "over" the dropdown
+     anymore, so `.header__dropdown:hover` can never fire to re-open
+     it. The dropdown closes the moment the cursor crosses from the
+     bridge into the panel.
+
+     This handler attaches mouseenter/mouseleave to BOTH the nav-item
+     AND the dropdown for each top-level nav link. Entering either
+     adds the `header__nav-item--open` class (CSS forces height:auto
+     + opacity:1). Leaving either schedules a 250 ms close timer;
+     entering the OTHER half cancels the timer before it fires, so
+     the cursor can travel freely between the nav-link and the
+     dropdown panel without the dropdown collapsing mid-motion. */
+  (function () {
+    if (window.__megaMenuHoverInstalled) return;
+    window.__megaMenuHoverInstalled = true;
+
+    // Tight close delay so moving the cursor off the visible card snaps
+    // the dropdown shut (Herschel-style). Long enough to absorb the
+    // ~50ms it takes the cursor to traverse from the nav link down
+    // into the card across any sub-pixel gap.
+    var CLOSE_DELAY = 80;
+
+    // Resolved lazily — at script-run time the header may not be in
+    // the DOM yet if the section is being re-rendered. Each handler
+    // re-queries so it always gets the current element.
+    function getHeaderEl() {
+      return document.querySelector('header');
+    }
+
+    // True when the cursor is moving INTO another element that should
+    // keep the dropdown open: anywhere in the <header> bar itself,
+    // OR into a .mega-menu-card. The card is technically a descendant
+    // of <header> so the first check covers it, but we keep the
+    // explicit card check in case the layout ever moves the card out.
+    function isStayingInOpenSurface(relatedTarget) {
+      if (!relatedTarget || !relatedTarget.closest) return false;
+      var headerEl = getHeaderEl();
+      if (headerEl && headerEl.contains(relatedTarget)) return true;
+      if (relatedTarget.closest('.mega-menu-card')) return true;
+      return false;
+    }
+
+    function wireNavItem(navItem) {
+      if (!navItem || navItem.__megaMenuWired) return;
+      var dropdown = navItem.querySelector(':scope > .header__dropdown');
+      if (!dropdown) return;
+      navItem.__megaMenuWired = true;
+
+      var closeTimer = null;
+
+      function open() {
+        if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+        // Close any sibling dropdown that's already open. Without this,
+        // moving the cursor from one nav item's panel up through the
+        // header bar (which now keeps panels open) to a different nav
+        // item would leave both panels visible at once.
+        document.querySelectorAll('.js-header-nav-item.header__nav-item--open').forEach(function (other) {
+          if (other !== navItem) other.classList.remove('header__nav-item--open');
+        });
+        navItem.classList.add('header__nav-item--open');
+      }
+      function scheduleClose(e) {
+        // Keep the dropdown open while the cursor is anywhere in the
+        // header bar — including empty space between nav items, the
+        // logo, the cart icon, etc. Only schedule a close once the
+        // cursor leaves the header entirely (or skips past the visible
+        // card down to the page content below).
+        if (e && isStayingInOpenSurface(e.relatedTarget)) return;
+        if (closeTimer) clearTimeout(closeTimer);
+        closeTimer = setTimeout(function () {
+          navItem.classList.remove('header__nav-item--open');
+          closeTimer = null;
+        }, CLOSE_DELAY);
+      }
+
+      // Stash on the element so the header-level listener below can
+      // re-trigger close logic without each navItem keeping its own
+      // copy of the relatedTarget heuristics.
+      navItem.__megaMenuScheduleClose = scheduleClose;
+
+      navItem.addEventListener('mouseenter', open);
+      navItem.addEventListener('mouseleave', scheduleClose);
+
+      // Listen on the visible card rather than the full-viewport
+      // dropdown wrapper. With pointer-events: none on .header__dropdown
+      // and pointer-events: auto on .mega-menu-card, the cursor only
+      // counts as "over the dropdown" while it's actually over the
+      // visible panel — so moving the cursor off the card to the left,
+      // right, or below immediately triggers the close timer.
+      var card = dropdown.querySelector('.mega-menu-card');
+      if (card) {
+        card.addEventListener('mouseenter', open);
+        card.addEventListener('mouseleave', scheduleClose);
+      }
+    }
+
+    function wireAll() {
+      document.querySelectorAll('.js-header-nav-item').forEach(wireNavItem);
+
+      // One-shot header-level mouseleave: when the cursor finally
+      // exits the entire header bar, ask every currently-open nav
+      // item to schedule its close. Without this the dropdown would
+      // hang open forever after the customer mouses off the empty
+      // area of the header into page content (because no nav-item /
+      // card mouseleave fires from that empty space).
+      var headerEl = getHeaderEl();
+      if (headerEl && !headerEl.__megaMenuHeaderWired) {
+        headerEl.__megaMenuHeaderWired = true;
+        headerEl.addEventListener('mouseleave', function (e) {
+          // If the cursor moved to a mega-menu card that lives outside
+          // <header> (defensive — current layout keeps the card inside),
+          // don't close.
+          if (e && e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.mega-menu-card')) {
+            return;
+          }
+          document.querySelectorAll('.js-header-nav-item.header__nav-item--open').forEach(function (navItem) {
+            if (navItem.__megaMenuScheduleClose) {
+              navItem.__megaMenuScheduleClose(e);
+            }
+          });
+        });
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', wireAll);
+    } else {
+      wireAll();
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "t:sections.theme_header.name",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__15.content"
+    },
+    {
+      "type": "link_list",
+      "id": "dropdown_links",
+      "label": "t:sections.theme_header.settings.dropdown_links.label",
+      "default": "main-menu"
+    },
+    {
+      "type": "link_list",
+      "id": "search_links",
+      "label": "t:sections.theme_header.settings.search_links.label",
+      "info": "t:sections.theme_header.settings.search_links.info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__12.content"
+    },
+    {
+      "type": "select",
+      "id": "bar_color_scheme",
+      "label": "t:sections.all.colors.settings.color_scheme.label",
+      "options": [
+        {
+          "value": "color__bg-body color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value": "color__bg-neutral color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value": "color__bg-overlay-1 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value": "color__bg-overlay-2 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value": "color__bg-overlay-3 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value": "color__bg-primary color__primary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value": "color__bg-secondary color__secondary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value":"color__bg-tertiary color__tertiary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default": "color__bg-body color__text"
+    },
+    {
+      "type": "select",
+      "id": "bar_color_border",
+      "label": "t:sections.all.colors.settings.color_border.label",
+      "options": [
+        {
+          "value": "color__border-divider-1",
+          "label": "t:sections.all.colors.settings.color_border.options__1.label"
+        },
+        {
+          "value": "color__border-selected-1",
+          "label": "t:sections.all.colors.settings.color_border.options__2.label"
+        },
+        {
+          "value": "!color__border-transparent",
+          "label": "t:sections.all.colors.settings.color_border.options__3.label"
+        }
+      ],
+      "default": "color__border-divider-1"
+    },
+    {
+      "type": "select",
+      "id": "bar_layout_desktop",
+      "label": "t:sections.theme_header.settings.bar_layout_desktop.label",
+      "options": [
+        {
+          "value": "left-below",
+          "label": "t:sections.theme_header.settings.bar_layout_desktop.options__1.label"
+        },
+        {
+          "value": "left-inline",
+          "label": "t:sections.theme_header.settings.bar_layout_desktop.options__2.label"
+        },
+        {
+          "value": "center-inline",
+          "label": "Center logo, nav left"
+        },
+        {
+          "value": "left-center",
+          "label": "Logo left, nav centered"
+        },
+        {
+          "value": "center-below",
+          "label": "t:sections.theme_header.settings.bar_layout_desktop.options__3.label"
+        }
+      ],
+      "default": "left-inline"
+    },
+    {
+      "type": "select",
+      "id": "bar_button_cart_type",
+      "label": "t:sections.theme_header.settings.bar_button_cart_type.label",
+      "options": [
+        {
+          "value": "icon",
+          "label": "t:sections.theme_header.settings.bar_button_cart_type.options__1.label"
+        },
+        {
+          "value": "text",
+          "label": "t:sections.theme_header.settings.bar_button_cart_type.options__2.label"
+        }
+      ],
+      "default": "icon"
+    },
+    {
+      "type": "select",
+      "id": "bar_button_search_type",
+      "label": "t:sections.theme_header.settings.bar_button_search_type.label",
+      "options": [
+        {
+          "value": "icon",
+          "label": "t:sections.theme_header.settings.bar_button_search_type.options__1.label"
+        },
+        {
+          "value": "text",
+          "label": "t:sections.theme_header.settings.bar_button_search_type.options__2.label"
+        }
+      ],
+      "default": "icon"
+    },
+    {
+      "type": "select",
+      "id": "bar_button_login_type",
+      "label": "t:sections.theme_header.settings.bar_button_login_type.label",
+      "options": [
+        {
+          "value": "icon",
+          "label": "t:sections.theme_header.settings.bar_button_login_type.options__1.label"
+        },
+        {
+          "value": "text",
+          "label": "t:sections.theme_header.settings.bar_button_login_type.options__2.label"
+        },
+        {
+          "value": "none",
+          "label": "t:sections.theme_header.settings.bar_button_login_type.options__3.label"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "select",
+      "id": "bar_button_menu_type",
+      "label": "t:sections.theme_header.settings.bar_button_menu_type.label",
+      "info": "t:sections.theme_header.settings.bar_button_menu_type.info",
+      "options": [
+        {
+          "value": "icon",
+          "label": "t:sections.theme_header.settings.bar_button_menu_type.options__1.label"
+        },
+        {
+          "value": "text",
+          "label": "t:sections.theme_header.settings.bar_button_menu_type.options__2.label"
+        }
+      ],
+      "default": "icon"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_search",
+      "label": "t:sections.theme_header.settings.enable_search.label",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Transparent header (homepage)"
+    },
+    {
+      "type": "select",
+      "id": "transparent_text_color",
+      "label": "Text/icon color when transparent",
+      "options": [
+        { "value": "light", "label": "White (for dark hero images)" },
+        { "value": "dark", "label": "Dark (for light hero images)" }
+      ],
+      "default": "light",
+      "info": "Only applies on the homepage when the header is transparent"
+    },
+    { "type": "header", "content": "Nav typography" },
+    {
+      "type": "select",
+      "id": "nav_font_family",
+      "label": "Font family",
+      "options": [
+        { "value": "--type-font-body-family", "label": "Body (Forma)" },
+        { "value": "--type-font-header-family", "label": "Heading (PP Right Grotesk)" }
+      ],
+      "default": "--type-font-body-family"
+    },
+    {
+      "type": "range",
+      "id": "nav_font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "nav_font_weight",
+      "label": "Font weight",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "nav_letter_spacing",
+      "label": "Letter spacing",
+      "options": [
+        { "value": "0em", "label": "None" },
+        { "value": "0.02em", "label": "Tight" },
+        { "value": "0.05em", "label": "Normal" },
+        { "value": "0.08em", "label": "Wide" },
+        { "value": "0.12em", "label": "Wider" },
+        { "value": "0.16em", "label": "Widest" },
+        { "value": "0.2em", "label": "Extra Wide" },
+        { "value": "0.25em", "label": "Ultra Wide" },
+        { "value": "0.3em", "label": "Max Wide" }
+      ],
+      "default": "0.08em"
+    },
+    {
+      "type": "select",
+      "id": "nav_text_transform",
+      "label": "Text case",
+      "options": [
+        { "value": "none", "label": "Normal" },
+        { "value": "uppercase", "label": "UPPERCASE" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "color",
+      "id": "nav_text_color",
+      "label": "Text color"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__18.content"
+    },
+    {
+      "type": "select",
+      "id": "dropdown_color_scheme",
+      "label": "t:sections.all.colors.settings.color_scheme.label",
+      "options": [
+        {
+          "value": "color__bg-body color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value": "color__bg-neutral color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value": "color__bg-overlay-1 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value": "color__bg-overlay-2 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value": "color__bg-overlay-3 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value": "color__bg-primary color__primary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value": "color__bg-secondary color__secondary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value":"color__bg-tertiary color__tertiary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default": "color__bg-body color__text"
+    },
+    {
+      "type": "select",
+      "id": "dropdown_color_border",
+      "label": "t:sections.all.colors.settings.color_border.label",
+      "options": [
+        {
+          "value": "color__border-divider-1",
+          "label": "t:sections.all.colors.settings.color_border.options__1.label"
+        },
+        {
+          "value": "color__border-selected-1",
+          "label": "t:sections.all.colors.settings.color_border.options__2.label"
+        },
+        {
+          "value": "!color__border-transparent",
+          "label": "t:sections.all.colors.settings.color_border.options__3.label"
+        }
+      ],
+      "default": "color__border-divider-1"
+    },
+    { "type": "header", "content": "Mega menu - Layout" },
+    {
+      "type": "paragraph",
+      "content": "Settings below shape every mega-menu dropdown panel. Add blocks (Menu links, Product feed, Featured product, Image link, Rich text) below to populate panels — each block attaches to a top-level nav link by title."
+    },
+    {
+      "type": "range",
+      "id": "mega_menu_columns_max",
+      "label": "Columns (1-4)",
+      "min": 1, "max": 4, "step": 1,
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "mega_menu_max_width",
+      "label": "Container max width",
+      "options": [
+        { "value": "100%",    "label": "Full bleed" },
+        { "value": "1200px",  "label": "1200 px" },
+        { "value": "1440px",  "label": "1440 px" },
+        { "value": "1600px",  "label": "1600 px" },
+        { "value": "1920px",  "label": "1920 px" }
+      ],
+      "default": "1600px"
+    },
+    {
+      "type": "range",
+      "id": "mega_menu_pad_top",
+      "label": "Padding top",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "mega_menu_pad_right",
+      "label": "Padding right",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "mega_menu_pad_bottom",
+      "label": "Padding bottom",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "mega_menu_pad_left",
+      "label": "Padding left",
+      "min": 0, "max": 120, "step": 4, "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "mega_menu_col_gap",
+      "label": "Column gap",
+      "min": 0, "max": 80, "step": 2, "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "mega_menu_row_gap",
+      "label": "Row gap",
+      "min": 0, "max": 80, "step": 2, "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "mega_menu_valign",
+      "label": "Vertical alignment",
+      "options": [
+        { "value": "start",   "label": "Top" },
+        { "value": "center",  "label": "Center" },
+        { "value": "stretch", "label": "Stretch" }
+      ],
+      "default": "stretch"
+    },
+    {
+      "type": "checkbox",
+      "id": "mega_menu_fallback_links",
+      "label": "Auto-render sub-menu links when no blocks attached",
+      "info": "When a top-level nav link has no blocks, fall back to a simple list of its children so existing menus still work.",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__19.content"
+    },
+    {
+      "type": "select",
+      "id": "search_color_scheme",
+      "label": "t:sections.all.colors.settings.color_scheme.label",
+      "options": [
+        {
+          "value": "color__bg-body color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value": "color__bg-neutral color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value": "color__bg-overlay-1 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value": "color__bg-overlay-2 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value": "color__bg-overlay-3 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value": "color__bg-primary color__primary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value": "color__bg-secondary color__secondary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value":"color__bg-tertiary color__tertiary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default": "color__bg-body color__text"
+    },
+    {
+      "type": "select",
+      "id": "search_color_border",
+      "label": "t:sections.all.colors.settings.color_border.label",
+      "options": [
+        {
+          "value": "color__border-divider-1",
+          "label": "t:sections.all.colors.settings.color_border.options__1.label"
+        },
+        {
+          "value": "!color__border-transparent",
+          "label": "t:sections.all.colors.settings.color_border.options__3.label"
+        }
+      ],
+      "default": "color__border-divider-1"
+    },
+    { "type": "header", "content": "Search bar typography & colors" },
+    { "type": "paragraph", "content": "Applies to both the mobile and desktop search inputs." },
+    {
+      "type": "select", "id": "search_font_family", "label": "Font family",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "nav", "label": "Nav" },
+        { "value": "handwritten", "label": "Handwritten" }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "select", "id": "search_font_weight", "label": "Font weight",
+      "options": [
+        { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }, { "value": "800", "label": "Extra-bold" },
+        { "value": "900", "label": "Black" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select", "id": "search_font_case", "label": "Letter case",
+      "options": [
+        { "value": "none", "label": "Normal" },
+        { "value": "uppercase", "label": "UPPERCASE" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range", "id": "search_font_size", "label": "Font size (px)",
+      "min": 12, "max": 22, "step": 1, "default": 14
+    },
+    {
+      "type": "select", "id": "search_letter_spacing", "label": "Letter spacing",
+      "options": [
+        { "value": "0em", "label": "None" },
+        { "value": "0.04em", "label": "Tight" },
+        { "value": "0.08em", "label": "Normal" },
+        { "value": "0.12em", "label": "Wide" },
+        { "value": "0.16em", "label": "Extra wide" }
+      ],
+      "default": "0em"
+    },
+    { "type": "color", "id": "search_input_bg", "label": "Input background", "default": "#ffffff" },
+    { "type": "color", "id": "search_input_text_color", "label": "Input text color", "default": "#1a1a1a" },
+    { "type": "color", "id": "search_input_border_color", "label": "Input border color", "default": "#cccccc" },
+    { "type": "color", "id": "search_placeholder_color", "label": "Placeholder text color", "default": "#888888" },
+    { "type": "color", "id": "search_icon_color", "label": "Icon color (magnifier + close X)", "default": "#1a1a1a" },
+    { "type": "header", "content": "Search results typography" },
+    { "type": "paragraph", "content": "Applies to the dropdown below the search input — suggestion links, section labels, and product result cards (title, type/vendor, price). Both mobile and desktop." },
+    {
+      "type": "select", "id": "search_results_font_family", "label": "Font family",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "nav", "label": "Nav" },
+        { "value": "handwritten", "label": "Handwritten" }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "select", "id": "search_results_font_weight", "label": "Font weight",
+      "options": [
+        { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }, { "value": "800", "label": "Extra-bold" },
+        { "value": "900", "label": "Black" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select", "id": "search_results_font_case", "label": "Letter case",
+      "options": [
+        { "value": "none", "label": "Normal" },
+        { "value": "uppercase", "label": "UPPERCASE" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "select", "id": "search_results_letter_spacing", "label": "Letter spacing",
+      "options": [
+        { "value": "0em", "label": "None" },
+        { "value": "0.04em", "label": "Tight" },
+        { "value": "0.08em", "label": "Normal" },
+        { "value": "0.12em", "label": "Wide" },
+        { "value": "0.16em", "label": "Extra wide" }
+      ],
+      "default": "0em"
+    },
+    { "type": "range", "id": "search_results_text_size",  "label": "Text size — links & labels (px)", "min": 10, "max": 20, "step": 1, "default": 14 },
+    { "type": "range", "id": "search_results_title_size", "label": "Product title size (px)",          "min": 10, "max": 24, "step": 1, "default": 15 },
+    {
+      "type": "select", "id": "search_results_title_weight", "label": "Product title weight",
+      "options": [
+        { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }, { "value": "800", "label": "Extra-bold" },
+        { "value": "900", "label": "Black" }
+      ],
+      "default": "500"
+    },
+    { "type": "range", "id": "search_results_meta_size",  "label": "Type / vendor / price size (px)",  "min": 9, "max": 18, "step": 1, "default": 12 },
+    { "type": "color", "id": "search_results_text_color", "label": "Text color", "info": "Leave blank to inherit from the theme." },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__8.content"
+    },
+    {
+      "type":"select",
+      "id":"visibility",
+      "label":"t:sections.all.visibility.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.visibility.options__1.label"
+        },
+        {
+          "value":"md:hidden",
+          "label":"t:sections.all.visibility.options__2.label"
+        },
+        {
+          "value":"hidden md:block",
+          "label":"t:sections.all.visibility.options__3.label"
+        }
+      ],
+      "default":""
+    }
+  ],
+  "max_blocks": 50,
+  "blocks": [
+    {
+      "type": "category_panel",
+      "name": "Mega menu — Category",
+      "limit": 50,
+      "settings": [
+        { "type": "header", "content": "Placement" },
+        { "type": "paragraph", "content": "Type the exact title of the top-level nav link this category should appear under (e.g. 'Wallets'). Case-insensitive." },
+        { "type": "text", "id": "parent_link_title", "label": "Attach to nav link (title)" },
+        { "type": "header", "content": "Sub-categories (left column)" },
+        { "type": "text", "id": "heading", "label": "Heading (optional)", "default": "Categories" },
+        { "type": "link_list", "id": "link_list", "label": "Sub-categories link list", "info": "Pick a Shopify menu (Online Store → Navigation) whose items become the sub-category list. Leave blank to auto-list the parent nav link's children." },
+        { "type": "header", "content": "Image (right column)" },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "image_alt", "label": "Image alt text" },
+        { "type": "url", "id": "image_url", "label": "Image link URL", "info": "Optional. Wraps the image in a clickable link." },
+        { "type": "header", "content": "Panel layout" },
+        { "type": "range", "id": "text_column_ratio", "label": "Text column width", "info": "Width of the left text column as a fraction of the right image column. 100 = same width, 50 = text half as wide as image, 200 = text twice as wide.", "min": 30, "max": 250, "step": 10, "default": 100 },
+
+        { "type": "header", "content": "Typography — Heading" },
+        {
+          "type": "select", "id": "heading_font", "label": "Font family",
+          "options": [
+            { "value": "inherit",     "label": "Theme default (Nav)" },
+            { "value": "body",        "label": "Forma DJR" },
+            { "value": "heading",     "label": "PP Right Grotesk" },
+            { "value": "handwritten", "label": "Thread Handwritten" }
+          ],
+          "default": "inherit"
+        },
+        { "type": "range", "id": "heading_size", "label": "Size", "min": 10, "max": 32, "step": 1, "unit": "px", "default": 14 },
+        {
+          "type": "select", "id": "heading_weight", "label": "Weight",
+          "options": [
+            { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+            { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" },
+            { "value": "700", "label": "Bold" }, { "value": "800", "label": "Extra-bold" },
+            { "value": "900", "label": "Black" }
+          ],
+          "default": "700"
+        },
+        {
+          "type": "select", "id": "heading_case", "label": "Case",
+          "options": [
+            { "value": "none",       "label": "Normal" },
+            { "value": "uppercase",  "label": "UPPERCASE" },
+            { "value": "capitalize", "label": "Capitalize" }
+          ],
+          "default": "none"
+        },
+        {
+          "type": "select", "id": "heading_ls", "label": "Letter spacing",
+          "options": [
+            { "value": "0em",    "label": "None" },
+            { "value": "0.02em", "label": "Tight" },
+            { "value": "0.05em", "label": "Normal" },
+            { "value": "0.08em", "label": "Wide" },
+            { "value": "0.2em",  "label": "Extra-wide" }
+          ],
+          "default": "0.02em"
+        },
+        { "type": "color", "id": "heading_color", "label": "Color", "info": "Leave blank to inherit." },
+
+        { "type": "header", "content": "Typography — Sub-categories" },
+        {
+          "type": "select", "id": "sublinks_font", "label": "Font family",
+          "options": [
+            { "value": "inherit",     "label": "Theme default (Body)" },
+            { "value": "body",        "label": "Forma DJR" },
+            { "value": "heading",     "label": "PP Right Grotesk" },
+            { "value": "handwritten", "label": "Thread Handwritten" }
+          ],
+          "default": "inherit"
+        },
+        { "type": "range", "id": "sublinks_size", "label": "Size", "min": 10, "max": 24, "step": 1, "unit": "px", "default": 15 },
+        {
+          "type": "select", "id": "sublinks_weight", "label": "Weight",
+          "options": [
+            { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+            { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" },
+            { "value": "700", "label": "Bold" }, { "value": "800", "label": "Extra-bold" },
+            { "value": "900", "label": "Black" }
+          ],
+          "default": "400"
+        },
+        {
+          "type": "select", "id": "sublinks_case", "label": "Case",
+          "options": [
+            { "value": "none",       "label": "Normal" },
+            { "value": "uppercase",  "label": "UPPERCASE" },
+            { "value": "capitalize", "label": "Capitalize" }
+          ],
+          "default": "none"
+        },
+        {
+          "type": "select", "id": "sublinks_ls", "label": "Letter spacing",
+          "options": [
+            { "value": "0em",    "label": "None" },
+            { "value": "0.02em", "label": "Tight" },
+            { "value": "0.05em", "label": "Normal" },
+            { "value": "0.08em", "label": "Wide" },
+            { "value": "0.2em",  "label": "Extra-wide" }
+          ],
+          "default": "0em"
+        },
+        { "type": "color", "id": "sublinks_color", "label": "Color", "info": "Leave blank to inherit." }
+      ]
+    },
+    {
+      "type": "menu_links",
+      "name": "Mega menu — Links column",
+      "limit": 50,
+      "settings": [
+        { "type": "header", "content": "Placement" },
+        { "type": "paragraph", "content": "Type the exact title of the top-level nav link this block should appear under (e.g. 'Wallets'). Case-insensitive." },
+        { "type": "text", "id": "parent_link_title", "label": "Attach to nav link (title)" },
+        { "type": "range", "id": "column_span", "label": "Column span", "min": 1, "max": 4, "step": 1, "default": 1 },
+        { "type": "header", "content": "Inner padding" },
+        { "type": "range", "id": "pad_top",    "label": "Top",    "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "range", "id": "pad_right",  "label": "Right",  "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "range", "id": "pad_bottom", "label": "Bottom", "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "range", "id": "pad_left",   "label": "Left",   "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "header", "content": "Content" },
+        { "type": "text", "id": "heading", "label": "Heading (optional)" },
+        { "type": "link_list", "id": "link_list", "label": "Link list (optional)", "info": "If empty, the children of the parent nav link are used." },
+        {
+          "type": "select", "id": "heading_size", "label": "Heading size",
+          "options": [
+            { "value": "small",  "label": "Small" },
+            { "value": "medium", "label": "Medium" },
+            { "value": "large",  "label": "Large" }
+          ],
+          "default": "medium"
+        },
+        {
+          "type": "select", "id": "text_align", "label": "Text alignment",
+          "options": [
+            { "value": "left",   "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right",  "label": "Right" }
+          ],
+          "default": "left"
+        }
+      ]
+    },
+    {
+      "type": "product_feed",
+      "name": "Mega menu — Product feed",
+      "limit": 50,
+      "settings": [
+        { "type": "header", "content": "Placement" },
+        { "type": "paragraph", "content": "Type the exact title of the top-level nav link this block should appear under (e.g. 'Wallets'). Case-insensitive." },
+        { "type": "text", "id": "parent_link_title", "label": "Attach to nav link (title)" },
+        { "type": "range", "id": "column_span", "label": "Column span", "min": 1, "max": 4, "step": 1, "default": 2 },
+        { "type": "header", "content": "Inner padding" },
+        { "type": "range", "id": "pad_top",    "label": "Top",    "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "range", "id": "pad_right",  "label": "Right",  "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "range", "id": "pad_bottom", "label": "Bottom", "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "range", "id": "pad_left",   "label": "Left",   "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "header", "content": "Content" },
+        { "type": "text", "id": "heading", "label": "Heading (optional)" },
+        { "type": "collection", "id": "collection", "label": "Collection" },
+        { "type": "range", "id": "product_count", "label": "Products shown", "min": 1, "max": 8, "step": 1, "default": 4 },
+        { "type": "range", "id": "inner_columns", "label": "Columns within block", "min": 1, "max": 4, "step": 1, "default": 2 },
+        { "type": "checkbox", "id": "show_shop_all", "label": "Show \"Shop all\" link", "default": true },
+        { "type": "text", "id": "shop_all_text", "label": "\"Shop all\" text", "default": "Shop all" },
+        { "type": "url", "id": "shop_all_url", "label": "\"Shop all\" URL (optional)", "info": "If empty, uses the collection's URL." }
+      ]
+    },
+    {
+      "type": "featured_product",
+      "name": "Mega menu — Featured",
+      "limit": 50,
+      "settings": [
+        { "type": "header", "content": "Placement" },
+        { "type": "paragraph", "content": "Type the exact title of the top-level nav link this block should appear under (e.g. 'Wallets'). Case-insensitive." },
+        { "type": "text", "id": "parent_link_title", "label": "Attach to nav link (title)" },
+        { "type": "range", "id": "column_span", "label": "Column span", "min": 1, "max": 4, "step": 1, "default": 1 },
+        { "type": "header", "content": "Inner padding" },
+        { "type": "range", "id": "pad_top",    "label": "Top",    "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "range", "id": "pad_right",  "label": "Right",  "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "range", "id": "pad_bottom", "label": "Bottom", "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "range", "id": "pad_left",   "label": "Left",   "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "header", "content": "Content" },
+        { "type": "text", "id": "heading", "label": "Heading (optional)" },
+        { "type": "product", "id": "product", "label": "Product" },
+        { "type": "checkbox", "id": "show_title",  "label": "Show product title", "default": true },
+        { "type": "checkbox", "id": "show_price",  "label": "Show price", "default": true },
+        { "type": "checkbox", "id": "show_button", "label": "Show button", "default": false },
+        { "type": "text", "id": "button_text", "label": "Button text", "default": "Shop now" },
+        { "type": "header", "content": "Image" },
+        {
+          "type": "select", "id": "image_aspect_ratio", "label": "Aspect ratio",
+          "options": [
+            { "value": "ratio_1_1",   "label": "1:1 Square" },
+            { "value": "ratio_4_5",   "label": "4:5 Portrait" },
+            { "value": "ratio_3_4",   "label": "3:4 Portrait" },
+            { "value": "ratio_3_2",   "label": "3:2 Landscape" },
+            { "value": "ratio_16_9",  "label": "16:9 Landscape" },
+            { "value": "ratio_auto",  "label": "Auto (image's own)" }
+          ],
+          "default": "ratio_1_1"
+        },
+        {
+          "type": "select", "id": "image_object_fit", "label": "Image fit",
+          "options": [
+            { "value": "cover",   "label": "Cover (fill, may crop)" },
+            { "value": "contain", "label": "Contain (no crop)" }
+          ],
+          "default": "cover"
+        },
+        { "type": "range", "id": "image_radius", "label": "Image corner radius", "min": 0, "max": 40, "step": 2, "unit": "px", "default": 0 }
+      ]
+    },
+    {
+      "type": "image_link",
+      "name": "Mega menu — Image link",
+      "limit": 50,
+      "settings": [
+        { "type": "header", "content": "Placement" },
+        { "type": "paragraph", "content": "Type the exact title of the top-level nav link this block should appear under (e.g. 'Wallets'). Case-insensitive." },
+        { "type": "text", "id": "parent_link_title", "label": "Attach to nav link (title)" },
+        { "type": "range", "id": "column_span", "label": "Column span", "min": 1, "max": 4, "step": 1, "default": 1 },
+        { "type": "header", "content": "Inner padding" },
+        { "type": "range", "id": "pad_top",    "label": "Top",    "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "range", "id": "pad_right",  "label": "Right",  "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "range", "id": "pad_bottom", "label": "Bottom", "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "range", "id": "pad_left",   "label": "Left",   "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "header", "content": "Content" },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "image_alt", "label": "Image alt text" },
+        { "type": "url",  "id": "url", "label": "Link URL" },
+        { "type": "text", "id": "heading", "label": "Heading (optional)" },
+        { "type": "text", "id": "caption", "label": "Caption (optional)" },
+        { "type": "text", "id": "button_text", "label": "Button text (optional)" },
+        {
+          "type": "select", "id": "text_position", "label": "Text position",
+          "options": [
+            { "value": "below",          "label": "Below image" },
+            { "value": "overlay-bottom", "label": "Overlay (bottom)" },
+            { "value": "overlay-center", "label": "Overlay (center)" }
+          ],
+          "default": "below"
+        },
+        { "type": "header", "content": "Image" },
+        {
+          "type": "select", "id": "image_aspect_ratio", "label": "Aspect ratio",
+          "options": [
+            { "value": "ratio_1_1",   "label": "1:1 Square" },
+            { "value": "ratio_4_5",   "label": "4:5 Portrait" },
+            { "value": "ratio_3_4",   "label": "3:4 Portrait" },
+            { "value": "ratio_3_2",   "label": "3:2 Landscape" },
+            { "value": "ratio_16_9",  "label": "16:9 Landscape" },
+            { "value": "ratio_auto",  "label": "Auto (image's own)" }
+          ],
+          "default": "ratio_4_5"
+        },
+        {
+          "type": "select", "id": "image_object_fit", "label": "Image fit",
+          "options": [
+            { "value": "cover",   "label": "Cover (fill, may crop)" },
+            { "value": "contain", "label": "Contain (no crop)" }
+          ],
+          "default": "cover"
+        },
+        { "type": "range", "id": "image_radius", "label": "Image corner radius", "min": 0, "max": 40, "step": 2, "unit": "px", "default": 0 }
+      ]
+    },
+    {
+      "type": "rich_text",
+      "name": "Mega menu — Rich text",
+      "limit": 50,
+      "settings": [
+        { "type": "header", "content": "Placement" },
+        { "type": "paragraph", "content": "Type the exact title of the top-level nav link this block should appear under (e.g. 'Wallets'). Case-insensitive." },
+        { "type": "text", "id": "parent_link_title", "label": "Attach to nav link (title)" },
+        { "type": "range", "id": "column_span", "label": "Column span", "min": 1, "max": 4, "step": 1, "default": 1 },
+        { "type": "header", "content": "Inner padding" },
+        { "type": "range", "id": "pad_top",    "label": "Top",    "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "range", "id": "pad_right",  "label": "Right",  "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "range", "id": "pad_bottom", "label": "Bottom", "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "range", "id": "pad_left",   "label": "Left",   "min": 0, "max": 80, "step": 2, "unit": "px", "default": 0 },
+        { "type": "header", "content": "Content" },
+        { "type": "text", "id": "heading", "label": "Heading (optional)" },
+        {
+          "type": "select", "id": "heading_size", "label": "Heading size",
+          "options": [
+            { "value": "small",  "label": "Small" },
+            { "value": "medium", "label": "Medium" },
+            { "value": "large",  "label": "Large" }
+          ],
+          "default": "medium"
+        },
+        { "type": "richtext", "id": "content", "label": "Content" },
+        {
+          "type": "select", "id": "text_align", "label": "Text alignment",
+          "options": [
+            { "value": "left",   "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right",  "label": "Right" }
+          ],
+          "default": "left"
+        }
+      ]
+    },
+    {
+      "type": "Content",
+      "name": "Legacy (do not use)",
+      "limit": 10,
+      "settings": [
+        { "type": "paragraph", "content": "This block type is kept only so legacy data isn't orphaned. The new mega-menu blocks above replace it. Recreate any content here as one of the Mega menu — * blocks above, then delete this." },
+        { "type": "text",        "id": "menu",    "label": "Menu" },
+        { "type": "url",         "id": "url",     "label": "URL" },
+        { "type": "text",        "id": "heading", "label": "Heading" },
+        { "type": "richtext",    "id": "content", "label": "Content" },
+        { "type": "image_picker","id": "image",   "label": "Image" }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["custom.overlay"]
+  }
+}
+{% endschema %}

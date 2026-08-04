@@ -1,0 +1,719 @@
+<!-- sections/collection__main.liquid -->
+{% comment %}
+  Main contents of the collection template
+
+  Globals:
+    - settings.layout_horizontal: horizontaly margin
+
+  Possible enhancements:
+    - Add support for global setting to control grid gap.
+    - Add setting so blocks can be set to width of two blocks.
+    - Add new block to support SMS opt-in.
+
+  Pro tips:
+    - Use blocks to showcase promotional content.
+{% endcomment %}
+
+{%- assign _grid_cg_m = section.settings.grid_col_gap_mobile  | default: 8 -%}
+{%- assign _grid_rg_m = section.settings.grid_row_gap_mobile  | default: 12 -%}
+{%- assign _grid_cg_d = section.settings.grid_col_gap_desktop | default: 8 -%}
+{%- assign _grid_rg_d = section.settings.grid_row_gap_desktop | default: 12 -%}
+
+<style>
+  #shopify-section-{{ section.id }},
+  #shopify-section-{{ section.id }} > *,
+  #shopify-section-{{ section.id }} section,
+  #shopify-section-{{ section.id }} div {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  #js\:results {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    column-gap: {{ _grid_cg_m }}px !important;
+    row-gap: {{ _grid_rg_m }}px !important;
+    grid-auto-flow: dense;
+  }
+  @media (min-width: 768px) {
+    #js\:results {
+      column-gap: {{ _grid_cg_d }}px !important;
+      row-gap: {{ _grid_rg_d }}px !important;
+    }
+  }
+
+  /* Product + lifestyle pair — every Nth product is wrapped in a
+     .cs-pair that spans 2 outer-grid columns, with the product card
+     on the left and a card-sized lifestyle tile (the product's own
+     3rd image) on the right. Guarantees same-row pairing on mobile
+     and desktop. grid-auto-flow: dense on the outer grid backfills
+     any gap from boundary-case wrapping on wider viewports. */
+  #shopify-section-{{ section.id }} .cs-pair {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: {{ _grid_cg_m }}px;
+    row-gap: {{ _grid_rg_m }}px;
+  }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .cs-pair {
+      column-gap: {{ _grid_cg_d }}px;
+      row-gap: {{ _grid_rg_d }}px;
+    }
+  }
+  #shopify-section-{{ section.id }} .cs-pair__lifestyle {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.04);
+    width: 100%;
+  }
+  #shopify-section-{{ section.id }} .cs-pair__lifestyle-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+</style>
+<section id="js:top" class="{{ section.settings.color_scheme }}">
+  <div>
+    {% render 'collection__sublinks' %}
+    {% render 'collection__subtags' %}
+    <div
+      x-ref="destop_filter"
+      x-data="
+        {
+          sort_by : ['{{ sort_by }}'],
+          height: 0
+        }
+      "
+      {% if settings.header_position == 'sticky' %}
+        x-init="
+          height = $refs.header.offsetHeight;
+          $refs.destop_filter.style.top = height + 'px';
+        "
+      {% endif %}
+    >
+      {% render 'component__collection-filter' %}
+    </div>
+
+    {% paginate collection.products by section.settings.products_per_page %}
+      {%- unless collection.title == blank %}
+        {% comment %} <h1 class="text-center mt-12 mb-0 type--big">{{ collection.title }}</h1> {% endcomment %}
+      {%- endunless -%}
+      <section
+        id="js:results"
+        class="
+          grid animation-500 py-4
+          {{ section.settings.row_size_desktop }}
+          {{ section.settings.row_size_mobile }}
+        "
+        :class="
+          {
+          'opacity-25' : pagination_loading }
+        "
+        style="
+          padding-left: 8px !important; padding-right: 8px !important; max-width: 100% !important; margin: 0 !important;
+        "
+      >
+        {% for product in collection.products %}
+          {% assign gridIndex = forloop.index %}
+          {% if paginate.current_page == 1 %}
+            {% for block in section.blocks %}
+              {%- case block.type -%}
+                {%- when 'newsletter' -%}
+                  {% if block.settings.index == gridIndex %}
+                    {% render 'component__newsletter-item',
+                      title: block.settings.heading,
+                      content: block.settings.content,
+                      button_label: block.settings.button_label,
+                      disclaimer: block.settings.disclaimer,
+                      success: block.settings.success,
+                      size_desktop: block.settings.column_size,
+                      background_image: block.settings.image_background,
+                      background_color: block.settings.background_color_scheme,
+                      index: gridIndex
+                    %}
+                  {% endif %}
+
+                {%- when 'content' -%}
+                  {% if block.settings.index == gridIndex %}
+                    {% render 'component__content-item',
+                      url: block.settings.url,
+                      title: block.settings.heading,
+                      content: block.settings.content,
+                      button_label: block.settings.button_label,
+                      size_desktop: block.settings.column_size,
+                      background_image: block.settings.image_background,
+                      background_color: block.settings.background_color_scheme,
+                      video: block.settings.video,
+                      autoplay: block.settings.enable_autoplay,
+                      mute: block.settings.enable_mute_toggle,
+                      loop: block.settings.enable_loop,
+                      index: gridIndex
+                    %}
+                  {% endif %}
+              {%- endcase -%}
+            {% endfor %}
+          {% endif %}
+
+          {%- comment -%}
+            Product + lifestyle pair — wraps every Nth product in a
+            span-2 grid item with the product card on the left and a
+            card-sized lifestyle tile (the product's own 3rd image)
+            on the right. Skipped when the product has fewer than 3
+            images, when display_mode is 'variants', or when the
+            feature is toggled off.
+          {%- endcomment -%}
+          {%- assign _cs_show_pair = false -%}
+          {%- if section.settings.show_lifestyle_tiles and section.settings.display_mode != 'variants' and product.images.size >= 3 -%}
+            {%- assign _cs_pair_interval = section.settings.lifestyle_tile_interval | default: 6 -%}
+            {%- assign _cs_pair_mod = forloop.index | modulo: _cs_pair_interval -%}
+            {%- if _cs_pair_mod == 0 -%}
+              {%- assign _cs_show_pair = true -%}
+              {%- assign _cs_lifestyle = product.images[2] -%}
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- if _cs_show_pair -%}
+            <div class="cs-pair">
+              <div class="cs-pair__product">
+                {% render 'component__product-item', product: product, source: 'col_main' %}
+              </div>
+              <a class="cs-pair__lifestyle {{ settings.thumbnails_ratio }}"
+                 href="{{ product.url }}"
+                 aria-label="{{ product.title | escape }}">
+                <img class="cs-pair__lifestyle-img"
+                     src="{{ _cs_lifestyle | image_url: width: 800 }}"
+                     srcset="{{ _cs_lifestyle | image_url: width: 400 }} 400w, {{ _cs_lifestyle | image_url: width: 600 }} 600w, {{ _cs_lifestyle | image_url: width: 900 }} 900w"
+                     sizes="(min-width: 768px) 25vw, 50vw"
+                     alt="{{ _cs_lifestyle.alt | default: product.title | escape }}"
+                     loading="lazy"
+                     width="{{ _cs_lifestyle.width }}"
+                     height="{{ _cs_lifestyle.height }}">
+              </a>
+            </div>
+          {%- elsif section.settings.display_mode == 'variants' and product.has_only_default_variant == false -%}
+            {%- for variant in product.variants -%}
+              {% render 'component__variant-item', product: product, variant: variant, source: 'col_main' %}
+            {%- endfor -%}
+          {%- else -%}
+            {% render 'component__product-item', product: product, source: 'col_main' %}
+          {%- endif -%}
+        {% endfor %}
+      </section>
+
+      {% if collection.all_products_count == 0 %}
+        <section class="py-4 text-center">
+          <span>{{ 'collections.general.no_matches' | t }}</span>
+        </section>
+      {% else %}
+        {% render 'component__pagination', paginate: paginate %}
+      {% endif %}
+
+      {% render 'script__swatches' %}
+    {% endpaginate %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:sections.collection_main.name",
+  "settings": [
+    { "type": "header", "content": "Display mode" },
+    { "type": "paragraph", "content": "Products mode renders one card per master product (silhouette-level). Variants mode renders one card per variant of each product — useful for color-broken-out collection pages like 'Vertical Leather Wallets'." },
+    {
+      "type": "select",
+      "id": "display_mode",
+      "label": "Grid display mode",
+      "options": [
+        { "value": "products", "label": "Products (one card per product)" },
+        { "value": "variants", "label": "Variants (one card per variant)" }
+      ],
+      "default": "products"
+    },
+
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__1.content"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.settings.color_scheme.label",
+      "options": [
+        {
+          "value": "color__bg-body color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value": "color__bg-neutral color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value": "color__bg-overlay-1 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value": "color__bg-overlay-2 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value": "color__bg-overlay-3 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value": "color__bg-primary color__primary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value": "color__bg-secondary color__secondary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value": "color__bg-tertiary color__tertiary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default": "color__bg-body color__text"
+    },
+    {
+      "type": "select",
+      "id": "color_border",
+      "label": "t:sections.all.colors.settings.color_border.label",
+      "options": [
+        {
+          "value": "color__border-divider-1",
+          "label": "t:sections.all.colors.settings.color_border.options__1.label"
+        },
+        {
+          "value": "color__border-selected-1",
+          "label": "t:sections.all.colors.settings.color_border.options__2.label"
+        },
+        {
+          "value": "!color__border-transparent",
+          "label": "t:sections.all.colors.settings.color_border.options__3.label"
+        }
+      ],
+      "default": "color__border-divider-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__3.content"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:sections.all.layout.paragraph__1.content"
+    },
+    {
+      "type": "select",
+      "id": "row_size_desktop",
+      "label": "t:sections.collection_main.settings.row_size_desktop.label",
+      "options": [
+        {
+          "value": "md:grid-cols-2",
+          "label": "2"
+        },
+        {
+          "value": "md:grid-cols-3",
+          "label": "3"
+        },
+        {
+          "value": "md:grid-cols-4",
+          "label": "4"
+        },
+        {
+          "value": "md:grid-cols-5",
+          "label": "5"
+        },
+        {
+          "value": "md:grid-cols-6",
+          "label": "6"
+        }
+      ],
+      "default": "md:grid-cols-4"
+    },
+    {
+      "type": "select",
+      "id": "row_size_mobile",
+      "label": "t:sections.collection_main.settings.row_size_mobile.label",
+      "options": [
+        {
+          "value": "grid-cols-1",
+          "label": "1"
+        },
+        {
+          "value": "grid-cols-2",
+          "label": "2"
+        },
+        {
+          "value": "grid-cols-3",
+          "label": "3"
+        }
+      ],
+      "default": "grid-cols-2"
+    },
+    { "type": "header", "content": "Grid spacing — Mobile" },
+    { "type": "range", "id": "grid_col_gap_mobile",  "label": "Column gap",  "min": 0, "max": 48, "step": 1, "unit": "px", "default": 8 },
+    { "type": "range", "id": "grid_row_gap_mobile",  "label": "Row gap",     "min": 0, "max": 80, "step": 1, "unit": "px", "default": 12 },
+    { "type": "header", "content": "Grid spacing — Desktop" },
+    { "type": "range", "id": "grid_col_gap_desktop", "label": "Column gap", "min": 0, "max": 48, "step": 1, "unit": "px", "default": 8 },
+    { "type": "range", "id": "grid_row_gap_desktop", "label": "Row gap",    "min": 0, "max": 80, "step": 1, "unit": "px", "default": 12 },
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__8.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sort",
+      "label": "t:sections.collection_main.settings.enable_sort.label",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_filter",
+      "label": "t:sections.collection_main.settings.enable_filter.label",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__5.content"
+    },
+    {
+      "type": "number",
+      "id": "products_per_page",
+      "label": "t:sections.collection_main.settings.products_per_page.label",
+      "default": 12
+    },
+
+    {
+      "type": "header",
+      "content": "Product lifestyle tiles",
+      "info": "Drops a card-sized lifestyle tile next to every Nth product card, using that product's own 3rd image. The pair sits side-by-side on the same row on mobile and desktop. Skipped automatically when the source product has fewer than 3 images."
+    },
+    { "type": "checkbox", "id": "show_lifestyle_tiles", "label": "Show product lifestyle tiles", "default": false },
+    { "type": "range", "id": "lifestyle_tile_interval", "label": "Show a tile next to every Nth product", "min": 3, "max": 12, "step": 1, "default": 6 }
+  ],
+  "blocks": [
+    {
+      "type": "newsletter",
+      "name": "t:sections.collection_main.blocks.newsletter.name",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__4.content"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_background",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.image_background.label"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.heading.label",
+          "default": {
+            "en": "Block heading",
+            "es": "Encabezado de bloque",
+            "it": "Intestazione del blocco",
+            "de": "Blocküberschrift",
+            "fr": "En-tête de bloc"
+          }
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.content.label",
+          "default": {
+            "en": "<p>Tell customers why they should subscribe to your newsletter.</p>",
+            "es": "<p>Dígales a los clientes por qué deberían suscribirse a su boletín informativo.</p>",
+            "it": "<p>Dì ai clienti perché dovrebbero iscriversi alla tua newsletter.</p>",
+            "de": "<p>Teilen Sie Ihren Kunden mit, warum sie Ihren Newsletter abonnieren sollten.</p>",
+            "fr": "<p>Expliquez aux clients pourquoi ils devraient s’abonner à votre newsletter.</p>"
+          }
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.button_label.label",
+          "default": {
+            "en": "Subscribe",
+            "es": "Subscribir",
+            "it": "Abbonarsi",
+            "de": "Abonnieren",
+            "fr": "S’inscrire"
+          }
+        },
+        {
+          "type": "richtext",
+          "id": "disclaimer",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.disclaimer.label"
+        },
+        {
+          "type": "richtext",
+          "id": "success",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.success.label",
+          "default": {
+            "en": "<p>Success! You’ve been subscribed.</p>",
+            "es": "<p>Gracias por suscribirte</p>",
+            "it": "<p>Grazie per esserti iscritto</p>",
+            "de": "<p>Vielen Dank für Ihre Anmeldung</p>",
+            "fr": "<p>Merci de vous être abonné</p>"
+          }
+        },
+        {
+          "type": "paragraph",
+          "content": "t:sections.collection_main.paragraph__1.content"
+        },
+        {
+          "type": "number",
+          "id": "index",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.index.label",
+          "default": 6
+        },
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__1.content"
+        },
+        {
+          "type": "select",
+          "id": "background_color_scheme",
+          "label": "t:sections.all.colors.settings.color_scheme.label",
+          "options": [
+            {
+              "value": "color__bg-body color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__1.label"
+            },
+            {
+              "value": "color__bg-neutral color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__2.label"
+            },
+            {
+              "value": "color__bg-overlay-1 color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__3.label"
+            },
+            {
+              "value": "color__bg-overlay-2 color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__4.label"
+            },
+            {
+              "value": "color__bg-overlay-3 color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__5.label"
+            },
+            {
+              "value": "color__bg-primary color__primary",
+              "label": "t:sections.all.colors.settings.color_scheme.options__6.label"
+            },
+            {
+              "value": "color__bg-secondary color__secondary",
+              "label": "t:sections.all.colors.settings.color_scheme.options__7.label"
+            }
+          ],
+          "default": "color__bg-body color__text"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__3.content"
+        },
+        {
+          "type": "select",
+          "id": "column_size",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.column_size.label",
+          "info": "t:sections.collection_main.blocks.newsletter.settings.column_size.info",
+          "options": [
+            {
+              "value": "md:col-span-1",
+              "label": "1"
+            },
+            {
+              "value": "md:col-span-2",
+              "label": "2"
+            },
+            {
+              "value": "md:col-span-3",
+              "label": "3"
+            },
+            {
+              "value": "md:col-span-4",
+              "label": "4"
+            }
+          ],
+          "default": "md:col-span-2"
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "name": "t:sections.collection_main.blocks.content.name",
+      "limit": 15,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "t:sections.collection_main.paragraph__1.content"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__4.content",
+          "info": "t:sections.all.content.info"
+        },
+        {
+          "type": "video",
+          "id": "video",
+          "label": "t:sections.all.content.settings.video.label"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_autoplay",
+          "label": "Enable autoplay",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_mute_toggle",
+          "label": "Enable mute button",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_loop",
+          "label": "Enable autoloop",
+          "default": true
+        },
+        {
+          "type": "image_picker",
+          "id": "image_background",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.image_background.label"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "t:sections.collection_main.blocks.content.settings.url.label"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "t:sections.collection_main.blocks.content.settings.heading.label",
+          "default": {
+            "en": "Block heading",
+            "es": "Encabezado de bloque",
+            "it": "Intestazione del blocco",
+            "de": "Blocküberschrift",
+            "fr": "En-tête de bloc"
+          }
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "t:sections.collection_main.blocks.content.settings.content.label",
+          "default": {
+            "en": "<p>Describe a product, make announcements, or inform customers about a promotion.</p>",
+            "es": "<p>Describa un producto, haga anuncios o informe a los clientes sobre una promoción.</p>",
+            "it": "<p>Descrivi un prodotto, fai annunci o informa i clienti su una promozione.</p>",
+            "de": "<p>Beschreiben Sie ein Produkt, machen Sie Ankündigungen oder informieren Sie Kunden über eine Werbeaktion.</p>",
+            "fr": "<p>Décrivez un produit, faites des annonces ou informez les clients d’une promotion.</p>"
+          }
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "t:sections.collection_main.blocks.content.settings.button_label.label",
+          "default": {
+            "en": "Button",
+            "es": "Botón",
+            "it": "Bottone",
+            "de": "Knopf",
+            "fr": "Bouton"
+          }
+        },
+        {
+          "type": "number",
+          "id": "index",
+          "label": "t:sections.collection_main.blocks.content.settings.index.label",
+          "default": 2
+        },
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__1.content"
+        },
+        {
+          "type": "select",
+          "id": "background_color_scheme",
+          "label": "t:sections.all.colors.settings.color_scheme.label",
+          "options": [
+            {
+              "value": "color__bg-body color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__1.label"
+            },
+            {
+              "value": "color__bg-neutral color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__2.label"
+            },
+            {
+              "value": "color__bg-overlay-1 color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__3.label"
+            },
+            {
+              "value": "color__bg-overlay-2 color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__4.label"
+            },
+            {
+              "value": "color__bg-overlay-3 color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__5.label"
+            },
+            {
+              "value": "color__bg-primary color__primary",
+              "label": "t:sections.all.colors.settings.color_scheme.options__6.label"
+            },
+            {
+              "value": "color__bg-secondary color__secondary",
+              "label": "t:sections.all.colors.settings.color_scheme.options__7.label"
+            }
+          ],
+          "default": "color__bg-body color__text"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__3.content"
+        },
+        {
+          "type": "select",
+          "id": "column_size",
+          "label": "t:sections.collection_main.blocks.newsletter.settings.column_size.label",
+          "info": "t:sections.collection_main.blocks.newsletter.settings.column_size.info",
+          "options": [
+            {
+              "value": "col-span-1",
+              "label": "1"
+            },
+            {
+              "value": "col-span-2",
+              "label": "2"
+            },
+            {
+              "value": "col-span-3",
+              "label": "3"
+            },
+            {
+              "value": "col-span-4",
+              "label": "4"
+            }
+          ],
+          "default": "col-span-1"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.collection_main.name"
+    }
+  ],
+  "templates": ["collection"]
+}
+{% endschema %}

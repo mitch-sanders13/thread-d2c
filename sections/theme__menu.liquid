@@ -1,0 +1,1168 @@
+<!-- sections/theme__menu.liquid -->
+{% comment %}
+  Slide out menu for mobile visitors.
+
+  Two rendering modes:
+    1) BLOCK MODE (Mugsy-style) — active when the section has at least one
+       `category` block. Each Category is an accordion containing every
+       `submenu_item` block whose `parent_category` matches the category
+       title. Per-block image picker + URL + label. Per-category layout
+       (1-col rows w/ thumbnail-left vs. 2-col grid). Per-category
+       "Shop All" CTA in a distinct color.
+    2) LEGACY LINK_LIST MODE — used when no category blocks exist; renders
+       from the Shopify Navigation link list at `main_links` (the old
+       behavior). Lets merchants keep the existing menu until they migrate
+       to blocks.
+
+  Globals:
+    - settings.enable_region: boolean to enable/disable the region selector
+    - settings.enable_language: boolean to enable/disable the language selector
+    - settings.type_seperator: setting to pick the type of seperator between text
+{% endcomment %}
+
+{%- comment -%}
+  CSS-variable driven typography + spacing for the whole drawer.
+  Same scoped `#shopify-section-{{ section.id }}` selector pattern as the
+  rest of the theme. The variables let one rule serve both block mode and
+  legacy mode without duplication, and overriding .type__nav inside the
+  scope is necessary because the theme-wide rule (assets/styles-...css
+  ~line 3093) bakes uppercase + a specific font-family in.
+{%- endcomment -%}
+{%- assign tm_font_family_var = '--type-font-body-family' -%}
+{%- case section.settings.menu_font_family -%}
+  {%- when 'heading' -%}{%- assign tm_font_family_var = '--type-font-header-family' -%}
+  {%- when 'nav' -%}{%- assign tm_font_family_var = '--type-font-nav-family' -%}
+  {%- when 'handwritten' -%}{%- assign tm_font_family_var = '--type-font-handwritten-family' -%}
+{%- endcase -%}
+
+{%- assign tm_service_font_var = '--type-font-body-family' -%}
+{%- case section.settings.service_font_family -%}
+  {%- when 'heading' -%}{%- assign tm_service_font_var = '--type-font-header-family' -%}
+  {%- when 'nav' -%}{%- assign tm_service_font_var = '--type-font-nav-family' -%}
+  {%- when 'handwritten' -%}{%- assign tm_service_font_var = '--type-font-handwritten-family' -%}
+{%- endcase -%}
+
+{%- assign tm_topbar_font_var = '--type-font-body-family' -%}
+{%- case section.settings.top_search_font_family -%}
+  {%- when 'heading' -%}{%- assign tm_topbar_font_var = '--type-font-header-family' -%}
+  {%- when 'nav' -%}{%- assign tm_topbar_font_var = '--type-font-nav-family' -%}
+  {%- when 'handwritten' -%}{%- assign tm_topbar_font_var = '--type-font-handwritten-family' -%}
+{%- endcase -%}
+
+<style>
+  /* Featured image button overlay — merchant picks a position via
+   * the feature_btn_position select. Each modifier class places the
+   * .tm-feature__btn-wrap absolute box on the image; the existing
+   * bottom_full default reproduces the previous "full-width strip"
+   * behaviour so old configs don't visually change. */
+  #shopify-section-{{ section.id }} .tm-feature {
+    overflow: hidden;
+    border-radius: {{ section.settings.feature_radius | default: 0 }}px;
+  }
+  #shopify-section-{{ section.id }} .tm-feature__img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+  #shopify-section-{{ section.id }} .tm-feature__btn-wrap {
+    position: absolute;
+    display: inline-flex;
+    z-index: 2;
+    pointer-events: none; /* outer <a> handles the click */
+  }
+  #shopify-section-{{ section.id }} .tm-feature__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Corner / edge positions — 12px inset from the relevant edges. */
+  #shopify-section-{{ section.id }} .tm-feature--top_left      .tm-feature__btn-wrap { top: 12px; left: 12px; }
+  #shopify-section-{{ section.id }} .tm-feature--top_center    .tm-feature__btn-wrap { top: 12px; left: 50%; transform: translateX(-50%); }
+  #shopify-section-{{ section.id }} .tm-feature--top_right     .tm-feature__btn-wrap { top: 12px; right: 12px; }
+  #shopify-section-{{ section.id }} .tm-feature--middle_left   .tm-feature__btn-wrap { top: 50%; left: 12px; transform: translateY(-50%); }
+  #shopify-section-{{ section.id }} .tm-feature--middle_center .tm-feature__btn-wrap { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+  #shopify-section-{{ section.id }} .tm-feature--middle_right  .tm-feature__btn-wrap { top: 50%; right: 12px; transform: translateY(-50%); }
+  #shopify-section-{{ section.id }} .tm-feature--bottom_left   .tm-feature__btn-wrap { bottom: 12px; left: 12px; }
+  #shopify-section-{{ section.id }} .tm-feature--bottom_center .tm-feature__btn-wrap { bottom: 12px; left: 50%; transform: translateX(-50%); }
+  #shopify-section-{{ section.id }} .tm-feature--bottom_right  .tm-feature__btn-wrap { bottom: 12px; right: 12px; }
+
+  /* Legacy "full-width strip at the bottom" — back-compat default
+   * matching the previous hardcoded layout. */
+  #shopify-section-{{ section.id }} .tm-feature--bottom_full .tm-feature__btn-wrap {
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    display: flex;
+    background: #ffffff;
+  }
+  #shopify-section-{{ section.id }} .tm-feature--bottom_full .tm-feature__btn { width: 100%; }
+
+  /* Optional text-color override on the featured button. !important
+   * because the theme's btn variant rules in theme__styles.liquid
+   * declare color with !important too, so we have to win on
+   * specificity AND priority. Targets the span AND descendants so
+   * nested text nodes inherit the override. */
+  {%- if section.settings.feature_btn_color != blank -%}
+  #shopify-section-{{ section.id }} .tm-feature__btn,
+  #shopify-section-{{ section.id }} .tm-feature__btn * {
+    color: {{ section.settings.feature_btn_color }} !important;
+  }
+  {%- endif -%}
+
+  #shopify-section-{{ section.id }} {
+    --tm-font-family: var({{ tm_font_family_var }});
+    --tm-font-weight: {{ section.settings.menu_font_weight | default: '500' }};
+    --tm-font-case: {{ section.settings.menu_font_case | default: 'capitalize' }};
+    --tm-font-size: {{ section.settings.menu_font_size | default: 16 }}px;
+    --tm-letter-spacing: {{ section.settings.menu_letter_spacing | default: '0em' }};
+    --tm-image-size: {{ section.settings.menu_image_size | default: 48 }}px;
+    --tm-image-gap: {{ section.settings.menu_image_gap | default: 12 }}px;
+    --tm-row-pad-v: {{ section.settings.menu_row_padding_v | default: 14 }}px;
+    --tm-cat-row-pad-v: {{ section.settings.menu_cat_row_padding_v | default: 16 }}px;
+    --tm-section-pad-top: {{ section.settings.menu_section_pad_top | default: 0 }}px;
+    --tm-section-pad-bottom: {{ section.settings.menu_section_pad_bottom | default: 0 }}px;
+    --tm-shop-all-color: {{ section.settings.shop_all_color | default: 'var(--thread-blue)' }};
+    --tm-shop-all-weight: {{ section.settings.shop_all_font_weight | default: '700' }};
+    --tm-shop-all-case: {{ section.settings.shop_all_font_case | default: 'uppercase' }};
+    --tm-shop-all-ls: {{ section.settings.shop_all_letter_spacing | default: '0.08em' }};
+    --tm-shop-all-size: {{ section.settings.shop_all_font_size | default: 13 }}px;
+    --tm-svc-bg: {{ section.settings.service_bg_color | default: '#ede8e2' }};
+    --tm-svc-color: {{ section.settings.service_text_color | default: 'var(--thread-ink)' }};
+    --tm-svc-font: var({{ tm_service_font_var }});
+    --tm-svc-weight: {{ section.settings.service_font_weight | default: '700' }};
+    --tm-svc-case: {{ section.settings.service_font_case | default: 'uppercase' }};
+    --tm-svc-size: {{ section.settings.service_font_size | default: 13 }}px;
+    --tm-svc-ls: {{ section.settings.service_letter_spacing | default: '0.08em' }};
+    --tm-svc-pad-v: {{ section.settings.service_row_padding_v | default: 18 }}px;
+    --tm-svc-pad-top: {{ section.settings.service_pad_top | default: 24 }}px;
+    --tm-svc-pad-bottom: {{ section.settings.service_pad_bottom | default: 24 }}px;
+    --tm-topbar-bg: {{ section.settings.top_search_bg | default: 'transparent' }};
+    --tm-topbar-text: {{ section.settings.top_search_text_color | default: 'var(--thread-ink)' }};
+    --tm-topbar-icon: {{ section.settings.top_search_icon_color | default: 'var(--thread-ink)' }};
+    --tm-topbar-font: var({{ tm_topbar_font_var | default: '--type-font-body-family' }});
+    --tm-topbar-weight: {{ section.settings.top_search_font_weight | default: '500' }};
+    --tm-topbar-case: {{ section.settings.top_search_font_case | default: 'uppercase' }};
+    --tm-topbar-size: {{ section.settings.top_search_font_size | default: 13 }}px;
+    --tm-topbar-ls: {{ section.settings.top_search_letter_spacing | default: '0.08em' }};
+  }
+
+  /* Override theme-wide .type__nav uppercase + nav-family ONLY within
+     this section so the merchant's chosen font/weight/case apply to
+     accordion button labels and legacy link_list rows. */
+  #shopify-section-{{ section.id }} .tm-nav .type__nav {
+    font-family: var(--tm-font-family) !important;
+    font-size: var(--tm-font-size) !important;
+    font-weight: var(--tm-font-weight) !important;
+    text-transform: var(--tm-font-case) !important;
+    letter-spacing: var(--tm-letter-spacing) !important;
+  }
+  #shopify-section-{{ section.id }} .tm-nav a.capitalize {
+    text-transform: var(--tm-font-case) !important;
+  }
+
+  /* Whole main menu section padding so merchant can space it from the
+     Customer service section below. */
+  #shopify-section-{{ section.id }} .tm-nav {
+    padding-top: var(--tm-section-pad-top);
+    padding-bottom: var(--tm-section-pad-bottom);
+    /* Don't let the flex algorithm shrink the nav to share vertical
+       space with .tm-service. When a category accordion expands and
+       total content exceeds the drawer height, the drawer wrapper's
+       overflow-y-auto should handle the scroll — the nav must keep
+       its natural (expanded) height. Without this, expanded submenu
+       items get clipped behind the bottom-pinned service section. */
+    flex-shrink: 0;
+  }
+  #shopify-section-{{ section.id }} .tm-topbar { flex-shrink: 0; }
+
+  /* Override the accordion button's hardcoded p-4 (from
+     component__accordion.liquid) so the merchant can control vertical
+     padding of each Menu Category row (Wallets / Bags / Accessories
+     accordion buttons). Horizontal padding stays at 16px. */
+  #shopify-section-{{ section.id }} .tm-nav > div > [id^="accordion-"] > button {
+    padding-top: var(--tm-cat-row-pad-v) !important;
+    padding-bottom: var(--tm-cat-row-pad-v) !important;
+  }
+
+  /* Block-mode row: image-left, label-right (single column). */
+  #shopify-section-{{ section.id }} .tm-row {
+    display: flex;
+    align-items: center;
+    gap: var(--tm-image-gap);
+    padding: var(--tm-row-pad-v) 16px;
+    text-decoration: none;
+    color: inherit;
+    {% if section.settings.menu_show_dividers %}border-top: 1px solid currentColor;{% endif %}
+    {% if section.settings.menu_show_dividers %}border-top-color: rgba(0, 0, 0, 0.08);{% endif %}
+  }
+  #shopify-section-{{ section.id }} .tm-row:hover { text-decoration: none; }
+  #shopify-section-{{ section.id }} .tm-row__img {
+    width: var(--tm-image-size);
+    height: var(--tm-image-size);
+    object-fit: cover;
+    flex-shrink: 0;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.04);
+  }
+  #shopify-section-{{ section.id }} .tm-row__label {
+    font-family: var(--tm-font-family) !important;
+    font-weight: var(--tm-font-weight) !important;
+    font-size: var(--tm-font-size) !important;
+    text-transform: var(--tm-font-case) !important;
+    letter-spacing: var(--tm-letter-spacing) !important;
+    line-height: 1.3;
+    color: inherit;
+  }
+
+  /* Per-category 2-col grid layout — opt-in via the block's `layout` setting. */
+  #shopify-section-{{ section.id }} .tm-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 8px;
+  }
+  #shopify-section-{{ section.id }} .tm-grid .tm-row {
+    flex-direction: column;
+    align-items: flex-start;
+    border-top: 0 !important;
+    padding: 8px;
+    gap: 8px;
+  }
+  #shopify-section-{{ section.id }} .tm-grid .tm-row__img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
+
+  /* Shop All CTA — text + chevron grouped on the left (Mugsy reference).
+     !important on font properties so theme-wide rules (.type__nav, body
+     font on parent containers, etc.) can't override the merchant's
+     "Shop All link styling" settings. */
+  #shopify-section-{{ section.id }} .tm-shop-all {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: var(--tm-row-pad-v) 16px;
+    text-decoration: none;
+    color: var(--tm-shop-all-color) !important;
+    font-family: var(--tm-font-family) !important;
+    font-size: var(--tm-shop-all-size) !important;
+    font-weight: var(--tm-shop-all-weight) !important;
+    text-transform: var(--tm-shop-all-case) !important;
+    letter-spacing: var(--tm-shop-all-ls) !important;
+    {% if section.settings.menu_show_dividers %}border-top: 1px solid rgba(0, 0, 0, 0.08);{% endif %}
+  }
+  #shopify-section-{{ section.id }} .tm-shop-all__text {
+    font-family: var(--tm-font-family) !important;
+    font-size: var(--tm-shop-all-size) !important;
+    font-weight: var(--tm-shop-all-weight) !important;
+    text-transform: var(--tm-shop-all-case) !important;
+    letter-spacing: var(--tm-shop-all-ls) !important;
+    color: var(--tm-shop-all-color) !important;
+  }
+  #shopify-section-{{ section.id }} .tm-shop-all:hover { text-decoration: none; color: var(--tm-shop-all-color) !important; }
+  #shopify-section-{{ section.id }} .tm-shop-all__arrow {
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
+  }
+  #shopify-section-{{ section.id }} .tm-shop-all__arrow svg {
+    width: 1em;
+    height: 1em;
+    stroke: currentColor;
+  }
+
+  /* Customer service section — Tecovas-style block at the bottom of the
+     drawer. Independent bg + typography from the main menu above. */
+  #shopify-section-{{ section.id }} .tm-service {
+    background: var(--tm-svc-bg);
+    color: var(--tm-svc-color);
+    padding-top: var(--tm-svc-pad-top);
+    padding-bottom: var(--tm-svc-pad-bottom);
+    /* Flex auto-margin pins .tm-service to the bottom of the drawer
+       when the main menu is short, and resolves to 0 when total content
+       exceeds the drawer height (the wrapper's overflow-y-auto takes
+       over and the user scrolls). Pairs with flex-shrink: 0 on .tm-nav
+       and .tm-topbar above so the menu can't shrink to overlap.
+       The drawer wrapper (component__drawer.liquid:52) is already
+       `flex flex-col h-full`, and .tm-topbar / .tm-nav / .tm-service
+       are direct flex siblings, so no other layout change is needed. */
+    margin-top: auto;
+    flex-shrink: 0;
+  }
+  #shopify-section-{{ section.id }} .tm-service__row,
+  #shopify-section-{{ section.id }} .tm-service__btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--tm-svc-pad-v) 16px;
+    text-decoration: none;
+    color: var(--tm-svc-color) !important;
+    font-family: var(--tm-svc-font) !important;
+    font-size: var(--tm-svc-size) !important;
+    font-weight: var(--tm-svc-weight) !important;
+    text-transform: var(--tm-svc-case) !important;
+    letter-spacing: var(--tm-svc-ls) !important;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    {% if section.settings.service_show_dividers %}border-top: 1px solid rgba(0, 0, 0, 0.08);{% endif %}
+  }
+  /* Target the inner text span directly so theme-wide span rules can't
+     override the inherited font properties (same pattern as .tm-shop-all__text). */
+  #shopify-section-{{ section.id }} .tm-service__label {
+    font-family: var(--tm-svc-font) !important;
+    font-size: var(--tm-svc-size) !important;
+    font-weight: var(--tm-svc-weight) !important;
+    text-transform: var(--tm-svc-case) !important;
+    letter-spacing: var(--tm-svc-ls) !important;
+    color: var(--tm-svc-color) !important;
+  }
+  #shopify-section-{{ section.id }} .tm-service__row:hover,
+  #shopify-section-{{ section.id }} .tm-service__btn:hover { text-decoration: none; color: var(--tm-svc-color) !important; }
+  #shopify-section-{{ section.id }} .tm-service__chevron {
+    display: inline-flex;
+    align-items: center;
+    transition: transform 0.2s ease;
+    line-height: 0;
+  }
+  #shopify-section-{{ section.id }} .tm-service__chevron svg {
+    width: 1em;
+    height: 1em;
+    stroke: currentColor;
+  }
+  #shopify-section-{{ section.id }} .tm-service__chevron--open { transform: rotate(180deg); }
+  #shopify-section-{{ section.id }} .tm-service__sublist {
+    overflow: hidden;
+  }
+  #shopify-section-{{ section.id }} .tm-service__sublink {
+    display: block;
+    padding: calc(var(--tm-svc-pad-v) * 0.7) 32px;
+    text-decoration: none;
+    color: var(--tm-svc-color) !important;
+    font-family: var(--tm-svc-font) !important;
+    font-size: calc(var(--tm-svc-size) * 0.95) !important;
+    font-weight: 400 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    opacity: 0.85;
+  }
+  #shopify-section-{{ section.id }} .tm-service__sublink:hover { text-decoration: none; opacity: 1; }
+
+  /* Top-bar Search... button + close X inside the hamburger drawer.
+     Styling here is independent from both the main menu typography
+     and from the real search input (which is in theme__header). */
+  #shopify-section-{{ section.id }} .tm-topbar { background-color: var(--tm-topbar-bg); }
+  #shopify-section-{{ section.id }} .tm-topbar__search,
+  #shopify-section-{{ section.id }} .tm-topbar__close {
+    background-color: var(--tm-topbar-bg);
+    color: var(--tm-topbar-text) !important;
+  }
+  #shopify-section-{{ section.id }} .tm-topbar__label {
+    font-family: var(--tm-topbar-font) !important;
+    font-weight: var(--tm-topbar-weight) !important;
+    font-size: var(--tm-topbar-size) !important;
+    text-transform: var(--tm-topbar-case) !important;
+    letter-spacing: var(--tm-topbar-ls) !important;
+    color: var(--tm-topbar-text) !important;
+  }
+  #shopify-section-{{ section.id }} .tm-topbar__icon svg {
+    color: var(--tm-topbar-icon) !important;
+    stroke: var(--tm-topbar-icon);
+  }
+</style>
+
+{% capture drawer_content %}
+
+  {%- comment -%} Top bar — search "input"-looking button + close X.
+     The "Search..." button is a fake — tapping it closes the drawer
+     and opens the real search drawer (theme__header.liquid renders
+     the actual <input id="search-mobile">). Styling here only affects
+     this top-of-drawer button. {%- endcomment -%}
+  <section class="tm-topbar sticky top-0 flex flex-wrap items-center justify-between h-[56px]
+    {{ section.settings.top_color_scheme }}"
+    @click="menu_nested = false;">
+    <div class="flex items-center justify-between w-full h-full">
+      <button
+        class="tm-topbar__search type__nav w-full h-full flex-grow !text-left !justify-start !px-4 flex items-center border--b-width {{ section.settings.top_color_border }}"
+        title="Search"
+        @click.stop="menu_drawer = false; search_visible = true; search_active = true; $nextTick(() => { document.querySelector('#search-mobile').focus(); });">
+        <span class="tm-topbar__icon" aria-hidden="true">{% render 'component__icon', icon: 'search', size: '24', class: '' %}</span>
+        <span class="ml-1 tm-topbar__label type__nav">{{ section.settings.top_search_label | default: 'Search...' }}</span>
+      </button>
+      <button
+        class="tm-topbar__close type__nav h-full !text-left !justify-start !px-4 flex items-center border--b-width {{ section.settings.top_color_border }}"
+        title="Close Menu"
+        @click.stop="menu_drawer = false; menu_nested = false" >
+        <span class="tm-topbar__icon" aria-hidden="true">{% render 'component__icon', icon: 'x', size: '24', class: '' %}</span>
+      </button>
+    </div>
+  </section>
+
+  {%- comment -%}
+    Navigation. No inner scroll / fixed height — the drawer wrapper
+    (component__drawer.liquid) already has overflow-y-auto + h-full,
+    so letting the whole drawer scroll means the Customer service
+    section below this <section> flows naturally in the same scroll
+    container instead of getting cut off below an inner-scroll boundary.
+  {%- endcomment -%}
+  <section class="tm-nav relative overflow-x-hidden
+    {{ section.settings.main_color_scheme }}">
+      <div
+        class="w-full"
+        x-cloak
+        x-data="{ accordion: null }">
+
+        {%- comment -%}
+          Decide which renderer to use: if at least one `category` block
+          is present, use the new block-based layout. Otherwise fall back
+          to the legacy link_list-driven rendering.
+        {%- endcomment -%}
+        {%- assign tm_category_count = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'category' -%}{%- assign tm_category_count = tm_category_count | plus: 1 -%}{%- endif -%}
+        {%- endfor -%}
+
+        {%- if tm_category_count > 0 -%}
+          {%- comment -%} ===== BLOCK MODE ===== {%- endcomment -%}
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'category' -%}
+              {%- assign cat_handle = block.settings.title | handleize -%}
+              {%- capture accordion_content -%}
+                {%- assign tm_layout_class = '' -%}
+                {%- if block.settings.layout == '2col' -%}{%- assign tm_layout_class = 'tm-grid' -%}{%- endif -%}
+                <div class="{{ tm_layout_class }}">
+                  {%- for sub in section.blocks -%}
+                    {%- if sub.type == 'submenu_item' -%}
+                      {%- assign sub_parent_handle = sub.settings.parent_category | handleize -%}
+                      {%- if sub_parent_handle == cat_handle -%}
+                        <a href="{{ sub.settings.url }}" class="tm-row">
+                          {%- if sub.settings.image != blank -%}
+                            <img class="tm-row__img"
+                              loading="lazy"
+                              src="{{ sub.settings.image | image_url: width: 200 }}"
+                              srcset="{{ sub.settings.image | image_url: width: 120 }} 120w, {{ sub.settings.image | image_url: width: 240 }} 240w, {{ sub.settings.image | image_url: width: 360 }} 360w"
+                              sizes="{{ section.settings.menu_image_size | default: 48 }}px"
+                              width="{{ section.settings.menu_image_size | default: 48 }}"
+                              height="{{ section.settings.menu_image_size | default: 48 }}"
+                              alt="{{ sub.settings.label | escape }}"
+                              {{ sub.shopify_attributes }}>
+                          {%- endif -%}
+                          <span class="tm-row__label">{{ sub.settings.label }}</span>
+                        </a>
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                </div>
+                {%- if block.settings.shop_all_url != blank and block.settings.shop_all_label != blank -%}
+                  <a href="{{ block.settings.shop_all_url }}" class="tm-shop-all" {{ block.shopify_attributes }}>
+                    <span class="tm-shop-all__text">{{ block.settings.shop_all_label }}</span>
+                    <span class="tm-shop-all__arrow" aria-hidden="true">
+                      {% render 'component__icon', icon: 'chevron-right', size: '16' %}
+                    </span>
+                  </a>
+                {%- endif -%}
+              {%- endcapture -%}
+
+              {%- capture cat_container_class -%}{% unless forloop.last %}border--b-width{% endunless %} {{ section.settings.main_color_border }}{%- endcapture -%}
+
+              {% render 'component__accordion',
+                  open: false,
+                  index: forloop.index,
+                  button_label: block.settings.title,
+                  container_class: cat_container_class,
+                  inner_class: 'color__bg-body',
+                  content: accordion_content %}
+            {%- endif -%}
+          {%- endfor -%}
+
+        {%- else -%}
+          {%- comment -%} ===== LEGACY LINK_LIST MODE (unchanged) ===== {%- endcomment -%}
+          {%- for link in section.settings.main_links.links -%}
+            {% if link.links != blank %}
+              {% capture accordion_content %}
+                {% for child_link in link.links %}
+                  <a href="{{ child_link.url }}" class="type__nav border--t-width {{ section.settings.main_color_border }} flex flex-col items-start justify-start w-full px-4 py-4 no-underline capitalize">
+                    {%- liquid
+                      assign child_image = ''
+                      if child_link.url contains 'collections'
+                        assign collection_handle = child_link.url | remove: shop.url | remove: 'collections' | remove: '//' | handleize
+                        assign child_image = collection_handle | append: '-mobile.jpg'
+                      endif
+                    -%}
+                    {% if child_image != blank %}
+                      <picture class="color__bg-overlay-2 aspect-[1/1] border--radius flex items-center font-normal">
+                        <source media="(min-width: 1px)" data-srcset="
+                          {{ child_image | file_img_url: "640x", format: 'jpg' }} 1x,
+                          {{ child_image | file_img_url: "640x", format: 'jpg', scale: 2 }} 2x">
+                        <img class="h-[127px] w-[127px]" loading="lazy" alt="{{ child_link.title }}" src="{{ child_image | file_img_url: "1200x", format: 'jpg' }}">
+                      </picture>
+                    {%- endif -%}
+                    <span class="pt-2 type__nav">{{ child_link.title }}</span>
+                  </a>
+                {% endfor %}
+              {% endcapture %}
+              {% capture accordion_container_class %}{% unless forloop.last %}border--b-width{% endunless %} {{ section.settings.main_color_border }}{% endcapture %}
+              {% capture accordion_inner_class %}color__bg-overlay-1 {% unless link.title == "Brand" %}grid grid-cols-2{% endunless %}{% endcapture %}
+              {% render 'component__accordion',
+                  open: false,
+                  index: forloop.index,
+                  button_label: link.title,
+                  container_class: accordion_container_class,
+                  inner_class: accordion_inner_class,
+                  content: accordion_content %}
+            {% else %}
+              <a id="accordion-{{ forloop.index }}" class="type__body border--b-width {{ section.settings.main_color_border }} flex items-center justify-between w-full px-4 py-[1.25rem] no-underline capitalize" href="{{ link.url }}">
+                <span class="text-left type__nav">
+                {{ link.title }}
+                </span>
+              </a>
+            {% endif %}
+          {%- endfor -%}
+        {%- endif -%}
+
+        {%- unless section.settings.feature_img == blank -%}
+          {%- assign _tm_feat_pos = section.settings.feature_btn_position | default: 'bottom_full' -%}
+          {%- assign _tm_feat_btn = section.settings.feature_btn_variant | default: 'btn--secondary' -%}
+          <a href="{{ section.settings.url_id }}" class="block m-4">
+            <div class="tm-feature tm-feature--{{ _tm_feat_pos }} relative color__bg-overlay-1">
+              {%- comment -%}
+                High-res image with srcset so retina mobile (DPR 2-3)
+                gets a crisp source. Previously this was sized to a
+                fixed 210px height on the CDN, which upscaled to a
+                pixelated result on most phones. Now uses width-based
+                scaling at the image's natural aspect ratio, letting
+                the browser pick the right source for each viewport
+                / pixel density.
+              {%- endcomment -%}
+              <img
+                class="tm-feature__img w-full"
+                src="{{ section.settings.feature_img | image_url: width: 800 }}"
+                srcset="{{ section.settings.feature_img | image_url: width: 400 }} 400w, {{ section.settings.feature_img | image_url: width: 600 }} 600w, {{ section.settings.feature_img | image_url: width: 800 }} 800w, {{ section.settings.feature_img | image_url: width: 1200 }} 1200w, {{ section.settings.feature_img | image_url: width: 1600 }} 1600w"
+                sizes="(max-width: 480px) 92vw, 420px"
+                width="{{ section.settings.feature_img.width }}"
+                height="{{ section.settings.feature_img.height }}"
+                alt="{{ section.settings.feature_img.alt | default: section.settings.text_id | escape }}"
+                loading="lazy"
+                decoding="async">
+              {%- if section.settings.text_id != blank -%}
+                <div class="tm-feature__btn-wrap">
+                  <span class="tm-feature__btn btn {{ _tm_feat_btn }}">{{ section.settings.text_id }}</span>
+                </div>
+              {%- endif -%}
+            </div>
+          </a>
+        {% endunless %}
+
+      </div>
+  </section>
+
+  {%- comment -%}
+    Customer service section (Tecovas reference).
+    Renders if at least one `service_link` block exists. Each service_link
+    with no matching `service_sublink` children renders as a flat row;
+    with children it becomes an expandable accordion. Independent Alpine
+    state per accordion (svcOpen) so they collapse independently.
+  {%- endcomment -%}
+  {%- assign tm_service_count = 0 -%}
+  {%- for b in section.blocks -%}
+    {%- if b.type == 'service_link' -%}{%- assign tm_service_count = tm_service_count | plus: 1 -%}{%- endif -%}
+  {%- endfor -%}
+
+  {%- if tm_service_count > 0 -%}
+    <section class="tm-service" x-data="{ svcOpen: null }">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'service_link' -%}
+          {%- assign svc_handle = block.settings.label | handleize -%}
+          {%- comment -%} Count children so we can decide: flat link vs accordion {%- endcomment -%}
+          {%- assign svc_child_count = 0 -%}
+          {%- for sub in section.blocks -%}
+            {%- if sub.type == 'service_sublink' -%}
+              {%- assign sub_parent_handle = sub.settings.parent_label | handleize -%}
+              {%- if sub_parent_handle == svc_handle -%}{%- assign svc_child_count = svc_child_count | plus: 1 -%}{%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+
+          {%- if svc_child_count > 0 and block.settings.url == blank -%}
+            {%- comment -%} Accordion variant: dropdown header + sublinks {%- endcomment -%}
+            <div {{ block.shopify_attributes }}>
+              <button type="button"
+                class="tm-service__btn"
+                @click="svcOpen === '{{ forloop.index }}' ? svcOpen = null : svcOpen = '{{ forloop.index }}'"
+                :aria-expanded="svcOpen === '{{ forloop.index }}' ? 'true' : 'false'">
+                <span class="tm-service__label">{{ block.settings.label }}</span>
+                <span class="tm-service__chevron" :class="{ 'tm-service__chevron--open': svcOpen === '{{ forloop.index }}' }" aria-hidden="true">
+                  {% render 'component__icon', icon: 'chevron-down', size: '16' %}
+                </span>
+              </button>
+              <div class="tm-service__sublist" x-show="svcOpen === '{{ forloop.index }}'" x-cloak>
+                {%- for sub in section.blocks -%}
+                  {%- if sub.type == 'service_sublink' -%}
+                    {%- assign sub_parent_handle = sub.settings.parent_label | handleize -%}
+                    {%- if sub_parent_handle == svc_handle -%}
+                      <a href="{{ sub.settings.url }}" class="tm-service__sublink" {{ sub.shopify_attributes }}>{{ sub.settings.label }}</a>
+                    {%- endif -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- else -%}
+            {%- comment -%} Flat row variant {%- endcomment -%}
+            <a href="{{ block.settings.url }}" class="tm-service__row" {{ block.shopify_attributes }}>
+              <span class="tm-service__label">{{ block.settings.label }}</span>
+            </a>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </section>
+  {%- endif -%}
+
+  {%- comment -%} Sticky footer (commented out — preserved from original) {%- endcomment -%}
+  {% comment %}
+  <aside class="sticky bottom-0 {{ section.settings.bottom_color_scheme }}" x-show="!menu_nested">
+    <div class="flex flex-wrap">
+      <div class="border--t-width {{ section.settings.bottom_color_border }} w-full">
+        <div class="flex flex-wrap px-4 pt-2">
+        {%- if shop.customer_accounts_enabled -%}
+          <a href="{{ routes.account_url }}" rel="nofollow" class="btn btn--smaller mb-2 mr-2
+            {{ section.settings.bottom_button_color }}">
+            {% if customer %}
+              {{ 'general.navigation.account' | t }}
+            {% else %}
+            {{ 'customer.account.log_in' | t }}
+            {% endif %}
+          </a>
+        {% endif %}
+          {% if settings.enable_region or settings.enable_language %}
+            <button class="btn btn--smaller mb-2 mr-2
+            {{ section.settings.bottom_button_color }}"
+              @click="localization_popup = true;">
+              <span class="fi type--smaller" style="background-image: url(https://flagicons.lipis.dev/flags/4x3/{{ localization.country.iso_code | downcase }}.svg)"></span>
+              <span class="ml-1 type--smaller">{{ localization.country.currency.symbol }} {{ localization.country.currency.iso_code }}
+              {% if settings.type_seperator == 'dot' %}·{% else %}|{% endif %}
+              {{ localization.language.iso_code | upcase }}</span>
+              {% render 'component__icon', icon: 'chevron-down', size: '16' %}
+            </button>
+          {% endif %}
+        </div>
+      </div>
+      <div class="border--t-width {{ section.settings.bottom_color_border }} w-full">
+        <p class="px-4 py-2 m-0 type--small">
+          {%- for link in section.settings.bottom_links.links -%}
+            <a href="{{ link.url }}" class="mr-2">{{ link.title }}</a>
+          {%- endfor -%}
+         </p>
+      </div>
+    </div>
+  </aside>
+  {% endcomment %}
+
+{% endcapture %}
+
+{% render 'component__drawer',
+  drawer_id: 'menu_drawer',
+  position: 'left',
+  content: drawer_content %}
+
+{% schema %}
+{
+  "name":"t:sections.theme_menu.name",
+  "max_blocks": 50,
+  "settings":[
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__15.content"
+    },
+    {
+      "type":"link_list",
+      "id":"main_links",
+      "label":"t:sections.theme_menu.settings.main_links.label",
+      "info": "Used only when no Category blocks are added below. Once you add the first Category block, the menu renders from blocks instead."
+    },
+    {
+      "type": "image_picker",
+      "id": "feature_img",
+      "label": "Featured Menu Image"
+    },
+    {
+      "type": "url",
+      "id": "url_id",
+      "label": "Featured Image URL",
+      "default": "/"
+    },
+    {
+      "type": "text",
+      "id": "text_id",
+      "label": "Featured Image button text",
+      "default": "Learn More >"
+    },
+    {
+      "type": "select",
+      "id": "feature_btn_variant",
+      "label": "Featured Image button style",
+      "info": "Uses the theme's current button variants. Pick 'Plain (text-only)' for a minimal label.",
+      "options": [
+        { "value": "btn--primary",   "label": "Primary" },
+        { "value": "btn--secondary", "label": "Secondary" },
+        { "value": "btn--tertiary",  "label": "Tertiary" },
+        { "value": "btn--neutral",   "label": "Neutral" },
+        { "value": "btn--plain",     "label": "Plain (text-only)" }
+      ],
+      "default": "btn--secondary"
+    },
+    { "type": "color", "id": "feature_btn_color", "label": "Featured Image button text color", "info": "Leave blank to inherit the button variant's default color." },
+    {
+      "type": "select",
+      "id": "feature_btn_position",
+      "label": "Featured Image button position",
+      "info": "Where the button sits on top of the image. 'Bottom — full width strip' preserves the previous layout.",
+      "options": [
+        { "value": "top_left",      "label": "Top left" },
+        { "value": "top_center",    "label": "Top center" },
+        { "value": "top_right",     "label": "Top right" },
+        { "value": "middle_left",   "label": "Middle left" },
+        { "value": "middle_center", "label": "Middle center" },
+        { "value": "middle_right",  "label": "Middle right" },
+        { "value": "bottom_left",   "label": "Bottom left" },
+        { "value": "bottom_center", "label": "Bottom center" },
+        { "value": "bottom_right",  "label": "Bottom right" },
+        { "value": "bottom_full",   "label": "Bottom — full width strip (default)" }
+      ],
+      "default": "bottom_full"
+    },
+    { "type": "range", "id": "feature_radius", "label": "Featured Image corner radius (px)", "min": 0, "max": 24, "step": 1, "default": 0 },
+    { "type": "header", "content": "Menu typography" },
+    {
+      "type": "select", "id": "menu_font_family", "label": "Font family",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "nav", "label": "Nav (default)" },
+        { "value": "handwritten", "label": "Handwritten" }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "select", "id": "menu_font_weight", "label": "Font weight",
+      "options": [
+        { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }, { "value": "800", "label": "Extra-bold" },
+        { "value": "900", "label": "Black" }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "select", "id": "menu_font_case", "label": "Letter case",
+      "options": [
+        { "value": "none", "label": "Normal" },
+        { "value": "uppercase", "label": "UPPERCASE" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "capitalize"
+    },
+    {
+      "type": "range", "id": "menu_font_size", "label": "Font size (px)",
+      "min": 12, "max": 24, "step": 1, "default": 16
+    },
+    {
+      "type": "select", "id": "menu_letter_spacing", "label": "Letter spacing",
+      "options": [
+        { "value": "0em", "label": "None" },
+        { "value": "0.04em", "label": "Tight" },
+        { "value": "0.08em", "label": "Normal" },
+        { "value": "0.12em", "label": "Wide" },
+        { "value": "0.16em", "label": "Extra wide" }
+      ],
+      "default": "0em"
+    },
+    { "type": "header", "content": "Menu spacing & images" },
+    {
+      "type": "range", "id": "menu_image_size", "label": "Thumbnail size (px)",
+      "min": 32, "max": 100, "step": 4, "default": 48
+    },
+    {
+      "type": "range", "id": "menu_image_gap", "label": "Gap between image and label (px)",
+      "min": 0, "max": 32, "step": 2, "default": 12
+    },
+    {
+      "type": "range", "id": "menu_row_padding_v", "label": "Submenu item row vertical padding (px)",
+      "min": 6, "max": 32, "step": 2, "default": 14
+    },
+    {
+      "type": "range", "id": "menu_cat_row_padding_v", "label": "Menu category row vertical padding (px)",
+      "info": "Top/bottom padding of each category accordion button (Wallets, Bags, etc.).",
+      "min": 6, "max": 40, "step": 2, "default": 16
+    },
+    {
+      "type": "range", "id": "menu_section_pad_top", "label": "Main menu section top padding (px)",
+      "min": 0, "max": 80, "step": 4, "default": 0
+    },
+    {
+      "type": "range", "id": "menu_section_pad_bottom", "label": "Main menu section bottom padding (px)",
+      "info": "Space between the main menu and the Customer service section below.",
+      "min": 0, "max": 80, "step": 4, "default": 0
+    },
+    {
+      "type": "checkbox", "id": "menu_show_dividers", "label": "Show row dividers",
+      "default": true
+    },
+    { "type": "header", "content": "\"Shop All\" link styling" },
+    {
+      "type": "color", "id": "shop_all_color", "label": "Color",
+      "default": "#1e7db3"
+    },
+    {
+      "type": "select", "id": "shop_all_font_weight", "label": "Font weight",
+      "options": [
+        { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }, { "value": "800", "label": "Extra-bold" },
+        { "value": "900", "label": "Black" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select", "id": "shop_all_font_case", "label": "Letter case",
+      "options": [
+        { "value": "none", "label": "Normal" },
+        { "value": "uppercase", "label": "UPPERCASE" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "range", "id": "shop_all_font_size", "label": "Font size (px)",
+      "min": 10, "max": 20, "step": 1, "default": 13
+    },
+    {
+      "type": "select", "id": "shop_all_letter_spacing", "label": "Letter spacing",
+      "options": [
+        { "value": "0em", "label": "None" },
+        { "value": "0.04em", "label": "Tight" },
+        { "value": "0.08em", "label": "Normal" },
+        { "value": "0.12em", "label": "Wide" },
+        { "value": "0.16em", "label": "Extra wide" }
+      ],
+      "default": "0.08em"
+    },
+    { "type": "header", "content": "Customer service section" },
+    { "type": "paragraph", "content": "Renders after the main menu in its own background color. Add Service link / Service sub-link blocks below. A service link with no sub-links renders as a flat row; with sub-links it becomes an expandable accordion." },
+    { "type": "color", "id": "service_bg_color", "label": "Background color", "default": "#ede8e2" },
+    { "type": "color", "id": "service_text_color", "label": "Text color", "default": "#1c1c1c" },
+    {
+      "type": "select", "id": "service_font_family", "label": "Font family",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "nav", "label": "Nav" },
+        { "value": "handwritten", "label": "Handwritten" }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "select", "id": "service_font_weight", "label": "Font weight",
+      "options": [
+        { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }, { "value": "800", "label": "Extra-bold" },
+        { "value": "900", "label": "Black" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select", "id": "service_font_case", "label": "Letter case",
+      "options": [
+        { "value": "none", "label": "Normal" },
+        { "value": "uppercase", "label": "UPPERCASE" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "range", "id": "service_font_size", "label": "Font size (px)",
+      "min": 10, "max": 22, "step": 1, "default": 13
+    },
+    {
+      "type": "select", "id": "service_letter_spacing", "label": "Letter spacing",
+      "options": [
+        { "value": "0em", "label": "None" },
+        { "value": "0.04em", "label": "Tight" },
+        { "value": "0.08em", "label": "Normal" },
+        { "value": "0.12em", "label": "Wide" },
+        { "value": "0.16em", "label": "Extra wide" }
+      ],
+      "default": "0.08em"
+    },
+    {
+      "type": "range", "id": "service_row_padding_v", "label": "Row vertical padding (px)",
+      "min": 8, "max": 32, "step": 2, "default": 18
+    },
+    {
+      "type": "range", "id": "service_pad_top", "label": "Section top padding (px)",
+      "min": 0, "max": 80, "step": 4, "default": 24
+    },
+    {
+      "type": "range", "id": "service_pad_bottom", "label": "Section bottom padding (px)",
+      "min": 0, "max": 80, "step": 4, "default": 24
+    },
+    { "type": "checkbox", "id": "service_show_dividers", "label": "Show row dividers", "default": true },
+    { "type": "header", "content": "Drawer top bar (Search button)" },
+    { "type": "paragraph", "content": "Styles the fake search button at the top of the hamburger drawer. The real search input (when the search drawer opens) is styled separately in the Header section." },
+    { "type": "text", "id": "top_search_label", "label": "Label", "default": "Search..." },
+    { "type": "color", "id": "top_search_bg", "label": "Background", "default": "#ffffff" },
+    { "type": "color", "id": "top_search_text_color", "label": "Text color", "default": "#1c1c1c" },
+    { "type": "color", "id": "top_search_icon_color", "label": "Icon color (magnifier + close X)", "default": "#1c1c1c" },
+    {
+      "type": "select", "id": "top_search_font_family", "label": "Font family",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "nav", "label": "Nav" },
+        { "value": "handwritten", "label": "Handwritten" }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "select", "id": "top_search_font_weight", "label": "Font weight",
+      "options": [
+        { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }, { "value": "800", "label": "Extra-bold" },
+        { "value": "900", "label": "Black" }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "select", "id": "top_search_font_case", "label": "Letter case",
+      "options": [
+        { "value": "none", "label": "Normal" },
+        { "value": "uppercase", "label": "UPPERCASE" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "range", "id": "top_search_font_size", "label": "Font size (px)",
+      "min": 10, "max": 22, "step": 1, "default": 13
+    },
+    {
+      "type": "select", "id": "top_search_letter_spacing", "label": "Letter spacing",
+      "options": [
+        { "value": "0em", "label": "None" },
+        { "value": "0.04em", "label": "Tight" },
+        { "value": "0.08em", "label": "Normal" },
+        { "value": "0.12em", "label": "Wide" },
+        { "value": "0.16em", "label": "Extra wide" }
+      ],
+      "default": "0.08em"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__12.content"
+    },
+    {
+      "type":"select",
+      "id":"top_color_scheme",
+      "label":"t:sections.all.colors.settings.color_scheme.label",
+      "options":[
+        { "value":"color__bg-body color__text", "label":"t:sections.all.colors.settings.color_scheme.options__1.label" },
+        { "value":"color__bg-neutral color__text", "label":"t:sections.all.colors.settings.color_scheme.options__2.label" },
+        { "value":"color__bg-overlay-1 color__text", "label":"t:sections.all.colors.settings.color_scheme.options__3.label" },
+        { "value":"color__bg-overlay-2 color__text", "label":"t:sections.all.colors.settings.color_scheme.options__4.label" },
+        { "value":"color__bg-overlay-3 color__text", "label":"t:sections.all.colors.settings.color_scheme.options__5.label" },
+        { "value":"color__bg-primary color__primary", "label":"t:sections.all.colors.settings.color_scheme.options__6.label" },
+        { "value":"color__bg-secondary color__secondary", "label":"t:sections.all.colors.settings.color_scheme.options__7.label" },
+        { "value":"color__bg-tertiary color__tertiary", "label":"t:sections.all.colors.settings.color_scheme.options__8.label" }
+      ],
+      "default":"color__bg-body color__text"
+    },
+    {
+      "type":"select",
+      "id":"top_color_border",
+      "label":"t:sections.all.colors.settings.color_border.label",
+      "options":[
+        { "value":"color__border-divider-1", "label":"t:sections.all.colors.settings.color_border.options__1.label" },
+        { "value":"color__border-selected-1", "label":"t:sections.all.colors.settings.color_border.options__2.label" },
+        { "value":"!color__border-transparent", "label":"t:sections.all.colors.settings.color_border.options__3.label" }
+      ],
+      "default":"color__border-divider-1"
+    },
+    {
+      "type":"select",
+      "id":"top_color_button",
+      "label":"t:sections.all.colors.settings.color_button.label",
+      "options":[
+        { "value":"btn", "label":"t:sections.all.colors.settings.color_button.options__1.label" },
+        { "value":"btn btn--secondary", "label":"t:sections.all.colors.settings.color_button.options__2.label" },
+        { "value":"btn btn--tertiary", "label":"t:sections.all.colors.settings.color_button.options__5.label" },
+        { "value":"btn btn--neutral", "label":"t:sections.all.colors.settings.color_button.options__3.label" },
+        { "value":"btn btn--plain", "label":"t:sections.all.colors.settings.color_button.options__4.label" },
+        { "value":"btn--minimal-light", "label":"t:sections.all.colors.settings.color_button.options__6.label" },
+        { "value":"btn--minimal-dark", "label":"t:sections.all.colors.settings.color_button.options__7.label" }
+      ],
+      "default":"btn btn--plain"
+    },
+    {
+      "type":"select",
+      "id":"top_button_cart_type",
+      "label":"t:sections.theme_menu.settings.top_button_cart_type.label",
+      "options":[
+        { "value":"icon", "label":"t:sections.theme_menu.settings.top_button_cart_type.options__1.label" },
+        { "value":"text", "label":"t:sections.theme_menu.settings.top_button_cart_type.options__2.label" }
+      ],
+      "default":"icon"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__13.content"
+    },
+    {
+      "type":"select",
+      "id":"main_color_scheme",
+      "label":"t:sections.all.colors.settings.color_scheme.label",
+      "options":[
+        { "value":"color__bg-body color__text", "label":"t:sections.all.colors.settings.color_scheme.options__1.label" },
+        { "value":"color__bg-neutral color__text", "label":"t:sections.all.colors.settings.color_scheme.options__2.label" },
+        { "value":"color__bg-overlay-1 color__text", "label":"t:sections.all.colors.settings.color_scheme.options__3.label" },
+        { "value":"color__bg-overlay-2 color__text", "label":"t:sections.all.colors.settings.color_scheme.options__4.label" },
+        { "value":"color__bg-overlay-3 color__text", "label":"t:sections.all.colors.settings.color_scheme.options__5.label" },
+        { "value":"color__bg-primary color__primary", "label":"t:sections.all.colors.settings.color_scheme.options__6.label" },
+        { "value":"color__bg-secondary color__secondary", "label":"t:sections.all.colors.settings.color_scheme.options__7.label" },
+        { "value":"color__bg-tertiary color__tertiary", "label":"t:sections.all.colors.settings.color_scheme.options__8.label" }
+      ],
+      "default":"color__bg-body color__text"
+    },
+    {
+      "type":"select",
+      "id":"main_color_border",
+      "label":"t:sections.all.colors.settings.color_border.label",
+      "options":[
+        { "value":"color__border-divider-1", "label":"t:sections.all.colors.settings.color_border.options__1.label" },
+        { "value":"color__border-selected-1", "label":"t:sections.all.colors.settings.color_border.options__2.label" },
+        { "value":"!color__border-transparent", "label":"t:sections.all.colors.settings.color_border.options__3.label" }
+      ],
+      "default":"color__border-divider-1"
+    },
+    {
+      "type":"select",
+      "id":"main_color_button",
+      "label":"t:sections.all.colors.settings.color_button.label",
+      "options":[
+        { "value":"btn", "label":"t:sections.all.colors.settings.color_button.options__1.label" },
+        { "value":"btn btn--secondary", "label":"t:sections.all.colors.settings.color_button.options__2.label" },
+        { "value":"btn btn--tertiary", "label":"t:sections.all.colors.settings.color_button.options__5.label" },
+        { "value":"btn btn--neutral", "label":"t:sections.all.colors.settings.color_button.options__3.label" },
+        { "value":"btn btn--plain", "label":"t:sections.all.colors.settings.color_button.options__4.label" }
+      ],
+      "default":"btn btn--plain"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__14.content"
+    },
+    {
+      "type":"select",
+      "id":"bottom_color_scheme",
+      "label":"t:sections.all.colors.settings.color_scheme.label",
+      "options":[
+        { "value":"color__bg-body color__text", "label":"t:sections.all.colors.settings.color_scheme.options__1.label" },
+        { "value":"color__bg-neutral color__text", "label":"t:sections.all.colors.settings.color_scheme.options__2.label" },
+        { "value":"color__bg-overlay-1 color__text", "label":"t:sections.all.colors.settings.color_scheme.options__3.label" },
+        { "value":"color__bg-overlay-2 color__text", "label":"t:sections.all.colors.settings.color_scheme.options__4.label" },
+        { "value":"color__bg-overlay-3 color__text", "label":"t:sections.all.colors.settings.color_scheme.options__5.label" },
+        { "value":"color__bg-primary color__primary", "label":"t:sections.all.colors.settings.color_scheme.options__6.label" },
+        { "value":"color__bg-secondary color__secondary", "label":"t:sections.all.colors.settings.color_scheme.options__7.label" },
+        { "value":"color__bg-tertiary color__tertiary", "label":"t:sections.all.colors.settings.color_scheme.options__8.label" }
+      ],
+      "default":"color__bg-overlay-1 color__text"
+    },
+    {
+      "type":"select",
+      "id":"bottom_color_border",
+      "label":"t:sections.all.colors.settings.color_border.label",
+      "options":[
+        { "value":"color__border-divider-1", "label":"t:sections.all.colors.settings.color_border.options__1.label" },
+        { "value":"color__border-selected-1", "label":"t:sections.all.colors.settings.color_border.options__2.label" },
+        { "value":"!color__border-transparent", "label":"t:sections.all.colors.settings.color_border.options__3.label" }
+      ],
+      "default":"color__border-divider-1"
+    },
+    {
+      "type":"select",
+      "id":"bottom_button_color",
+      "label":"t:sections.theme_menu.settings.bottom_button_color.label",
+      "options":[
+        { "value":"btn", "label":"t:sections.theme_menu.settings.bottom_button_color.options__1.label" },
+        { "value":"btn btn--secondary", "label":"t:sections.theme_menu.settings.bottom_button_color.options__2.label" },
+        { "value":"btn btn--neutral", "label":"t:sections.theme_menu.settings.bottom_button_color.options__3.label" },
+        { "value":"btn btn--plain", "label":"t:sections.theme_menu.settings.bottom_button_color.options__4.label" }
+      ],
+      "default":"btn btn--secondary"
+    },
+    {
+      "type":"link_list",
+      "id":"bottom_links",
+      "label":"t:sections.theme_menu.settings.bottom_links.label"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Menu category",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Category title",
+          "info": "Used as both the accordion label and as the key submenu items reference via \"Belongs to category\".", "default": "Category" },
+        {
+          "type": "select", "id": "layout", "label": "Layout",
+          "options": [
+            { "value": "1col", "label": "Single column (image left, label right)" },
+            { "value": "2col", "label": "Two-column grid (image top, label below)" }
+          ],
+          "default": "1col"
+        },
+        { "type": "header", "content": "Shop All link" },
+        { "type": "text", "id": "shop_all_label", "label": "Label",
+          "info": "Leave blank to hide the Shop All link for this category.", "default": "Shop All" },
+        { "type": "url", "id": "shop_all_url", "label": "URL" }
+      ]
+    },
+    {
+      "type": "submenu_item",
+      "name": "Menu item",
+      "settings": [
+        { "type": "text", "id": "parent_category", "label": "Belongs to category",
+          "info": "Must match a Menu Category block's title exactly (case + spacing aside, it's compared as a handle)." },
+        { "type": "image_picker", "id": "image", "label": "Thumbnail image" },
+        { "type": "text", "id": "label", "label": "Label", "default": "Item" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
+    },
+    {
+      "type": "service_link",
+      "name": "Service link",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Store Locator" },
+        { "type": "url", "id": "url", "label": "Link",
+          "info": "Optional. If left blank and you add Service sub-link blocks pointing here, the row becomes a tap-to-expand accordion. If filled, it's a plain link (sub-links are ignored)." }
+      ]
+    },
+    {
+      "type": "service_sublink",
+      "name": "Service sub-link",
+      "settings": [
+        { "type": "text", "id": "parent_label", "label": "Belongs to service link",
+          "info": "Must match a Service link's label (case + spacing ignored — compared as a handle)." },
+        { "type": "text", "id": "label", "label": "Label", "default": "Find a Store" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["custom.overlay"]
+  }
+}
+{% endschema %}

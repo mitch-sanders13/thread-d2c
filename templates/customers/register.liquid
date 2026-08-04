@@ -1,0 +1,54 @@
+<!-- templates/customers/login.liquid -->
+
+<section class="
+  {{ section.settings.color_scheme }} 
+  {{ section.settings.color_border }}
+  {{ section.settings.style_border }}">
+  <div class="py-24
+    {{ settings.layout_horizontal }}
+    {{ settings.layout_alignment }}">
+
+    <div class="max-w-prose w-full">
+
+      <h1>
+        {{ 'customer.account.sign_up' | t }}
+      </h1>
+
+      {% form 'create_customer' %}
+
+        {% if form.errors %}
+          <div class="color__bg-overlay-1 type--small border--radius p-2 mt-2 mb-4">
+            {{ form.errors | default_errors }}
+          </div>
+        {% endif %}
+
+        <input type="hidden" name="return_to" value="/collections/carriers-club">
+
+        <label for="first_name" class="login">{{ 'customer.account.name' | t }}</label><br/>
+        <input id="first_name" required class="mb-4" type="text" value="" name="customer[first_name]" id="first_name"/>
+
+
+        <label for="customer_email">{{ 'customer.account.email' | t }}</label><br/>
+        <input id="customer_email" class="mb-4" type="email" name="customer[email]" />
+
+
+        <label for="password" class="login">{{ 'customer.account.password' | t }}</label><br/>
+        <input id="password" required class="mb-4" type="password" value="" name="customer[password]" id="password"/>
+
+
+        <button type="submit" class="btn mb-4">
+          {{ 'customer.account.sign_up' | t }}
+        </button>
+
+
+        <div class="border--t-width color__border-divider-1 pt-4">
+          <p>{{ 'customer.account.existing' | t }}</p>
+          <a href="{{ routes.account_login_url }}" class="btn btn--plain">
+            {{ 'customer.account.log_in' | t }}
+          </a>
+        </div>
+      {% endform %}
+    </div>
+
+  </div>
+</section>

@@ -1,0 +1,444 @@
+<!-- sections/cart__main.liquid -->
+{% comment %} 
+  Main section of the cart template.
+
+  Globals:
+    - settings.layout_horizontal: horizontaly margin
+
+  Possible enhancements:
+    - Add support for cart behavior to go to cart page after adding.
+
+  Pro tips:
+    - This template isn't primarly used since the cart drawer will be used instead.
+{% endcomment %}
+
+{% comment %}
+  Intentional redirect: the storefront uses the cart drawer as its only
+  cart surface, so /cart bounces to the homepage with ?cart — which
+  layout/theme.liquid's x-init reads to auto-open the drawer. Relative
+  URL so preview themes and alternate domains keep working. The markup
+  below remains as a functional no-JS fallback cart page.
+
+  (Previous version had a second, malformed <script> with an
+  unterminated string and a hardcoded production domain — the redirect
+  only worked via the x-init copy. Consolidated to one canonical
+  redirect here.)
+{% endcomment %}
+<script>
+  window.location.replace('/?cart');
+</script>
+
+<section class="{{ section.settings.page_color_scheme }}">
+
+  <div class="py-24
+    {{ settings.layout_horizontal }}">
+
+    <form action="{{ routes.cart_url }}" method="post">
+      <div class="flex flex-wrap items-start">
+
+        {%- comment -%}headline{%- endcomment -%}
+        {% if cart.item_count > 0 %}
+          <div class="w-full">
+            <h1>{{ 'cart.general.cart_heading' | t }} (<span>{{ cart.item_count }}</span>)</h1>
+          </div> 
+        {% else %}
+          <div class="w-full">
+            <h1>{{ 'cart.general.empty' | t }}</h1>
+          </div>
+          <a class="btn" href="{{ section.settings.empty_button_url }}">
+            {{ section.settings.empty_button_label }}
+          </a>
+        {% endif %}
+
+        {%- comment -%}cart{%- endcomment -%}
+        <div class="md:w-2/3 md:border--r-width w-full
+          {{ section.settings.color_border }}">
+          {% for item in cart.items %}
+            <div>
+              <div class="border--t-width flex w-full md:p-4 py-4 gap-2
+                {{ section.settings.color_border }}">
+
+                {%- comment -%}image{%- endcomment -%}
+                <a href="{{ item.url }}" 
+                  class="w-[20%] h-full">
+                  <div class="object-cover aspect-[1/1] aspect-w-1 aspect-h-1
+                  {{ settings.thumbmails_color_scheme }}">
+                    {% capture image_class %}w-full h-full object-cover aspect-[1/1] {{ settings.thumbmails_color_scheme }} {% endcapture %}
+                    {{ item.image | image_url: width: 320 | image_tag: style: 'object-fit:cover', class: image_class, loading: 'lazy', alt: product.title }}
+                  </div>
+                </a>
+
+                <div class="flex flex-col justify-between flex-grow gap-2">
+                  <div class="flex items-start justify-between gap-2">
+
+                    <div>
+                      <a href="{{ item.url }}" 
+                        class="hover:no-underline no-underline" tabindex="-1">
+                        <p class="mb-0 !leading-tight">{{ item.title }}</p>
+                        {%- for property in item.properties -%}
+                          {%- assign property_first_char = property.first | slice: 0 -%}
+                          {%- if property.last != blank and property_first_char != '_' -%}
+                              <p class="type--smaller mb-0 opacity-75">{{ property.first }}: {{ property.last }} </p>
+                          {%- endif -%}
+                        {%- endfor -%}
+                        <p class="type--smaller mb-0 opacity-75">{{ item.variant.title }}</p>           
+                        <p class="type--smaller mb-0 opacity-75">{{ item.sku }}</p>
+                        <p class="type--smaller mb-0 opacity-75">{{ item.selling_plan_allocation.selling_plan.name }}</p>
+                        {% for discount_allocation in item.discount_allocations %}
+                          <div class="mt-2">
+                            {% capture badge_content %}
+                              <span class="type--smaller type__nav mr-1">{{ discount_allocation.discount_application.title }}</span>
+                              <span class="type--smaller type__nav mr-1">{% if settings.type_seperator == 'dot' %}·{% else %}|{% endif %}</span>
+                              <span class="type--smaller type__nav">{{ discount_allocation.amount | money }}</span>
+                            {% endcapture %}
+                            {% render 'component__badge', 
+                              color: 'overlay-1',
+                              icon: 'tag',
+                              content: badge_content %}
+                          </div>
+                        {% endfor %}
+                      </a>
+                    </div>
+
+                    <div class="flex flex-col items-end">
+                      <span class="!leading-tight">{{ item.line_price | money }}</span>
+                      {% if item.original_price > item.line_price %}
+                        <span>
+                          <s class="!leading-tight">
+                            {{ item.original_price | money }}
+                          </s>
+                        </span>
+                      {% endif %}
+
+                      {% if item.unit_price %}
+                        <span class="type--small flex opacity-75">
+                          <span>
+                            {{ item.unit_price | money }}
+                          </span>
+                          <span>/</span>
+                          <span>
+                            {{ item.unit_price_measurement.reference_value }}
+                            {{ item.unit_price_measurement.reference_unit }}
+                          </span>
+                        </span>
+                      {% endif %}
+                    </div>
+                    
+                  </div>
+                  <div class="flex items-center justify-between">
+
+                    <div class="relative flex max-w-[150px] color__border-divider-2 border--width hover:color__border-selected-1 color__bg-overlay-1 border__input--radius overflow-hidden animation-500" 
+                      x-data="{ 
+                        button_loading: false,
+                        key: '{{ item.key }}',
+                        quantity: {{ item.quantity }}
+                      }">
+                      <button class="btn btn--smaller btn--plain shrink-0 !rounded-none" 
+                        :disabled="button_loading"
+                        title="{{ 'cart.general.decrease' | t }}"
+                        @click.prevent="
+                          changeCartItemQuantity(key, quantity-1, false, false);
+                          quantity--; 
+                          button_loading = true; 
+                          setTimeout(function(){ button_loading = false}, 1000);">
+                        {% render 'component__icon', icon: 'minus', size: '14', class: '' %}
+                      </button>
+                      <label for="quantity" class="sr-only">{{ 'products.general.quantity' | t }}</label>
+                      <input id="quantity" placeholder="1" type="text" 
+                        class="form-input !border-0 text-center !rounded-none"
+                        x-model='quantity'
+                        @change.debounce="
+                          changeCartItemQuantity(key, quantity, false, false);
+                          button_loading = true; 
+                          setTimeout(function(){ button_loading = false}, 1000);">
+                      <div class="btn__spinner btn--smaller !w-auto"
+                        :class="{ '!visible color__bg-overlay-1 z-10' : button_loading }">
+                        {% render 'component__icon', icon: 'spinner', size: '16', class: '' %}
+                      </div>
+                      <button class="btn btn--smaller btn--plain shrink-0 !rounded-none" 
+                        :disabled="button_loading"
+                        title="{{ 'cart.general.increase' | t }}"
+                        @click.prevent="changeCartItemQuantity(key, quantity+1, false, false);
+                        quantity++; 
+                        button_loading = true; 
+                        setTimeout(function(){ button_loading = false}, 1000);">
+                        {% render 'component__icon', icon: 'plus', size: '14', class: '' %}
+                      </button>
+                    </div>
+                
+                    <div>
+                      <a 
+                        href="{{ item.url_to_remove }}"
+                        class="btn btn--load btn--plain btn--small">
+                        {% render 'component__icon', icon: 'trash', size: '14', class: '' %}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        {%- comment -%}sidebar{%- endcomment -%}
+        {% if cart.total_price > 0 %}
+          <aside class="md:w-1/3 border--t-width sticky top-0 w-full
+            {{ section.settings.color_border }}
+            {{ section.settings.sidebar_color_scheme }}">
+              
+            {%- comment -%}subtotal{%- endcomment -%}
+            <div class="border--b-width w-full p-4 
+              {{ section.settings.color_border }}">
+              <div class="flex items-center justify-between w-full mb-1">
+                <span>{{ 'cart.general.subtotal' | t }}</span>
+                <span>{{ cart.original_total_price | money }}</span>
+              </div>
+              <div class="flex items-center justify-between w-full mb-1">
+                <span>{{ 'cart.general.discount' | t }}</span>
+                <span>-{{ cart.total_discount | money }}</span>
+              </div>
+              <div class="flex items-center justify-between w-full">
+                <span class="flex items-center w-full">
+                  <strong>{{ 'cart.general.total' | t }}</strong>
+                  {% if cart.taxes_included %}
+                    {%- capture taxes_included -%}
+                      {{ 'customer.order.taxes_included' | t }}
+                    {%- endcapture -%}
+                    <div class="ml-1">
+                      {% render 'component__badge', 
+                        color: 'overlay-1',
+                        icon: '',
+                        content: taxes_included %}
+                    </div>
+                  {% endif %}
+                </span>
+                <strong>{{ cart.total_price | money }}</strong>
+              </div>
+            </div>
+
+            {%- comment -%}notes{%- endcomment -%}
+            {% if section.settings.enable_cart_note %}
+              <div class="border--b-width w-full p-4 
+                {{ section.settings.color_border }}" 
+                x-data="{ reveal: cart.note != '', currentNote: cart.note }"
+                x-show="cart.items.length > 0"
+                x-cloak>
+                <label class="flex items-center">
+                  <label for="notes" class="sr-only">{{ 'cart.notes.title' | t }}</label>
+                  <input id="notes" :checked="reveal" type="checkbox" class="form-checkbox" @click="reveal = ! reveal">
+                  <p class="text--small mb-0 ml-2">{{ 'cart.notes.add' | t }}</p>
+                </label>
+                <textarea 
+                  name="note"
+                  rows="4" 
+                  class="form-textarea border--radius w-full mt-2"
+                  placeholder="{{ 'cart.notes.placeholder_alt' | t }}"
+                  x-model="currentNote"
+                  @keydown.debounce="updateCartNote(currentNote)"
+                  x-show="reveal"
+                  x-cloak></textarea>
+              </div>
+            {% endif %}
+
+            {%- comment -%}checkout{%- endcomment -%}
+            <div class="mt-auto">
+              <div class="w-full p-4">
+                <label for="checkout" class="sr-only">{{ 'cart.general.checkout' | t }}</label>
+                <input 
+                  id="checkout"
+                  class="!w-full btn mb-2"
+                  type="submit" 
+                  name="checkout" 
+                  value="Checkout {% if settings.type_seperator == 'dot' %}·{% else %}|{% endif %} {{ cart.total_price | money_with_currency | strip_html }}">
+
+                {% if section.settings.enable_dynamic_checkout %}
+                  {% if additional_checkout_buttons %}
+                    <div class="additional-checkout-buttons additional-checkout-buttons--vertical mb-2">
+                      {{ content_for_additional_checkout_buttons }}
+                    </div>
+                  {% endif %}
+                {% endif %}
+                {%- unless section.settings.main_disclaimer == blank %}
+                  <div class="type--smaller m-0--clear">
+                    {{ section.settings.main_disclaimer }}
+                  </div>
+                {%- endunless -%}
+              </div>
+            </div>
+
+          
+            
+          </aside>
+        {% endif %}
+
+      </div>
+    </form>
+      
+  </div>
+</section>
+
+{% schema %}
+{
+  "name":"t:sections.cart.name",
+  "settings":[
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__6.content"
+    },
+    {
+      "type":"select",
+      "id":"page_color_scheme",
+      "label":"t:sections.all.colors.settings.color_scheme.label",
+      "options":[
+        {
+          "value":"color__bg-body color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value":"color__bg-neutral color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value":"color__bg-overlay-1 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value":"color__bg-overlay-2 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value":"color__bg-overlay-3 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value":"color__bg-primary color__primary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value":"color__bg-secondary color__secondary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value":"color__bg-tertiary color__tertiary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default":"color__bg-overlay-1 color__text"
+    },
+    {
+      "type":"select",
+      "id":"color_border",
+      "label":"t:sections.all.colors.settings.color_border.label",
+      "options":[
+        {
+          "value":"color__border-divider-1",
+          "label":"t:sections.all.colors.settings.color_border.options__1.label"
+        },
+        {
+          "value":"color__border-selected-1",
+          "label":"t:sections.all.colors.settings.color_border.options__2.label"
+        },
+        {
+          "value":"!color__border-transparent",
+          "label":"t:sections.all.colors.settings.color_border.options__3.label"
+        }
+      ],
+      "default":"color__border-divider-1"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__7.content"
+    },
+    {
+      "type":"select",
+      "id":"sidebar_color_scheme",
+      "label":"t:sections.all.colors.settings.color_scheme.label",
+      "options":[
+        {
+          "value":"color__bg-body color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value":"color__bg-neutral color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value":"color__bg-overlay-1 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value":"color__bg-overlay-2 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value":"color__bg-overlay-3 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value":"color__bg-primary color__primary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value":"color__bg-secondary color__secondary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value":"color__bg-tertiary color__tertiary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default":"color__bg-overlay-1 color__text"
+    },
+    {
+      "type":"richtext",
+      "id":"main_disclaimer",
+      "label":"t:sections.cart.settings.main_disclaimer.label"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__9.content"
+    },
+    {
+      "type":"text",
+      "id":"empty_button_label",
+      "label":"t:sections.cart.settings.empty_button_label.label",
+      "default":{
+        "en":"Shop all",
+        "es": "Comprar todo",
+        "it": "Acquista tutto",
+        "de": "Alles kaufen",
+        "fr": "Magasiner tout"
+      }
+    },
+    {
+      "type":"url",
+      "id":"empty_button_url",
+      "label":"t:sections.cart.settings.empty_button_url.label",
+      "default":"/collections/all"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__8.content"
+    },
+    {
+      "type":"checkbox",
+      "id":"enable_cart_note",
+      "label":"t:sections.cart.settings.enable_cart_note.label"
+    },
+    {
+      "type":"checkbox",
+      "id":"enable_dynamic_checkout",
+      "label":"t:sections.cart.settings.enable_dynamic_checkout.label"
+    }
+  ],
+  "presets":[
+    {
+      "name":"t:sections.cart.name"
+    }
+  ],
+  "templates":[
+    "cart"
+  ]
+}
+{% endschema %}

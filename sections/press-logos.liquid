@@ -1,0 +1,557 @@
+<!-- sections/press-logos.liquid -->
+{% comment %}
+  Press/logo bar with quote carousel.
+  Each block is a press mention: logo image, quote text.
+  On mobile: single quote + single logo with swipe and dot indicators.
+  On desktop: quote carousel on top, all logos displayed in a row below.
+{% endcomment %}
+
+<section class="{{ section.settings.visibility }}{% if section.settings.use_global_spacing == 'global' %} spacing-global{% elsif section.settings.use_global_spacing == 'global-sides' %} spacing-sides{% endif %}"
+  style="
+    {% if section.settings.use_global_spacing == 'custom' %}
+      padding-top:{{ section.settings.spacing_top }}px;
+      padding-bottom:{{ section.settings.spacing_bottom }}px;
+    {% elsif section.settings.use_global_spacing == 'global-sides' %}
+      padding-top:{{ section.settings.spacing_top }}px;
+      padding-bottom:{{ section.settings.spacing_bottom }}px;
+    {% endif %}
+    {% if section.settings.background_color != blank %}
+      background-color:{{ section.settings.background_color }};
+    {% endif %}">
+
+  {%- comment -%} Resolve quote font token vs manual {%- endcomment -%}
+  {% assign pl_quote_use_token = false %}
+  {% assign pl_quote_token_class = '' %}
+  {% assign pl_quote_font_style = '' %}
+  {% if section.settings.quote_font contains 'token-' %}
+    {% assign pl_quote_use_token = true %}
+    {% assign pl_quote_token_class = section.settings.quote_font | replace: 'token-', 'type-' %}
+  {% elsif section.settings.quote_font == 'body' %}
+    {% assign pl_quote_font_style = 'font-family:var(--type-font-body-family);' %}
+  {% elsif section.settings.quote_font == 'heading' %}
+    {% assign pl_quote_font_style = 'font-family:var(--type-font-header-family);' %}
+  {% elsif section.settings.quote_font == 'nav' %}
+    {% assign pl_quote_font_style = 'font-family:var(--type-font-nav-family);' %}
+  {% elsif section.settings.quote_font == 'handwritten' %}
+    {% assign pl_quote_font_style = 'font-family:var(--type-font-handwritten-family);' %}
+  {% endif %}
+
+  {%- comment -%} ===== MOBILE: full-width swipe carousel with quote + logo + dots ===== {%- endcomment -%}
+  <div class="md:hidden"
+    x-data="{
+      current: 0,
+      total: {{ section.blocks.size }},
+      touchStartX: 0,
+      touchEndX: 0,
+      handleSwipe() {
+        const diff = this.touchStartX - this.touchEndX;
+        if (Math.abs(diff) > 50) {
+          if (diff > 0 && this.current < this.total - 1) this.current++;
+          else if (diff < 0 && this.current > 0) this.current--;
+        }
+      }
+    }"
+    @touchstart="touchStartX = $event.changedTouches[0].screenX"
+    @touchend="touchEndX = $event.changedTouches[0].screenX; handleSwipe()">
+
+    <div class="relative overflow-hidden">
+      <div class="flex transition-transform duration-300 ease-in-out"
+        :style="'transform: translateX(-' + (current * 100) + '%)'">
+        {% for block in section.blocks %}
+          <div class="w-full flex-shrink-0 flex flex-col items-center text-center px-6"
+            {{ block.shopify_attributes }}>
+
+            {%- comment -%} Quote {%- endcomment -%}
+            {%- unless block.settings.quote == blank -%}
+              <p style="
+                {% unless pl_quote_use_token %}
+                  font-size:{{ section.settings.quote_size_mobile }}px;
+                  font-weight:{{ section.settings.quote_weight }};
+                  line-height:{{ section.settings.quote_line_height }};
+                  {{ pl_quote_font_style }}
+                {% endunless %}
+                {% if section.settings.quote_color != blank %}
+                  color:{{ section.settings.quote_color }};
+                {% endif %}"
+                class="mb-0{% if pl_quote_use_token %} {{ pl_quote_token_class }}{% endif %}">
+                "{{ block.settings.quote }}"
+              </p>
+            {%- endunless -%}
+
+            {%- comment -%} Logo {%- endcomment -%}
+            {%- unless block.settings.logo == blank -%}
+              <div style="
+                margin-top:{{ section.settings.quote_logo_spacing }}px;
+                height:{{ section.settings.logo_height_mobile }}px;
+                display:flex;
+                align-items:center;
+                justify-content:center;">
+                {% if block.settings.link_url != blank %}
+                  <a href="{{ block.settings.link_url }}" class="no-underline" target="_blank" rel="noopener">
+                {% endif %}
+                {{ block.settings.logo | image_url: height: 200 | image_tag:
+                  class: 'object-contain',
+                  style: 'max-height:100%;width:auto;',
+                  loading: 'lazy',
+                  alt: block.settings.name }}
+                {% if block.settings.link_url != blank %}
+                  </a>
+                {% endif %}
+              </div>
+            {%- endunless -%}
+
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {%- comment -%} Dot indicators {%- endcomment -%}
+    <div class="flex justify-center items-center gap-2"
+      style="padding-top:{{ section.settings.dot_spacing_top }}px;padding-bottom:{{ section.settings.dot_spacing_bottom }}px;">
+      {% for block in section.blocks %}
+        <button
+          @click="current = {{ forloop.index0 }}"
+          :style="current === {{ forloop.index0 }}
+            ? 'width:{{ section.settings.dot_size }}px;height:{{ section.settings.dot_size }}px;border-radius:50%;border:none;padding:0;cursor:pointer;transition:background 0.3s ease;background:{{ section.settings.dot_active_color }};'
+            : 'width:{{ section.settings.dot_size }}px;height:{{ section.settings.dot_size }}px;border-radius:50%;border:none;padding:0;cursor:pointer;transition:background 0.3s ease;background:{{ section.settings.dot_inactive_color }};'"
+          aria-label="Go to slide {{ forloop.index }}">
+        </button>
+      {% endfor %}
+    </div>
+  </div>
+
+  {%- comment -%} ===== DESKTOP: quote carousel on top, all logos in a row below ===== {%- endcomment -%}
+  <div class="hidden md:block"
+    x-data="{
+      current: 0,
+      total: {{ section.blocks.size }},
+      autoplay: null,
+      startAutoplay() {
+        if ({{ section.settings.autoplay_speed }} > 0) {
+          this.autoplay = setInterval(() => {
+            this.current = (this.current + 1) % this.total;
+          }, {{ section.settings.autoplay_speed }}000);
+        }
+      },
+      stopAutoplay() {
+        if (this.autoplay) clearInterval(this.autoplay);
+      }
+    }"
+    x-init="startAutoplay()"
+    @mouseenter="stopAutoplay()"
+    @mouseleave="startAutoplay()">
+
+    {%- comment -%} Quote area {%- endcomment -%}
+    <div class="relative overflow-hidden" style="padding:0 {{ section.settings.quote_padding_sides }}px;">
+      {% for block in section.blocks %}
+        <div
+          x-show="current === {{ forloop.index0 }}"
+          x-transition:enter="transition ease-out duration-300"
+          x-transition:enter-start="opacity-0"
+          x-transition:enter-end="opacity-100"
+          x-transition:leave="transition ease-in duration-200"
+          x-transition:leave-start="opacity-100"
+          x-transition:leave-end="opacity-0"
+          class="text-center"
+          {% if forloop.first == false %}style="position:absolute;top:0;left:0;right:0;"{% endif %}>
+          {%- unless block.settings.quote == blank -%}
+            <p style="
+              max-width:{{ section.settings.quote_max_width }}px;
+              {% unless pl_quote_use_token %}
+                font-size:{{ section.settings.quote_size_desktop }}px;
+                font-weight:{{ section.settings.quote_weight }};
+                line-height:{{ section.settings.quote_line_height }};
+                {{ pl_quote_font_style }}
+              {% endunless %}
+              {% if section.settings.quote_color != blank %}
+                color:{{ section.settings.quote_color }};
+              {% endif %}"
+              class="mb-0 mx-auto{% if pl_quote_use_token %} {{ pl_quote_token_class }}{% endif %}">
+              "{{ block.settings.quote }}"
+            </p>
+          {%- endunless -%}
+        </div>
+      {% endfor %}
+    </div>
+
+    {%- comment -%} Logo row {%- endcomment -%}
+    <div class="flex items-center justify-center flex-wrap"
+      style="
+        gap:{{ section.settings.logo_gap }}px;
+        padding-top:{{ section.settings.quote_logo_spacing }}px;
+        padding-left:{{ section.settings.logo_padding_sides }}px;
+        padding-right:{{ section.settings.logo_padding_sides }}px;">
+      {% for block in section.blocks %}
+        {%- unless block.settings.logo == blank -%}
+          <div style="
+            height:{{ section.settings.logo_height_desktop }}px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            cursor:pointer;
+            opacity:0.8;
+            transition:opacity 0.2s ease;"
+            @click="current = {{ forloop.index0 }}"
+            @mouseenter="$el.style.opacity='1'"
+            @mouseleave="$el.style.opacity='0.8'">
+            {% if block.settings.link_url != blank %}
+              <a href="{{ block.settings.link_url }}" class="no-underline" target="_blank" rel="noopener" style="display:flex;align-items:center;height:100%;">
+            {% endif %}
+            {{ block.settings.logo | image_url: height: 200 | image_tag:
+              class: 'object-contain',
+              style: 'max-height:100%;width:auto;',
+              loading: 'lazy',
+              alt: block.settings.name }}
+            {% if block.settings.link_url != blank %}
+              </a>
+            {% endif %}
+          </div>
+        {%- endunless -%}
+      {% endfor %}
+    </div>
+
+    {%- comment -%} Dot indicators {%- endcomment -%}
+    <div class="flex justify-center items-center gap-2"
+      style="padding-top:{{ section.settings.dot_spacing_top }}px;padding-bottom:{{ section.settings.dot_spacing_bottom }}px;">
+      {% for block in section.blocks %}
+        <button
+          @click="current = {{ forloop.index0 }}"
+          :style="current === {{ forloop.index0 }}
+            ? 'width:{{ section.settings.dot_size }}px;height:{{ section.settings.dot_size }}px;border-radius:50%;border:none;padding:0;cursor:pointer;transition:background 0.3s ease;background:{{ section.settings.dot_active_color }};'
+            : 'width:{{ section.settings.dot_size }}px;height:{{ section.settings.dot_size }}px;border-radius:50%;border:none;padding:0;cursor:pointer;transition:background 0.3s ease;background:{{ section.settings.dot_inactive_color }};'"
+          aria-label="Go to slide {{ forloop.index }}">
+        </button>
+      {% endfor %}
+    </div>
+  </div>
+
+</section>
+
+{% schema %}
+{
+  "name": "Press logos",
+  "class": "section",
+  "settings": [
+
+    {
+      "type": "header",
+      "content": "Quote styling"
+    },
+    {
+      "type": "select",
+      "id": "quote_font",
+      "label": "Quote font",
+      "options": [
+        { "value": "token-display", "label": "↳ Use theme token (Display)" },
+        { "value": "token-h1", "label": "↳ Use theme token (H1)" },
+        { "value": "token-h2", "label": "↳ Use theme token (H2)" },
+        { "value": "token-h3", "label": "↳ Use theme token (H3)" },
+        { "value": "token-body", "label": "↳ Use theme token (Body)" },
+        { "value": "token-small", "label": "↳ Use theme token (Small)" },
+        { "value": "token-label", "label": "↳ Use theme token (Label)" },
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "body", "label": "Forma DJR" },
+        { "value": "heading", "label": "PP Right Grotesk" },
+        { "value": "handwritten", "label": "Thread Handwritten" }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "range",
+      "id": "quote_size_mobile",
+      "label": "Quote font size — mobile (px)",
+      "min": 12,
+      "max": 36,
+      "step": 1,
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "quote_size_desktop",
+      "label": "Quote font size — desktop (px)",
+      "min": 12,
+      "max": 48,
+      "step": 1,
+      "default": 18
+    },
+    {
+      "type": "select",
+      "id": "quote_weight",
+      "label": "Quote font weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "range",
+      "id": "quote_line_height",
+      "label": "Quote line height",
+      "min": 1.0,
+      "max": 2.5,
+      "step": 0.1,
+      "default": 1.5
+    },
+    {
+      "type": "color",
+      "id": "quote_color",
+      "label": "Quote text color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "range",
+      "id": "quote_max_width",
+      "label": "Quote max width — desktop (px)",
+      "min": 300,
+      "max": 1000,
+      "step": 10,
+      "default": 700
+    },
+    {
+      "type": "range",
+      "id": "quote_padding_sides",
+      "label": "Quote side padding (px)",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 24
+    },
+
+    {
+      "type": "header",
+      "content": "Logos"
+    },
+    {
+      "type": "range",
+      "id": "logo_height_mobile",
+      "label": "Logo height — mobile (px)",
+      "min": 20,
+      "max": 100,
+      "step": 2,
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "logo_height_desktop",
+      "label": "Logo height — desktop (px)",
+      "min": 20,
+      "max": 120,
+      "step": 2,
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "logo_gap",
+      "label": "Gap between logos — desktop (px)",
+      "min": 10,
+      "max": 120,
+      "step": 5,
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "logo_padding_sides",
+      "label": "Logo row side padding (px)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 40
+    },
+
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "quote_logo_spacing",
+      "label": "Spacing between quote and logos (px)",
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "use_global_spacing",
+      "label": "Spacing mode",
+      "options": [
+        { "value": "global", "label": "↳ Use global spacing" },
+        { "value": "global-sides", "label": "↳ Use global sides only" },
+        { "value": "custom", "label": "Custom (use settings below)" }
+      ],
+      "default": "custom",
+      "info": "Global spacing is set in Theme Settings > Typography tokens"
+    },
+    {
+      "type": "range",
+      "id": "spacing_top",
+      "label": "Section padding top (px)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "spacing_bottom",
+      "label": "Section padding bottom (px)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 40
+    },
+
+    {
+      "type": "header",
+      "content": "Dot indicators"
+    },
+    {
+      "type": "range",
+      "id": "dot_size",
+      "label": "Dot size (px)",
+      "min": 6,
+      "max": 16,
+      "step": 1,
+      "default": 10
+    },
+    {
+      "type": "color",
+      "id": "dot_active_color",
+      "label": "Dot active color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "dot_inactive_color",
+      "label": "Dot inactive color",
+      "default": "#CCCCCC"
+    },
+    {
+      "type": "range",
+      "id": "dot_spacing_top",
+      "label": "Dot area top spacing (px)",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "dot_spacing_bottom",
+      "label": "Dot area bottom spacing (px)",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "default": 8
+    },
+
+    {
+      "type": "header",
+      "content": "Autoplay"
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Autoplay interval (seconds, 0 = off)",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 5
+    },
+
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#F0F0F0"
+    },
+    {
+      "type": "select",
+      "id": "visibility",
+      "label": "Visibility",
+      "options": [
+        { "value": "", "label": "All devices" },
+        { "value": "hidden md:block", "label": "Desktop only" },
+        { "value": "md:hidden", "label": "Mobile only" }
+      ],
+      "default": ""
+    }
+  ],
+
+  "blocks": [
+    {
+      "type": "press_item",
+      "name": "Press mention",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "logo",
+          "label": "Logo image"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Publication name",
+          "default": "Publication"
+        },
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Quote",
+          "default": "These are the products everyone is talking about."
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link URL (optional)"
+        }
+      ]
+    }
+  ],
+
+  "presets": [
+    {
+      "name": "Press logos",
+      "blocks": [
+        {
+          "type": "press_item",
+          "settings": {
+            "name": "Barstool Sports",
+            "quote": "These are the jeans guys reach for when comfort matters but style still counts."
+          }
+        },
+        {
+          "type": "press_item",
+          "settings": {
+            "name": "Esquire",
+            "quote": "The most comfortable jeans you'll ever own."
+          }
+        },
+        {
+          "type": "press_item",
+          "settings": {
+            "name": "ESPN",
+            "quote": "A game-changer in the world of men's fashion."
+          }
+        },
+        {
+          "type": "press_item",
+          "settings": {
+            "name": "Forbes",
+            "quote": "Redefining what it means to look good and feel great."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

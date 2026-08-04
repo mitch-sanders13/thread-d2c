@@ -1,0 +1,842 @@
+<!-- sections/bundle-builder.liquid -->
+{% comment %}
+  Trifecta bundle builder. Step-by-step wizard: customer picks one slot per
+  step (Wallet → Lanyard → Chapstick), reviews all three, then adds to cart.
+
+  Each slot block exposes up to 4 silhouette options. Each silhouette points
+  to a Shopify collection whose products become the color choices for that
+  silhouette.
+
+  Auto-match (review-screen toggle, default ON): when changing a color on
+  the review screen, the other slots' currently-selected silhouettes will
+  also snap to a product with the matching `color_<slug>` tag if one
+  exists.
+
+  Discount: real application happens at checkout via a Shopify discount
+  code (settings.discount_code → /discount/CODE?redirect=/cart after
+  successful add). The discount_type/discount_value settings here only
+  control the visible savings label on the review screen.
+
+  The same section is used in four places:
+    1. /pages/build-your-trifecta (standalone page template)
+    2. PDP "Make it a Trifecta" drawer — bundle__drawer.liquid fetches this
+       via the Shopify Section Rendering API and calls lockSlot() to pin
+       the customer's current product.
+    3. Cart drawer "Edit bundle" — same drawer pattern, calls
+       prefillFromCart() with the customer's three existing line items and
+       lands on the review step.
+    4. Cart drawer "Complete your Trifecta" upsell — same drawer pattern,
+       calls prefillForUpsell() with the customer's 1-2 cart items that
+       match a bundle slot. Lands on the first incomplete step. On bundle
+       completion, the pre-existing eligible items are removed and the new
+       bundle items take their place via the discount-code redirect.
+{% endcomment %}
+
+{%- liquid
+  assign section_id = 'bundle-builder-' | append: section.id
+  comment
+    Shopify section IDs inside JSON templates look like
+    `template--12345__my_section` — the `-` characters are illegal in JS
+    identifiers, so we derive a safe variant for JS expressions
+    (factory function name, Alpine.data name, x-data attribute).
+  endcomment
+  assign js_id = section.id | replace: '-', '_'
+  assign discount_type = section.settings.discount_type
+  assign discount_value = section.settings.discount_value | default: 0
+  assign slot_count = section.blocks | size
+  if slot_count == 0
+    assign slot_count = 1
+  endif
+-%}
+
+{%- comment -%} bundle-builder.css is loaded globally from layout/theme.liquid {%- endcomment -%}
+
+<section
+  id="{{ section_id }}"
+  class="
+    {{ section.settings.visibility }}
+    {{ section.settings.color_scheme }}
+    {{ section.settings.color_border }}
+    {{ section.settings.style_border }}
+  ">
+  <div
+    class="bundle-wizard {{ section.settings.layout_horizontal }}"
+    style="
+      padding-top:{{ section.settings.spacing_top }}px;
+      padding-bottom:{{ section.settings.spacing_bottom }}px;
+    "
+    x-data="bundleBuilder_{{ js_id }}">
+
+    {%- comment -%} optional page-level heading shown above the wizard {%- endcomment -%}
+    {%- unless section.settings.heading == blank and section.settings.subheading == blank -%}
+      <div class="flex flex-col items-center px-4 pb-4 text-center">
+        <div class="max-w-prose">
+          {%- unless section.settings.heading == blank -%}
+            <h2>{{ section.settings.heading }}</h2>
+          {%- endunless -%}
+          {%- unless section.settings.subheading == blank -%}
+            <div class="m-0--clear pt-2">
+              {{ section.settings.subheading }}
+            </div>
+          {%- endunless -%}
+        </div>
+      </div>
+    {%- endunless -%}
+
+    {%- comment -%} persistent savings strip + step progress dots + back {%- endcomment -%}
+    {% render 'bundle__wizard-header' %}
+
+    {%- comment -%} slot steps — only the active one is visible {%- endcomment -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'slot' -%}
+        <div x-show="!reviewMode && currentStep === {{ forloop.index0 }}" x-cloak>
+          {% render 'bundle__wizard-step',
+              block: block,
+              slot_index: forloop.index0,
+              section_id: section_id %}
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- comment -%} review step {%- endcomment -%}
+    <div x-show="reviewMode" x-cloak>
+      {% render 'bundle__wizard-review',
+          discount_type: discount_type,
+          discount_value: discount_value %}
+    </div>
+
+    {%- comment -%} sticky footer (slot steps only) {%- endcomment -%}
+    <div x-show="!reviewMode" x-cloak>
+      {% render 'bundle__wizard-footer' %}
+    </div>
+
+  </div>
+</section>
+
+{%- comment -%} per-section product data {%- endcomment -%}
+<script type="application/json" id="{{ section_id }}-data">
+{
+  "discountCode": {{ section.settings.discount_code | default: settings.trifecta_discount_code | default: '' | strip | json }},
+  "slots": [
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'slot' -%}
+        {
+          "label": {{ block.settings.label | default: 'Slot' | json }},
+          "required": {{ block.settings.required | default: true | json }},
+          "defaultSilhouette": {{ block.settings.default_silhouette | default: 1 | minus: 1 | json }},
+          "silhouettes": [
+            {%- assign silhouette_indexes = '1,2,3,4' | split: ',' -%}
+            {%- assign valid_idxs = '' -%}
+            {%- for idx in silhouette_indexes -%}
+              {%- assign label_key = 'silhouette_' | append: idx | append: '_label' -%}
+              {%- assign coll_key = 'silhouette_' | append: idx | append: '_collection' -%}
+              {%- if block.settings[label_key] != blank and block.settings[coll_key] != blank -%}
+                {%- assign valid_idxs = valid_idxs | append: idx | append: ',' -%}
+              {%- endif -%}
+            {%- endfor -%}
+            {%- assign valid_idx_arr = valid_idxs | split: ',' -%}
+            {%- for idx in valid_idx_arr -%}
+              {%- assign label_key = 'silhouette_' | append: idx | append: '_label' -%}
+              {%- assign coll_key = 'silhouette_' | append: idx | append: '_collection' -%}
+              {%- assign s_label = block.settings[label_key] -%}
+              {%- assign s_coll_value = block.settings[coll_key] -%}
+              {%- comment -%}
+                Settings of type=collection return a Collection object via dot
+                access (block.settings.foo) but the underlying handle string
+                via bracket access (block.settings[var]). Normalize so the
+                .products iteration below works.
+              {%- endcomment -%}
+              {%- if s_coll_value.products -%}
+                {%- assign s_coll = s_coll_value -%}
+              {%- else -%}
+                {%- assign s_coll = collections[s_coll_value] -%}
+              {%- endif -%}
+              {
+                "label": {{ s_label | json }},
+                "products": [
+                  {%- for product in s_coll.products limit: 50 -%}
+                    {%- assign color_tag = '' -%}
+                    {%- for tag in product.tags -%}
+                      {%- assign tag_lc = tag | downcase | strip -%}
+                      {%- if tag_lc contains 'color_' -%}
+                        {%- assign color_tag = tag_lc | remove_first: 'color_' -%}
+                        {%- break -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+                    {%- assign first_variant = product.selected_or_first_available_variant -%}
+                    {%- assign swatch_img = product.featured_image | image_url: width: 400 -%}
+                    {%- assign swatch_img_400 = product.featured_image | image_url: width: 400 -%}
+                    {%- assign swatch_img_600 = product.featured_image | image_url: width: 600 -%}
+                    {%- assign swatch_img_900 = product.featured_image | image_url: width: 900 -%}
+                    {
+                      "handle": {{ product.handle | json }},
+                      "title": {{ product.title | json }},
+                      "url": {{ product.url | json }},
+                      "price": {{ first_variant.price | json }},
+                      "compareAtPrice": {{ first_variant.compare_at_price | default: 0 | json }},
+                      "available": {{ first_variant.available | json }},
+                      "variantId": {{ first_variant.id | json }},
+                      "swatchImage": {{ swatch_img | json }},
+                      "swatchImage400": {{ swatch_img_400 | json }},
+                      "swatchImage600": {{ swatch_img_600 | json }},
+                      "swatchImage900": {{ swatch_img_900 | json }},
+                      "colorTag": {{ color_tag | json }}
+                    }{%- unless forloop.last -%},{%- endunless -%}
+                  {%- endfor -%}
+                ]
+              }{%- unless forloop.last -%},{%- endunless -%}
+            {%- endfor -%}
+          ]
+        }
+        {%- unless forloop.last -%},{%- endunless -%}
+      {%- endif -%}
+    {%- endfor -%}
+  ]
+}
+</script>
+
+<script>
+(function() {
+  function bundleBuilderFactory_{{ js_id }}() {
+    return {
+      // ------- existing data (unchanged) -------
+      slots: [],
+      autoMatch: {{ section.settings.auto_match_default | default: true | json }},
+      cartLoading: false,
+      incompleteReason: '',
+      discountCode: '',
+
+      // ------- wizard state -------
+      currentStep: 0,
+      reviewMode: false,
+      visitedSteps: [],
+      pageSize: 12,
+      pagesShown: [],
+
+      // ------- edit-from-cart state -------
+      editingBundleId: null,
+      editingKeys: [],
+
+      init() {
+        var dataEl = document.getElementById('{{ section_id }}-data');
+        if (!dataEl) return;
+        var data;
+        try { data = JSON.parse(dataEl.textContent); }
+        catch (e) { console.error('[bundle-builder] bad JSON data', e); return; }
+        this.discountCode = (data.discountCode || '').trim();
+        var self = this;
+        this.slots = data.slots.map(function(slot) {
+          var sIdx = slot.defaultSilhouette;
+          if (sIdx >= slot.silhouettes.length) sIdx = 0;
+          var s = slot.silhouettes[sIdx];
+          var firstAvailable = s ? (s.products.find(function(p){ return p.available; }) || s.products[0]) : null;
+          return {
+            label: slot.label,
+            required: slot.required,
+            silhouettes: slot.silhouettes,
+            silhouetteIndex: sIdx,
+            selectedHandle: firstAvailable ? firstAvailable.handle : null,
+            matchedByAuto: false,
+            locked: false
+          };
+        });
+        this.pagesShown = this.slots.map(function() { return 1; });
+        this.visitedSteps = this.slots.map(function(_, i) { return i === 0; });
+
+        // Cart-upsell entry point: when the customer hits the trifecta page
+        // via the cart's "Complete your Trifecta" CTA, the URL carries
+        // slot_<label>=<handle> params for each pre-existing eligible item,
+        // and (optionally) replace_keys=key1,key2,... line item keys to
+        // remove when the bundle is finalized.
+        this._readUrlPrefill();
+      },
+
+      _readUrlPrefill() {
+        try {
+          var params = new URLSearchParams(window.location.search || '');
+          var items = [];
+          var self = this;
+          this.slots.forEach(function(slot) {
+            var handle = params.get('slot_' + slot.label.toLowerCase());
+            if (handle) items.push({ slotLabel: slot.label, handle: handle, key: null });
+          });
+          if (!items.length) return;
+          var replaceKeys = (params.get('replace_keys') || '').split(',').filter(Boolean);
+          this.prefillForUpsell({ items: items });
+          // prefillForUpsell sets editingKeys from payload.items[].key (all null
+          // here), so override with the keys from the URL.
+          this.editingKeys = replaceKeys;
+        } catch (e) {
+          console.error('[bundle-builder] url prefill failed', e);
+        }
+      },
+
+      // ------- existing helpers -------
+
+      lockSlot(slotLabel, productHandle) {
+        var target = (slotLabel || '').toLowerCase();
+        for (var i = 0; i < this.slots.length; i++) {
+          if (this.slots[i].label.toLowerCase() !== target) continue;
+          for (var j = 0; j < this.slots[i].silhouettes.length; j++) {
+            var s = this.slots[i].silhouettes[j];
+            var match = s.products.find(function(p){ return p.handle === productHandle; });
+            if (match) {
+              this.slots[i].silhouetteIndex = j;
+              this.slots[i].selectedHandle = productHandle;
+              this.slots[i].locked = true;
+              this.slots[i].matchedByAuto = false;
+              this.visitedSteps[i] = true;
+              if (this.autoMatch && match.colorTag) {
+                this.applyAutoMatch(i, match.colorTag);
+              }
+              // Jump past the locked step so the customer starts where they have work to do.
+              var firstIncomplete = this.firstIncompleteStep();
+              if (firstIncomplete >= 0) this.currentStep = firstIncomplete;
+              return true;
+            }
+          }
+          console.warn('[bundle-builder] product handle not found in slot', slotLabel, productHandle);
+          return false;
+        }
+        console.warn('[bundle-builder] no slot with label', slotLabel);
+        return false;
+      },
+
+      currentSilhouette(slotIdx) {
+        var slot = this.slots[slotIdx];
+        if (!slot) return null;
+        return slot.silhouettes[slot.silhouetteIndex] || null;
+      },
+
+      currentProduct(slotIdx) {
+        var s = this.currentSilhouette(slotIdx);
+        if (!s || !this.slots[slotIdx].selectedHandle) return null;
+        return s.products.find(function(p){ return p.handle === this.slots[slotIdx].selectedHandle; }.bind(this)) || null;
+      },
+
+      selectSilhouette(slotIdx, silhouetteIdx) {
+        var slot = this.slots[slotIdx];
+        if (!slot || slot.locked || silhouetteIdx === slot.silhouetteIndex) return;
+        slot.silhouetteIndex = silhouetteIdx;
+        slot.matchedByAuto = false;
+        this.pagesShown[slotIdx] = 1;
+        var s = slot.silhouettes[silhouetteIdx];
+        var first = s ? (s.products.find(function(p){ return p.available; }) || s.products[0]) : null;
+        slot.selectedHandle = first ? first.handle : null;
+        if (this.autoMatch && slot.selectedHandle) {
+          var color = first ? first.colorTag : '';
+          if (color) this.applyAutoMatch(slotIdx, color);
+        }
+      },
+
+      selectColor(slotIdx, handle) {
+        var slot = this.slots[slotIdx];
+        if (!slot || slot.locked) return;
+        slot.selectedHandle = handle;
+        slot.matchedByAuto = false;
+        var product = this.currentProduct(slotIdx);
+        if (this.autoMatch && product && product.colorTag) {
+          this.applyAutoMatch(slotIdx, product.colorTag);
+        }
+      },
+
+      applyAutoMatch(sourceSlotIdx, colorTag) {
+        for (var i = 0; i < this.slots.length; i++) {
+          if (i === sourceSlotIdx) continue;
+          var slot = this.slots[i];
+          var s = slot.silhouettes[slot.silhouetteIndex];
+          if (!s) continue;
+          var match = s.products.find(function(p){ return p.colorTag === colorTag && p.available; });
+          if (match) {
+            slot.selectedHandle = match.handle;
+            slot.matchedByAuto = true;
+          }
+        }
+      },
+
+      isMatched(slotIdx, handle) {
+        var slot = this.slots[slotIdx];
+        return slot && slot.matchedByAuto && slot.selectedHandle === handle;
+      },
+
+      subtotalCents() {
+        var sum = 0;
+        for (var i = 0; i < this.slots.length; i++) {
+          var p = this.currentProduct(i);
+          if (p) sum += p.price;
+        }
+        return sum;
+      },
+
+      discountCents() {
+        var sub = this.subtotalCents();
+        if (!this.canAddToCart()) return 0;
+        {% case discount_type %}
+          {% when 'percent' %}
+            return Math.round(sub * ({{ discount_value | default: 0 }} / 100));
+          {% when 'fixed_off' %}
+            return Math.min(sub, {{ discount_value | default: 0 | times: 100 }});
+          {% else %}
+            return 0;
+        {% endcase %}
+      },
+
+      totalCents() {
+        return Math.max(0, this.subtotalCents() - this.discountCents());
+      },
+
+      formatMoney(cents) {
+        if (typeof cents !== 'number') return '';
+        if (window.Shopify && window.Shopify.formatMoney) {
+          return window.Shopify.formatMoney(cents, '{{ cart.currency.symbol }}');
+        }
+        return '$' + (cents / 100).toFixed(2);
+      },
+
+      canAddToCart() {
+        for (var i = 0; i < this.slots.length; i++) {
+          var slot = this.slots[i];
+          if (!slot.required) continue;
+          var p = this.currentProduct(i);
+          if (!p || !p.available) return false;
+        }
+        return true;
+      },
+
+      // ------- wizard navigation -------
+
+      stepComplete(idx) {
+        var slot = this.slots[idx];
+        if (!slot) return false;
+        if (!slot.required) return true;
+        var p = this.currentProduct(idx);
+        return !!(p && p.available);
+      },
+
+      firstIncompleteStep() {
+        for (var i = 0; i < this.slots.length; i++) {
+          if (!this.stepComplete(i)) return i;
+        }
+        return -1;
+      },
+
+      goToStep(idx) {
+        if (idx < 0 || idx >= this.slots.length) return;
+        if (!(this.visitedSteps[idx] || this.stepComplete(idx))) return;
+        this.currentStep = idx;
+        this.reviewMode = false;
+        this.visitedSteps[idx] = true;
+      },
+
+      goBack() {
+        if (this.currentStep > 0) {
+          this.currentStep -= 1;
+        }
+      },
+
+      advanceFromCurrent() {
+        if (!this.stepComplete(this.currentStep)) return;
+        this.visitedSteps[this.currentStep] = true;
+        if (this.currentStep < this.slots.length - 1) {
+          this.currentStep += 1;
+          this.visitedSteps[this.currentStep] = true;
+        } else {
+          this.reviewMode = true;
+        }
+      },
+
+      // ------- pagination -------
+
+      visibleProducts(slotIdx) {
+        var s = this.currentSilhouette(slotIdx);
+        if (!s) return [];
+        var limit = this.pageSize * (this.pagesShown[slotIdx] || 1);
+        return s.products.slice(0, limit);
+      },
+
+      hasMore(slotIdx) {
+        var s = this.currentSilhouette(slotIdx);
+        if (!s) return false;
+        return s.products.length > this.pageSize * (this.pagesShown[slotIdx] || 1);
+      },
+
+      showMore(slotIdx) {
+        this.pagesShown[slotIdx] = (this.pagesShown[slotIdx] || 1) + 1;
+      },
+
+      // ------- edit-from-cart prefill -------
+
+      _prefillSlots(payload) {
+        if (!payload || !payload.items) return;
+        var self = this;
+        payload.items.forEach(function(it) {
+          var target = (it.slotLabel || '').toLowerCase();
+          for (var i = 0; i < self.slots.length; i++) {
+            if (self.slots[i].label.toLowerCase() !== target) continue;
+            for (var j = 0; j < self.slots[i].silhouettes.length; j++) {
+              var s = self.slots[i].silhouettes[j];
+              var found = s.products.find(function(p){ return p.handle === it.handle; });
+              if (found) {
+                self.slots[i].silhouetteIndex = j;
+                self.slots[i].selectedHandle = it.handle;
+                self.slots[i].matchedByAuto = false;
+                self.visitedSteps[i] = true;
+                break;
+              }
+            }
+            break;
+          }
+        });
+      },
+
+      prefillFromCart(payload) {
+        this._prefillSlots(payload);
+        this.editingBundleId = (payload && payload.bundleId) || null;
+        this.editingKeys = (payload && payload.items || []).map(function(p){ return p.key; }).filter(Boolean);
+        // Land on review screen — every slot is already filled.
+        this.reviewMode = true;
+      },
+
+      prefillForUpsell(payload) {
+        this._prefillSlots(payload);
+        // Upsell flow: pre-existing cart items are NOT yet a bundle. After the
+        // customer completes the wizard, those items will be removed and the
+        // new bundle (with discount) added.
+        this.editingBundleId = null;
+        this.editingKeys = (payload && payload.items || []).map(function(p){ return p.key; }).filter(Boolean);
+        this.reviewMode = false;
+        var firstIncomplete = this.firstIncompleteStep();
+        this.currentStep = firstIncomplete >= 0 ? firstIncomplete : 0;
+      },
+
+      // ------- add-to-cart -------
+
+      addBundle() {
+        return this.finalizeBundle();
+      },
+
+      finalizeBundle() {
+        if (!this.canAddToCart() || this.cartLoading) return Promise.resolve();
+        this.cartLoading = true;
+        this.incompleteReason = '';
+
+        var bundleId = 'tri_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        var items = [];
+        for (var i = 0; i < this.slots.length; i++) {
+          var slot = this.slots[i];
+          var p = this.currentProduct(i);
+          if (!p) continue;
+          items.push({
+            id: p.variantId,
+            quantity: 1,
+            properties: {
+              'Bundle Slot': slot.label,
+              '_bundle_id': bundleId
+            }
+          });
+        }
+
+        var self = this;
+        var rootScope = (window.Alpine && document.body) ? window.Alpine.$data(document.body) : null;
+        // Three modes:
+        //   - new bundle (no editingKeys): just add + discount redirect
+        //   - edit existing bundle (editingBundleId set): add new + remove old, no redirect
+        //   - upsell (editingKeys present, editingBundleId null): add bundle + remove
+        //     the original eligible cart items + discount redirect (this is a NEW
+        //     bundle for the customer, even though they had components in cart)
+        var isEditingExistingBundle = !!this.editingBundleId;
+        var editingKeys = this.editingKeys.slice();
+        var hasEditingKeys = editingKeys.length > 0;
+
+        return fetch(window.Shopify.routes.root + 'cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ items: items })
+        })
+        .then(function(r){
+          return r.json().then(function(body){
+            if (!r.ok) throw Object.assign(new Error('Add to cart failed'), { body: body });
+            return body;
+          });
+        })
+        .then(function(){
+          // Step 2: remove any line items that should be replaced by the new bundle.
+          if (hasEditingKeys && rootScope && typeof rootScope.changeCartItemQuantity === 'function') {
+            return editingKeys.reduce(function(chain, key) {
+              return chain.then(function() {
+                return rootScope.changeCartItemQuantity(key, 0, false, false);
+              });
+            }, Promise.resolve());
+          }
+        })
+        .then(function() {
+          // Step 3: finalize.
+          if (isEditingExistingBundle) {
+            // Edit of an existing bundle: the discount session is already on the
+            // cart, no need to redirect. Just refresh + close drawer.
+            if (rootScope && typeof rootScope.updateCart === 'function') {
+              rootScope.updateCart(true);
+            }
+            window.dispatchEvent(new CustomEvent('bundle-drawer:close'));
+            return;
+          }
+          // New bundle (page flow OR cart upsell). Fire the discount fetch in
+          // parallel with the cart refresh — /discount/<code> only sets a
+          // session cookie, the cart drawer display is identical whether it's
+          // attached or not (the discount applies at checkout).
+          if (self.discountCode) {
+            fetch('/discount/' + encodeURIComponent(self.discountCode), {
+              method: 'GET',
+              credentials: 'same-origin'
+            }).catch(function(){});
+          }
+          if (rootScope && typeof rootScope.updateCart === 'function') {
+            rootScope.updateCart(true);
+          }
+          window.dispatchEvent(new CustomEvent('bundle-drawer:close'));
+        })
+        .catch(function(err){
+          var msg = (err && err.body && err.body.description) || 'Could not add bundle to cart. Please try again.';
+          self.incompleteReason = msg;
+          if (rootScope) {
+            rootScope.error_title = (err && err.body && err.body.message) || 'Something went wrong';
+            rootScope.error_message = msg;
+            rootScope.show_alert = true;
+          }
+          console.error('[bundle-builder]', err);
+        })
+        .finally(function(){
+          self.cartLoading = false;
+          self.editingBundleId = null;
+          self.editingKeys = [];
+        });
+      }
+    };
+  }
+
+  window.bundleBuilder_{{ js_id }} = bundleBuilderFactory_{{ js_id }};
+
+  // Register with Alpine.data so x-data="bundleBuilder_<js_id>" resolves through
+  // Alpine's component registry. Use js_id (hyphens replaced with underscores)
+  // because x-data expressions are evaluated as JS — hyphens parse as the
+  // decrement operator and break the identifier.
+  function registerBundleBuilder_{{ js_id }}() {
+    if (!window.Alpine || typeof window.Alpine.data !== 'function') return false;
+    window.Alpine.data('bundleBuilder_{{ js_id }}', bundleBuilderFactory_{{ js_id }});
+    return true;
+  }
+  if (!registerBundleBuilder_{{ js_id }}()) {
+    document.addEventListener('alpine:init', registerBundleBuilder_{{ js_id }});
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Bundle builder",
+  "tag": "section",
+  "class": "section-bundle-builder",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Build Your Trifecta"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "<p>Save when you bundle a wallet, lanyard, and chapstick holder</p>"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Final add-to-cart button text",
+      "default": "Add Trifecta to Cart"
+    },
+    {
+      "type": "text",
+      "id": "auto_match_label",
+      "label": "Auto-match toggle label",
+      "default": "Match colors automatically"
+    },
+    {
+      "type": "header",
+      "content": "Bundle discount",
+      "info": "The discount_type/discount_value below controls only the SAVINGS LABEL shown in the price summary. To actually apply the discount at checkout, create a matching discount in Shopify admin and enter its code below — customers will be redirected to /discount/CODE after the bundle is added to cart, applying the code automatically."
+    },
+    {
+      "type": "select",
+      "id": "discount_type",
+      "label": "Discount type (display label)",
+      "options": [
+        { "value": "percent", "label": "Percent off" },
+        { "value": "fixed_off", "label": "Fixed amount off" },
+        { "value": "none", "label": "No discount" }
+      ],
+      "default": "percent"
+    },
+    {
+      "type": "number",
+      "id": "discount_value",
+      "label": "Discount value (percent OR dollar amount, label only)",
+      "default": 10
+    },
+    {
+      "type": "text",
+      "id": "discount_code",
+      "label": "Discount code (overrides theme setting)",
+      "info": "Section-level override for the trifecta discount code. Leave blank to use the theme-level setting (Theme settings → Trifecta bundle → Trifecta discount code), which is also read by the PDP preview and cart upsell."
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_match_default",
+      "label": "Auto-match colors on by default",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "spacing_top",
+      "min": 0,
+      "max": 300,
+      "step": 20,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "spacing_bottom",
+      "min": 0,
+      "max": 300,
+      "step": 20,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 60
+    },
+    {
+      "type": "select",
+      "id": "layout_horizontal",
+      "label": "Width",
+      "options": [
+        { "value": "window--narrow", "label": "Narrow" },
+        { "value": "window", "label": "Default" },
+        { "value": "window--wide", "label": "Wide" },
+        { "value": "window--full", "label": "Full" }
+      ],
+      "default": "window"
+    },
+    {
+      "type": "header",
+      "content": "Colors & borders"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "options": [
+        { "value": "color__bg-body color__text", "label": "Body" },
+        { "value": "color__bg-neutral color__text", "label": "Neutral" },
+        { "value": "color__bg-overlay-1 color__text", "label": "Overlay 1" },
+        { "value": "color__bg-overlay-2 color__text", "label": "Overlay 2" },
+        { "value": "color__bg-overlay-3 color__text", "label": "Overlay 3" }
+      ],
+      "default": "color__bg-body color__text"
+    },
+    {
+      "type": "select",
+      "id": "color_border",
+      "label": "Border color",
+      "options": [
+        { "value": "color__border-divider-1", "label": "Divider" },
+        { "value": "color__border-selected-1", "label": "Selected" }
+      ],
+      "default": "color__border-divider-1"
+    },
+    {
+      "type": "select",
+      "id": "style_border",
+      "label": "Border style",
+      "options": [
+        { "value": "", "label": "None" },
+        { "value": "border--t-width", "label": "Top" },
+        { "value": "border--b-width", "label": "Bottom" },
+        { "value": "border--b-width border--t-width", "label": "Top and bottom" }
+      ],
+      "default": ""
+    },
+    {
+      "type": "select",
+      "id": "visibility",
+      "label": "Visibility",
+      "options": [
+        { "value": "", "label": "Show on all devices" },
+        { "value": "md:hidden", "label": "Show on mobile only" },
+        { "value": "hidden md:block", "label": "Show on desktop only" }
+      ],
+      "default": ""
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slot",
+      "name": "Bundle slot",
+      "limit": 5,
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Slot label",
+          "default": "Wallet"
+        },
+        {
+          "type": "checkbox",
+          "id": "required",
+          "label": "Required to add bundle",
+          "default": true
+        },
+        {
+          "type": "range",
+          "id": "default_silhouette",
+          "label": "Default silhouette (1-4)",
+          "min": 1,
+          "max": 4,
+          "step": 1,
+          "default": 1
+        },
+        { "type": "header", "content": "Silhouette 1" },
+        { "type": "text", "id": "silhouette_1_label", "label": "Label", "default": "Elastic" },
+        { "type": "collection", "id": "silhouette_1_collection", "label": "Source collection" },
+        { "type": "header", "content": "Silhouette 2" },
+        { "type": "text", "id": "silhouette_2_label", "label": "Label" },
+        { "type": "collection", "id": "silhouette_2_collection", "label": "Source collection" },
+        { "type": "header", "content": "Silhouette 3" },
+        { "type": "text", "id": "silhouette_3_label", "label": "Label" },
+        { "type": "collection", "id": "silhouette_3_collection", "label": "Source collection" },
+        { "type": "header", "content": "Silhouette 4" },
+        { "type": "text", "id": "silhouette_4_label", "label": "Label" },
+        { "type": "collection", "id": "silhouette_4_collection", "label": "Source collection" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Bundle builder",
+      "blocks": [
+        { "type": "slot", "settings": { "label": "Wallet" } },
+        { "type": "slot", "settings": { "label": "Lanyard" } },
+        { "type": "slot", "settings": { "label": "Chapstick" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

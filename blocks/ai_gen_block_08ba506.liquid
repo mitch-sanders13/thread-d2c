@@ -1,0 +1,521 @@
+{% doc %}
+  @prompt
+    I want a section to show multiple images of our event space so people know what it looks like. I want it to be easy to scroll/view the images on both desktop and mobile
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-event-gallery-{{ ai_gen_id }} {
+    width: 100%;
+    display: block;
+    background-color: {{ block.settings.background_color }};
+    padding: {{ block.settings.section_padding }}px 0;
+  }
+
+  .ai-event-gallery-container-{{ ai_gen_id }} {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .ai-event-gallery-header-{{ ai_gen_id }} {
+    text-align: {{ block.settings.text_alignment }};
+    margin-bottom: {{ block.settings.header_spacing }}px;
+  }
+
+  .ai-event-gallery-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.title_size }}px;
+    color: {{ block.settings.text_color }};
+    margin: 0 0 12px 0;
+    font-weight: 600;
+  }
+
+  .ai-event-gallery-description-{{ ai_gen_id }} {
+    font-size: {{ block.settings.description_size }}px;
+    color: {{ block.settings.text_color }};
+    margin: 0;
+    opacity: 0.8;
+  }
+
+  .ai-event-gallery-scroll-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.image_gap }}px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: {{ block.settings.scrollbar_color }} transparent;
+    padding-bottom: 20px;
+  }
+
+  .ai-event-gallery-scroll-{{ ai_gen_id }}::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .ai-event-gallery-scroll-{{ ai_gen_id }}::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .ai-event-gallery-scroll-{{ ai_gen_id }}::-webkit-scrollbar-thumb {
+    background-color: {{ block.settings.scrollbar_color }};
+    border-radius: 4px;
+  }
+
+  .ai-event-gallery-item-{{ ai_gen_id }} {
+    flex: 0 0 auto;
+    width: {{ block.settings.image_width_desktop }}px;
+    position: relative;
+  }
+
+  .ai-event-gallery-image-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    height: {{ block.settings.image_height_desktop }}px;
+    border-radius: {{ block.settings.border_radius }}px;
+    overflow: hidden;
+    position: relative;
+    background-color: #f4f4f4;
+  }
+
+  .ai-event-gallery-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  {% if block.settings.enable_hover_zoom %}
+    .ai-event-gallery-item-{{ ai_gen_id }}:hover .ai-event-gallery-image-{{ ai_gen_id }} {
+      transform: scale(1.05);
+    }
+  {% endif %}
+
+  .ai-event-gallery-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f4f4f4;
+  }
+
+  .ai-event-gallery-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-event-gallery-caption-{{ ai_gen_id }} {
+    margin-top: 12px;
+    font-size: 14px;
+    color: {{ block.settings.text_color }};
+    text-align: center;
+  }
+
+  .ai-event-gallery-empty-state-{{ ai_gen_id }} {
+    text-align: center;
+    padding: 60px 20px;
+    color: {{ block.settings.text_color }};
+    opacity: 0.6;
+  }
+
+  .ai-event-gallery-empty-state-{{ ai_gen_id }} p {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-event-gallery-item-{{ ai_gen_id }} {
+      width: {{ block.settings.image_width_mobile }}px;
+    }
+
+    .ai-event-gallery-image-wrapper-{{ ai_gen_id }} {
+      height: {{ block.settings.image_height_mobile }}px;
+    }
+
+    .ai-event-gallery-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 0.8 }}px;
+    }
+
+    .ai-event-gallery-description-{{ ai_gen_id }} {
+      font-size: {{ block.settings.description_size | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<event-gallery-{{ ai_gen_id }} class="ai-event-gallery-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-event-gallery-container-{{ ai_gen_id }}">
+    {% if block.settings.title != blank or block.settings.description != blank %}
+      <div class="ai-event-gallery-header-{{ ai_gen_id }}">
+        {% if block.settings.title != blank %}
+          <h2 class="ai-event-gallery-title-{{ ai_gen_id }}">{{ block.settings.title }}</h2>
+        {% endif %}
+        {% if block.settings.description != blank %}
+          <div class="ai-event-gallery-description-{{ ai_gen_id }}">{{ block.settings.description }}</div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% assign has_images = false %}
+    {% for i in (1..8) %}
+      {% assign image_key = 'image_' | append: i %}
+      {% if block.settings[image_key] != blank %}
+        {% assign has_images = true %}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+
+    {% if has_images %}
+      <div class="ai-event-gallery-scroll-{{ ai_gen_id }}">
+        {% for i in (1..8) %}
+          {% assign image_key = 'image_' | append: i %}
+          {% assign caption_key = 'caption_' | append: i %}
+          {% assign image = block.settings[image_key] %}
+          {% assign caption = block.settings[caption_key] %}
+
+          {% if image != blank %}
+            <div class="ai-event-gallery-item-{{ ai_gen_id }}">
+              <div class="ai-event-gallery-image-wrapper-{{ ai_gen_id }}">
+                <img
+                  src="{{ image | image_url: width: 1200 }}"
+                  alt="{{ image.alt | escape }}"
+                  loading="lazy"
+                  width="{{ image.width }}"
+                  height="{{ image.height }}"
+                  class="ai-event-gallery-image-{{ ai_gen_id }}"
+                >
+              </div>
+              {% if caption != blank %}
+                <div class="ai-event-gallery-caption-{{ ai_gen_id }}">{{ caption }}</div>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="ai-event-gallery-empty-state-{{ ai_gen_id }}">
+        <p>Add images to showcase your event space</p>
+      </div>
+    {% endif %}
+  </div>
+</event-gallery-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class EventGallery{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.scrollContainer = this.querySelector('.ai-event-gallery-scroll-{{ ai_gen_id }}');
+        
+        if (this.scrollContainer) {
+          this.setupTouchScroll();
+        }
+      }
+
+      setupTouchScroll() {
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        this.scrollContainer.addEventListener('mousedown', (e) => {
+          isDown = true;
+          this.scrollContainer.style.cursor = 'grabbing';
+          startX = e.pageX - this.scrollContainer.offsetLeft;
+          scrollLeft = this.scrollContainer.scrollLeft;
+        });
+
+        this.scrollContainer.addEventListener('mouseleave', () => {
+          isDown = false;
+          this.scrollContainer.style.cursor = 'grab';
+        });
+
+        this.scrollContainer.addEventListener('mouseup', () => {
+          isDown = false;
+          this.scrollContainer.style.cursor = 'grab';
+        });
+
+        this.scrollContainer.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - this.scrollContainer.offsetLeft;
+          const walk = (x - startX) * 2;
+          this.scrollContainer.scrollLeft = scrollLeft - walk;
+        });
+
+        this.scrollContainer.style.cursor = 'grab';
+      }
+    }
+
+    customElements.define('event-gallery-{{ ai_gen_id }}', EventGallery{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Event space gallery",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "label": "Title",
+      "default": "Our Event Space"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "Explore our versatile event space perfect for any occasion"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Images"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Image 1"
+    },
+    {
+      "type": "text",
+      "id": "caption_1",
+      "label": "Caption 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Image 2"
+    },
+    {
+      "type": "text",
+      "id": "caption_2",
+      "label": "Caption 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Image 3"
+    },
+    {
+      "type": "text",
+      "id": "caption_3",
+      "label": "Caption 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_4",
+      "label": "Image 4"
+    },
+    {
+      "type": "text",
+      "id": "caption_4",
+      "label": "Caption 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_5",
+      "label": "Image 5"
+    },
+    {
+      "type": "text",
+      "id": "caption_5",
+      "label": "Caption 5"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_6",
+      "label": "Image 6"
+    },
+    {
+      "type": "text",
+      "id": "caption_6",
+      "label": "Caption 6"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_7",
+      "label": "Image 7"
+    },
+    {
+      "type": "text",
+      "id": "caption_7",
+      "label": "Caption 7"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_8",
+      "label": "Image 8"
+    },
+    {
+      "type": "text",
+      "id": "caption_8",
+      "label": "Caption 8"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "image_width_desktop",
+      "label": "Image width (desktop)",
+      "min": 200,
+      "max": 600,
+      "step": 20,
+      "unit": "px",
+      "default": 400
+    },
+    {
+      "type": "range",
+      "id": "image_height_desktop",
+      "label": "Image height (desktop)",
+      "min": 200,
+      "max": 600,
+      "step": 20,
+      "unit": "px",
+      "default": 300
+    },
+    {
+      "type": "range",
+      "id": "image_width_mobile",
+      "label": "Image width (mobile)",
+      "min": 200,
+      "max": 400,
+      "step": 20,
+      "unit": "px",
+      "default": 280
+    },
+    {
+      "type": "range",
+      "id": "image_height_mobile",
+      "label": "Image height (mobile)",
+      "min": 150,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "default": 220
+    },
+    {
+      "type": "range",
+      "id": "image_gap",
+      "label": "Space between images",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "Section padding",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "header_spacing",
+      "label": "Header spacing",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Image border radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_hover_zoom",
+      "label": "Enable hover zoom",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Title size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "label": "Description size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#fdfdfd"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#212121"
+    },
+    {
+      "type": "color",
+      "id": "scrollbar_color",
+      "label": "Scrollbar color",
+      "default": "#cccccc"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Event space gallery"
+    }
+  ]
+}
+{% endschema %}

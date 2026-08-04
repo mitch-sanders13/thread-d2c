@@ -1,0 +1,271 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "09331aae-f35b-4064-af86-1989225b3dae": {
+      "type": "page__help-center",
+      "blocks": {
+        "6eb7f57d-bb8e-4eea-8c9a-4485a950b456": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "General",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "When is support available?",
+            "tab_content_answer": "<p>Our customer support team is available Monday through Friday from 10AM to 4PM. We do our best to respond to all inquiries within 1 business day and appreciate your patience! <\/p><p><em>Please understand that holidays may affect these hours as we may be experiencing a high volume of support tickets. <\/em><\/p><p>You can contact us by sending an email directly to contact@threadwallets.com. Talk with you soon! <\/p>"
+          }
+        },
+        "e234ddf5-4bb3-4c79-90a6-6e19a11a721f": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "General",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "How do I clean my Thread products?",
+            "tab_content_answer": "<p>How you clean your Thread Wallets product will depend on which item you have! Please visit our <a href=\"https:\/\/www.threadwallets.com\/pages\/warranty\" target=\"_blank\" title=\"https:\/\/www.threadwallets.com\/pages\/warranty\">warranty page<\/a> to see care instructions for each product. <\/p>"
+          }
+        },
+        "e2b7df5c-cb67-4b4f-badc-e33e709998b0": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "General",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "Will my cards fall out of my Thread product?",
+            "tab_content_answer": "<p>Thread Wallets are designed to keep your cards safe and secure. They are constructed with a tight-knit elastic to keep your cards locked in place so that they do not fall out!<\/p><p>But don't take our word for it, check out our <a href=\"https:\/\/www.threadwallets.com\/a\/review\/all?rp=1\">Reviews<\/a> page to hear what our customers have to say about the security of the elastic cardholder! <\/p>"
+          }
+        },
+        "fa6c35f7-ee7f-4861-9df1-5b7e7de294c6": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "General",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "When do you restock products?",
+            "tab_content_answer": "<p>Please know that we are working our hardest to get these products restocked as soon as possible!<\/p><p>If you would like to be among the first to know when a specific product is restocked, you can sign up for restock notifications on the product page. <\/p><p>Additionally, we typically announce product restocks to our Instagram followers and our email\/SMS subscribers so you may want to hop on there as well! You can sign up for our email list <a href=\"https:\/\/www.threadwallets.com\/pages\/join-us?utm_expid=.JVK5cOzlRlK1tQs-nHT9Vg.0&utm_referrer=https%3A%2F%2Fwww.google.com%2F\">here<\/a>. <\/p>"
+          }
+        },
+        "dc0faeee-af94-4b1f-a2d6-07e24191e1a4": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "General",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "Does Thread offer custom products?",
+            "tab_content_answer": "<p>Thread Wallets has worked with a wide variety of companies to create custom Thread gear. If you feel you would be interested in Thread products customized with your brand, please feel free to reach out to our Custom team at  ben@threadwallets.com.<\/p>"
+          }
+        },
+        "d9df6a26-6893-4a2d-b56e-b17cc1cd8c23": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "General",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "Can I carry Thread products in my store?",
+            "tab_content_answer": "<p>Thread Wallets works with retailers all over the country. Many of our items can be found in a location near you! Please check out our <a href=\"https:\/\/www.threadwallets.com\/pages\/store-locator?rp=1\" target=\"_blank\" title=\"https:\/\/www.threadwallets.com\/pages\/store-locator?rp=1\">store locator<\/a> to see specific locations in your area.<\/p><p>If you are interested in carrying Thread products in your store, please reach out to our Wholesale team at wholesale@threadwallets.com.<\/p>"
+          }
+        },
+        "923a0e23-7445-4fb8-b368-a7ebf062e175": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "Shipping",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "How long will it take to ship my order?",
+            "tab_content_answer": "<p>We know you're STOKED to get your order so here's a little more information to ease your mind. For all orders, we require 1-2 full business day to process orders and get them ready to ship out. If orders are placed on Friday, it's possible that they will be processed and shipped that same day but it's more likely that they will be taken care of on Monday morning.<\/p><p>Once we've had that 1-2 full business days to process your order,  shipping typically takes an additional 4-7 business days (for Domestic orders) Shipping times can vary based on your location and you should receive a more accurate estimate at checkout based on your current address. <\/p><p>When your order is processed and shipped, you should receive emails to update you on the packages status but be sure to check your spam and promotions folders as they sometimes go there by mistake! You can also download the Shop app for additional updates on where your package is in transit. That way, you can be in the know every step of the way! <\/p>"
+          }
+        },
+        "132adbaa-e7e1-4bd1-a63c-fd1f2710e546": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "Shipping",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "My order was returned to sender. What do I do?",
+            "tab_content_answer": "<p>If your items were \"returned to sender\", it is often due to an error with the address. When packages are returned to us, we will receive them back to our warehouse and contact you via email for the correct address so that the order can be reshipped. If you have already contacted us with an updated address, we'll simply go ahead and have the order shipped back out! <\/p>"
+          }
+        },
+        "7866e06e-59df-4bd7-bf19-34f9ecd10b6c": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "Shipping",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "My order says it was delivered but it hasn't arrived. What now?",
+            "tab_content_answer": "<p>We use USPS and DHL to deliver our packages. Domestic orders usually take around 4-7 business days to be delivered once shipped and international orders can take around 10-15 business days, depending on the location. Please allow 1-2 full business days for your order to be fulfilled and processed before it ships. <\/p><p>If you are having your Thread products shipped internationally, please be patient as it can take much longer due to customs and the reliability of the postal service of the country being shipped to. Once packages have passed US customs, they often become un-trackable since they are no longer in the hands of the original carrier. <\/p><p>Domestic orders are not determined lost until 20 days post shipment and international orders are not determined lost until 45 business days post shipment.<\/p><p>If your tracking number indicates that the package was \"DELIVERED\" but you have not received the package, please be patient. Some service providers scan the package as it enters their truck, others scan the package as it enters the mailbox. We recommend checking with neighbors, your postal service provider, and your local post office to see if the package was misplaced. If after those 20 days (or 45 days for international orders), you still have not received the package, please let us know and we'll be sure to take care of that for you right away!<\/p>"
+          }
+        },
+        "8493b4e4-0d94-4677-9205-f177ba084308": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "Shipping",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "What if my order gets lost in the mail?",
+            "tab_content_answer": "<p>Our company policy is that we cannot send out a replacement order or issue a refund for lost, missing, or stolen packages until at least 20 days (for domestic orders) have passed since the original shipment date. If you are receiving product internationally, we ask that you wait 45 business days. Often, the package shows up within this time period. We appreciate your patience! <\/p><p>We also recommend checking with your local post office or postal service worker. Once 20  days (or 45 business days for international orders) have passed, please contact our customer service team at contact@threadwallets.com to request a replacement order or refund. <\/p>"
+          }
+        },
+        "431c2563-6591-4bcb-b719-d1e969d18508": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "Returns",
+            "tab_content_headline": "Return & Refund Information",
+            "tab_content_description": "",
+            "tab_content_question": "",
+            "tab_content_answer": ""
+          }
+        },
+        "4249055b-b195-40cf-bc9c-b2f292ee622a": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "Returns",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "Full Return Policy",
+            "tab_content_answer": "<p>We understand how it is to shop online. For whatever reason you might need to return your purchase, send it back to us <strong>within 30 days<\/strong> of your initial purchase for a refund. <strong>Returned products must be unused and include their original packaging (plastic bag the product arrived in, card insert, phone case box, lanyard hook, etc.)<\/strong>. Any product returned that is used or not in its original packaging will be rejected and will not be sent back to the customer. <\/p><p>Once you have requested a return, you will be provided a return label which can be used to ship your item(s) back to our warehouse for processing. If you purchased Redo Free Returns with your order the return is free! If not the cost of the label will be deducted from the refund amount.<\/p><p>Return requests can be initiated <a href=\"https:\/\/www.threadwallets.com\/apps\/redo\/returns-portal\" target=\"_blank\" title=\"https:\/\/www.threadwallets.com\/apps\/redo\/returns-portal\">here<\/a>.   <\/p><p>We will inform you of the refund by email and credit will automatically be applied to your original method of payment within 3-5 business days of processing the return.<\/p><p>*Thread Wallets LLC is not responsible for any returns lost in transit<\/p><p><strong>Sale and Mystery Items:<\/strong><\/p><p>Any Mystery Items (Mystery Wallets, Mystery Neck Lanyards, and Mystery Wrist Lanyards) or items purchased from our Sale page are not eligible for return. These items are all<strong> FINAL SALE <\/strong>and will not be eligible for a refund or exchange. <\/p><p> <strong>Late or missing refunds (if applicable):<\/strong><\/p><p>Refunds typically take 3-5 business days to clear but can take up to 7 business days depending on your bank. If 7 full business days have passed and you still have not received your refund, check your bank account and get in touch with your credit card company or bank about pending transactions.<\/p><p>If you’ve done this and still have not received your refund, please contact us at contact@threadwallets.com and we will make sure to get that sorted out for you!<\/p>"
+          }
+        },
+        "a96dc364-95b6-42a7-a9a7-ddcb60240ee4": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "Returns",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "Initiate a return",
+            "tab_content_answer": "<p>If your order was placed within the last 30 days, please initiate your return request <a href=\"https:\/\/www.threadwallets.com\/apps\/redo\/returns-portal\" target=\"_blank\" title=\"https:\/\/www.threadwallets.com\/apps\/redo\/returns-portal\">here<\/a>. <\/p><p>Please be aware that all Mystery Items (both mystery wallets and lanyards) as well as items purchased from our Sale page are FINAL SALE and are not eligible for return or exchange. <\/p>"
+          }
+        },
+        "4f082ffb-3277-45ea-a01b-bc1c771eab48": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "Returns",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "I mailed back my return but have not received my refund yet. What now?",
+            "tab_content_answer": "<p>Once returns are placed in the mail, it typically takes 4-7 business days for orders to arrive at our warehouse. When those returns are received, we do our best to process and issue refunds within the next few business days and you will receive an email notification when that has been completed! <\/p><p>When a refund has been issued, it will often take about 3 business days to clear but can take up to 7 business days depending on your bank. If you have not seen that refund to your original method of payment within those 7 business days of receiving a refund notification, we recommend contacting your bank about pending transactions. <\/p><p>If you have done so and are still not seeing your refund, please let us know at contact@threadwallets.com and we will look into that on our end and make sure it's all taken care of for you!<\/p><p><strong>As stated in our <\/strong><a href=\"\/pages\/return-policy\" target=\"_blank\" title=\"Return Policy\"><strong>full return policy<\/strong><\/a><strong>, Thread Wallets LLC is not responsible for any returns lost in transit.<\/strong><\/p>"
+          }
+        },
+        "18fe8a52-e9e7-4771-8323-2e6d6d170d5a": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "Returns",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "Holiday Return Policy",
+            "tab_content_answer": "<p>Because we offer deals throughout the holiday season, we do offer an extended return window. For orders fulfilled between November 1st and December 25th, we have an extended return policy that lasts until January 31st. Returns can be made through our <a href=\"https:\/\/www.threadwallets.com\/apps\/redo\/returns-portal\" title=\"https:\/\/www.threadwallets.com\/apps\/redo\/returns-portal\">returns portal<\/a><\/p>"
+          }
+        },
+        "5425ff18-37e1-414b-96d8-5183f614fcc1": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "Warranty",
+            "tab_content_headline": "Warranty Claim & Policy Information",
+            "tab_content_description": "",
+            "tab_content_question": "",
+            "tab_content_answer": ""
+          }
+        },
+        "2e9cfee9-cefb-4b32-b2b8-22004cda6a73": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "Warranty",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "Submit a warranty claim",
+            "tab_content_answer": "<p>We stand by our products. Each one is made using durable materials and checked for quality before shipping. Our products hold some of your most valuable items and are built to last, but we know that accidents happen. For that reason, your item may qualify for a warranty replacement!<\/p><p>If your product becomes defective within one year of purchase, you qualify for a replacement. Products that have been stretched out due to over-stuffing, water damage, normal day to day wear and tear, etc. will not qualify for a replacement.<\/p><p><strong>To submit a warranty claim, please visit the <\/strong><a href=\"https:\/\/www.threadwallets.com\/pages\/warranty\" target=\"_blank\" title=\"https:\/\/www.threadwallets.com\/pages\/warranty\"><strong>link here<\/strong><\/a><strong> and our customer support team will take care of that for you! <\/strong><\/p><p>Please visit our warranty policy here to see what qualifies for replacement as well as care instructions for each product. <\/p>"
+          }
+        },
+        "594fed88-0787-430c-803f-448f694599f3": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "Warranty",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "Full Warranty Policy",
+            "tab_content_answer": "<p>We stand by our products. Each one is made using durable materials and checked for quality before shipping. Our products hold some of your most valuable items and are built to last, but we know that accidents happen. For that reason, your item may qualify for a warranty replacement!<\/p><p>If your product becomes defective within one year of purchase, you qualify for a replacement. Products that have been stretched out due to over-stuffing, water damage, normal day to day wear and tear, etc. will not qualify for a replacement.<\/p><p><strong>To submit a warranty claim, please visit the <\/strong><a href=\"https:\/\/www.threadwallets.com\/pages\/warranty\" target=\"_blank\" title=\"https:\/\/www.threadwallets.com\/pages\/warranty\"><strong>link here<\/strong><\/a><strong> and our customer support team will take care of that for you! <\/strong><\/p><p>Please visit our warranty policy here to see what qualifies for replacement as well as care instructions for each product. <\/p>"
+          }
+        },
+        "db35cfa6-9b1a-4cec-8b6d-242217de3271": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "Collaboration",
+            "tab_content_headline": "Collaboration & Donation Information",
+            "tab_content_description": "",
+            "tab_content_question": "",
+            "tab_content_answer": ""
+          }
+        },
+        "2df01cc7-0c9f-4f58-8316-fa5bafacc0db": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "Collaboration",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "Collaborations and donations",
+            "tab_content_answer": "<p>We love working with creative individuals who are active, outgoing, and engaged in their communities. While we wish we could collaborate with everyone and support every cause, we unfortunately don't have the capacity. <\/p><p>If you'd like to be considered, please send an email to contact@threadwallets.com with your name, email, company name, website, social media handle(s), number of products being requested, mailing address, and a description of your event, collaboration, charity, etc.  <\/p><p>We will review your request and a member of our team will reach out within 1-2 weeks!<\/p>"
+          }
+        },
+        "dc2db9fa-a623-444f-a85c-e3e91e0fd63c": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "Collaboration",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "Careers at Thread",
+            "tab_content_answer": "<p>At Thread, our culture sets us apart and influences everything we do. <strong>We are family.<\/strong> By joining the Thread family, you will be immersed in an environment of supportive and collaborative people.<\/p><p>For more information on job openings at Thread, check out our <a href=\"https:\/\/www.threadwallets.com\/pages\/careers\"><span style=\"text-decoration:underline\">Careers<\/span><\/a> page! <\/p>"
+          }
+        },
+        "bb3e1a5c-61af-4b10-b5bc-68f7782ecd06": {
+          "type": "Accordions",
+          "settings": {
+            "tab_content_title": "General",
+            "tab_content_headline": "",
+            "tab_content_description": "",
+            "tab_content_question": "How do I cancel my order?",
+            "tab_content_answer": "<p>After an order has been placed, customers have 1 hour of processing time to cancel their order on their end. After an hour is up, you can reach out to our customer service team at <a href=\"mailto:contact@threadwallets.com\" target=\"_blank\">contact@threadwallets.com<\/a> to see if the order is still able to be canceled.<\/p>"
+          }
+        }
+      },
+      "block_order": [
+        "6eb7f57d-bb8e-4eea-8c9a-4485a950b456",
+        "e234ddf5-4bb3-4c79-90a6-6e19a11a721f",
+        "e2b7df5c-cb67-4b4f-badc-e33e709998b0",
+        "fa6c35f7-ee7f-4861-9df1-5b7e7de294c6",
+        "dc0faeee-af94-4b1f-a2d6-07e24191e1a4",
+        "d9df6a26-6893-4a2d-b56e-b17cc1cd8c23",
+        "923a0e23-7445-4fb8-b368-a7ebf062e175",
+        "132adbaa-e7e1-4bd1-a63c-fd1f2710e546",
+        "7866e06e-59df-4bd7-bf19-34f9ecd10b6c",
+        "8493b4e4-0d94-4677-9205-f177ba084308",
+        "431c2563-6591-4bcb-b719-d1e969d18508",
+        "4249055b-b195-40cf-bc9c-b2f292ee622a",
+        "a96dc364-95b6-42a7-a9a7-ddcb60240ee4",
+        "4f082ffb-3277-45ea-a01b-bc1c771eab48",
+        "18fe8a52-e9e7-4771-8323-2e6d6d170d5a",
+        "5425ff18-37e1-414b-96d8-5183f614fcc1",
+        "2e9cfee9-cefb-4b32-b2b8-22004cda6a73",
+        "594fed88-0787-430c-803f-448f694599f3",
+        "db35cfa6-9b1a-4cec-8b6d-242217de3271",
+        "2df01cc7-0c9f-4f58-8316-fa5bafacc0db",
+        "dc2db9fa-a623-444f-a85c-e3e91e0fd63c",
+        "bb3e1a5c-61af-4b10-b5bc-68f7782ecd06"
+      ],
+      "settings": {
+        "hours_id": "M-F 10AM-4PM (MST)",
+        "address_id": "125 W 500 S PROVO, UT 84601",
+        "email_id": "contact@threadwallets.com",
+        "tab_titles": "General, Shipping, Returns, Warranty, Collaboration"
+      }
+    }
+  },
+  "order": [
+    "09331aae-f35b-4064-af86-1989225b3dae"
+  ]
+}

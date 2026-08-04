@@ -1,0 +1,702 @@
+ <!-- sections/page__collegiate-schools.liquid -->
+{% comment %}
+  Collegiate Schools Grid - Display searchable grid of school logos
+  
+  Features:
+  - Pulls schools from Shopify metaobject entries
+  - Live client-side search filtering
+  - Responsive grid layout
+  - Links to filtered collegiate collection
+  
+  Usage:
+    Add this section to page.collegiate.json template
+  
+  Globals:
+    - settings.layout_horizontal: horizontal margin
+{% endcomment %}
+
+<section class="
+  {{ section.settings.color_scheme }}
+  {{ section.settings.color_border }}
+  {{ section.settings.style_border }}">
+  
+  <div class="{{ settings.layout_horizontal }}"
+    style="
+      padding-top: {{ section.settings.spacing_top }}px;
+      padding-bottom: {{ section.settings.spacing_bottom }}px;">
+    
+    {% comment %} Header Section {% endcomment %}
+    {% if section.settings.enable_heading or section.settings.enable_description %}
+      <div class="mb-12 text-center max-w-3xl mx-auto">
+        {% if section.settings.enable_heading and section.settings.heading != blank %}
+          <h1 class="mb-4 type__heading">{{ section.settings.heading }}</h1>
+        {% endif %}
+        
+        {% if section.settings.enable_description and section.settings.description != blank %}
+          <p class="opacity-75">{{ section.settings.description }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+    
+    {% comment %} Search Bar {% endcomment %}
+    {% if section.settings.enable_search %}
+      <div class="mb-8 max-w-xl mx-auto">
+        <div class="relative">
+          <input 
+            type="text" 
+            id="school-search" 
+            class="form-input w-full !pl-12"
+            placeholder="{{ section.settings.search_placeholder }}"
+            autocomplete="off"
+          >
+          {% render 'component__icon', 
+            icon: 'search',
+            size: '20', 
+            class: 'absolute !flex items-center top-0 left-4 h-full opacity-50' 
+          %}
+        </div>
+      </div>
+    {% endif %}
+    
+    {% comment %} Paginate through metaobjects (sorted automatically by handle) {% endcomment %}
+    {% assign schools_per_page = section.settings.schools_per_page | default: 50 %}
+    
+    {% paginate shop.metaobjects.schools.values by schools_per_page %}
+      <div 
+        id="schools-grid"
+        class="
+          grid gap-6
+          {{ section.settings.row_size_mobile }}
+          {{ section.settings.row_size_desktop }}
+        "
+        data-total-schools="{{ paginate.items.size }}"
+        data-current-page="{{ paginate.current_page }}"
+        data-total-pages="{{ paginate.pages }}"
+      >
+        {% if paginate.items.size > 0 %}
+          {% for school in shop.metaobjects.schools.values %}
+            {% comment %} Build collection URL with school filter {% endcomment %}
+            {% capture school_url %}/collections/collegiate?filter.p.m.custom.school={{ school.school_name }}{% endcapture %}
+            
+            <a 
+              href="{{ school_url | escape }}"
+              class="school-item group relative flex flex-col items-center justify-center p-6 transition-all duration-300"
+              data-school-name="{{ school.school_name | escape | downcase }}"
+              data-school-slug="{{ school.url_slug }}"
+              data-index="{{ forloop.index0 }}"
+            >
+              {% comment %} School Logo {% endcomment %}
+              <div class="w-full aspect-square flex items-center justify-center mb-4">
+                {% if school.school_logo %}
+                  <img 
+                    src="{{ school.school_logo | image_url: width: 300 }}"
+                    alt="{{ school.school_name }} logo"
+                    class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                    loading="lazy"
+                    width="200"
+                    height="200"
+                  >
+                {% else %}
+                  {% comment %} Fallback if no logo {% endcomment %}
+                  <div class="w-32 h-32 flex items-center justify-center color__bg-overlay-3 border--radius">
+                    <span class="type--large font-bold opacity-50">{{ school.school_name | slice: 0, 2 | upcase }}</span>
+                  </div>
+                {% endif %}
+              </div>
+              
+              {% comment %} School Name {% endcomment %}
+              <h2 class="text-center type--base font-medium mb-0">{{ school.school_name }}</h2>
+            </a>
+          {% endfor %}
+        {% else %}
+          {% comment %} No schools found - Show message {% endcomment %}
+          <div class="col-span-full text-center py-12">
+            <p class="type--large opacity-75 mb-4">No schools available yet.</p>
+            <p class="type--small opacity-50">Schools will appear here once they are added in the admin.</p>
+          </div>
+        {% endif %}
+      </div>
+      
+      {% comment %} Load More Button (Ajax Pagination) {% endcomment %}
+      {% if paginate.pages > 1 %}
+        <div id="load-more-container" class="mt-12 text-center">
+          <button 
+            id="load-more-btn" 
+            class="btn btn--secondary"
+            data-next-url="{{ paginate.next.url }}"
+            data-current-page="{{ paginate.current_page }}"
+            data-total-pages="{{ paginate.pages }}"
+            {% unless paginate.next %}disabled{% endunless %}
+          >
+            {% if paginate.next %}
+              Load More Schools
+            {% else %}
+              All Schools Loaded
+            {% endif %}
+          </button>
+        </div>
+      {% endif %}
+    {% endpaginate %}
+    
+    {% comment %} No Results Message (Hidden by default, shown by JS) {% endcomment %}
+    <div id="no-results-message" class="hidden col-span-full text-center py-12">
+      <p class="type--large opacity-75 mb-2">No schools found</p>
+      <p class="type--small opacity-50">Try searching with a different term</p>
+    </div>
+    
+  </div>
+</section>
+
+{% comment %} Ajax Load More & Search Functionality {% endcomment %}
+<script>
+  (function() {
+    // DOM Elements
+    const searchInput = document.getElementById('school-search');
+    const schoolsGrid = document.getElementById('schools-grid');
+    const noResultsMessage = document.getElementById('no-results-message');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const loadMoreContainer = document.getElementById('load-more-container');
+    
+    if (!schoolsGrid) return;
+    
+    let allSchools = [];
+    let isSearching = false;
+    let isLoading = false;
+    let isLoadingForSearch = false; // Prevent duplicate search-triggered loads
+    let allSchoolsLoaded = false;
+    let initialSchoolCount = 0;
+    let searchDebounceTimer = null;
+    let hasMultiplePages = false; // Track if load more should be available
+    
+    // Get current schools from DOM
+    function updateSchoolsList() {
+      allSchools = Array.from(document.querySelectorAll('.school-item'));
+    }
+    
+    // Initial schools list
+    updateSchoolsList();
+    initialSchoolCount = allSchools.length;
+    
+    // Check if there are multiple pages initially
+    if (loadMoreBtn) {
+      const totalPages = parseInt(loadMoreBtn.getAttribute('data-total-pages'));
+      const currentPage = parseInt(loadMoreBtn.getAttribute('data-current-page'));
+      hasMultiplePages = totalPages > 1 && currentPage < totalPages;
+    }
+    
+    // Load all remaining schools
+    function loadAllSchools(callback) {
+      if (allSchoolsLoaded || !loadMoreBtn) {
+        callback();
+        return;
+      }
+      
+      const totalPages = parseInt(loadMoreBtn.getAttribute('data-total-pages'));
+      const currentPage = parseInt(loadMoreBtn.getAttribute('data-current-page'));
+      
+      if (currentPage >= totalPages) {
+        allSchoolsLoaded = true;
+        callback();
+        return;
+      }
+      
+      // Load all remaining pages
+      function loadNextPage() {
+        const nextUrl = loadMoreBtn.getAttribute('data-next-url');
+        if (!nextUrl) {
+          allSchoolsLoaded = true;
+          callback();
+          return;
+        }
+        
+        fetch(nextUrl)
+          .then(response => response.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newSchools = doc.querySelectorAll('.school-item');
+            
+            newSchools.forEach(function(school) {
+              schoolsGrid.appendChild(school);
+            });
+            
+            updateSchoolsList();
+            
+            const newLoadMoreBtn = doc.querySelector('#load-more-btn');
+            if (newLoadMoreBtn) {
+              const newNextUrl = newLoadMoreBtn.getAttribute('data-next-url');
+              const newCurrentPage = newLoadMoreBtn.getAttribute('data-current-page');
+              const newTotalPages = newLoadMoreBtn.getAttribute('data-total-pages');
+              
+              loadMoreBtn.setAttribute('data-next-url', newNextUrl || '');
+              loadMoreBtn.setAttribute('data-current-page', newCurrentPage);
+              loadMoreBtn.setAttribute('data-total-pages', newTotalPages);
+              
+              if (newNextUrl && !newLoadMoreBtn.disabled) {
+                loadNextPage(); // Recursively load next page
+              } else {
+                allSchoolsLoaded = true;
+                callback();
+              }
+            } else {
+              allSchoolsLoaded = true;
+              callback();
+            }
+          })
+          .catch(error => {
+            console.error('Error loading schools:', error);
+            callback();
+          });
+      }
+      
+      loadNextPage();
+    }
+    
+    // Ajax Load More functionality
+    function loadMoreSchools() {
+      if (!loadMoreBtn || isLoading) return;
+      
+      const nextUrl = loadMoreBtn.getAttribute('data-next-url');
+      
+      // Check if schools are already loaded but hidden (from previous search)
+      const hiddenSchools = allSchools.filter(function(school, index) {
+        return index >= initialSchoolCount && school.style.display === 'none';
+      });
+      
+      // If schools are already loaded but hidden, show next batch
+      if (!nextUrl && hiddenSchools.length > 0) {
+        const schoolsToShow = Math.min(50, hiddenSchools.length); // Show 50 at a time
+        
+        for (let i = 0; i < schoolsToShow; i++) {
+          hiddenSchools[i].style.display = '';
+        }
+        
+        // Update initialSchoolCount to reflect newly visible schools
+        initialSchoolCount += schoolsToShow;
+        
+        // Check if there are more hidden schools
+        const remainingHidden = hiddenSchools.length - schoolsToShow;
+        if (remainingHidden === 0) {
+          loadMoreBtn.textContent = 'All Schools Loaded';
+          loadMoreBtn.disabled = true;
+        } else {
+          loadMoreBtn.textContent = 'Load More Schools';
+        }
+        
+        return;
+      }
+      
+      // Otherwise, fetch from server
+      if (!nextUrl) return;
+      
+      isLoading = true;
+      loadMoreBtn.disabled = true;
+      loadMoreBtn.textContent = 'Loading...';
+      
+      // Fetch next page
+      fetch(nextUrl)
+        .then(response => response.text())
+        .then(html => {
+          // Parse the response HTML
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          
+          // Extract new school items
+          const newSchools = doc.querySelectorAll('.school-item');
+          
+          // Append new schools to the grid
+          newSchools.forEach(function(school) {
+            schoolsGrid.appendChild(school);
+          });
+          
+          // Update schools list
+          updateSchoolsList();
+          
+          // Update initialSchoolCount to include newly loaded schools
+          initialSchoolCount = allSchools.length;
+          
+          // Get pagination info from new page
+          const newLoadMoreBtn = doc.querySelector('#load-more-btn');
+          
+          if (newLoadMoreBtn) {
+            const newNextUrl = newLoadMoreBtn.getAttribute('data-next-url');
+            const newCurrentPage = newLoadMoreBtn.getAttribute('data-current-page');
+            const newTotalPages = newLoadMoreBtn.getAttribute('data-total-pages');
+            
+            loadMoreBtn.setAttribute('data-next-url', newNextUrl || '');
+            loadMoreBtn.setAttribute('data-current-page', newCurrentPage);
+            loadMoreBtn.setAttribute('data-total-pages', newTotalPages);
+            
+            // Update button text and state
+            if (!newNextUrl || newLoadMoreBtn.disabled) {
+              loadMoreBtn.textContent = 'All Schools Loaded';
+              loadMoreBtn.disabled = true;
+            } else {
+              loadMoreBtn.textContent = 'Load More Schools';
+              loadMoreBtn.disabled = false;
+            }
+          } else {
+            // No more pages
+            loadMoreBtn.textContent = 'All Schools Loaded';
+            loadMoreBtn.disabled = true;
+          }
+          
+          isLoading = false;
+        })
+        .catch(error => {
+          console.error('Error loading more schools:', error);
+          loadMoreBtn.textContent = 'Error Loading - Try Again';
+          loadMoreBtn.disabled = false;
+          isLoading = false;
+        });
+    }
+    
+    // Search functionality (searches across ALL schools, loading them if needed)
+    function filterSchools() {
+      if (!searchInput) return;
+      
+      const searchTerm = searchInput.value.toLowerCase().trim();
+      isSearching = searchTerm !== '';
+      
+      // If searching and not all schools loaded, load them first
+      if (isSearching && !allSchoolsLoaded && !isLoadingForSearch) {
+        isLoadingForSearch = true; // Prevent duplicate loads
+        
+        loadAllSchools(function() {
+          isLoadingForSearch = false;
+          // Re-apply filter with current search value (in case user kept typing)
+          const currentSearchTerm = searchInput.value.toLowerCase().trim();
+          applySearchFilter(currentSearchTerm);
+        });
+      } else if (!isLoadingForSearch) {
+        // Only apply filter if not currently loading
+        applySearchFilter(searchTerm);
+      }
+    }
+    
+    // Debounced search to prevent rapid-fire calls
+    function debouncedFilterSchools() {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(filterSchools, 150);
+    }
+    
+    function applySearchFilter(searchTerm) {
+      let visibleCount = 0;
+      
+      allSchools.forEach(function(school, index) {
+        const schoolName = school.getAttribute('data-school-name');
+        const schoolSlug = school.getAttribute('data-school-slug');
+        
+        // Check if search term matches school name or slug
+        const matches = schoolName.includes(searchTerm) || schoolSlug.includes(searchTerm);
+        
+        // When no search term, only show initial schools (respect pagination)
+        if (searchTerm === '') {
+          if (index < initialSchoolCount) {
+            school.style.display = '';
+            visibleCount++;
+          } else {
+            school.style.display = 'none';
+          }
+        } else if (matches) {
+          school.style.display = '';
+          visibleCount++;
+        } else {
+          school.style.display = 'none';
+        }
+      });
+      
+      // Show/hide no results message
+      if (visibleCount === 0 && searchTerm !== '') {
+        if (noResultsMessage) noResultsMessage.classList.remove('hidden');
+        schoolsGrid.classList.add('hidden');
+      } else {
+        if (noResultsMessage) noResultsMessage.classList.add('hidden');
+        schoolsGrid.classList.remove('hidden');
+      }
+      
+      // Hide load more button when searching, show when cleared
+      if (loadMoreContainer) {
+        if (searchTerm !== '') {
+          loadMoreContainer.style.display = 'none';
+        } else {
+          loadMoreContainer.style.display = '';
+          
+          // Check if there are hidden schools to show OR if there's a next URL
+          if (loadMoreBtn) {
+            const hiddenSchools = allSchools.filter(function(school, index) {
+              return index >= initialSchoolCount && school.style.display === 'none';
+            });
+            
+            const nextUrl = loadMoreBtn.getAttribute('data-next-url');
+            
+            // Enable button if there are hidden schools or more pages to load
+            if (hiddenSchools.length > 0 || nextUrl) {
+              loadMoreBtn.disabled = false;
+              loadMoreBtn.textContent = 'Load More Schools';
+            } else {
+              loadMoreBtn.disabled = true;
+              loadMoreBtn.textContent = 'All Schools Loaded';
+            }
+          }
+        }
+      }
+    }
+    
+    // Event listeners
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener('click', loadMoreSchools);
+    }
+    
+    if (searchInput) {
+      // Use debounced search for input events
+      searchInput.addEventListener('input', debouncedFilterSchools);
+      
+      searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          searchInput.value = '';
+          clearTimeout(searchDebounceTimer);
+          filterSchools();
+          searchInput.blur();
+        }
+      });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collegiate Schools Grid",
+  "class": "section-collegiate-schools",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_heading",
+      "label": "Show heading",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop Your School"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_description",
+      "label": "Show description",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Find your school and explore exclusive collegiate wallet designs."
+    },
+    {
+      "type": "header",
+      "content": "Search"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_search",
+      "label": "Enable search",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "search_placeholder",
+      "label": "Search placeholder text",
+      "default": "Search schools..."
+    },
+    {
+      "type": "header",
+      "content": "Pagination"
+    },
+    {
+      "type": "range",
+      "id": "schools_per_page",
+      "label": "Schools per page",
+      "min": 10,
+      "max": 100,
+      "step": 10,
+      "default": 50,
+      "info": "Number of schools to display per page"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "row_size_desktop",
+      "label": "Desktop columns",
+      "options": [
+        {
+          "value": "md:grid-cols-2",
+          "label": "2"
+        },
+        {
+          "value": "md:grid-cols-3",
+          "label": "3"
+        },
+        {
+          "value": "md:grid-cols-4",
+          "label": "4"
+        },
+        {
+          "value": "md:grid-cols-5",
+          "label": "5"
+        },
+        {
+          "value": "md:grid-cols-6",
+          "label": "6"
+        }
+      ],
+      "default": "md:grid-cols-4"
+    },
+    {
+      "type": "select",
+      "id": "row_size_mobile",
+      "label": "Mobile columns",
+      "options": [
+        {
+          "value": "grid-cols-1",
+          "label": "1"
+        },
+        {
+          "value": "grid-cols-2",
+          "label": "2"
+        },
+        {
+          "value": "grid-cols-3",
+          "label": "3"
+        }
+      ],
+      "default": "grid-cols-2"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "spacing_top",
+      "label": "Top spacing",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "spacing_bottom",
+      "label": "Bottom spacing",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "options": [
+        {
+          "value": "color__bg-body color__text",
+          "label": "Body"
+        },
+        {
+          "value": "color__bg-neutral color__text",
+          "label": "Neutral"
+        },
+        {
+          "value": "color__bg-overlay-1 color__text",
+          "label": "Overlay 1"
+        },
+        {
+          "value": "color__bg-overlay-2 color__text",
+          "label": "Overlay 2"
+        },
+        {
+          "value": "color__bg-overlay-3 color__text",
+          "label": "Overlay 3"
+        },
+        {
+          "value": "color__bg-primary color__primary",
+          "label": "Primary"
+        },
+        {
+          "value": "color__bg-secondary color__secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "color__bg-tertiary color__tertiary",
+          "label": "Tertiary"
+        }
+      ],
+      "default": "color__bg-body color__text"
+    },
+    {
+      "type": "select",
+      "id": "color_border",
+      "label": "Border color",
+      "options": [
+        {
+          "value": "color__border-divider-1",
+          "label": "Divider 1"
+        },
+        {
+          "value": "color__border-selected-1",
+          "label": "Selected 1"
+        },
+        {
+          "value": "!color__border-transparent",
+          "label": "Transparent"
+        }
+      ],
+      "default": "color__border-divider-1"
+    },
+    {
+      "type": "select",
+      "id": "style_border",
+      "label": "Border style",
+      "options": [
+        {
+          "value": "",
+          "label": "None"
+        },
+        {
+          "value": "border--t-width",
+          "label": "Top"
+        },
+        {
+          "value": "border--b-width",
+          "label": "Bottom"
+        },
+        {
+          "value": "border--y-width",
+          "label": "Top & Bottom"
+        }
+      ],
+      "default": ""
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collegiate Schools Grid"
+    }
+  ]
+}
+{% endschema %}
+

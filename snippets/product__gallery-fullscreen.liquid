@@ -1,0 +1,185 @@
+<!-- snippets/product__gallery-fullscreen.liquid -->
+{% comment %} 
+  A fullscreen overlay of zoomable product images
+
+  Usage:
+    {% render 'product__gallery-fullscreen' %}
+
+  Globals:
+    - settings.layout_horizontal: horizontaly margin
+    - settings.thumbmails_color_scheme: color scheme of thumbnails
+{% endcomment %}
+
+<!-- fullscreen images -->
+{% if featured %}
+  {%- assign product = section.settings.product -%}
+{% endif %}
+
+{% capture fullscreen_content %}
+
+  {%- capture slides -%}
+    {% for media in product.media %}
+      {% case media.media_type %}
+        {% when 'image' %}
+          <div class="snap-center flex justify-center flex-none w-full h-full items-center whitespace-normal relative
+            {{ settings.thumbmails_color_scheme }}" 
+            :class="{ 'z-10' : index == {{ forloop.index0 }}}"
+            x-intersect:enter.full="index = {{ forloop.index0 }};"
+            x-bind:data-slide="{{ forloop.index0 }}"
+            @click="zoom = !zoom">
+            <div class="flex items-center justify-center flex-none w-full h-full"
+              x-show="!zoom">
+              {% capture image_class %}{{ settings.thumbmails_color_scheme }} absolute contain max-h-full w-auto{% endcapture %}
+              {{ media
+                | image_url: width: media.width 
+                | image_tag: class: image_class, loading: 'lazy', alt: media.alt }}
+            </div>
+            <div class="flex items-center justify-center flex-none w-full h-full pointer-events-none"
+              :class="{ 'hidden' : !zoom }"
+              x-bind:style="
+                'transform: translate('+(((mouse_x/width)-0.5)*100)+'%, '+(((mouse_y/height)-0.5)*100)+'%)'"
+              x-show="zoom"
+              x-cloak>
+              {% capture image_class %}{{ settings.thumbmails_color_scheme }} absolute contain h-auto w-[200%] max-w-none{% endcapture %}
+              {{ media
+                | image_url: width: media.width 
+                | image_tag: class: image_class, loading: 'lazy', alt: media.alt }}
+            </div>
+          </div>
+      {% endcase %}
+    {% endfor %}
+  {%- endcapture -%}
+  
+  <div class="flex flex-col w-full"
+    x-data="{
+      index: 0,
+      index_scroll: 0,
+      index_size: {{ product.images.size }},
+      show_arrows: true,
+      zoom: false,
+      mouse_x: 0,
+      mouse_y: 0,
+      height: 0,
+      width: 0,
+      isOverflown(element) {
+        return element.scrollWidth > element.clientWidth;
+      },
+      scrollToIndex(index_scroll) {
+        this.zoom = false;
+        this.index = index_scroll;
+        let slider = this.$refs.slider;
+        let currentSlide = slider.querySelector('[data-slide=&quot;' + index_scroll + '&quot;]');
+
+        if (currentSlide) {
+          let currentSlidePosition = currentSlide.offsetLeft;
+          slider.scrollTo({
+            top: 0,
+            left: currentSlidePosition,
+            behavior: 'smooth'
+          });
+        }
+      },
+      scrollNext() {
+        this.zoom = false;
+        let slider = this.$refs.slider;
+        let scrolledToEnd = (el) => {
+          if(el.scrollLeft + el.offsetWidth == el.scrollWidth){
+            return true;
+          } else {
+            return false;
+          } 
+        }
+
+        if(this.index >= this.index_size || scrolledToEnd(slider)){
+          this.scrollToIndex(0);
+        } else {
+          this.scrollToIndex(this.index + 1);
+        }
+      },
+      scrollBack() {
+        this.zoom = false;
+        let slider = this.$refs.slider;
+        if(this.index < 0 || slider.scrollLeft == 0){
+          this.scrollToIndex(this.index_size - 1);
+        } else {  
+          this.scrollToIndex(this.index - 1);
+        }
+      }
+    }"
+    x-trap="fullscreen"
+    @keyup.left="scrollBack();"
+    @keyup.right="scrollNext();">
+
+    <div class="relative flex flex-grow w-full"
+      x-ref="fullscreen"
+      @mousemove="
+        height = $refs.fullscreen.offsetHeight;
+        width = $refs.fullscreen.offsetWidth;
+        mouse_x = $event.offsetX; 
+        mouse_y = $event.offsetY;">
+
+      {%- comment -%} slides {%- endcomment -%}
+      <div class="whitespace-nowrap md:snap-x md:gap-4 scroll-smooth hidescrollbar inline-flex w-full gap-2 overflow-x-auto overflow-y-hidden"
+        x-init="setTimeout(function(){ if (isOverflown($el)) show_arrows = true}, 600);"  
+        x-ref="slider">
+        {{ slides }}
+      </div>
+
+      {% comment %} overlays {% endcomment %}
+      {% if product.media.size > 1 %}
+        <div class="top-4 absolute left-0 right-0 z-20 px-4 text-center">
+          <div class="type--small pb-2">
+            <span x-text="index+1">1</span>/<span x-text="index_size">1</span>
+          </div>
+        </div>
+        <div class="bottom-4 absolute left-0 right-0 z-20 px-4 text-center">
+          <div class="flex flex-wrap items-center justify-center gap-2">
+            {% for media in product.media %}
+              <button class="color__bg-text animation-100 border--radius w-3 h-1 opacity-25" 
+                :class="{ '!opacity-100': index === {{ forloop.index0 }} }"
+                @click="index_scroll = {{ forloop.index0 }}; scrollToIndex(index_scroll);"></button>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+    </div>
+    
+    {% comment %} controls {% endcomment %}
+    <div class="py-4 w-full
+      {{ settings.layout_horizontal }}">
+      <div class="flex justify-between">
+        <div class="md:flex hidden gap-2">
+          <button class="btn btn--plain btn--small shadow-sm"
+            @click="zoom = false">
+            {% render 'component__icon', icon: 'minus', size: '20', class: '' %}
+          </button>
+          <button class="btn btn--plain btn--small shadow-sm"
+            @click="zoom = true">
+            {% render 'component__icon', icon: 'plus', size: '20', class: '' %}
+          </button>
+        </div>
+        <button class="btn--close-dark btn--smaller" 
+          @click="fullscreen = false; hide_header = false;">
+          {% render 'component__icon', icon: 'x', size: '24', class: '' %} {{ 'general.navigation.close' | t }}
+        </button>
+        <div class="flex gap-2">
+          <button class="btn btn--plain btn--small shadow-sm"
+            title="{{ 'general.media.previous_slide' | t }}"
+            @click="scrollBack();">
+            {% render 'component__icon', icon: 'arrow-left', size: '20', class: '' %}
+          </button>
+          <button class="btn btn--plain btn--small shadow-sm"
+            title="{{ 'general.media.next_slide' | t }}"
+            @click="scrollNext();">
+            {% render 'component__icon', icon: 'arrow-right', size: '20', class: '' %}
+          </button>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+{% endcapture %}
+{% render 'component__fullscreen', 
+  fullscreen_id: 'fullscreen',
+  content: fullscreen_content %}

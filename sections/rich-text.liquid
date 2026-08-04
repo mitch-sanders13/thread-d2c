@@ -1,0 +1,342 @@
+<!-- sections/rich-text.liquid -->
+{% comment %}
+  Rich Text section — eyebrow, heading, subtext, and button.
+  Supports left, center, and right alignment.
+  Optional top/bottom/both border dividers.
+  Button supports outline-pill, outline-rect, outline-rounded, filled, text-underline, text-plain.
+{% endcomment %}
+
+{%- comment -%} Resolve colors {%- endcomment -%}
+{%- assign text_color = section.settings.text_color -%}
+{%- assign border_color = section.settings.border_color -%}
+
+{%- comment -%} Border styles {%- endcomment -%}
+{%- assign border_top = '' -%}
+{%- assign border_bot = '' -%}
+{%- if section.settings.border == 'top' or section.settings.border == 'both' -%}
+  {%- assign border_top = 'yes' -%}
+{%- endif -%}
+{%- if section.settings.border == 'bottom' or section.settings.border == 'both' -%}
+  {%- assign border_bot = 'yes' -%}
+{%- endif -%}
+
+{%- comment -%} Alignment {%- endcomment -%}
+{%- assign text_align = section.settings.alignment -%}
+{%- assign flex_align = 'flex-start' -%}
+{%- if section.settings.alignment == 'center' -%}{%- assign flex_align = 'center' -%}{%- endif -%}
+{%- if section.settings.alignment == 'right' -%}{%- assign flex_align = 'flex-end' -%}{%- endif -%}
+
+{%- comment -%} Button {%- endcomment -%}
+{%- assign btn_type = section.settings.btn_type -%}
+{%- assign is_text_btn = false -%}
+{%- if btn_type == 'text-underline' or btn_type == 'text-plain' -%}{%- assign is_text_btn = true -%}{%- endif -%}
+
+{%- assign btn_radius = 0 -%}
+{%- if btn_type == 'outline-pill' or btn_type == 'filled-pill' -%}{%- assign btn_radius = 50 -%}
+{%- elsif btn_type == 'outline-rounded' or btn_type == 'filled-rounded' -%}{%- assign btn_radius = section.settings.btn_radius -%}
+{%- else -%}{%- assign btn_radius = section.settings.btn_radius -%}
+{%- endif -%}
+
+{%- assign is_filled = false -%}
+{%- if btn_type contains 'filled' -%}{%- assign is_filled = true -%}{%- endif -%}
+
+<section class="{{ section.settings.visibility }}"
+  style="background:{{ section.settings.bg_color }};padding:{{ section.settings.padding_top }}px {{ section.settings.padding_sides }}px {{ section.settings.padding_bottom }}px;{% if border_top %}border-top:1px solid {{ border_color }};{% endif %}{% if border_bot %}border-bottom:1px solid {{ border_color }};{% endif %}">
+
+  <div style="max-width:{{ section.settings.max_width }}px;{% if section.settings.alignment == 'center' %}margin-left:auto;margin-right:auto;{% elsif section.settings.alignment == 'right' %}margin-left:auto;{% endif %}display:flex;flex-direction:column;gap:{{ section.settings.gap }}px;">
+
+    {%- comment -%} Eyebrow {%- endcomment -%}
+    {% if section.settings.show_eyebrow and section.settings.eyebrow_text != blank %}
+      {%- assign e_font = section.settings.eyebrow_font -%}
+      {%- assign e_color = section.settings.eyebrow_color | default: text_color -%}
+      <div style="margin:0 !important;font-family:var(--type-font-{{ e_font }}-family) !important;font-size:{{ section.settings.eyebrow_size }}px !important;font-weight:{{ section.settings.eyebrow_weight }} !important;text-transform:{{ section.settings.eyebrow_case }} !important;letter-spacing:{{ section.settings.eyebrow_ls }}em !important;color:{{ e_color }} !important;text-align:{{ text_align }} !important;">
+        {{ section.settings.eyebrow_text }}
+      </div>
+    {% endif %}
+
+    {%- comment -%} Heading {%- endcomment -%}
+    {% if section.settings.heading_text != blank %}
+      {%- assign h_lh = section.settings.heading_lh | divided_by: 100.0 -%}
+      {%- assign h_font = section.settings.heading_font -%}
+      <div role="heading" aria-level="2"
+        style="margin:0 !important;font-family:var(--type-font-{{ h_font }}-family) !important;font-size:{{ section.settings.heading_size }}px !important;font-weight:{{ section.settings.heading_weight }} !important;text-transform:{{ section.settings.heading_case }} !important;letter-spacing:{{ section.settings.heading_ls }}em !important;line-height:{{ h_lh }} !important;color:{{ section.settings.heading_color }} !important;text-align:{{ text_align }} !important;">
+        {{ section.settings.heading_text }}
+      </div>
+    {% endif %}
+
+    {%- comment -%} Subtext — rendered outside max-width via negative margins {%- endcomment -%}
+    {% if section.settings.show_subtext and section.settings.subtext != blank %}
+      {%- assign s_lh = section.settings.subtext_lh | divided_by: 100.0 -%}
+      {%- assign s_font = section.settings.subtext_font -%}
+      {%- assign s_color = section.settings.subtext_color | default: text_color -%}
+    {% endif %}
+
+    {%- comment -%} Button {%- endcomment -%}
+    {% if section.settings.show_btn and section.settings.btn_label != blank %}
+      <div style="display:flex;justify-content:{{ flex_align }};">
+        <a href="{{ section.settings.btn_url }}"
+          style="
+            display:inline-block;
+            text-decoration:{% if btn_type == 'text-underline' %}underline{% else %}none{% endif %};
+            font-family:var(--type-font-{{ section.settings.btn_font }}-family);
+            font-size:{{ section.settings.btn_size }}px;
+            font-weight:{{ section.settings.btn_weight }};
+            text-transform:{{ section.settings.btn_case }};
+            letter-spacing:{{ section.settings.btn_ls }}em;
+            padding:{{ section.settings.btn_pv }}px {{ section.settings.btn_ph }}px;
+            border-radius:{{ btn_radius }}px;
+            {% if is_text_btn %}
+              background:transparent;
+              border:none;
+              color:{{ section.settings.btn_text_color }};
+            {% elsif is_filled %}
+              background:{{ section.settings.btn_bg_color }};
+              color:{{ section.settings.btn_text_color }};
+              border:{{ section.settings.btn_border_w }}px solid {{ section.settings.btn_bg_color }};
+            {% else %}
+              background:transparent;
+              color:{{ section.settings.btn_border_color }};
+              border:{{ section.settings.btn_border_w }}px solid {{ section.settings.btn_border_color }};
+            {% endif %}
+          ">
+          {{ section.settings.btn_label }}
+        </a>
+      </div>
+    {% endif %}
+
+  </div>
+
+  {%- comment -%} Subtext — full width, padding controls inset {%- endcomment -%}
+  {% if section.settings.show_subtext and section.settings.subtext != blank %}
+    {%- assign s_lh = section.settings.subtext_lh | divided_by: 100.0 -%}
+    {%- assign s_font = section.settings.subtext_font -%}
+    {%- assign s_color = section.settings.subtext_color | default: text_color -%}
+    <style>
+      .rt-subtext-{{ section.id }} {
+        padding-left: {{ section.settings.subtext_pad_h_mobile }}px !important;
+        padding-right: {{ section.settings.subtext_pad_h_mobile }}px !important;
+      }
+      @media (min-width: 768px) {
+        .rt-subtext-{{ section.id }} {
+          padding-left: {{ section.settings.subtext_pad_h }}px !important;
+          padding-right: {{ section.settings.subtext_pad_h }}px !important;
+        }
+      }
+    </style>
+    <div class="rt-subtext-{{ section.id }}" style="margin:0 !important;padding-top:{{ section.settings.gap }}px !important;font-family:var(--type-font-{{ s_font }}-family) !important;font-size:{{ section.settings.subtext_size }}px !important;font-weight:{{ section.settings.subtext_weight }} !important;text-transform:{{ section.settings.subtext_case }} !important;letter-spacing:{{ section.settings.subtext_ls }}em !important;line-height:{{ s_lh }} !important;color:{{ s_color }} !important;text-align:{{ text_align }} !important;">
+      {{ section.settings.subtext }}
+    </div>
+  {% endif %}
+
+</section>
+
+{% schema %}
+{
+  "name": "Rich Text",
+  "settings": [
+    { "type": "header", "content": "Section" },
+    {
+      "type": "select", "id": "visibility", "label": "Visibility",
+      "options": [
+        { "value": "", "label": "All devices" },
+        { "value": "md:hidden", "label": "Mobile only" },
+        { "value": "hidden md:block", "label": "Desktop only" }
+      ],
+      "default": ""
+    },
+    { "type": "color", "id": "bg_color", "label": "Background color", "default": "#ffffff" },
+    {
+      "type": "color", "id": "text_color", "label": "Default text color",
+      "info": "Used when individual elements are set to inherit",
+      "default": "#1c1c1c"
+    },
+    {
+      "type": "select", "id": "alignment", "label": "Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    { "type": "range", "id": "max_width", "label": "Max content width (px)", "min": 200, "max": 1200, "step": 20, "default": 600 },
+    { "type": "range", "id": "gap", "label": "Gap between elements", "min": 4, "max": 48, "step": 2, "default": 16 },
+    { "type": "range", "id": "padding_top", "label": "Padding top", "min": 0, "max": 80, "step": 4, "default": 32 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding bottom", "min": 0, "max": 80, "step": 4, "default": 32 },
+    { "type": "range", "id": "padding_sides", "label": "Padding sides", "min": 0, "max": 60, "step": 4, "default": 20 },
+    {
+      "type": "select", "id": "border", "label": "Border dividers",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "top", "label": "Top only" },
+        { "value": "bottom", "label": "Bottom only" },
+        { "value": "both", "label": "Top and bottom" }
+      ],
+      "default": "none"
+    },
+    { "type": "color", "id": "border_color", "label": "Border color", "default": "#e3ded2" },
+    { "type": "header", "content": "Eyebrow" },
+    { "type": "checkbox", "id": "show_eyebrow", "label": "Show eyebrow", "default": false },
+    { "type": "text", "id": "eyebrow_text", "label": "Eyebrow text", "default": "Archive Event" },
+    {
+      "type": "select", "id": "eyebrow_font", "label": "Font",
+      "options": [
+        { "value": "body", "label": "Body (Forma DJR)" },
+        { "value": "header", "label": "Display (PP Right Grotesk)" }
+      ],
+      "default": "body"
+    },
+    { "type": "range", "id": "eyebrow_size", "label": "Size", "min": 8, "max": 24, "step": 1, "default": 11 },
+    {
+      "type": "select", "id": "eyebrow_weight", "label": "Weight",
+      "options": [{ "value": "400", "label": "Regular" }, { "value": "700", "label": "Bold" }],
+      "default": "400"
+    },
+    {
+      "type": "select", "id": "eyebrow_case", "label": "Case",
+      "options": [{ "value": "uppercase", "label": "UPPERCASE" }, { "value": "none", "label": "Normal" }, { "value": "capitalize", "label": "Capitalize" }],
+      "default": "uppercase"
+    },
+    {
+      "type": "select", "id": "eyebrow_ls", "label": "Letter spacing",
+      "options": [{ "value": "0", "label": "None" }, { "value": "0.05", "label": "Tight" }, { "value": "0.10", "label": "Normal" }, { "value": "0.16", "label": "Wide" }],
+      "default": "0.10"
+    },
+    { "type": "color", "id": "eyebrow_color", "label": "Color", "default": "#1c1c1c" },
+    { "type": "header", "content": "Heading" },
+    { "type": "text", "id": "heading_text", "label": "Heading text", "default": "Unlock The Archive Event" },
+    {
+      "type": "select", "id": "heading_tag", "label": "Heading tag",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" },
+        { "value": "p", "label": "Paragraph" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "select", "id": "heading_font", "label": "Font",
+      "options": [
+        { "value": "body", "label": "Body (Forma DJR)" },
+        { "value": "header", "label": "Display (PP Right Grotesk)" }
+      ],
+      "default": "body"
+    },
+    { "type": "range", "id": "heading_size", "label": "Size", "min": 14, "max": 80, "step": 2, "default": 28 },
+    {
+      "type": "select", "id": "heading_weight", "label": "Weight",
+      "options": [{ "value": "400", "label": "Regular" }, { "value": "700", "label": "Bold" }],
+      "default": "700"
+    },
+    {
+      "type": "select", "id": "heading_case", "label": "Case",
+      "options": [{ "value": "none", "label": "Normal" }, { "value": "uppercase", "label": "UPPERCASE" }, { "value": "capitalize", "label": "Capitalize" }],
+      "default": "none"
+    },
+    {
+      "type": "select", "id": "heading_ls", "label": "Letter spacing",
+      "options": [{ "value": "0", "label": "None" }, { "value": "0.02", "label": "Tight" }, { "value": "0.05", "label": "Normal" }],
+      "default": "0"
+    },
+    { "type": "range", "id": "heading_lh", "label": "Line height %", "min": 90, "max": 180, "step": 5, "default": 125 },
+    { "type": "color", "id": "heading_color", "label": "Color", "default": "#1c1c1c" },
+    { "type": "header", "content": "Subtext" },
+    { "type": "checkbox", "id": "show_subtext", "label": "Show subtext", "default": true },
+    { "type": "textarea", "id": "subtext", "label": "Subtext", "default": "Sign in to access previously sold-out styles." },
+    {
+      "type": "select", "id": "subtext_font", "label": "Font",
+      "options": [
+        { "value": "body", "label": "Body (Forma DJR)" },
+        { "value": "header", "label": "Display (PP Right Grotesk)" }
+      ],
+      "default": "body"
+    },
+    { "type": "range", "id": "subtext_size", "label": "Size", "min": 10, "max": 40, "step": 1, "default": 18 },
+    {
+      "type": "select", "id": "subtext_weight", "label": "Weight",
+      "options": [{ "value": "400", "label": "Regular" }, { "value": "700", "label": "Bold" }],
+      "default": "400"
+    },
+    {
+      "type": "select", "id": "subtext_case", "label": "Case",
+      "options": [{ "value": "none", "label": "Normal" }, { "value": "uppercase", "label": "UPPERCASE" }, { "value": "capitalize", "label": "Capitalize" }],
+      "default": "none"
+    },
+    {
+      "type": "select", "id": "subtext_ls", "label": "Letter spacing",
+      "options": [{ "value": "0", "label": "None" }, { "value": "0.01", "label": "Tiny" }, { "value": "0.02", "label": "Tight" }],
+      "default": "0.01"
+    },
+    { "type": "range", "id": "subtext_lh", "label": "Line height %", "min": 100, "max": 200, "step": 5, "default": 150 },
+    { "type": "color", "id": "subtext_color", "label": "Color", "default": "#1c1c1c" },
+    { "type": "range", "id": "subtext_pad_h", "label": "Horizontal padding (desktop)", "min": 0, "max": 248, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "subtext_pad_h_mobile", "label": "Horizontal padding (mobile)", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
+    { "type": "header", "content": "Button" },
+    { "type": "checkbox", "id": "show_btn", "label": "Show button", "default": true },
+    { "type": "text", "id": "btn_label", "label": "Button label", "default": "Shop now" },
+    { "type": "url", "id": "btn_url", "label": "Button URL" },
+    {
+      "type": "select", "id": "btn_type", "label": "Button style",
+      "options": [
+        { "value": "outline-pill", "label": "Outline pill" },
+        { "value": "outline-rect", "label": "Outline square" },
+        { "value": "outline-rounded", "label": "Outline rounded" },
+        { "value": "filled-pill", "label": "Filled pill" },
+        { "value": "filled-rect", "label": "Filled square" },
+        { "value": "filled-rounded", "label": "Filled rounded" },
+        { "value": "text-underline", "label": "Text underline" },
+        { "value": "text-plain", "label": "Text plain" }
+      ],
+      "default": "outline-pill"
+    },
+    {
+      "type": "select", "id": "btn_font", "label": "Font",
+      "options": [
+        { "value": "body", "label": "Body (Forma DJR)" },
+        { "value": "header", "label": "Display (PP Right Grotesk)" }
+      ],
+      "default": "body"
+    },
+    { "type": "range", "id": "btn_size", "label": "Size", "min": 10, "max": 22, "step": 1, "default": 13 },
+    {
+      "type": "select", "id": "btn_weight", "label": "Weight",
+      "options": [{ "value": "400", "label": "Regular" }, { "value": "700", "label": "Bold" }],
+      "default": "400"
+    },
+    {
+      "type": "select", "id": "btn_case", "label": "Case",
+      "options": [{ "value": "uppercase", "label": "UPPERCASE" }, { "value": "none", "label": "Normal" }, { "value": "capitalize", "label": "Capitalize" }],
+      "default": "uppercase"
+    },
+    {
+      "type": "select", "id": "btn_ls", "label": "Letter spacing",
+      "options": [{ "value": "0", "label": "None" }, { "value": "0.05", "label": "Tight" }, { "value": "0.08", "label": "Normal" }, { "value": "0.12", "label": "Wide" }],
+      "default": "0.08"
+    },
+    { "type": "range", "id": "btn_pv", "label": "Padding vertical", "min": 4, "max": 20, "step": 1, "default": 11 },
+    { "type": "range", "id": "btn_ph", "label": "Padding horizontal", "min": 8, "max": 48, "step": 2, "default": 28 },
+    { "type": "range", "id": "btn_border_w", "label": "Border thickness", "min": 1, "max": 4, "step": 1, "default": 1 },
+    { "type": "range", "id": "btn_radius", "label": "Border radius (rounded style)", "min": 0, "max": 20, "step": 1, "default": 8 },
+    { "type": "color", "id": "btn_bg_color", "label": "Filled bg / text color", "default": "#1c1c1c" },
+    { "type": "color", "id": "btn_text_color", "label": "Button text color", "default": "#ffffff" },
+    { "type": "color", "id": "btn_border_color", "label": "Outline border / text color", "default": "#1c1c1c" }
+  ],
+  "presets": [
+    {
+      "name": "Rich Text",
+      "settings": {
+        "show_eyebrow": false,
+        "heading_text": "Unlock The Archive Event",
+        "show_subtext": true,
+        "subtext": "Sign in to access previously sold-out styles.",
+        "show_btn": true,
+        "btn_label": "Shop now",
+        "btn_type": "outline-pill",
+        "alignment": "left"
+      }
+    }
+  ],
+  "disabled_on": { "groups": ["custom.overlay"] }
+}
+{% endschema %}

@@ -1,0 +1,220 @@
+{% comment %}
+  Cart drawer upsell panel: appears when the customer has a bundle-eligible
+  product in cart but hasn't built a complete trifecta.
+
+  Reads `cartBundleStatus` from the surrounding cart Alpine scope:
+    { filled: [slot, ...], missing: [slot, ...], eligibleItems: [{...}] }
+
+  The "Complete your Trifecta" button calls startBundleUpsell(eligibleItems)
+  which closes the cart drawer and opens the bundle drawer in 'upsell'
+  mode with the customer's existing eligible cart items pre-filled.
+
+  Renders nothing if the merchant disables the upsell in theme settings.
+{% endcomment %}
+
+{%- if settings.trifecta_upsell_enable -%}
+  {%- assign _copy = settings.trifecta_upsell_copy -%}
+  {%- assign _button = settings.trifecta_upsell_button | default: 'Complete your Trifecta' -%}
+
+  {%- comment -%}
+    Partial trifecta (1-2 of 3 types in cart): inline builder. Customer
+    picks the missing slot(s) without leaving the cart drawer.
+  {%- endcomment -%}
+  <div
+    class="cart__trifecta-upsell cart__trifecta-upsell--partial"
+    x-data="cartTrifectaInlineBuilder()"
+    x-init="init()"
+    x-show="cart.items.length > 0 && cartBundleStatus.filled.length > 0 && !cartBundleStatus.complete"
+    x-cloak>
+
+    {%- comment -%} Collapsed state — call to action {%- endcomment -%}
+    <div class="cart__trifecta-upsell-text" x-show="!building" x-cloak>
+      <p class="cart__trifecta-upsell-status">
+        You have a
+        <strong x-text="cartBundleStatus.filled.join(' and ')"></strong>
+        in your cart.
+      </p>
+      <div class="cart__trifecta-upsell-copy">
+        {{ _copy }}
+      </div>
+      <p class="cart__trifecta-upsell-missing type--xsmall opacity-60">
+        Add a <strong x-text="cartBundleStatus.missing.join(' and ')"></strong> to complete it.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="cart__trifecta-upsell-cta btn btn--primary"
+      x-show="!building"
+      x-cloak
+      @click="startBuilding(cartBundleStatus.missing)">
+      {{ _button }}
+    </button>
+
+    {%- comment -%}
+      Expanded state — inline picker. One card per missing slot
+      (interactive) and one read-only chip per already-filled slot.
+      The dropdown panel matches the cart-edit widget styling so the
+      picker feels native to the cart drawer.
+    {%- endcomment -%}
+    <div class="cart__bundle-group" x-show="building" x-cloak>
+      <div class="cart__bundle-header">
+        <div class="cart__bundle-header-title">
+          <strong>Build your Trifecta</strong>
+        </div>
+        <button
+          type="button"
+          class="cart__bundle-dropdown-close"
+          aria-label="Cancel"
+          @click="cancelBuilding()">✕</button>
+      </div>
+
+      <ul class="cart__bundle-items" aria-label="Bundle slots">
+        <template x-for="slot in slots" :key="slot.label">
+          <li
+            class="cart__bundle-item"
+            :class="{
+              'is-active-dropdown': dropdownOpen === slotIdxFromLabel(slot.label),
+              'cart__bundle-item--readonly': cartBundleStatus.filled.indexOf(slot.label) >= 0
+            }">
+
+            {%- comment -%} Filled-from-cart: read-only chip {%- endcomment -%}
+            <template x-if="cartBundleStatus.filled.indexOf(slot.label) >= 0">
+              <div class="cart__bundle-item-button" style="cursor: default; border-color: transparent;">
+                <div class="cart__bundle-item-img" style="display:flex;align-items:center;justify-content:center;font-size:0.7rem;opacity:0.5;">✓</div>
+                <div class="cart__bundle-item-body">
+                  <p class="cart__bundle-item-slot" x-text="slot.label"></p>
+                  <p class="cart__bundle-item-title">Using your <span x-text="slot.label.toLowerCase()"></span> from cart</p>
+                </div>
+              </div>
+            </template>
+
+            {%- comment -%} Missing-from-cart: pickable {%- endcomment -%}
+            <template x-if="cartBundleStatus.filled.indexOf(slot.label) < 0">
+              <button
+                type="button"
+                class="cart__bundle-item-button"
+                :disabled="loading"
+                :aria-expanded="dropdownOpen === slotIdxFromLabel(slot.label)"
+                @click="toggleDropdown(slotIdxFromLabel(slot.label))">
+                <img
+                  class="cart__bundle-item-img"
+                  :src="currentProduct(slotIdxFromLabel(slot.label)).image || ''"
+                  :alt="currentProduct(slotIdxFromLabel(slot.label)).title || ''"
+                  loading="lazy"
+                  width="56"
+                  height="56" />
+                <div class="cart__bundle-item-body">
+                  <p class="cart__bundle-item-slot" x-text="slot.label"></p>
+                  <p class="cart__bundle-item-title" x-text="currentProduct(slotIdxFromLabel(slot.label)).title || ('Pick a ' + slot.label.toLowerCase())"></p>
+                </div>
+                <span class="cart__bundle-item-change">
+                  <span x-text="dropdownOpen === slotIdxFromLabel(slot.label) ? 'Close' : 'Pick'"></span>
+                  <span class="cart__bundle-item-caret" aria-hidden="true">▾</span>
+                </span>
+              </button>
+            </template>
+          </li>
+        </template>
+      </ul>
+
+      <div class="cart__bundle-dropdown-toolbar" x-show="dropdownOpen >= 0" x-cloak>
+        <div class="cart__bundle-type-tabs">
+          <button
+            type="button"
+            class="cart__bundle-type-tab"
+            :class="{ 'is-active': dropdownOpen >= 0 && selectedType[dropdownOpen] === '' }"
+            @click="selectType(dropdownOpen, '')">
+            <span>All</span>
+          </button>
+          <template x-for="type in (dropdownOpen >= 0 ? typesForSlot(dropdownOpen) : [])" :key="type">
+            <button
+              type="button"
+              class="cart__bundle-type-tab"
+              :class="{ 'is-active': dropdownOpen >= 0 && selectedType[dropdownOpen] === type }"
+              @click="selectType(dropdownOpen, type)">
+              <span x-text="type"></span>
+            </button>
+          </template>
+        </div>
+        <button
+          type="button"
+          class="cart__bundle-dropdown-close"
+          aria-label="Close"
+          @click="dropdownOpen = -1">✕</button>
+      </div>
+
+      <div
+        class="cart__bundle-dropdown"
+        :class="{ 'is-open': dropdownOpen >= 0 }">
+
+        <div class="cart__bundle-swatches">
+          <template x-for="p in (dropdownOpen >= 0 ? productsForCurrentType(dropdownOpen) : [])" :key="p.handle">
+            <button
+              type="button"
+              class="cart__bundle-swatch"
+              :class="{
+                'is-selected': dropdownOpen >= 0 && currentProduct(dropdownOpen).handle === p.handle,
+                'is-unavailable': !p.available
+              }"
+              :disabled="!p.available || loading"
+              :aria-label="p.title + (p.available ? '' : ' (sold out)')"
+              :title="p.title"
+              @click="selectProduct(dropdownOpen, p)">
+              <span class="cart__bundle-swatch-img">
+                <img :src="p.image" :alt="p.title" loading="lazy" />
+              </span>
+              <span class="cart__bundle-swatch-name" x-text="shortName(p.title)"></span>
+            </button>
+          </template>
+        </div>
+      </div>
+
+      <p class="cart__bundle-status cart__bundle-status--loading" x-show="loading" x-cloak>Adding bundle&hellip;</p>
+      <p class="cart__bundle-status cart__bundle-status--error" x-show="error" x-text="error" x-cloak></p>
+
+      <div class="cart__bundle-actions">
+        <button
+          type="button"
+          class="cart__bundle-action cart__bundle-action--ghost"
+          :disabled="loading"
+          @click="cancelBuilding()">Cancel</button>
+        <button
+          type="button"
+          class="btn btn--primary"
+          :disabled="loading"
+          style="flex:1;"
+          @click="buildBundle(cartBundleStatus)">
+          <span x-show="!loading">Add Bundle &mdash; Save 10%</span>
+          <span x-show="loading" x-cloak>Adding&hellip;</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%}
+    Complete trifecta (all 3 types in cart as separate items): one-click
+    "Combine into Bundle" to save 10%. Rewires the 3 cart lines with
+    _bundle_id properties and applies the discount code.
+  {%- endcomment -%}
+  <div
+    class="cart__trifecta-upsell cart__trifecta-upsell--complete"
+    x-show="cart.items.length > 0 && cartBundleStatus.complete"
+    x-cloak>
+    <div class="cart__trifecta-upsell-text">
+      <p class="cart__trifecta-upsell-status">
+        <strong>You qualify for a Trifecta Bundle!</strong>
+      </p>
+      <div class="cart__trifecta-upsell-copy">
+        Save 10% by combining your wallet, lanyard, and chapstick holder.
+      </div>
+    </div>
+    <button
+      type="button"
+      class="cart__trifecta-upsell-cta btn btn--primary"
+      :disabled="cart_loading"
+      @click="combineCartIntoBundle()">
+      <span x-show="!cart_loading">Combine into Bundle &mdash; Save 10%</span>
+      <span x-show="cart_loading" x-cloak>Bundling&hellip;</span>
+    </button>
+  </div>
+{%- endif -%}

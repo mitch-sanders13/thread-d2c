@@ -1,0 +1,169 @@
+<!-- sections/page__contact.liquid -->
+{% comment %} 
+  Form for contact page.
+
+  Globals:
+  - settings.layout_horizontal: horizontaly margin
+
+  Possible enhancements:
+  - Add setting so merchant can add more fields to contact form.
+
+  Pro tips:
+  - Update email address so form submissions are going to the right inbox.
+{% endcomment %}
+
+<section class="{{ section.settings.color_scheme }}"> 
+
+  <div class="flex flex-col justify-center items-center py-8 border--b-width color__border-divider-1">
+    <h1 class="mb-0 type--big">
+      {{ page.title | escape }}
+    </h1>
+  </div>
+
+  <div class="flex flex-col justify-center items-center 2 py-24
+    {{ section.settings.layout_horizontal }}">
+    <div class="max-w-prose xl:max-w-5xl w-full">
+      
+      <div class="rte mb-4">
+        {{ page.content }}
+      </div>
+
+      {% form 'contact' %}
+        {% if form.posted_successfully? %}
+          <p>
+            {{ 'contact.form.success' | t }}
+          </p>
+        {% endif %}
+
+        {% if form.errors %}
+          <div class="color__bg-overlay-1 type--small border--radius p-2 mb-4">
+            {{ form.errors | default_errors }}
+          </div>
+        {% endif %}
+
+        <div class="mb-4">
+          <label class="type--base" for="ContactFormName">{{ 'customer.account.name' | t }}:</label>
+          <input
+            type="text"
+            class="form-input"
+            name="contact[name]"
+            id="ContactFormName"
+            placeholder="{{ 'customer.account.name' | t }}"
+            value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}">
+        </div>
+
+        <div class="mb-4">
+          <label class="type--base" for="ContactFormEmail">{{ 'contact.form.email' | t }}:</label>
+          <input
+            type="email"
+            class="form-input"
+            name="contact[email]"
+            id="ContactFormEmail"
+            placeholder="{{ 'contact.form.email_placeholder' | t }}"
+            value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off">
+        </div>
+
+        <div class="mb-4">
+          <label class="type--base" for="ContactFormMessage">{{ 'contact.form.message' | t }}:</label>
+          <textarea
+            rows="10"
+            class="border--radiu"
+            name="contact[body]"
+            id="ContactFormMessage"
+            placeholder="{{ 'contact.form.dots' | t }}">
+            {% if form.body %}
+              {{ form.body }}{% endif %}
+          </textarea>
+        </div>
+        
+        <div class="mb-4">
+          <button type="submit" class="btn btn--secondary !w-full">
+            {{ 'contact.form.send' | t }}
+          </button>
+        </div>
+        
+      {% endform %}
+      
+    </div>
+  </div>
+</section>
+
+{% schema %}
+  {
+    "name": "Contact",
+    "settings": [
+      {
+        "type": "header",
+        "content": "t:sections.all.headers.header__1.content"
+      }, {
+        "type": "select",
+        "id": "color_scheme",
+        "label": "t:sections.all.colors.settings.color_scheme.label",
+        "options": [
+          {
+            "value": "color__bg-body color__text",
+            "label": "t:sections.all.colors.settings.color_scheme.options__1.label"
+          },
+          {
+            "value": "color__bg-neutral color__text",
+            "label": "t:sections.all.colors.settings.color_scheme.options__2.label"
+          },
+          {
+            "value": "color__bg-overlay-1 color__text",
+            "label": "t:sections.all.colors.settings.color_scheme.options__3.label"
+          },
+          {
+            "value": "color__bg-overlay-2 color__text",
+            "label": "t:sections.all.colors.settings.color_scheme.options__4.label"
+          }, {
+            "value": "color__bg-overlay-3 color__text",
+            "label": "t:sections.all.colors.settings.color_scheme.options__5.label"
+          }, {
+            "value": "color__bg-primary color__primary",
+            "label": "t:sections.all.colors.settings.color_scheme.options__6.label"
+          }, {
+            "value": "color__bg-secondary color__secondary",
+            "label": "t:sections.all.colors.settings.color_scheme.options__7.label"
+          }, {
+            "value": "color__bg-tertiary color__tertiary",
+            "label": "t:sections.all.colors.settings.color_scheme.options__8.label"
+          }
+        ],
+        "default": "color__bg-body color__text"
+      },
+    {
+      "type": "select",
+      "id": "layout_horizontal",
+      "label": "t:settings_schema.layout.settings.layout_horizontal.label",
+      "options": [
+        {
+          "value": "window--narrow",
+          "label": "t:settings_schema.layout.settings.layout_horizontal.options__1.label"
+        },
+        {
+          "value": "window",
+          "label": "t:settings_schema.layout.settings.layout_horizontal.options__2.label"
+        },
+        {
+          "value": "window--wide",
+          "label": "t:settings_schema.layout.settings.layout_horizontal.options__3.label"
+        },
+        {
+          "value": "window--full",
+          "label": "t:settings_schema.layout.settings.layout_horizontal.options__4.label"
+        }
+      ],
+      "default": "window"
+    }
+    ],
+    "presets": [
+      {
+        "name": "Contact"
+      }
+    ],
+    "templates": ["page"]
+  }
+{% endschema %}

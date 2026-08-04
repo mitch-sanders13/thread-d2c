@@ -1,0 +1,173 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "banner-video",
+      "settings": {
+        "visibility": "",
+        "image_background": "shopify://shop_images/DSC08789.jpg",
+        "video_background": "shopify://files/videos/Thread_FINAL_subtitles 2_1_1_1.mp4",
+        "auto_play": true,
+        "content": "<p>OUR MISSION</p>",
+        "heading": "Empower and inspire others to carry on",
+        "color_scheme": "color__bg-secondary color__secondary",
+        "color_button": "btn btn--tertiary",
+        "spacing_bottom": 0
+      }
+    },
+    "5356fbf2-51b4-489b-b252-fbedf3196ebf": {
+      "type": "about-image-text",
+      "settings": {
+        "image": "shopify://shop_images/thread-1.png",
+        "subtext": "<p>CARRY ON MINDSET</p>",
+        "heading": "<p>PROGRESSION FOLLOWS FRICTION</p>",
+        "body": "<p>We are inspired by the human instinct to progress. We celebrate rad individuals who explore, experiment, and discover. No matter the circumstance, onward is the mantra for the everyday carrier. </p>",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "a1582709-72ad-45f7-8d1a-048a322680ab": {
+      "type": "about-image-stack",
+      "settings": {
+        "image": "shopify://shop_images/Screenshot_2023-04-18_141404.png",
+        "subtext": "<p>ORIGIN STORY</p>",
+        "heading": "<p>ROOTED IN EXPRESSION</p>",
+        "body": "<p>In 2015, we stretched ourselves to redefine minimalist carry goods. We took what was once boring black and brown leather wallets and designed our own expressive, minimalist, and functional wallets & accessories. By opening the door to the creative possibilities on a forgotten category we sparked a fire in youth at large and continue to attract artists, athletes, and leaders in indiviuality. Many years later, Thread established its brand mission, Carry On, as a call to any and all that values personal progress and self-expression. With this slogan we are driven to be the go-to all things carry brand. Join us in our mission to empower and inspire others to Carry On.</p>",
+        "padding_top": 1,
+        "padding_bottom": 1
+      }
+    },
+    "bb546e9a-9f17-40a3-93d9-7c5fadd35bb6": {
+      "type": "about-product",
+      "settings": {
+        "image": "shopify://shop_images/thread-11.png",
+        "subtext": "<p>THE CARRY CATEGORY</p>",
+        "heading": "<p>PRODUCTS <br/>THAT <br/>DEFINE <br/>US</p>",
+        "heading_2": "<p>PRODUCTS THAT DEFINE US</p>",
+        "title_1": "<p>CROSSBODY BAG</p>",
+        "url_1": "https://www.threadwallets.com/collections/crossbody-bags",
+        "title_2": "<p>WRIST LANYARD</p>",
+        "url_2": "https://www.threadwallets.com/collections/wrist-lanyards",
+        "title_3": "<p>VERTICAL WALLET</p>",
+        "url_3": "https://www.threadwallets.com/collections/vertical-wallets",
+        "title_4": "<p>BIFOLD WALLET</p>",
+        "url_4": "https://www.threadwallets.com/collections/bifold-wallets",
+        "title_5": "<p>ELASTIC WALLET</p>",
+        "url_5": "https://www.threadwallets.com/collections/elastic-wallets",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "a9d3b13e-e038-42bc-b46b-ebe89990985d": {
+      "type": "about-slider",
+      "blocks": {
+        "template--15858389024906__a9d3b13e-e038-42bc-b46b-ebe89990985d-1681874525048d8a22-0": {
+          "type": "content",
+          "settings": {
+            "image_background": "shopify://shop_images/ThreadHeadPhotos_MARY_RAND.jpg",
+            "slide_name": "MARY  RAND",
+            "name_url": "https://www.threadwallets.com",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 8
+          }
+        },
+        "template--15858389024906__a9d3b13e-e038-42bc-b46b-ebe89990985d-1681874525048d8a22-1": {
+          "type": "content",
+          "settings": {
+            "image_background": "shopify://shop_images/ThreadHeadPhotos_ACE_PELKA.jpg",
+            "slide_name": "ACE PELKA",
+            "name_url": "https://www.threadwallets.com",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 8
+          }
+        },
+        "template--15858389024906__a9d3b13e-e038-42bc-b46b-ebe89990985d-1681874525048d8a22-2": {
+          "type": "content",
+          "settings": {
+            "image_background": "shopify://shop_images/ThreadHeadPhotos_ZOE_MCDOUGAL.jpg",
+            "slide_name": "ZOE MCDOUGAL",
+            "name_url": "https://www.threadwallets.com",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 8
+          }
+        },
+        "1ac32144-e038-4b5c-a25e-e457312b0e32": {
+          "type": "content",
+          "settings": {
+            "image_background": "shopify://shop_images/ThreadHeadPhotos_ETHAN_JONES.jpg",
+            "slide_name": "ETHAN JONES",
+            "name_url": "https://www.threadwallets.com",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 8
+          }
+        },
+        "0ca63a4b-94b1-4f52-93fb-e827bd568b54": {
+          "type": "content",
+          "settings": {
+            "image_background": "shopify://shop_images/ThreadHeadPhotos_IVY_MILLER.jpg",
+            "slide_name": "IVY MILLER",
+            "name_url": "https://www.threadwallets.com",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "layout_desktop_width": 3,
+            "layout_mobile_width": 8
+          }
+        }
+      },
+      "block_order": [
+        "template--15858389024906__a9d3b13e-e038-42bc-b46b-ebe89990985d-1681874525048d8a22-0",
+        "template--15858389024906__a9d3b13e-e038-42bc-b46b-ebe89990985d-1681874525048d8a22-1",
+        "template--15858389024906__a9d3b13e-e038-42bc-b46b-ebe89990985d-1681874525048d8a22-2",
+        "1ac32144-e038-4b5c-a25e-e457312b0e32",
+        "0ca63a4b-94b1-4f52-93fb-e827bd568b54"
+      ],
+      "disabled": true,
+      "settings": {
+        "subtext": "<p>WHO WE ARE</p>",
+        "heading": "<p>CURIOUS</p><p>CARRIERS</p>",
+        "body": "<p>We are driven by a culture of curiosity. In the pursuit of carrying on, we push on, break through and begin anew. With a fresh perspective living a life in motion is our focus.</p>",
+        "link_title": "SEE MORE",
+        "link_url": "https://www.threadwallets.com/",
+        "spacing_top": 0,
+        "spacing_bottom": 0,
+        "visibility": ""
+      }
+    },
+    "dd031afd-da46-470c-bf05-fc811a6f3247": {
+      "type": "about-image-text-2",
+      "settings": {
+        "image": "shopify://shop_images/Thread-3.png",
+        "subtext": "<p>IMPACT</p>",
+        "heading": "<p>CARRY ON FOUNDATION</p>",
+        "body": "<p>Thread's non-profit arm, the Carry On Foundation, launched in 2022. Its mission is to teach resilience and promote mental health through action sports.</p>",
+        "url": "https://carryon.org/",
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    }
+  },
+  "order": [
+    "main",
+    "5356fbf2-51b4-489b-b252-fbedf3196ebf",
+    "a1582709-72ad-45f7-8d1a-048a322680ab",
+    "bb546e9a-9f17-40a3-93d9-7c5fadd35bb6",
+    "a9d3b13e-e038-42bc-b46b-ebe89990985d",
+    "dd031afd-da46-470c-bf05-fc811a6f3247"
+  ]
+}

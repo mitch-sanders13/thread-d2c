@@ -1,0 +1,396 @@
+<!-- sections/attentive-bar.liquid -->
+{% comment %}
+  Inline newsletter signup — email field + submit button in one row.
+  Uses Shopify's built-in customer form. New subscribers sync to Attentive via
+  Attentive's Shopify integration (no popup required).
+{% endcomment %}
+
+{%- comment -%} Resolve heading/sub font tokens vs manual {%- endcomment -%}
+{% assign ab_h_use_token = false %}
+{% assign ab_h_token_class = '' %}
+{% assign ab_h_font_style = '' %}
+{% if section.settings.heading_font contains 'token-' %}
+  {% assign ab_h_use_token = true %}
+  {% assign ab_h_token_class = section.settings.heading_font | replace: 'token-', 'type-' %}
+{% elsif section.settings.heading_font == 'body' %}
+  {% assign ab_h_font_style = 'font-family:var(--type-font-body-family);' %}
+{% elsif section.settings.heading_font == 'heading' %}
+  {% assign ab_h_font_style = 'font-family:var(--type-font-header-family);' %}
+{% elsif section.settings.heading_font == 'nav' %}
+  {% assign ab_h_font_style = 'font-family:var(--type-font-nav-family);' %}
+{% elsif section.settings.heading_font == 'handwritten' %}
+  {% assign ab_h_font_style = 'font-family:var(--type-font-handwritten-family);' %}
+{% endif %}
+
+<section class="
+  {{ section.settings.visibility }}
+  {{ section.settings.color_scheme }}
+  {{ section.settings.color_border }}
+  {{ section.settings.style_border }}">
+  <div class="{{ section.settings.layout_horizontal }}"
+    style="padding-top:{{ section.settings.spacing_top }}px;padding-bottom:{{ section.settings.spacing_bottom }}px;padding-left:{{ section.settings.side_padding }}px;padding-right:{{ section.settings.side_padding }}px;">
+    <div style="max-width:{{ section.settings.content_max_width }}px;margin:{% if section.settings.align == 'center' %}0 auto{% elsif section.settings.align == 'right' %}0 0 0 auto{% else %}0 auto 0 0{% endif %};text-align:{{ section.settings.align }};">
+
+      {%- unless section.settings.heading == blank -%}
+        <h3 class="{% if ab_h_use_token %}{{ ab_h_token_class }}{% endif %}"
+          aria-level="2"
+          style="margin:0 0 {{ section.settings.heading_mb }}px 0;{% unless ab_h_use_token %}{{ ab_h_font_style }}font-size:{{ section.settings.heading_size }}px;font-weight:{{ section.settings.heading_weight }};text-transform:{{ section.settings.heading_transform }};letter-spacing:{{ section.settings.heading_ls }};line-height:{{ section.settings.heading_lh }};{% endunless %}{% if section.settings.heading_color != blank %}color:{{ section.settings.heading_color }};{% endif %}">
+          {{ section.settings.heading }}
+        </h3>
+      {%- endunless -%}
+
+      {%- unless section.settings.subtitle == blank -%}
+        <p style="margin:0 0 {{ section.settings.subtitle_mb }}px 0;font-family:var(--type-font-{% if section.settings.subtitle_font == 'heading' %}header{% else %}{{ section.settings.subtitle_font }}{% endif %}-family);font-size:{{ section.settings.subtitle_size }}px;font-weight:{{ section.settings.subtitle_weight }};letter-spacing:{{ section.settings.subtitle_ls }};line-height:{{ section.settings.subtitle_lh }};{% if section.settings.subtitle_color != blank %}color:{{ section.settings.subtitle_color }};{% endif %}">
+          {{ section.settings.subtitle }}
+        </p>
+      {%- endunless -%}
+
+      <form class="attentive-form-wrap-{{ section.id }}"
+        onsubmit="return attentiveHybridSubmit('{{ section.id }}', event)"
+        novalidate>
+        <div class="attentive-field-{{ section.id }}" data-attn-fields
+          style="display:flex;flex-wrap:{% if section.settings.stack_mobile %}wrap{% else %}nowrap{% endif %};gap:{{ section.settings.field_gap }}px;align-items:stretch;max-width:{{ section.settings.input_max_width }}px;margin:{% if section.settings.align == 'center' %}0 auto{% elsif section.settings.align == 'right' %}0 0 0 auto{% else %}0{% endif %};">
+          <label class="sr-only" for="attentive-email-{{ section.id }}">Email</label>
+          <input
+            id="attentive-email-{{ section.id }}"
+            data-attn-email
+            type="email"
+            name="email"
+            required
+            placeholder="{{ section.settings.placeholder | default: 'Enter your email' }}"
+            style="flex:1 1 auto;min-width:0;padding:{{ section.settings.input_pad_v }}px {{ section.settings.input_pad_h }}px;border:{{ section.settings.input_border_width }}px solid {{ section.settings.input_border_color }};border-radius:{{ section.settings.input_radius }}px;background:{{ section.settings.input_bg }};color:{{ section.settings.input_text_color }};font-family:var(--type-font-{% if section.settings.input_font == 'heading' %}header{% else %}{{ section.settings.input_font }}{% endif %}-family);font-size:{{ section.settings.input_size }}px;outline:none;-webkit-appearance:none;appearance:none;">
+          <button
+            type="submit"
+            style="flex-shrink:0;padding:{{ section.settings.button_pad_v }}px {{ section.settings.button_pad_h }}px;border:{{ section.settings.button_border_width }}px solid {{ section.settings.button_border_color }};border-radius:{{ section.settings.button_radius }}px;background:{{ section.settings.button_bg }};color:{{ section.settings.button_text_color }};font-family:var(--type-font-nav-family);font-size:{{ section.settings.button_size }}px;font-weight:{{ section.settings.button_weight }};text-transform:{{ section.settings.button_transform }};letter-spacing:{{ section.settings.button_ls }};cursor:pointer;white-space:nowrap;transition:opacity 0.15s;">
+            {{ section.settings.button_label | default: 'Subscribe' }}
+          </button>
+        </div>
+
+        <p data-attn-error
+          style="display:none;margin:{{ section.settings.message_mt }}px 0 0;font-size:{{ section.settings.message_size }}px;color:{{ section.settings.error_color }};">
+          Please enter a valid email.
+        </p>
+        <p data-attn-success
+          style="display:none;margin:{{ section.settings.message_mt }}px 0 0;font-size:{{ section.settings.message_size }}px;color:{{ section.settings.success_color }};">
+          {{ section.settings.success_message | default: 'Thanks for subscribing!' }}
+        </p>
+      </form>
+
+      <script>
+        window.attentiveHybridSubmit = window.attentiveHybridSubmit || function(sid, e) {
+          e.preventDefault();
+          var form = e.target;
+          var emailEl = form.querySelector('[data-attn-email]');
+          var errEl = form.querySelector('[data-attn-error]');
+          var okEl = form.querySelector('[data-attn-success]');
+          var fieldsEl = form.querySelector('[data-attn-fields]');
+          errEl.style.display = 'none';
+          var email = (emailEl.value || '').trim();
+          if (!email || !emailEl.validity.valid) {
+            errEl.style.display = '';
+            emailEl.focus();
+            return false;
+          }
+          var cfg = (window.__attentiveBarConfig || {})[sid] || {};
+          var creativeId = (window.innerWidth >= 760) ? cfg.desktopId : cfg.mobileId;
+          try {
+            if (window.__attentive && window.__attentive.trigger) {
+              window.__attentive.trigger(null, { email: email }, null, creativeId);
+            }
+            if (window.__attentive && window.__attentive.analytics && window.__attentive.analytics.identify) {
+              window.__attentive.analytics.identify({ email: email });
+            }
+          } catch (err) {}
+          fieldsEl.style.display = 'none';
+          okEl.style.display = '';
+          return false;
+        };
+        window.__attentiveBarConfig = window.__attentiveBarConfig || {};
+        window.__attentiveBarConfig['{{ section.id }}'] = {
+          desktopId: {{ section.settings.desktop_id | default: 'null' }},
+          mobileId: {{ section.settings.mobile_id | default: 'null' }}
+        };
+      </script>
+
+      {%- unless section.settings.disclaimer == blank -%}
+        <div style="margin:{{ section.settings.disclaimer_mt }}px auto 0;max-width:{{ section.settings.input_max_width }}px;font-family:var(--type-font-{% if section.settings.disclaimer_font == 'heading' %}header{% else %}{{ section.settings.disclaimer_font }}{% endif %}-family);font-size:{{ section.settings.disclaimer_size }}px;line-height:{{ section.settings.disclaimer_lh }};{% if section.settings.disclaimer_color != blank %}color:{{ section.settings.disclaimer_color }};{% endif %}opacity:{{ section.settings.disclaimer_opacity }};">
+          {{ section.settings.disclaimer }}
+        </div>
+      {%- endunless -%}
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .attentive-field-{{ section.id }} input::placeholder {
+    color: {{ section.settings.placeholder_color | default: section.settings.input_text_color }};
+    opacity: {{ section.settings.placeholder_opacity | default: 0.5 }};
+  }
+  .attentive-field-{{ section.id }} button:hover {
+    opacity: 0.85;
+  }
+  {% if section.settings.stack_mobile %}
+    @media (max-width: 640px) {
+      .attentive-field-{{ section.id }} > input,
+      .attentive-field-{{ section.id }} > button {
+        flex: 1 1 100%;
+      }
+    }
+  {% endif %}
+</style>
+
+{% schema %}
+{
+  "name": "Newsletter signup",
+  "settings": [
+    { "type": "paragraph", "content": "Inline email signup. On submit, the email is passed to Attentive's popup (pre-filled) which handles the subscription and compliance. Paste your Attentive creative IDs below." },
+
+    { "type": "header", "content": "Attentive creative IDs" },
+    { "type": "text", "id": "desktop_id", "label": "Desktop creative ID" },
+    { "type": "text", "id": "mobile_id", "label": "Mobile creative ID" },
+
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Get 15% off your first order" },
+    { "type": "textarea", "id": "subtitle", "label": "Subtitle", "default": "Sign up for style tips, new drops, and early access." },
+    { "type": "text", "id": "placeholder", "label": "Input placeholder", "default": "Enter your email" },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Subscribe" },
+    { "type": "text", "id": "success_message", "label": "Success message", "default": "Thanks — check your inbox!" },
+    { "type": "richtext", "id": "disclaimer", "label": "Legal/disclaimer (optional)", "default": "<p>By subscribing you agree to receive marketing emails. Unsubscribe anytime.</p>" },
+
+    { "type": "header", "content": "Layout" },
+    {
+      "type": "select", "id": "align", "label": "Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    { "type": "range", "id": "content_max_width", "label": "Content max width (px)", "min": 320, "max": 900, "step": 10, "default": 560 },
+    { "type": "range", "id": "input_max_width", "label": "Email field max width (px)", "min": 240, "max": 700, "step": 10, "default": 440 },
+    { "type": "checkbox", "id": "stack_mobile", "label": "Stack field + button on mobile", "default": false },
+    { "type": "range", "id": "field_gap", "label": "Gap between field and button (px)", "min": 0, "max": 24, "step": 1, "default": 0 },
+    { "type": "range", "id": "side_padding", "label": "Side padding (px)", "min": 0, "max": 48, "step": 2, "default": 16 },
+    { "type": "range", "id": "spacing_top", "min": 0, "max": 300, "step": 10, "unit": "px", "label": "Padding top", "default": 60 },
+    { "type": "range", "id": "spacing_bottom", "min": 0, "max": 300, "step": 10, "unit": "px", "label": "Padding bottom", "default": 60 },
+
+    { "type": "header", "content": "Heading typography" },
+    {
+      "type": "select", "id": "heading_font", "label": "Font",
+      "options": [
+        { "value": "token-display", "label": "↳ Use theme token (Display)" },
+        { "value": "token-h1", "label": "↳ Use theme token (H1)" },
+        { "value": "token-h2", "label": "↳ Use theme token (H2)" },
+        { "value": "token-h3", "label": "↳ Use theme token (H3)" },
+        { "value": "token-body", "label": "↳ Use theme token (Body)" },
+        { "value": "inherit", "label": "Theme default" },
+        { "value": "body", "label": "Forma DJR" },
+        { "value": "heading", "label": "PP Right Grotesk" },
+        { "value": "handwritten", "label": "Thread Handwritten" }
+      ],
+      "default": "heading"
+    },
+    { "type": "range", "id": "heading_size", "label": "Size (px)", "min": 14, "max": 64, "step": 1, "default": 28 },
+    {
+      "type": "select", "id": "heading_weight", "label": "Weight",
+      "options": [
+        { "value": "400", "label": "Regular" }, { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" }, { "value": "700", "label": "Bold" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select", "id": "heading_transform", "label": "Text transform",
+      "options": [
+        { "value": "none", "label": "None" }, { "value": "uppercase", "label": "Uppercase" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "select", "id": "heading_ls", "label": "Letter spacing",
+      "options": [
+        { "value": "0em", "label": "None" }, { "value": "0.02em", "label": "Tight" },
+        { "value": "0.05em", "label": "Normal" }, { "value": "0.1em", "label": "Wide" }
+      ],
+      "default": "0em"
+    },
+    { "type": "range", "id": "heading_lh", "label": "Line height", "min": 1.0, "max": 1.8, "step": 0.1, "default": 1.2 },
+    { "type": "color", "id": "heading_color", "label": "Color" },
+    { "type": "range", "id": "heading_mb", "label": "Space below (px)", "min": 0, "max": 32, "step": 1, "default": 8 },
+
+    { "type": "header", "content": "Subtitle typography" },
+    {
+      "type": "select", "id": "subtitle_font", "label": "Font",
+      "options": [
+        { "value": "body", "label": "Forma DJR" },
+        { "value": "heading", "label": "PP Right Grotesk" },
+        { "value": "handwritten", "label": "Thread Handwritten" }
+      ],
+      "default": "body"
+    },
+    { "type": "range", "id": "subtitle_size", "label": "Size (px)", "min": 10, "max": 22, "step": 1, "default": 14 },
+    {
+      "type": "select", "id": "subtitle_weight", "label": "Weight",
+      "options": [
+        { "value": "300", "label": "Light" }, { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select", "id": "subtitle_ls", "label": "Letter spacing",
+      "options": [
+        { "value": "0em", "label": "None" }, { "value": "0.02em", "label": "Tight" },
+        { "value": "0.05em", "label": "Normal" }, { "value": "0.1em", "label": "Wide" }
+      ],
+      "default": "0em"
+    },
+    { "type": "range", "id": "subtitle_lh", "label": "Line height", "min": 1.0, "max": 2.0, "step": 0.1, "default": 1.4 },
+    { "type": "color", "id": "subtitle_color", "label": "Color" },
+    { "type": "range", "id": "subtitle_mb", "label": "Space below (px)", "min": 0, "max": 40, "step": 1, "default": 16 },
+
+    { "type": "header", "content": "Email input" },
+    {
+      "type": "select", "id": "input_font", "label": "Font",
+      "options": [
+        { "value": "body", "label": "Forma DJR" },
+        { "value": "heading", "label": "PP Right Grotesk" }
+      ],
+      "default": "body"
+    },
+    { "type": "range", "id": "input_size", "label": "Font size (px)", "min": 12, "max": 20, "step": 1, "default": 14 },
+    { "type": "range", "id": "input_pad_v", "label": "Vertical padding (px)", "min": 6, "max": 24, "step": 1, "default": 12 },
+    { "type": "range", "id": "input_pad_h", "label": "Horizontal padding (px)", "min": 6, "max": 32, "step": 1, "default": 14 },
+    { "type": "color", "id": "input_bg", "label": "Background", "default": "#ffffff" },
+    { "type": "color", "id": "input_text_color", "label": "Text color", "default": "#1a1a1a" },
+    { "type": "color", "id": "input_border_color", "label": "Border color", "default": "#1a1a1a" },
+    { "type": "range", "id": "input_border_width", "label": "Border thickness (px)", "min": 0, "max": 4, "step": 1, "default": 1 },
+    { "type": "range", "id": "input_radius", "label": "Border radius (px)", "min": 0, "max": 50, "step": 1, "default": 0 },
+    { "type": "color", "id": "placeholder_color", "label": "Placeholder color" },
+    { "type": "range", "id": "placeholder_opacity", "label": "Placeholder opacity", "min": 0.2, "max": 1.0, "step": 0.1, "default": 0.5 },
+
+    { "type": "header", "content": "Submit button" },
+    { "type": "range", "id": "button_size", "label": "Font size (px)", "min": 10, "max": 20, "step": 1, "default": 13 },
+    {
+      "type": "select", "id": "button_weight", "label": "Weight",
+      "options": [
+        { "value": "400", "label": "Regular" }, { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" }, { "value": "700", "label": "Bold" },
+        { "value": "800", "label": "Extra-bold" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select", "id": "button_transform", "label": "Text transform",
+      "options": [
+        { "value": "none", "label": "None" }, { "value": "uppercase", "label": "Uppercase" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "select", "id": "button_ls", "label": "Letter spacing",
+      "options": [
+        { "value": "0em", "label": "None" }, { "value": "0.05em", "label": "Tight" },
+        { "value": "0.08em", "label": "Normal" }, { "value": "0.12em", "label": "Wide" }
+      ],
+      "default": "0.08em"
+    },
+    { "type": "range", "id": "button_pad_v", "label": "Vertical padding (px)", "min": 6, "max": 24, "step": 1, "default": 12 },
+    { "type": "range", "id": "button_pad_h", "label": "Horizontal padding (px)", "min": 10, "max": 40, "step": 1, "default": 22 },
+    { "type": "color", "id": "button_bg", "label": "Background", "default": "#1a1a1a" },
+    { "type": "color", "id": "button_text_color", "label": "Text color", "default": "#ffffff" },
+    { "type": "color", "id": "button_border_color", "label": "Border color", "default": "#1a1a1a" },
+    { "type": "range", "id": "button_border_width", "label": "Border thickness (px)", "min": 0, "max": 4, "step": 1, "default": 1 },
+    { "type": "range", "id": "button_radius", "label": "Border radius (px)", "min": 0, "max": 50, "step": 1, "default": 0 },
+
+    { "type": "header", "content": "Disclaimer typography" },
+    {
+      "type": "select", "id": "disclaimer_font", "label": "Font",
+      "options": [
+        { "value": "body", "label": "Forma DJR" },
+        { "value": "heading", "label": "PP Right Grotesk" }
+      ],
+      "default": "body"
+    },
+    { "type": "range", "id": "disclaimer_size", "label": "Size (px)", "min": 9, "max": 16, "step": 1, "default": 11 },
+    { "type": "range", "id": "disclaimer_lh", "label": "Line height", "min": 1.0, "max": 2.0, "step": 0.1, "default": 1.4 },
+    { "type": "color", "id": "disclaimer_color", "label": "Color" },
+    { "type": "range", "id": "disclaimer_opacity", "label": "Opacity", "min": 0.3, "max": 1.0, "step": 0.1, "default": 0.7 },
+    { "type": "range", "id": "disclaimer_mt", "label": "Space above (px)", "min": 0, "max": 32, "step": 1, "default": 12 },
+
+    { "type": "header", "content": "Success / error message" },
+    { "type": "range", "id": "message_size", "label": "Font size (px)", "min": 10, "max": 18, "step": 1, "default": 13 },
+    { "type": "range", "id": "message_mt", "label": "Space above (px)", "min": 0, "max": 24, "step": 1, "default": 10 },
+    { "type": "color", "id": "success_color", "label": "Success color", "default": "#0a7d3b" },
+    { "type": "color", "id": "error_color", "label": "Error color", "default": "#b00020" },
+
+    { "type": "header", "content": "Section background" },
+    {
+      "type": "select", "id": "color_scheme", "label": "Color scheme",
+      "options": [
+        { "value": "color__bg-body color__text", "label": "Body" },
+        { "value": "color__bg-neutral color__text", "label": "Neutral" },
+        { "value": "color__bg-overlay-1 color__text", "label": "Accent 1" },
+        { "value": "color__bg-overlay-2 color__text", "label": "Accent 2" },
+        { "value": "color__bg-primary color__primary", "label": "Primary" },
+        { "value": "color__bg-secondary color__secondary", "label": "Secondary" }
+      ],
+      "default": "color__bg-body color__text"
+    },
+    {
+      "type": "select", "id": "color_border", "label": "Border color",
+      "options": [
+        { "value": "color__border-divider-1", "label": "Divider" },
+        { "value": "color__border-selected-1", "label": "Selected" }
+      ],
+      "default": "color__border-divider-1"
+    },
+    {
+      "type": "select", "id": "style_border", "label": "Border style",
+      "options": [
+        { "value": "", "label": "None" },
+        { "value": "border--t-width", "label": "Top" },
+        { "value": "border--b-width", "label": "Bottom" },
+        { "value": "border--b-width border--t-width", "label": "Top and bottom" }
+      ],
+      "default": "border--t-width"
+    },
+    {
+      "type": "select", "id": "layout_horizontal", "label": "Container width",
+      "options": [
+        { "value": "window--narrow", "label": "Narrow" },
+        { "value": "window", "label": "Default" },
+        { "value": "window--wide", "label": "Wide" },
+        { "value": "window--full", "label": "Full width" }
+      ],
+      "default": "window"
+    },
+
+    { "type": "header", "content": "Visibility" },
+    {
+      "type": "select", "id": "visibility", "label": "Devices",
+      "options": [
+        { "value": "", "label": "All devices" },
+        { "value": "md:hidden", "label": "Mobile only" },
+        { "value": "hidden md:block", "label": "Desktop only" }
+      ],
+      "default": ""
+    }
+  ],
+  "presets": [
+    {
+      "name": "Newsletter signup",
+      "settings": {
+        "heading": "Get 15% off your first order",
+        "subtitle": "Sign up for style tips, new drops, and early access.",
+        "button_label": "Subscribe"
+      }
+    }
+  ],
+  "disabled_on": { "groups": ["custom.overlay"] }
+}
+{% endschema %}

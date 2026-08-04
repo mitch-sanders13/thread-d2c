@@ -1,0 +1,521 @@
+<!-- sections/collection__banner.liquid -->
+{% comment %}
+  Display a banner with the collection title and featured image.
+
+  Globals:
+    - settings.layout_horizontal: horizontaly margin
+    - settings.enable_animations: boolean to enable animations
+
+  Pro tips:
+    - Use images that have a high contrast with text.
+    - To display any image this section could be replaced with a banner.liquid section.
+{% endcomment %}
+
+{%- assign _banner_mh_m = section.settings.banner_min_height_mobile | default: 100 -%}
+{%- assign _banner_mh_d = section.settings.banner_min_height_desktop | default: 100 -%}
+{%- assign _banner_pt   = section.settings.banner_padding_top    | default: 16 -%}
+{%- assign _banner_pb   = section.settings.banner_padding_bottom | default: 16 -%}
+
+<style>
+  #shopify-section-{{ section.id }} .js-collection-banner-inner {
+    min-height: {{ _banner_mh_m }}px;
+    padding-top: {{ _banner_pt }}px;
+    padding-bottom: {{ _banner_pb }}px;
+  }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .js-collection-banner-inner { min-height: {{ _banner_mh_d }}px; }
+    #shopify-section-{{ section.id }} .js-collection-banner-title { font-size: {{ section.settings.title_size | default: 56 }}px !important; }
+  }
+</style>
+
+<section
+  class="
+    relative overflow-hidden flex items-center justify-center
+    {{ section.settings.visibility }}
+    {{ section.settings.color_scheme }}
+    {{ section.settings.color_border }}
+    {{ section.settings.style_border }}
+  "
+>
+  {% comment %} Classes for custom image heights {% endcomment %}
+  {% assign image_classes = '' %}
+  {% if section.settings.show_entire_image %}
+    {% assign image_classes = 'hidden md:block w-full h-full absolute object-contain z-10' %}
+  {% else %}
+    {% assign image_classes = 'hidden md:block w-full h-full absolute object-cover z-10' %}
+  {% endif %}
+
+  {%- if section.settings.image_background_desktop %}
+    {{
+      section.settings.image_background_desktop
+      | image_url: width: 5760
+      | image_tag: class: image_classes, loading: lazy_loading
+    }}
+  {%- endif -%}
+
+  {%- if section.settings.image_background_mobile == blank %}
+    {%- if section.settings.image_background_desktop %}
+      {{
+        section.settings.image_background_desktop
+        | image_url: width: 5760
+        | image_tag:
+          class: 'md:hidden w-full h-full absolute object-cover z-10',
+          loading: lazy_loading
+      }}
+    {%- endif -%}
+  {%- else -%}
+    {{
+      section.settings.image_background_mobile
+      | image_url: width: 900
+      | image_tag:
+        class: 'md:hidden w-full h-full absolute object-cover z-10',
+        loading: lazy_loading
+    }}
+  {%- endif -%}
+
+  <div
+    class="relative z-10 w-full h-full"
+    {% if section.settings.enable_gradient %}
+      style="background: linear-gradient( to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2) );"
+    {% endif %}
+  >
+    <div
+      class="
+        js-collection-banner-inner
+        w-full flex flex-row flex-wrap
+        {{ settings.layout_horizontal }}
+        {{ section.settings.layout_x_alignment }}
+        {{ section.settings.layout_y_alignment }}
+        {{ section.settings.color_text }}
+        {% assign colors = section.settings.color_scheme | split: " " %}{{ colors[1] }}
+      "
+    >
+      <div
+        class="
+          max-w-prose
+          {% unless request.design_mode %}
+            {% if settings.enable_animations %}
+              opacity-0 js:animation animation-300
+            {% endif %}
+          {% endunless %}
+        "
+        {% if settings.enable_animations %}
+          data-delay="0"
+          data-replace="
+            {
+              'opacity-0' : 'opacity-100'
+            }
+          "
+        {% endif %}
+      >
+        {% unless collection.metafields.custom.disable_title %}
+          {%- if section.settings.enable_title -%}
+            {%- unless collection.title == blank %}
+              <h1 class="mb-0 js-collection-banner-title" style="font-family: var({{ section.settings.title_font | default: '--type-font-header-family' }}); font-size: {{ section.settings.title_size_mobile | default: 36 }}px; font-weight: {{ section.settings.title_weight | default: '700' }}; text-transform: {{ section.settings.title_case | default: 'uppercase' }}; letter-spacing: {{ section.settings.title_ls | default: '0.02em' }}; line-height: 0.94;{% if section.settings.title_color %} color: {{ section.settings.title_color }};{% endif %}">{{ collection.title }}</h1>
+            {%- endunless -%}
+          {% endif %}
+        {% endunless %}
+
+        {%- if section.settings.enable_description -%}
+          {%- unless collection.description == blank %}
+            <div>
+              {{ collection.description }}
+            </div>
+          {%- endunless -%}
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% comment %}Show back to school selection button for collegiate collection{% endcomment %}
+{% if section.settings.enable_bar and collection.handle == 'collegiate' %}
+  <section class="sticky top-0 z-10 z-20 hidden md:block color__bg-overlay-2">
+    <div class="max-w-full mx-auto my-0">
+      <div class="flex flex-row flex-wrap items-stretch">
+        <div class="flex items-center flex-auto flex-grow-0 flex-shrink-0 w-auto p-4 border--r-width color__border-selected-1">
+          <span class="!mb-0 type--smaller type__nav">
+            <a href="/" class="type--smaller type__nav">HOME</a>
+            /
+            <span class="opacity-75">
+              {{ collection.title }}
+            </span>
+          </span>
+        </div>
+
+        {% comment %} Back to school selection button {% endcomment %}
+        <div class="relative flex items-center justify-start flex-1 w-auto px-4 color__border-selected-1">
+          <a 
+            href="/pages/shop-your-school"
+            class="type__nav type--small py-4 px-6 no-underline transition-opacity hover:opacity-75"
+          >
+            ← Back to school selection
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endif %}
+
+{% comment %}Hide sort/filter bar for other collections{% endcomment %}
+{% if section.settings.enable_bar and collection.handle != 'collegiate' %}
+  <section
+    class="sticky top-0 z-10 z-20 hidden md:block color__bg-overlay-2"
+    x-data="{ sort_by: ['{{ collection.sort_by | default: collection.default_sort_by }}'] }"
+  >
+    <div class="max-w-full mx-auto my-0">
+      <div class="flex flex-row flex-wrap items-stretch">
+        <div class="flex items-center flex-auto flex-grow-0 flex-shrink-0 w-auto p-4 border--r-width color__border-selected-1">
+          <span class="!mb-0 type--smaller type__nav">
+            <a href="/" class="type--smaller type__nav">HOME</a>
+            /
+            <span class="opacity-75">
+              {{ collection.title }}
+            </span>
+          </span>
+        </div>
+
+        {% comment %} Sort dropdown functionality {% endcomment %}
+        <div class="relative flex items-center justify-start flex-1 w-auto px-4 color__border-selected-1 gap-4">
+          <form
+            id="js:sortFilter"
+            class="h-full flex items-center gap-4"
+            @change="
+              // Use page redirect for school filter instead of AJAX
+              $el.submit();
+            "
+          >
+            {% render 'component__sort-options',
+              sort_by: sort_by,
+              collection: collection
+            %}
+
+            {% comment %} School filter for Collegiate collections {% endcomment %}
+            {% if collection.handle contains 'collegiate' %}
+              {% assign school_filter = nil %}
+              {% for f in collection.filters %}
+                {% if f.label == 'School' %}
+                  {% assign school_filter = f %}
+                {% endif %}
+              {% endfor %}
+              {% if school_filter %}
+                {% render 'component__school-filter', filter: school_filter, variant: 'desktop' %}
+              {% endif %}
+            {% endif %}
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endif %}
+
+{% schema %}
+{
+  "name": "t:sections.collection_banner.name",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__4.content"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_background_desktop",
+      "label": "t:sections.banner.settings.image_background_desktop.label",
+      "info": "t:sections.banner.settings.image_background_desktop.info"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_background_mobile",
+      "label": "t:sections.banner.settings.image_background_mobile.label",
+      "info": "t:sections.banner.settings.image_background_mobile.info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__1.content"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.settings.color_scheme.label",
+      "options": [
+        {
+          "value": "color__bg-body color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value": "color__bg-neutral color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value": "color__bg-overlay-1 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value": "color__bg-overlay-2 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value": "color__bg-overlay-3 color__text",
+          "label": "t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value": "color__bg-primary color__primary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value": "color__bg-secondary color__secondary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value": "color__bg-tertiary color__tertiary",
+          "label": "t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default": "color__bg-body color__text"
+    },
+    {
+      "type": "select",
+      "id": "color_text",
+      "label": "t:sections.all.colors.settings.color_text.label",
+      "options": [
+        {
+          "value": "color__text",
+          "label": "t:sections.all.colors.settings.color_text.options__1.label"
+        },
+        {
+          "value": "color__light",
+          "label": "t:sections.all.colors.settings.color_text.options__2.label"
+        },
+        {
+          "value": "color__dark",
+          "label": "t:sections.all.colors.settings.color_text.options__3.label"
+        }
+      ],
+      "default": "color__light"
+    },
+    {
+      "type": "select",
+      "id": "color_border",
+      "label": "t:sections.all.colors.settings.color_border.label",
+      "options": [
+        {
+          "value": "color__border-divider-1",
+          "label": "t:sections.all.colors.settings.color_border.options__1.label"
+        },
+        {
+          "value": "color__border-selected-1",
+          "label": "t:sections.all.colors.settings.color_border.options__2.label"
+        }
+      ],
+      "default": "color__border-divider-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_gradient",
+      "label": "t:sections.collection_banner.settings.enable_gradient.label",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__2.content"
+    },
+    {
+      "type": "select",
+      "id": "style_border",
+      "label": "t:sections.all.styles.settings.style_border.label",
+      "options": [
+        {
+          "value": "",
+          "label": "t:sections.all.styles.settings.style_border.options__1.label"
+        },
+        {
+          "value": "border--t-width",
+          "label": "t:sections.all.styles.settings.style_border.options__2.label"
+        },
+        {
+          "value": "border--b-width",
+          "label": "t:sections.all.styles.settings.style_border.options__3.label"
+        },
+        {
+          "value": "border--b-width border--t-width",
+          "label": "t:sections.all.styles.settings.style_border.options__4.label"
+        }
+      ],
+      "default": "border--b-width"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__3.content"
+    },
+    {
+      "type": "range",
+      "id": "banner_min_height_mobile",
+      "label": "Banner height (mobile)",
+      "min": 0,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "banner_min_height_desktop",
+      "label": "Banner height (desktop)",
+      "min": 0,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "banner_padding_top",
+      "label": "Padding from header to title",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "banner_padding_bottom",
+      "label": "Padding from title to filter",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "layout_y_alignment",
+      "label": "t:sections.all.layout.settings.layout_y_alignment.label",
+      "options": [
+        {
+          "value": "items-start",
+          "label": "t:sections.all.layout.settings.layout_y_alignment.options__1.label"
+        },
+        {
+          "value": "items-center",
+          "label": "t:sections.all.layout.settings.layout_y_alignment.options__2.label"
+        },
+        {
+          "value": "items-end",
+          "label": "t:sections.all.layout.settings.layout_y_alignment.options__3.label"
+        }
+      ],
+      "default": "items-end"
+    },
+    {
+      "type": "select",
+      "id": "layout_x_alignment",
+      "label": "t:sections.all.layout.settings.layout_x_alignment.label",
+      "options": [
+        {
+          "value": "justify-start",
+          "label": "t:sections.all.layout.settings.layout_x_alignment.options__1.label"
+        },
+        {
+          "value": "justify-center text-center",
+          "label": "t:sections.all.layout.settings.layout_x_alignment.options__2.label"
+        },
+        {
+          "value": "justify-end text-right",
+          "label": "t:sections.all.layout.settings.layout_x_alignment.options__3.label"
+        }
+      ],
+      "default": "justify-start"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__8.content"
+    },
+    {
+      "type": "select",
+      "id": "visibility",
+      "label": "t:sections.all.visibility.label",
+      "options": [
+        {
+          "value": "",
+          "label": "t:sections.all.visibility.options__1.label"
+        },
+        {
+          "value": "md:hidden",
+          "label": "t:sections.all.visibility.options__2.label"
+        },
+        {
+          "value": "hidden md:block",
+          "label": "t:sections.all.visibility.options__3.label"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_bar",
+      "label": "Enable breadcrumb bar",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_description",
+      "label": "t:sections.collection_banner.settings.enable_description.label",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_title",
+      "label": "Enable title",
+      "default": true
+    },
+    { "type": "header", "content": "Title typography" },
+    {
+      "type": "select", "id": "title_font", "label": "Font",
+      "options": [
+        { "value": "--type-font-body-family", "label": "Body (Forma)" },
+        { "value": "--type-font-header-family", "label": "Heading (PP Right Grotesk)" }
+      ],
+      "default": "--type-font-header-family"
+    },
+    { "type": "range", "id": "title_size", "label": "Title size — desktop (px)", "min": 16, "max": 72, "step": 2, "unit": "px", "default": 56 },
+    { "type": "range", "id": "title_size_mobile", "label": "Title size — mobile (px)", "min": 16, "max": 72, "step": 2, "unit": "px", "default": 36 },
+    {
+      "type": "select", "id": "title_weight", "label": "Weight",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select", "id": "title_case", "label": "Case",
+      "options": [
+        { "value": "none", "label": "Normal" },
+        { "value": "uppercase", "label": "UPPERCASE" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "select", "id": "title_ls", "label": "Letter spacing",
+      "options": [
+        { "value": "0em", "label": "None" },
+        { "value": "0.02em", "label": "Tight" },
+        { "value": "0.05em", "label": "Normal" },
+        { "value": "0.08em", "label": "Wide" }
+      ],
+      "default": "0.02em"
+    },
+    { "type": "color", "id": "title_color", "label": "Color" }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.collection_banner.name"
+    }
+  ],
+  "templates": ["collection"]
+}
+{% endschema %}

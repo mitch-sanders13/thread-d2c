@@ -1,0 +1,503 @@
+<!-- sections/testimonial-slider.liquid -->
+{% comment %} 
+  Slider to highlight multiple testimonails.
+
+  Globals:
+    - settings.layout_horizontal: horizontaly margin
+    - settings.enable_animations: boolean to enable animations
+    - settings.thumbnails_color_border: border color
+    - settings.thumbnails_color_scheme: color scheme of thumbnails
+
+  Possible enhancements:
+    - 
+{% endcomment %}
+
+<section class="
+  {{ section.settings.visibility }}
+  {{ section.settings.color_border }}
+  {{ section.settings.style_border }}"
+  x-intersect.half="
+    body_background_color = '{{ section.settings.color_background }}';
+    body_text_color = '{{ section.settings.color_text }}';
+  ">
+  <div class="{{ settings.layout_horizontal }}"
+    style="
+      padding-top:{{ section.settings.spacing_top }}px;
+      padding-bottom:{{ section.settings.spacing_bottom }}px;"
+    x-data="{
+      index: 0,
+      index_size: {{ section.blocks.size | minus: 1 }},
+
+      scrollNext() {
+        if(this.index >= this.index_size){
+          this.index = 0
+        } else {
+          this.index++
+        }
+      },
+      
+      scrollBack() {
+        if(this.index <= 0){
+          this.index = this.index_size;
+        } else {
+          this.index--
+        }
+      },
+
+      autoScroll() {
+        setInterval(() => this.scrollNext(), {{ section.settings.announcement_delay }}000);
+      }
+    }"
+    {% if section.settings.announcement_delay > 0 %}
+      x-init="autoScroll()"
+    {% endif %}>
+
+    {% for block in section.blocks %}
+      <div class="flex flex-row -mx-4
+        {{ section.settings.layout_y_alignment }}
+        {{ section.settings.layout_x_alignment }}"
+        x-show="index == {{ forloop.index0 }}"
+        {% if settings.enable_animations %}
+          x-transition:enter="animation-300"
+          x-transition:enter-start="opacity-0"
+          x-transition:enter-end="opacity-100"
+          x-transition:leave="hidden animation-300"
+          x-transition:leave-start="hidden opacity-0"
+          x-transition:leave-end="hidden opacity-0"
+        {% endif %}
+        {% unless forloop.index0 == 0%}
+          x-cloak
+        {% endunless %}>
+        
+        {% comment %} Testimonial {% endcomment %}
+        <div class="p-4
+          {{ block.settings.layout_gallery_size }}
+          {{ block.settings.layout_x_alignment }}">
+
+          <div class="inline-flex h-16 mb-8 opacity-50">
+            {%- unless block.settings.logo == blank -%}
+              {% render 'component__image',
+                image: block.settings.logo,
+                aspect_ratio: '',
+                background: 'transparent',
+                crop: '',
+                max_width: 600,
+                container_class: 'h-full',
+                image_class: 'w-auto h-full',
+                enable_lazy_load: true,
+                include_2x: true
+              %}
+            {%- endunless -%}
+          </div>
+
+          <h3 class="type__heading-1 mb-0">
+            {{ block.settings.content }}
+          </h3>
+
+          <div class="flex items-center mt-8 
+            {{ block.settings.layout_x_alignment }}">
+            {% if block.settings.avatar %}
+              <div class="w-10 h-10 mr-2">
+                <div class="border__button--radius overflow-hidden object-cover aspect-[1/1]
+                  {{ settings.thumbnails_color_scheme }}">
+                  {{ block.settings.avatar 
+                    | image_url: width: 80 
+                    | image_tag: style: 'object-fit:cover', 
+                      class: 'h-full w-full object-cover aspect-[1/1]', 
+                      loading: 'lazy', 
+                      alt: block.settings.avatar.alt }}
+                </div>
+              </div>
+            {% endif %}
+            <div class="m-0--clear type--small opacity-75">
+              <p>
+                {{ block.settings.author_name }}
+              </p>
+              {{ block.settings.author_title }}
+            </div>
+          </div>
+
+          {% if section.blocks.size >= 2 %}
+            <div class="flex gap-4 mt-12
+              {{ block.settings.layout_x_alignment }}">
+              <button class="btn btn--plain btn--small shadow-sm"
+                @click="scrollBack();">
+                {% render 'component__icon', icon: 'arrow-left', size: '20', class: '' %}
+              </button>
+              <button class="btn btn--plain btn--small shadow-sm"
+                @click="scrollNext();">
+                {% render 'component__icon', icon: 'arrow-right', size: '20', class: '' %}
+              </button>
+            </div>
+          {% endif %}
+
+        </div>
+
+        {% comment %} Media {% endcomment %}
+        {% case block.settings.layout_gallery_size %}
+          {% when 'w-full md:w-1/3' %}
+            {% assign media_size = 'w-full md:w-2/3' %}
+          {% when 'w-full md:w-1/2' %}
+            {% assign media_size = 'w-full md:w-1/2' %}
+          {% when 'w-full md:w-2/3' %}
+            {% assign media_size = 'w-full md:w-1/3' %}
+          {% when 'w-full md:w-3/4' %}
+            {% assign media_size = 'w-full md:w-1/4' %}
+        {% endcase %}
+        {% unless block.settings.image_featured == blank %}
+          <div class="p-4
+            {{ media_size }}">
+            <div class="border--radius relative w-full overflow-hidden">
+              {% render 'component__image',
+                image: block.settings.image_featured,
+                aspect_ratio: '',
+                background: 'transparent',
+                crop: '',
+                max_width: 2000,
+                container_class: '',
+                image_class: '',
+                enable_lazy_load: true,
+                include_2x: true
+              %}
+            </div>
+          </div>
+        {% endunless %}
+
+      </div>
+    {% endfor %}
+    
+  </div>
+</section>
+
+{% schema %}
+{
+  "name":"Testimonial slider",
+  "settings":[
+     {
+        "type":"header",
+        "content":"t:sections.all.headers.header__22.content"
+     },
+     {
+        "type":"range",
+        "id":"spacing_top",
+        "min":0,
+        "max":300,
+        "step":10,
+        "unit":"px",
+        "label":"t:sections.all.spacing.settings.spacing.label_top",
+        "default":100
+     },
+     {
+        "type":"range",
+        "id":"spacing_bottom",
+        "min":0,
+        "max":300,
+        "step":10,
+        "unit":"px",
+        "label":"t:sections.all.spacing.settings.spacing.label_bottom",
+        "default":100
+     },
+     {
+        "type":"header",
+        "content":"t:sections.all.headers.header__1.content"
+     },
+     {
+        "type":"color",
+        "id":"color_background",
+        "label":"Background",
+        "default":"#ffffff"
+     },
+     {
+        "type":"select",
+        "id":"color_text",
+        "label":"t:sections.all.colors.settings.color_text.label",
+        "options":[
+           {
+              "value":"",
+              "label":"t:sections.all.colors.settings.color_text.options__1.label"
+           },
+           {
+              "value":"color__light",
+              "label":"t:sections.all.colors.settings.color_text.options__2.label"
+           },
+           {
+              "value":"color__dark",
+              "label":"t:sections.all.colors.settings.color_text.options__3.label"
+           }
+        ],
+        "default":""
+     },
+     {
+        "type":"select",
+        "id":"color_border",
+        "label":"t:sections.all.colors.settings.color_border.label",
+        "options":[
+           {
+              "value":"color__border-divider-1",
+              "label":"t:sections.all.colors.settings.color_border.options__1.label"
+           },
+           {
+              "value":"color__border-selected-1",
+              "label":"t:sections.all.colors.settings.color_border.options__2.label"
+           }
+        ],
+        "default":"color__border-divider-1"
+     },
+     {
+        "type":"header",
+        "content":"t:sections.all.headers.header__2.content"
+     },
+     {
+        "type":"select",
+        "id":"style_border",
+        "label":"t:sections.all.styles.settings.style_border.label",
+        "options":[
+           {
+              "value":"",
+              "label":"t:sections.all.styles.settings.style_border.options__1.label"
+           },
+           {
+              "value":"border--t-width",
+              "label":"t:sections.all.styles.settings.style_border.options__2.label"
+           },
+           {
+              "value":"border--b-width",
+              "label":"t:sections.all.styles.settings.style_border.options__3.label"
+           },
+           {
+              "value":"border--b-width border--t-width",
+              "label":"t:sections.all.styles.settings.style_border.options__4.label"
+           }
+        ],
+        "default":"border--b-width"
+     },
+     {
+        "type":"header",
+        "content":"t:sections.all.headers.header__3.content"
+     },
+     {
+      "type":"select",
+      "id":"layout_y_alignment",
+      "label":"t:sections.all.layout.settings.layout_y_alignment.label",
+      "options":[
+        {
+          "value":"items-start",
+          "label":"t:sections.all.layout.settings.layout_y_alignment.options__1.label"
+        },
+        {
+          "value":"items-center",
+          "label":"t:sections.all.layout.settings.layout_y_alignment.options__2.label"
+        },
+        {
+          "value":"items-end",
+          "label":"t:sections.all.layout.settings.layout_y_alignment.options__3.label"
+        }
+      ],
+      "default":"items-end"
+    },
+    {
+      "type":"select",
+      "id":"layout_x_alignment",
+      "label":"t:sections.all.layout.settings.layout_x_alignment.label",
+      "options":[
+        {
+          "value":"justify-start",
+          "label":"t:sections.all.layout.settings.layout_x_alignment.options__1.label"
+        },
+        {
+          "value":"justify-center",
+          "label":"t:sections.all.layout.settings.layout_x_alignment.options__2.label"
+        },
+        {
+          "value":"justify-end",
+          "label":"t:sections.all.layout.settings.layout_x_alignment.options__3.label"
+        }
+      ],
+      "default":"justify-start"
+    },
+     {
+        "type":"header",
+        "content":"t:sections.all.headers.header__8.content"
+     },
+     {
+        "type":"select",
+        "id":"visibility",
+        "label":"t:sections.all.display.settings.visibility.label",
+        "options":[
+           {
+              "value":"",
+              "label":"t:sections.all.display.settings.visibility.options__1.label"
+           },
+           {
+              "value":"md:hidden",
+              "label":"t:sections.all.display.settings.visibility.options__2.label"
+           },
+           {
+              "value":"hidden md:block",
+              "label":"t:sections.all.display.settings.visibility.options__3.label"
+           }
+        ],
+        "default":""
+     },
+     {
+      "type": "range",
+      "id": "announcement_delay",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "s",
+      "label": "Automatic scrolling",
+      "default": 0,
+      "info": "Set this to 0 to disable automatic scrolling."
+    }
+  ],
+  "blocks":[
+     {
+        "type":"testimonial",
+        "name":"t:sections.testimonials.blocks.testimonial.name",
+        "limit":20,
+        "settings":[
+           {
+              "type":"header",
+              "content":"t:sections.all.headers.header__4.content"
+           },
+           {
+              "type":"text",
+              "id":"content",
+              "label":"t:sections.testimonials.blocks.testimonial.settings.content.label",
+              "default":{
+                 "en":"Include a valuable review or testimonial that shows customers how much people enjoy your products.",
+                 "es":"Incluye una reseña o testimonio valioso que muestre a los clientes cuánto disfrutan las personas de tus productos.",
+                 "it":"Includi una recensione o una testimonianza preziosa che mostri ai clienti quanto le persone apprezzano i tuoi prodotti.",
+                 "de":"Fügen Sie eine wertvolle Bewertung oder ein Testimonial hinzu, das den Kunden zeigt, wie sehr die Menschen Ihre Produkte genießen.",
+                 "fr":"Incluez un avis ou un témoignage précieux qui montre aux clients à quel point les gens apprécient vos produits."
+              }
+           },
+           {
+              "type":"text",
+              "id":"author_name",
+              "label":"Author name",
+              "default":{
+                 "en":"Reviewer name",
+                 "es":"Nombre del revisor",
+                 "it":"Nome del revisore",
+                 "de":"Name des Prüfers",
+                 "fr":"Nom de l’évaluateur"
+              }
+           },
+           {
+            "type":"richtext",
+            "id":"author_title",
+            "label":"Author title",
+            "default":{
+              "en":"<p>Founder</p>",
+              "es":"<p>Fundador</p>",
+              "it":"<p>Fondatore</p>",
+              "de":"<p>Gründer</p>",
+              "fr":"<p>Fondateur</p>"
+            }
+            },
+           {
+              "type":"image_picker",
+              "id":"avatar",
+              "label":"t:sections.testimonials.blocks.testimonial.settings.avatar.label",
+              "info":"t:sections.testimonials.blocks.testimonial.settings.avatar.info"
+           },
+           {
+              "type":"image_picker",
+              "id":"logo",
+              "label":"Logo"
+           },
+           {
+            "type":"image_picker",
+            "id":"image_featured",
+            "label":"t:sections.content_grid.blocks.content.settings.image_featured.label"
+          },
+          {
+            "type":"header",
+            "content":"t:sections.all.headers.header__3.content"
+          },
+          {
+            "type": "select",
+            "id": "layout_gallery_size",
+            "label": "Content width",
+            "info": "Only applies to desktop.",
+            "options": [
+              {
+                "value": "w-full md:w-1/3",
+                "label": "t:sections.product_main.settings.layout_gallery_size.options__1.label"
+              },
+              {
+                "value": "w-full md:w-1/2",
+                "label": "t:sections.product_main.settings.layout_gallery_size.options__2.label"
+              },
+              {
+                "value": "w-full md:w-2/3",
+                "label": "t:sections.product_main.settings.layout_gallery_size.options__3.label"
+              },
+              {
+                "value": "w-full md:w-3/4",
+                "label": "t:sections.product_main.settings.layout_gallery_size.options__4.label"
+              }
+            ],
+            "default": "w-full md:w-2/3"
+          },
+          {
+            "type": "select",
+            "id": "layout_x_alignment",
+            "label": "t:sections.all.layout.settings.layout_x_alignment.label",
+            "options": [
+              {
+                "value": "text-left justify-start items-center",
+                "label": "t:sections.all.layout.settings.layout_x_alignment.options__1.label"
+              },
+              {
+                "value": "text-center justify-center items-center",
+                "label": "t:sections.all.layout.settings.layout_x_alignment.options__2.label"
+              },
+              {
+                "value": "text-right justify-end items-center",
+                "label": "t:sections.all.layout.settings.layout_x_alignment.options__3.label"
+              }
+            ],
+            "default": "text-left justify-start items-center"
+          }
+        ]
+     }
+  ],
+  "presets":[
+     {
+        "name":"Testimonial slider",
+        "settings":{
+           "color_border":"color__border-divider-1",
+           "style_border":"border--b-width"
+        },
+        "blocks":[
+           {
+              "type":"testimonial",
+              "settings":{
+                 "content":"<p>Include a valuable review or testimonial that shows customers how much people enjoy your products.</p>"
+              }
+           },
+           {
+              "type":"testimonial",
+              "settings":{
+                 "content":"<p>Include a valuable review or testimonial that shows customers how much people enjoy your products.</p>"
+              }
+           },
+           {
+              "type":"testimonial",
+              "settings":{
+                 "content":"<p>Include a valuable review or testimonial that shows customers how much people enjoy your products.</p>"
+              }
+           }
+        ]
+     }
+  ],
+  "disabled_on":{
+     "groups":[
+        "custom.overlay"
+     ]
+  }
+}
+{% endschema %}

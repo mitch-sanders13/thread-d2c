@@ -1,0 +1,37 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "17628190024fd1b231": {
+      "type": "apps",
+      "blocks": {
+        "redo_redo_contact_form_V7AhDM": {
+          "type": "shopify://apps/redo/blocks/redo_contact_form/c613644b-6df4-4d11-b336-43a5c06745a1",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "redo_redo_contact_form_V7AhDM"
+      ],
+      "settings": {
+        "spacing_top": 100,
+        "spacing_bottom": 100,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "style_border": "border--b-width",
+        "layout_horizontal": "window--wide",
+        "layout_padding": false
+      }
+    }
+  },
+  "order": [
+    "17628190024fd1b231"
+  ]
+}

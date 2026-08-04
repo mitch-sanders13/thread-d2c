@@ -1,0 +1,418 @@
+<!-- snippets/mega-menu__panel.liquid -->
+{%- comment -%}
+  Renders the contents of a desktop mega-menu dropdown for one top-level
+  nav link. Designed to be placed inside the `.header__dropdown` wrapper
+  in `sections/theme__header.liquid` (the wrapper owns the CSS-driven
+  hover open/close — see `.header__link:hover + .header__dropdown`).
+
+  Accepts:
+    - link:    a `link` object from the section's `dropdown_links` linklist
+               (the top-level nav link this panel belongs to).
+    - section: the header section (used for `section.settings` and
+               `section.blocks`).
+
+  Block-to-link matching:
+    Each section block has a `parent_link_title` text setting. A block
+    appears in this panel when its `parent_link_title` (case-insensitive,
+    trimmed) matches `link.title`. If no blocks match and the
+    `mega_menu_fallback_links` section setting is on, the link's children
+    render as a simple link list so existing menus keep working.
+{%- endcomment -%}
+
+{%- assign s = section.settings -%}
+{%- assign link_key = link.title | strip | downcase -%}
+
+{%- comment -%} Pre-count matched blocks {%- endcomment -%}
+{%- assign matched_count = 0 -%}
+{%- for block in section.blocks -%}
+  {%- assign block_key = block.settings.parent_link_title | default: '' | strip | downcase -%}
+  {%- if block_key != '' and block_key == link_key -%}
+    {%- assign matched_count = matched_count | plus: 1 -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- comment -%}
+  Detect whether ANY matched block on this link is a category_panel.
+  If so, render the Herschel-style centered card (single-block, 2-col
+  internal layout) and skip the regular grid. Otherwise fall back to
+  the existing multi-block grid layout.
+{%- endcomment -%}
+{%- assign has_category_panel = false -%}
+{%- for block in section.blocks -%}
+  {%- if block.type != 'category_panel' -%}{%- continue -%}{%- endif -%}
+  {%- assign cp_key = block.settings.parent_link_title | default: '' | strip | downcase -%}
+  {%- if cp_key != '' and cp_key == link_key -%}
+    {%- assign has_category_panel = true -%}
+    {%- assign category_panel_block = block -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+
+<div>
+  <div class="mega-menu-card mx-auto"
+    style="
+      max-width: {{ s.mega_menu_max_width | default: '900px' }};
+      background: var(--color__bg-body, #fff);
+      overflow: hidden;
+    ">
+
+  {%- if has_category_panel -%}
+    {%- comment -%}
+      Herschel-style single-card category panel: left column is the
+      sub-category links, right column is an edge-to-edge image.
+    {%- endcomment -%}
+    {%- assign cp = category_panel_block -%}
+    {%- assign text_ratio = cp.settings.text_column_ratio | default: 100 -%}
+
+    {%- comment -%}
+      Resolve typography settings. font-family is only emitted inline
+      when the merchant explicitly picks a named family — that way
+      "Theme default" leaves the underlying class (.type__nav for the
+      heading, .type__body for the sub-links) in charge and we don't
+      have to repeat the theme defaults in here.
+    {%- endcomment -%}
+    {%- assign _cp_hd_ff = '' -%}
+    {%- case cp.settings.heading_font -%}
+      {%- when 'body'        -%}{%- assign _cp_hd_ff = 'var(--type-font-body-family)' -%}
+      {%- when 'heading'     -%}{%- assign _cp_hd_ff = 'var(--type-font-header-family)' -%}
+      {%- when 'handwritten' -%}{%- assign _cp_hd_ff = 'var(--type-font-handwritten-family)' -%}
+    {%- endcase -%}
+    {%- assign _cp_sl_ff = '' -%}
+    {%- case cp.settings.sublinks_font -%}
+      {%- when 'body'        -%}{%- assign _cp_sl_ff = 'var(--type-font-body-family)' -%}
+      {%- when 'heading'     -%}{%- assign _cp_sl_ff = 'var(--type-font-header-family)' -%}
+      {%- when 'handwritten' -%}{%- assign _cp_sl_ff = 'var(--type-font-handwritten-family)' -%}
+    {%- endcase -%}
+
+    <div style="display: grid; grid-template-columns: {{ text_ratio }}fr 100fr; gap: 0; align-items: stretch;">
+      {%- comment -%} Left column — heading + link list {%- endcomment -%}
+      <div style="padding: 16px 40px; display: flex; flex-direction: column; justify-content: flex-start;">
+        {%- if cp.settings.heading != blank -%}
+          <h3 class="type__nav"
+            style="
+              margin: 0 0 16px 0;
+              {% if _cp_hd_ff != '' %}font-family: {{ _cp_hd_ff }};{% endif %}
+              font-size: {{ cp.settings.heading_size | default: 14 }}px;
+              font-weight: {{ cp.settings.heading_weight | default: '700' }};
+              letter-spacing: {{ cp.settings.heading_ls | default: '0.02em' }};
+              text-transform: {{ cp.settings.heading_case | default: 'none' }};
+              {% if cp.settings.heading_color != blank %}color: {{ cp.settings.heading_color }};{% endif %}
+              font-synthesis: weight style;
+              -webkit-font-synthesis: weight style;
+            ">
+            {{ cp.settings.heading }}
+          </h3>
+        {%- endif -%}
+
+        {%- if cp.settings.link_list != blank and cp.settings.link_list.links.size > 0 -%}
+          {%- assign cp_links = cp.settings.link_list.links -%}
+        {%- else -%}
+          {%- assign cp_links = link.links -%}
+        {%- endif -%}
+
+        <ul style="list-style: none; padding: 0; margin: 0;">
+          {%- for sublink in cp_links -%}
+            <li style="margin: 0 0 10px 0;">
+              <a href="{{ sublink.url }}"
+                class="type__body no-underline hover:underline"
+                style="
+                  display: inline-block;
+                  line-height: 1.4;
+                  {% if _cp_sl_ff != '' %}font-family: {{ _cp_sl_ff }};{% endif %}
+                  font-size: {{ cp.settings.sublinks_size | default: 15 }}px;
+                  font-weight: {{ cp.settings.sublinks_weight | default: '400' }};
+                  letter-spacing: {{ cp.settings.sublinks_ls | default: '0em' }};
+                  text-transform: {{ cp.settings.sublinks_case | default: 'none' }};
+                  {% if cp.settings.sublinks_color != blank %}color: {{ cp.settings.sublinks_color }};{% endif %}
+                  font-synthesis: weight style;
+                  -webkit-font-synthesis: weight style;
+                ">{{ sublink.title }}</a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+
+      {%- comment -%} Right column — edge-to-edge image {%- endcomment -%}
+      <div style="position: relative; overflow: hidden; min-height: 360px;">
+        {%- if cp.settings.image_url != blank -%}
+          <a href="{{ cp.settings.image_url }}" style="display: block; width: 100%; height: 100%; position: absolute; inset: 0;">
+        {%- endif -%}
+
+        {%- if cp.settings.image != blank -%}
+          <img
+            src="{{ cp.settings.image | image_url: width: 1200 }}"
+            srcset="{{ cp.settings.image | image_url: width: 600 }} 600w, {{ cp.settings.image | image_url: width: 900 }} 900w, {{ cp.settings.image | image_url: width: 1200 }} 1200w"
+            sizes="(min-width: 1280px) 50vw, 100vw"
+            alt="{{ cp.settings.image_alt | default: cp.settings.heading | escape }}"
+            loading="lazy"
+            style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;">
+        {%- else -%}
+          {{ 'lifestyle-2' | placeholder_svg_tag: 'w-full h-full' }}
+        {%- endif -%}
+
+        {%- if cp.settings.image_url != blank -%}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+
+  {%- elsif matched_count > 0 -%}
+    <div class="mega-menu"
+      style="
+        padding: {{ s.mega_menu_pad_top | default: 32 }}px {{ s.mega_menu_pad_right | default: 32 }}px {{ s.mega_menu_pad_bottom | default: 32 }}px {{ s.mega_menu_pad_left | default: 32 }}px;
+        display: grid;
+        grid-template-columns: repeat({{ s.mega_menu_columns_max | default: 4 }}, minmax(0, 1fr));
+        column-gap: {{ s.mega_menu_col_gap | default: 24 }}px;
+        row-gap: {{ s.mega_menu_row_gap | default: 24 }}px;
+        align-items: {{ s.mega_menu_valign | default: 'stretch' }};
+      ">
+
+      {%- for block in section.blocks -%}
+        {%- assign block_key = block.settings.parent_link_title | default: '' | strip | downcase -%}
+        {%- if block_key == '' or block_key != link_key -%}{%- continue -%}{%- endif -%}
+
+        {%- assign span = block.settings.column_span | default: 1 -%}
+        {%- assign cols_max = s.mega_menu_columns_max | default: 4 -%}
+        {%- if span > cols_max -%}{%- assign span = cols_max -%}{%- endif -%}
+
+        <div class="mega-menu__cell"
+          style="
+            grid-column: span {{ span }};
+            padding: {{ block.settings.pad_top | default: 0 }}px {{ block.settings.pad_right | default: 0 }}px {{ block.settings.pad_bottom | default: 0 }}px {{ block.settings.pad_left | default: 0 }}px;
+            min-width: 0;
+          "
+          {{ block.shopify_attributes }}>
+
+          {%- case block.type -%}
+
+          {%- when 'menu_links' -%}
+            {%- assign align = block.settings.text_align | default: 'left' -%}
+            {%- assign heading_size = block.settings.heading_size | default: 'medium' -%}
+            <div style="text-align: {{ align }};">
+              {%- if block.settings.heading != blank -%}
+                <h3 class="type__nav m-0"
+                  style="
+                    margin: 0 0 12px 0;
+                    {%- if heading_size == 'small' -%}font-size: 12px;
+                    {%- elsif heading_size == 'large' -%}font-size: 18px;
+                    {%- else -%}font-size: 14px;{%- endif -%}
+                    font-weight: 600;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                  ">{{ block.settings.heading }}</h3>
+              {%- endif -%}
+
+              {%- comment -%} Choose source: explicit link_list, else parent link's own children. {%- endcomment -%}
+              {%- if block.settings.link_list != blank and block.settings.link_list.links.size > 0 -%}
+                {%- assign source_links = block.settings.link_list.links -%}
+              {%- else -%}
+                {%- assign source_links = link.links -%}
+              {%- endif -%}
+
+              <ul style="list-style: none; padding: 0; margin: 0;">
+                {%- for sublink in source_links -%}
+                  <li style="margin: 0 0 8px 0;">
+                    <a href="{{ sublink.url }}"
+                      class="type__body hover:underline no-underline"
+                      style="display: inline-block;">{{ sublink.title }}</a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </div>
+
+          {%- when 'product_feed' -%}
+            {%- assign coll = block.settings.collection -%}
+            {%- assign feed_count = block.settings.product_count | default: 4 -%}
+            {%- assign inner_cols = block.settings.inner_columns | default: 2 -%}
+            <div>
+              {%- if block.settings.heading != blank -%}
+                <div class="flex items-center justify-between" style="margin: 0 0 12px 0;">
+                  <h3 class="type__nav m-0"
+                    style="margin: 0; font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">{{ block.settings.heading }}</h3>
+                  {%- if block.settings.show_shop_all and coll != blank -%}
+                    {%- assign shop_all_url = block.settings.shop_all_url | default: coll.url -%}
+                    <a href="{{ shop_all_url }}" class="type__body type--small hover:underline no-underline" style="opacity: 0.75;">{{ block.settings.shop_all_text | default: 'Shop all' }} →</a>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+
+              {%- if coll != blank and coll.products.size > 0 -%}
+                <div style="display: grid; grid-template-columns: repeat({{ inner_cols }}, minmax(0, 1fr)); gap: 12px;">
+                  {%- for product in coll.products limit: feed_count -%}
+                    {% render 'component__product-item', product: product, source: 'mega-menu' %}
+                  {%- endfor -%}
+                </div>
+              {%- else -%}
+                <p class="type--small" style="opacity: 0.6; margin: 0;">Pick a collection in this block's settings.</p>
+              {%- endif -%}
+            </div>
+
+          {%- when 'featured_product' -%}
+            {%- assign fp = block.settings.product -%}
+            {%- assign _r = block.settings.image_aspect_ratio | default: 'ratio_1_1' -%}
+            {%- case _r -%}
+              {%- when 'ratio_1_1'  -%}{%- assign ratio_cls = 'aspect-square' -%}
+              {%- when 'ratio_4_5'  -%}{%- assign ratio_cls = 'aspect-[4/5]'  -%}
+              {%- when 'ratio_3_4'  -%}{%- assign ratio_cls = 'aspect-[3/4]'  -%}
+              {%- when 'ratio_3_2'  -%}{%- assign ratio_cls = 'aspect-[3/2]'  -%}
+              {%- when 'ratio_16_9' -%}{%- assign ratio_cls = 'aspect-[16/9]' -%}
+              {%- when 'ratio_auto' -%}{%- assign ratio_cls = 'aspect-auto'   -%}
+              {%- else              -%}{%- assign ratio_cls = 'aspect-square' -%}
+            {%- endcase -%}
+            {%- assign fit = block.settings.image_object_fit | default: 'cover' -%}
+            <a href="{% if fp != blank %}{{ fp.url }}{% else %}#{% endif %}"
+              class="block no-underline hover:no-underline">
+              {%- if block.settings.heading != blank -%}
+                <h3 class="type__nav"
+                  style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">{{ block.settings.heading }}</h3>
+              {%- endif -%}
+              <div class="color__bg-overlay-1 {{ ratio_cls }}"
+                style="border-radius: {{ block.settings.image_radius | default: 0 }}px; overflow: hidden; display: block; width: 100%;">
+                {%- if fp != blank and fp.featured_image -%}
+                  <img src="{{ fp.featured_image | image_url: width: 800 }}"
+                    srcset="{{ fp.featured_image | image_url: width: 400 }} 400w, {{ fp.featured_image | image_url: width: 800 }} 800w, {{ fp.featured_image | image_url: width: 1200 }} 1200w"
+                    sizes="(min-width: 1280px) 25vw, 50vw"
+                    alt="{{ fp.featured_image.alt | default: fp.title | escape }}"
+                    loading="lazy"
+                    style="width: 100%; height: 100%; object-fit: {{ fit }}; display: block;">
+                {%- else -%}
+                  {{ 'lifestyle-2' | placeholder_svg_tag: 'w-full h-full' }}
+                {%- endif -%}
+              </div>
+              {%- if block.settings.show_title and fp != blank -%}
+                <div class="type__body" style="margin-top: 8px; font-size: 14px;">{{ fp.title }}</div>
+              {%- endif -%}
+              {%- if block.settings.show_price and fp != blank -%}
+                <div class="type__body type--small" style="margin-top: 2px; opacity: 0.75;">{{ fp.price_min | money }}</div>
+              {%- endif -%}
+              {%- if block.settings.show_button and block.settings.button_text != blank -%}
+                <span class="btn btn--secondary btn--smaller" style="margin-top: 8px; display: inline-block;">{{ block.settings.button_text }}</span>
+              {%- endif -%}
+            </a>
+
+          {%- when 'image_link' -%}
+            {%- assign _r = block.settings.image_aspect_ratio | default: 'ratio_4_5' -%}
+            {%- case _r -%}
+              {%- when 'ratio_1_1'  -%}{%- assign ratio_cls = 'aspect-square' -%}
+              {%- when 'ratio_4_5'  -%}{%- assign ratio_cls = 'aspect-[4/5]'  -%}
+              {%- when 'ratio_3_4'  -%}{%- assign ratio_cls = 'aspect-[3/4]'  -%}
+              {%- when 'ratio_3_2'  -%}{%- assign ratio_cls = 'aspect-[3/2]'  -%}
+              {%- when 'ratio_16_9' -%}{%- assign ratio_cls = 'aspect-[16/9]' -%}
+              {%- when 'ratio_auto' -%}{%- assign ratio_cls = 'aspect-auto'   -%}
+              {%- else              -%}{%- assign ratio_cls = 'aspect-[4/5]'  -%}
+            {%- endcase -%}
+            {%- assign fit = block.settings.image_object_fit | default: 'cover' -%}
+            {%- assign overlay_pos = block.settings.text_position | default: 'below' -%}
+            <a href="{{ block.settings.url | default: '#' }}"
+              class="block no-underline hover:no-underline"
+              style="position: relative;">
+              <div class="color__bg-overlay-1 {{ ratio_cls }}"
+                style="border-radius: {{ block.settings.image_radius | default: 0 }}px; overflow: hidden; display: block; width: 100%; position: relative;">
+                {%- if block.settings.image != blank -%}
+                  <img src="{{ block.settings.image | image_url: width: 1200 }}"
+                    srcset="{{ block.settings.image | image_url: width: 400 }} 400w, {{ block.settings.image | image_url: width: 800 }} 800w, {{ block.settings.image | image_url: width: 1200 }} 1200w"
+                    sizes="(min-width: 1280px) 33vw, 50vw"
+                    alt="{{ block.settings.image_alt | default: block.settings.heading | escape }}"
+                    loading="lazy"
+                    style="width: 100%; height: 100%; object-fit: {{ fit }}; display: block;">
+                {%- else -%}
+                  {{ 'lifestyle-2' | placeholder_svg_tag: 'w-full h-full' }}
+                {%- endif -%}
+
+                {%- if overlay_pos != 'below' and block.settings.heading != blank -%}
+                  <div style="
+                    position: absolute;
+                    left: 0; right: 0;
+                    {% if overlay_pos == 'overlay-center' %}top: 50%; transform: translateY(-50%); text-align: center;{% else %}bottom: 16px;{% endif %}
+                    padding: 0 16px;
+                    color: #fff;
+                    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+                  ">
+                    <h3 class="type__nav" style="margin: 0; font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">{{ block.settings.heading }}</h3>
+                    {%- if block.settings.caption != blank -%}
+                      <div class="type__body type--small" style="margin-top: 4px;">{{ block.settings.caption }}</div>
+                    {%- endif -%}
+                    {%- if block.settings.button_text != blank -%}
+                      <span class="btn btn--plain btn--smaller" style="margin-top: 8px; display: inline-block;">{{ block.settings.button_text }}</span>
+                    {%- endif -%}
+                  </div>
+                {%- endif -%}
+              </div>
+
+              {%- assign has_below_text = false -%}
+              {%- if overlay_pos == 'below' -%}
+                {%- if block.settings.heading != blank or block.settings.caption != blank or block.settings.button_text != blank -%}
+                  {%- assign has_below_text = true -%}
+                {%- endif -%}
+              {%- endif -%}
+              {%- if has_below_text -%}
+                <div style="margin-top: 8px;">
+                  {%- if block.settings.heading != blank -%}
+                    <h3 class="type__nav" style="margin: 0; font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">{{ block.settings.heading }}</h3>
+                  {%- endif -%}
+                  {%- if block.settings.caption != blank -%}
+                    <div class="type__body type--small" style="margin-top: 2px; opacity: 0.75;">{{ block.settings.caption }}</div>
+                  {%- endif -%}
+                  {%- if block.settings.button_text != blank -%}
+                    <span class="btn btn--secondary btn--smaller" style="margin-top: 8px; display: inline-block;">{{ block.settings.button_text }}</span>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            </a>
+
+          {%- when 'rich_text' -%}
+            {%- assign align = block.settings.text_align | default: 'left' -%}
+            {%- assign heading_size = block.settings.heading_size | default: 'medium' -%}
+            <div style="text-align: {{ align }};">
+              {%- if block.settings.heading != blank -%}
+                <h3 class="type__heading"
+                  style="
+                    margin: 0 0 8px 0;
+                    {%- if heading_size == 'small' -%}font-size: 18px;
+                    {%- elsif heading_size == 'large' -%}font-size: 32px;
+                    {%- else -%}font-size: 24px;{%- endif -%}
+                    font-weight: 600;
+                    line-height: 1.15;
+                  ">{{ block.settings.heading }}</h3>
+              {%- endif -%}
+              {%- if block.settings.content != blank -%}
+                <div class="type__body">{{ block.settings.content }}</div>
+              {%- endif -%}
+            </div>
+
+          {%- endcase -%}
+        </div>
+      {%- endfor -%}
+
+    </div>
+
+  {%- elsif s.mega_menu_fallback_links and link.links.size > 0 -%}
+    {%- comment -%}
+      Fallback: no blocks attached for this top-level link, but it has
+      children. Render a simple link list so existing nav menus continue
+      to work without any block setup.
+    {%- endcomment -%}
+    <div class="mx-auto"
+      style="
+        max-width: {{ s.mega_menu_max_width | default: '1600px' }};
+        padding: {{ s.mega_menu_pad_top | default: 32 }}px {{ s.mega_menu_pad_right | default: 32 }}px {{ s.mega_menu_pad_bottom | default: 32 }}px {{ s.mega_menu_pad_left | default: 32 }}px;
+        display: flex;
+        flex-wrap: wrap;
+        column-gap: {{ s.mega_menu_col_gap | default: 24 }}px;
+        row-gap: {{ s.mega_menu_row_gap | default: 24 }}px;
+      ">
+      {%- for child_link in link.links -%}
+        <div style="min-width: 160px;">
+          <a href="{{ child_link.url }}" class="type__nav type--small no-underline hover:underline whitespace-nowrap" style="display: block; margin-bottom: 8px; font-weight: 600;">{{ child_link.title }}</a>
+          {%- if child_link.links.size > 0 -%}
+            {%- for grand in child_link.links -%}
+              <a href="{{ grand.url }}" class="type__body type--small no-underline hover:underline whitespace-nowrap" style="display: block; margin-bottom: 4px;">{{ grand.title }}</a>
+            {%- endfor -%}
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  </div>{%- comment -%} .mega-menu-card {%- endcomment -%}
+</div>{%- comment -%} padding-top wrapper {%- endcomment -%}

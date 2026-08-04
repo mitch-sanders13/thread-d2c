@@ -1,0 +1,67 @@
+{% comment %}
+  snippets/footer__newsletter-script.liquid
+
+  On submit: validates → fires Attentive trigger + identify → hides the
+  whole newsletter body (heading/description/form/disclaimer) and shows
+  the sibling success panel. Idempotent via `||`.
+  Also emits per-block scoped layout CSS (heading alignment + mobile inset).
+{% endcomment %}
+
+<style>
+  @media (min-width: 768px) {
+    .ft-nl-{{ block.id }} .ft-heading {
+      text-align: {{ block.settings.heading_align_d | default: 'left' }} !important;
+    }
+  }
+  @media (max-width: 767.98px) {
+    .ft-nl-{{ block.id }} .ft-heading {
+      text-align: {{ block.settings.heading_align_m | default: 'center' }} !important;
+    }
+    .ft-nl-{{ block.id }} [data-nl-body] {
+      padding-left: {{ block.settings.mobile_pad_h | default: 0 }}px;
+      padding-right: {{ block.settings.mobile_pad_h | default: 0 }}px;
+    }
+  }
+</style>
+
+<script>
+  window.ftNewsletterSubmit = window.ftNewsletterSubmit || function(bid, bp, e) {
+    e.preventDefault();
+    var form = e.target;
+    var emailEl = form.querySelector('[data-nl-email]');
+    var errEl   = form.querySelector('[data-nl-error]');
+    if (errEl) errEl.style.display = 'none';
+    var email = (emailEl && emailEl.value || '').trim();
+    if (!email || (emailEl.validity && !emailEl.validity.valid)) {
+      if (errEl) errEl.style.display = '';
+      if (emailEl) emailEl.focus();
+      return false;
+    }
+    var cfg = (window.__ftNewsletterConfig || {})[bid] || {};
+    var creativeId = bp === 'd' ? cfg.desktopId : cfg.mobileId;
+    try {
+      if (window.__attentive && window.__attentive.trigger) {
+        window.__attentive.trigger(null, { email: email }, null, creativeId);
+      }
+      if (window.__attentive && window.__attentive.analytics && window.__attentive.analytics.identify) {
+        window.__attentive.analytics.identify({ email: email });
+      }
+    } catch (err) { /* Attentive tag may not be ready yet — silent */ }
+
+    // Replace the entire newsletter body (heading/description/form/disclaimer)
+    // with the success panel. Walk up to the wrapping container.
+    var root = form.closest('[data-nl-container]');
+    if (root) {
+      var body    = root.querySelector('[data-nl-body]');
+      var success = root.querySelector('[data-nl-success-full]');
+      if (body)    body.style.display = 'none';
+      if (success) success.style.display = '';
+    }
+    return false;
+  };
+  window.__ftNewsletterConfig = window.__ftNewsletterConfig || {};
+  window.__ftNewsletterConfig['{{ block.id }}'] = {
+    desktopId: {{ block.settings.attentive_desktop_id | default: 'null' }},
+    mobileId:  {{ block.settings.attentive_mobile_id  | default: 'null' }}
+  };
+</script>

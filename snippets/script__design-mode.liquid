@@ -1,0 +1,56 @@
+<!-- snippets/script__design-mode.liquid -->
+{% comment %} 
+  JavaScript to apply minor changes when using the theme editor. This script will ensure overlays will open when editing them (e.g. when editing cart drawer the drawer will be visible in theme editor).
+
+  Usage:
+    {% render 'script__design-mode' %}
+{% endcomment %}
+
+{% if request.design_mode %}
+  <script>
+    document.addEventListener("shopify:section:select", function(event) {
+      if (event.detail.sectionId.includes("theme__menu")) {
+        const section = event.target.children[0];
+        const backdrop = section.children[0];
+        const drawer = section.children[1];
+
+        section.style.display = 'block';
+        backdrop.style.display = 'block';
+        drawer.style.display = 'flex'; 
+      }
+      if (event.detail.sectionId.includes("theme__cart")) {
+        const section = event.target.children[0];
+        const backdropAbs = section.children[0];
+        const backdrop = backdropAbs.children[0];
+        const drawer = backdrop.children[0];
+
+        section.style.display = 'block';
+        backdropAbs.style.display = 'block';
+        backdrop.style.display = 'block';
+        drawer.style.display = 'flex';  
+      }
+    });
+    document.addEventListener("shopify:section:deselect", function(event) {
+      if (event.detail.sectionId.includes("theme__menu")) {
+        const section = event.target.children[0];
+        const backdrop = section.children[0];
+        const drawer = section.children[1];
+
+        section.style.display = 'none';
+        backdrop.style.display = 'none';
+        drawer.style.display = 'none'; 
+      }
+      if (event.detail.sectionId.includes("theme__cart")) {
+        const section = event.target.children[0];
+        const backdropAbs = section.children[0];
+        const backdrop = backdropAbs.children[0];
+        const drawer = backdrop.children[0];
+
+        section.style.display = 'none';
+        backdropAbs.style.display = 'none';
+        backdrop.style.display = 'none';
+        drawer.style.display = 'none';  
+      }
+    });
+  </script>
+{% endif %}

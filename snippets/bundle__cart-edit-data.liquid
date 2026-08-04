@@ -1,0 +1,1106 @@
+{% comment %}
+  Shared data + factory for the cart bundle inline-edit widget.
+
+  Rendered ONCE per cart drawer (from sections/theme__cart.liquid),
+  consumed by each <div x-data="bundleCartEdit(...)"> instance inside
+  bundle__cart-group.liquid.
+
+  Bails early if the eligibility collections aren't all configured —
+  the cart-group snippet will gracefully fall back to a read-only
+  list with just a Remove button (the factory returns minimal state).
+
+  Outputs:
+    1. <script type="application/json" id="bundle-cart-edit-data">
+         { slots: [{ label, products: [...] }, ...] }
+       Sorted per slot:
+         1. default-type match + available
+         2. available
+         3. sold-out
+    2. <script> defining window.bundleCartEdit (factory function used
+       by the per-bundle Alpine x-data scope).
+{% endcomment %}
+
+{%- if settings.trifecta_wallet_collection != blank and settings.trifecta_lanyard_collection != blank and settings.trifecta_chapstick_collection != blank -%}
+
+{%- comment -%}
+  Cart trifecta visual overrides — mirrors the inline <style> block
+  in snippets/bundle__pdp-cta.liquid one-for-one (same trifecta_*
+  merchant settings, same !important + descendant-wildcard cascade
+  patterns) so the cart-drawer trifecta widget stays in sync with
+  the PDP version. !important and the `> *` / `*` selectors are
+  required to defeat the global `span { font-size: 1rem; ... }`
+  rule in styles-*.css (see PDP file for the full explanation).
+
+  Emitted once per page from sections/theme__cart.liquid:875, so
+  every .cart__bundle-group instance in the drawer inherits.
+
+  The cart bundle TOTAL deliberately stays on .cart__item-price /
+  .cart__item-compare (site-wide cart settings — not trifecta_*) so
+  the discount visual matches other sale lines. Cart header text
+  'Trifecta Bundle' has no PDP analog; both untouched.
+{%- endcomment -%}
+<style>
+  /* ----- Items grid + card spacing ----- */
+  .cart__bundle-items {
+    gap: {{ settings.trifecta_items_gap | default: 8 }}px !important;
+  }
+  .cart__bundle-item-button {
+    padding-bottom: {{ settings.trifecta_card_pad | default: 8 }}px !important;
+  }
+  .cart__bundle-item-img-wrap {
+    margin-bottom: {{ settings.trifecta_card_gap | default: 6 }}px !important;
+  }
+
+  /* ----- Slot label ----- */
+  .cart__bundle-item-slot,
+  .cart__bundle-item-slot > * {
+    font-size: {{ settings.trifecta_slot_size_d | default: 11 }}px !important;
+    font-weight: {{ settings.trifecta_slot_weight | default: '700' }} !important;
+    text-transform: {{ settings.trifecta_slot_transform | default: 'uppercase' }} !important;
+    letter-spacing: {{ settings.trifecta_slot_ls | default: '0.08em' }} !important;
+    {%- case settings.trifecta_slot_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family) !important;
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family) !important;
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family) !important;
+    {%- endcase -%}
+    {%- if settings.trifecta_slot_color != blank %}color: {{ settings.trifecta_slot_color }} !important;{%- endif %}
+  }
+  .cart__bundle-item-slot {
+    margin-top: {{ settings.trifecta_slot_mt | default: 4 }}px !important;
+  }
+  @media (max-width: 749px) {
+    .cart__bundle-item-slot,
+    .cart__bundle-item-slot > * {
+      font-size: {{ settings.trifecta_slot_size_m | default: 11 }}px !important;
+    }
+  }
+
+  /* ----- Product title ----- */
+  .cart__bundle-item-title,
+  .cart__bundle-item-title > * {
+    font-size: {{ settings.trifecta_itemtitle_size_d | default: 12 }}px !important;
+    font-weight: {{ settings.trifecta_itemtitle_weight | default: '500' }} !important;
+    text-transform: {{ settings.trifecta_itemtitle_transform | default: 'none' }} !important;
+    letter-spacing: {{ settings.trifecta_itemtitle_ls | default: '0em' }} !important;
+    {%- case settings.trifecta_itemtitle_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family) !important;
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family) !important;
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family) !important;
+    {%- endcase -%}
+    {%- if settings.trifecta_itemtitle_color != blank %}color: {{ settings.trifecta_itemtitle_color }} !important;{%- endif %}
+  }
+  .cart__bundle-item-title {
+    margin-top: {{ settings.trifecta_itemtitle_mt | default: 2 }}px !important;
+  }
+  @media (max-width: 749px) {
+    .cart__bundle-item-title,
+    .cart__bundle-item-title > * {
+      font-size: {{ settings.trifecta_itemtitle_size_m | default: 12 }}px !important;
+    }
+  }
+
+  /* ----- Product price ----- */
+  .cart__bundle-item-price,
+  .cart__bundle-item-price > * {
+    font-size: {{ settings.trifecta_itemprice_size_d | default: 12 }}px !important;
+    font-weight: {{ settings.trifecta_itemprice_weight | default: '400' }} !important;
+    text-transform: {{ settings.trifecta_itemprice_transform | default: 'none' }} !important;
+    letter-spacing: {{ settings.trifecta_itemprice_ls | default: '0em' }} !important;
+    {%- case settings.trifecta_itemprice_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family) !important;
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family) !important;
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family) !important;
+    {%- endcase -%}
+    {%- if settings.trifecta_itemprice_color != blank %}color: {{ settings.trifecta_itemprice_color }} !important;{%- endif %}
+  }
+  .cart__bundle-item-price {
+    margin-top: {{ settings.trifecta_itemprice_mt | default: 2 }}px !important;
+  }
+  @media (max-width: 749px) {
+    .cart__bundle-item-price,
+    .cart__bundle-item-price > * {
+      font-size: {{ settings.trifecta_itemprice_size_m | default: 12 }}px !important;
+    }
+  }
+
+  /* ----- Change hint (text + caret cascade) ----- */
+  .cart__bundle-item-change,
+  .cart__bundle-item-change * {
+    font-size: {{ settings.trifecta_hint_size_d | default: 11 }}px !important;
+    {%- case settings.trifecta_hint_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family) !important;
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family) !important;
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family) !important;
+    {%- endcase -%}
+  }
+  .cart__bundle-item-change {
+    font-weight: {{ settings.trifecta_hint_weight | default: '600' }} !important;
+    text-transform: {{ settings.trifecta_hint_transform | default: 'uppercase' }} !important;
+    letter-spacing: {{ settings.trifecta_hint_ls | default: '0.05em' }} !important;
+    margin-top: {{ settings.trifecta_hint_mt | default: 3 }}px !important;
+    {%- if settings.trifecta_hint_color != blank %}color: {{ settings.trifecta_hint_color }} !important;{%- endif %}
+  }
+  @media (max-width: 749px) {
+    .cart__bundle-item-change,
+    .cart__bundle-item-change * {
+      font-size: {{ settings.trifecta_hint_size_m | default: 11 }}px !important;
+    }
+  }
+
+  /* ----- Filter pills ----- */
+  .cart__bundle-type-tabs {
+    gap: {{ settings.trifecta_dt_gap | default: 12 }}px !important;
+  }
+  .cart__bundle-type-tab,
+  .cart__bundle-type-tab > * {
+    font-size: {{ settings.trifecta_dt_size_d | default: 12 }}px !important;
+    font-weight: {{ settings.trifecta_dt_weight | default: '700' }} !important;
+    text-transform: {{ settings.trifecta_dt_transform | default: 'none' }} !important;
+    letter-spacing: {{ settings.trifecta_dt_ls | default: '0em' }} !important;
+    {%- case settings.trifecta_dt_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family) !important;
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family) !important;
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family) !important;
+    {%- endcase -%}
+    {%- if settings.trifecta_dt_color != blank %}color: {{ settings.trifecta_dt_color }} !important;{%- endif %}
+  }
+  .cart__bundle-type-tab {
+    padding: {{ settings.trifecta_dt_pad_v | default: 8 }}px {{ settings.trifecta_dt_pad_h | default: 12 }}px !important;
+  }
+  @media (max-width: 749px) {
+    .cart__bundle-type-tab,
+    .cart__bundle-type-tab > * {
+      font-size: {{ settings.trifecta_dt_size_m | default: 12 }}px !important;
+    }
+  }
+  .cart__bundle-type-tab.is-active,
+  .cart__bundle-type-tab.is-active > * {
+    {%- if settings.trifecta_dt_active_bg    != blank %}background: {{ settings.trifecta_dt_active_bg }} !important; border-color: {{ settings.trifecta_dt_active_bg }} !important;{%- endif %}
+    {%- if settings.trifecta_dt_active_color != blank %}color: {{ settings.trifecta_dt_active_color }} !important;{%- endif %}
+  }
+
+  /* ----- Dropdown swatch name ----- */
+  .cart__bundle-swatch-name,
+  .cart__bundle-swatch-name > * {
+    font-size: 12px !important;
+    font-weight: {{ settings.trifecta_dn_weight | default: '400' }} !important;
+    text-transform: {{ settings.trifecta_dn_transform | default: 'none' }} !important;
+    letter-spacing: 0.05em !important;
+    {%- case settings.trifecta_dn_font -%}
+      {%- when 'body'        -%}font-family: var(--type-font-body-family) !important;
+      {%- when 'heading'     -%}font-family: var(--type-font-header-family) !important;
+      {%- when 'handwritten' -%}font-family: var(--type-font-handwritten-family) !important;
+    {%- endcase -%}
+    {%- if settings.trifecta_dn_color != blank %}color: {{ settings.trifecta_dn_color }} !important;{%- endif %}
+  }
+  @media (max-width: 749px) {
+    .cart__bundle-swatch-name,
+    .cart__bundle-swatch-name > * {
+      font-size: 12px !important;
+    }
+  }
+</style>
+
+{%- liquid
+  assign _wallet_coll = settings.trifecta_wallet_collection
+  assign _lanyard_coll = settings.trifecta_lanyard_collection
+  assign _chapstick_coll = settings.trifecta_chapstick_collection
+  assign _default_wallet_type = settings.trifecta_default_wallet_type | strip
+  assign _default_lanyard_type = settings.trifecta_default_lanyard_type | strip
+  assign _default_chapstick_type = settings.trifecta_default_chapstick_type | strip
+  assign PRODUCTS_PER_SLOT = 200
+-%}
+
+{%- capture _slot_json_wallet -%}
+{%- assign _b1 = '' -%}{%- assign _b2 = '' -%}{%- assign _b3 = '' -%}
+{%- for p in _wallet_coll.products limit: 200 -%}
+  {%- if p.type == 'Bundle' -%}{%- continue -%}{%- endif -%}
+  {%- assign _v = p.selected_or_first_available_variant -%}
+  {%- assign _is_type_match = false -%}
+  {%- if _default_wallet_type != blank and p.type == _default_wallet_type -%}{%- assign _is_type_match = true -%}{%- endif -%}
+  {%- capture _entry -%}{
+    "handle": {{ p.handle | json }},
+    "title": {{ p.title | json }},
+    "url": {{ p.url | json }},
+    "image": {{ p.featured_image | image_url: width: 240 | json }},
+    "variantId": {{ _v.id | default: 0 | json }},
+    "price": {{ _v.price | default: 0 | json }},
+    "available": {{ _v.available | default: false | json }},
+    "type": {{ p.type | json }}
+  }{%- endcapture -%}
+  {%- if _v.available and _is_type_match -%}
+    {%- assign _b1 = _b1 | append: _entry | append: ',' -%}
+  {%- elsif _v.available -%}
+    {%- assign _b2 = _b2 | append: _entry | append: ',' -%}
+  {%- else -%}
+    {%- assign _b3 = _b3 | append: _entry | append: ',' -%}
+  {%- endif -%}
+{%- endfor -%}
+[{{ _b1 | append: _b2 | append: _b3 | remove_last: ',' }}]
+{%- endcapture -%}
+
+{%- capture _slot_json_lanyard -%}
+{%- assign _b1 = '' -%}{%- assign _b2 = '' -%}{%- assign _b3 = '' -%}
+{%- for p in _lanyard_coll.products limit: 200 -%}
+  {%- if p.type == 'Bundle' -%}{%- continue -%}{%- endif -%}
+  {%- assign _v = p.selected_or_first_available_variant -%}
+  {%- assign _is_type_match = false -%}
+  {%- if _default_lanyard_type != blank and p.type == _default_lanyard_type -%}{%- assign _is_type_match = true -%}{%- endif -%}
+  {%- capture _entry -%}{
+    "handle": {{ p.handle | json }},
+    "title": {{ p.title | json }},
+    "url": {{ p.url | json }},
+    "image": {{ p.featured_image | image_url: width: 240 | json }},
+    "variantId": {{ _v.id | default: 0 | json }},
+    "price": {{ _v.price | default: 0 | json }},
+    "available": {{ _v.available | default: false | json }},
+    "type": {{ p.type | json }}
+  }{%- endcapture -%}
+  {%- if _v.available and _is_type_match -%}
+    {%- assign _b1 = _b1 | append: _entry | append: ',' -%}
+  {%- elsif _v.available -%}
+    {%- assign _b2 = _b2 | append: _entry | append: ',' -%}
+  {%- else -%}
+    {%- assign _b3 = _b3 | append: _entry | append: ',' -%}
+  {%- endif -%}
+{%- endfor -%}
+[{{ _b1 | append: _b2 | append: _b3 | remove_last: ',' }}]
+{%- endcapture -%}
+
+{%- capture _slot_json_chapstick -%}
+{%- assign _b1 = '' -%}{%- assign _b2 = '' -%}{%- assign _b3 = '' -%}
+{%- for p in _chapstick_coll.products limit: 200 -%}
+  {%- if p.type == 'Bundle' -%}{%- continue -%}{%- endif -%}
+  {%- assign _v = p.selected_or_first_available_variant -%}
+  {%- assign _is_type_match = false -%}
+  {%- if _default_chapstick_type != blank and p.type == _default_chapstick_type -%}{%- assign _is_type_match = true -%}{%- endif -%}
+  {%- capture _entry -%}{
+    "handle": {{ p.handle | json }},
+    "title": {{ p.title | json }},
+    "url": {{ p.url | json }},
+    "image": {{ p.featured_image | image_url: width: 240 | json }},
+    "variantId": {{ _v.id | default: 0 | json }},
+    "price": {{ _v.price | default: 0 | json }},
+    "available": {{ _v.available | default: false | json }},
+    "type": {{ p.type | json }}
+  }{%- endcapture -%}
+  {%- if _v.available and _is_type_match -%}
+    {%- assign _b1 = _b1 | append: _entry | append: ',' -%}
+  {%- elsif _v.available -%}
+    {%- assign _b2 = _b2 | append: _entry | append: ',' -%}
+  {%- else -%}
+    {%- assign _b3 = _b3 | append: _entry | append: ',' -%}
+  {%- endif -%}
+{%- endfor -%}
+[{{ _b1 | append: _b2 | append: _b3 | remove_last: ',' }}]
+{%- endcapture -%}
+
+<script type="application/json" id="bundle-cart-edit-data">
+{
+  "productsPerSlot": {{ PRODUCTS_PER_SLOT }},
+  "slots": [
+    { "label": "Wallet",    "collectionHandle": {{ _wallet_coll.handle | json }},    "products": {{ _slot_json_wallet | strip }} },
+    { "label": "Lanyard",   "collectionHandle": {{ _lanyard_coll.handle | json }},   "products": {{ _slot_json_lanyard | strip }} },
+    { "label": "Chapstick", "collectionHandle": {{ _chapstick_coll.handle | json }}, "products": {{ _slot_json_chapstick | strip }} }
+  ]
+}
+</script>
+
+<script>
+(function(){
+  window.bundleCartEdit = function(groupItems) {
+    return {
+      bundleId: '',
+      slots: [],
+      selectedIndex: [0, 0, 0],
+      selectedType: { 0: '', 1: '', 2: '' },
+      cartItemKeys: ['', '', ''],
+      dropdownOpen: -1,
+      loading: false,
+      error: '',
+      productsPerSlot: 200,
+
+      init: function() {
+        var dataEl = document.getElementById('bundle-cart-edit-data');
+        if (!dataEl) return;
+        try {
+          var data = JSON.parse(dataEl.textContent);
+          this.slots = (data.slots || []).map(function(s){
+            return {
+              label: s.label,
+              collectionHandle: s.collectionHandle || '',
+              products: (s.products || []).slice()
+            };
+          });
+          this.productsPerSlot = data.productsPerSlot || 200;
+        } catch (e) {
+          console.error('[bundle-cart-edit] data parse failed', e);
+          return;
+        }
+
+        // Shopify Liquid caps collection.products at 50 per page (paginate
+        // tag isn't allowed in snippets/cart). For large collections like
+        // "lanyards" (1283 products) this means most product types — e.g.
+        // wristlet keychains — are missing from the initial Liquid output.
+        // Fetch the full collection via the Storefront products.json
+        // endpoint and merge into each slot. Runs in parallel per slot.
+        var that = this;
+        this.slots.forEach(function(slot, sIdx){
+          if (slot.collectionHandle) that._loadMoreProducts(slot.collectionHandle, sIdx);
+        });
+
+        var slotMap = { 'Wallet': 0, 'Lanyard': 1, 'Chapstick': 2 };
+        var self = this;
+        (groupItems || []).forEach(function(item){
+          var props = item.properties || {};
+          var slotLabel = props['Bundle Slot'];
+          var sIdx = slotMap[slotLabel];
+          if (sIdx === undefined) return;
+          if (!self.bundleId) self.bundleId = props['_bundle_id'] || '';
+          self.cartItemKeys[sIdx] = item.key || '';
+          var slot = self.slots[sIdx];
+          if (!slot || !slot.products) return;
+          var foundIdx = -1;
+          for (var j = 0; j < slot.products.length; j++) {
+            if (slot.products[j].handle === item.handle) { foundIdx = j; break; }
+          }
+          if (foundIdx >= 0) {
+            self.selectedIndex[sIdx] = foundIdx;
+          } else {
+            // Customer's current item isn't in the eligibility collection
+            // anymore (e.g. archived or moved), OR it lives past the
+            // Liquid 50-product cap and _loadMoreProducts hasn't merged
+            // it in yet. Synthesize an entry from the cart line so the
+            // widget still shows their picked item — and grab the
+            // product_type from the cart line item (Shopify cart.js
+            // exposes it) so the product-type line under the title
+            // renders. Previously this was hardcoded to '' which is
+            // why some bundle cards (Wallet, Lanyard) showed no type
+            // line while Chapstick — whose collection is small enough
+            // to fit in the initial Liquid render — did.
+            slot.products.unshift({
+              handle: item.handle,
+              title: item.product_title || item.title || '',
+              url: item.url || '',
+              image: item.image || '',
+              variantId: item.variant_id,
+              price: item.price || item.final_price || 0,
+              available: true,
+              type: item.product_type || ''
+            });
+            self.selectedIndex[sIdx] = 0;
+          }
+        });
+
+        // Default filter to "All" per slot.
+        this.slots.forEach(function(_, sIdx){
+          self.selectedType[sIdx] = '';
+        });
+      },
+
+      currentProduct: function(sIdx) {
+        if (sIdx < 0 || sIdx >= this.slots.length) return {};
+        var slot = this.slots[sIdx];
+        if (!slot || !slot.products || !slot.products.length) return {};
+        var idx = this.selectedIndex[sIdx] || 0;
+        return slot.products[idx] || slot.products[0] || {};
+      },
+
+      typesForSlot: function(sIdx) {
+        if (sIdx < 0) return [];
+        var slot = this.slots[sIdx];
+        if (!slot || !slot.products) return [];
+        var seen = {}, out = [];
+        for (var i = 0; i < slot.products.length; i++) {
+          var t = slot.products[i].type;
+          if (t && !seen[t]) { seen[t] = true; out.push(t); }
+        }
+        return out;
+      },
+
+      productsForCurrentType: function(sIdx) {
+        if (sIdx < 0) return [];
+        var slot = this.slots[sIdx];
+        if (!slot || !slot.products) return [];
+        var cap = this.productsPerSlot || 200;
+        var type = this.selectedType[sIdx];
+        var list = type
+          ? slot.products.filter(function(p){ return p.type === type; })
+          : slot.products;
+        return list.slice(0, cap);
+      },
+
+      selectType: function(sIdx, type) {
+        if (sIdx < 0) return;
+        this.selectedType[sIdx] = type;
+      },
+
+      _scrollToWidget: function(instant) {
+        // Scroll the bundle widget root to the top of its scroll container
+        // (the cart drawer's overflow-y-auto section, OR the document on
+        // /cart). `instant` true on dropdown close — smooth scroll races
+        // with the collapse animation and can land on the wrong content
+        // after the layout shifts. scrollIntoView walks up scroll
+        // containers automatically; CSS scroll-margin-top handles offset.
+        var root = this.$el;
+        if (!root || typeof root.scrollIntoView !== 'function') return;
+        root.scrollIntoView({
+          behavior: instant ? 'auto' : 'smooth',
+          block: 'start'
+        });
+      },
+
+      toggleDropdown: function(sIdx) {
+        if (this.loading) return;
+        if (this.dropdownOpen === sIdx) { this.dropdownOpen = -1; return; }
+        this.dropdownOpen = sIdx;
+        this.selectedType[sIdx] = '';
+        // Synchronous scroll inside the click handler — anchor to the
+        // widget top so the customer sees heading + cards + dropdown.
+        this._scrollToWidget();
+      },
+
+      selectProduct: function(sIdx, p) {
+        if (this.loading) return;
+        if (sIdx < 0 || !p || !p.available) return;
+        var slot = this.slots[sIdx];
+        if (!slot) return;
+        var oldKey = this.cartItemKeys[sIdx];
+        if (!oldKey) { this.error = 'Could not identify the cart line to swap.'; return; }
+
+        var curr = this.currentProduct(sIdx);
+        if (curr && curr.handle === p.handle) {
+          // No change — just close the dropdown.
+          this.dropdownOpen = -1;
+          return;
+        }
+
+        this.loading = true;
+        this.error = '';
+
+        // Scroll FIRST while the layout is still stable (dropdown
+        // expanded), THEN trigger the collapse below. If we close first,
+        // iOS's scroll anchoring can rebound the viewport during the
+        // 320ms collapse animation, landing on whatever was below the
+        // dropdown.
+        var self = this;
+        this._scrollToWidget(true);
+        this.dropdownOpen = -1;
+
+        var bundleId = this.bundleId;
+        var slotLabel = slot.label;
+
+        // Two-step swap: remove old line, add new variant carrying the
+        // same _bundle_id so the cart's bundleGroups() logic regroups them.
+        fetch(window.Shopify.routes.root + 'cart/change.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: oldKey, quantity: 0 })
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(){
+          return fetch(window.Shopify.routes.root + 'cart/add.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              items: [{
+                id: p.variantId,
+                quantity: 1,
+                properties: { 'Bundle Slot': slotLabel, '_bundle_id': bundleId }
+              }]
+            })
+          });
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(){
+          // Refresh cart — bundleGroups re-runs, this widget remounts
+          // with the new line keys. The :key on the x-for needs to change
+          // for Alpine to remount (handled in theme__cart.liquid).
+          var rootScope = (window.Alpine && document.body) ? window.Alpine.$data(document.body) : null;
+          if (rootScope && typeof rootScope.updateCart === 'function') {
+            rootScope.updateCart(false);
+          }
+        })
+        .catch(function(err){
+          console.error('[bundle-cart-edit] swap failed', err);
+          self.error = 'Could not update bundle. Please try again.';
+          self.loading = false;
+        });
+
+        // Safety: clear loading after 4s if the cart refresh didn't
+        // remount us (e.g. updateCart unavailable).
+        setTimeout(function(){ self.loading = false; }, 4000);
+      },
+
+      removeBundle: function() {
+        if (this.loading) return;
+        this.loading = true;
+        var self = this;
+        var keys = this.cartItemKeys.filter(Boolean);
+        var rootScope = (window.Alpine && document.body) ? window.Alpine.$data(document.body) : null;
+        keys.reduce(function(chain, key) {
+          return chain.then(function(){
+            return fetch(window.Shopify.routes.root + 'cart/change.js', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: key, quantity: 0 })
+            });
+          });
+        }, Promise.resolve())
+        .then(function(){
+          if (rootScope && typeof rootScope.updateCart === 'function') {
+            rootScope.updateCart(false);
+          }
+        })
+        .catch(function(err){
+          console.error('[bundle-cart-edit] remove failed', err);
+          self.error = 'Could not remove bundle. Please try again.';
+          self.loading = false;
+        });
+      },
+
+      _loadMoreProducts: function(handle, sIdx) {
+        // Fetches up to ~1500 products from /collections/<handle>/products.json
+        // (paginated 250 per page, max 6 pages) and merges any handles not
+        // already present into this slot. Storefront prices are returned as
+        // string dollars; we convert to integer cents to match the Liquid
+        // output. Network failures degrade silently — the Liquid-rendered
+        // 50-product set still works.
+        var self = this;
+        var MAX_PAGES = 6;
+        var PAGE_SIZE = 250;
+
+        function fetchPage(page) {
+          var url = window.Shopify.routes.root + 'collections/' + encodeURIComponent(handle)
+            + '/products.json?limit=' + PAGE_SIZE + '&page=' + page;
+          return fetch(url, { credentials: 'same-origin' })
+            .then(function(r){ return r.ok ? r.json() : { products: [] }; })
+            .then(function(data){
+              var slot = self.slots[sIdx];
+              if (!slot || !data || !Array.isArray(data.products) || data.products.length === 0) {
+                return false;
+              }
+              var existing = {};
+              slot.products.forEach(function(p){ existing[p.handle] = true; });
+              data.products.forEach(function(p){
+                if (existing[p.handle]) return;
+                if (!p.variants || p.variants.length === 0) return;
+                var v = p.variants[0];
+                var priceCents;
+                if (typeof v.price === 'number') {
+                  priceCents = v.price;
+                } else {
+                  priceCents = Math.round(parseFloat(v.price || '0') * 100);
+                }
+                var image = '';
+                if (p.images && p.images.length > 0) {
+                  image = p.images[0].src || p.images[0];
+                }
+                slot.products.push({
+                  handle: p.handle,
+                  title: p.title || '',
+                  url: '/products/' + p.handle,
+                  image: image,
+                  variantId: v.id,
+                  price: priceCents,
+                  available: v.available !== false,
+                  type: p.product_type || ''
+                });
+              });
+              return data.products.length >= PAGE_SIZE;
+            });
+        }
+
+        (function loop(page) {
+          if (page > MAX_PAGES) return;
+          fetchPage(page).then(function(hasMore){
+            if (hasMore) loop(page + 1);
+          }).catch(function(err){
+            console.warn('[bundle-cart-edit] page', page, 'fetch failed', err);
+          });
+        })(1);
+      },
+
+      removeSlot: function(sIdx) {
+        // Remove ONE slot from the bundle. The other two items stay in
+        // the cart but become regular cart items (no _bundle_id, no
+        // Bundle Slot, no 10% discount, no grouping).
+        //
+        // Shopify line-item properties are immutable, so we must remove
+        // the bundled lines and re-add the survivors. SAFE ORDER:
+        //   1) ADD the survivors as fresh, un-bundled lines.
+        //   2) Remove the target's bundled line.
+        //   3) Remove each survivor's bundled line.
+        // Cart temporarily has duplicates after step 1, but if any later
+        // step fails, the user is never left with an empty cart.
+        if (this.loading) return;
+        if (sIdx < 0 || sIdx >= this.cartItemKeys.length) return;
+        var targetKey = this.cartItemKeys[sIdx];
+        if (!targetKey) { this.error = 'Could not identify the cart line.'; return; }
+        this.loading = true;
+        this.error = '';
+        this.dropdownOpen = -1;
+        var self = this;
+        var rootScope = (window.Alpine && document.body) ? window.Alpine.$data(document.body) : null;
+
+        var survivors = [];
+        for (var i = 0; i < this.cartItemKeys.length; i++) {
+          if (i === sIdx) continue;
+          var key = this.cartItemKeys[i];
+          var p = this.currentProduct(i);
+          if (key && p && p.variantId) {
+            survivors.push({ key: key, variantId: p.variantId });
+          }
+        }
+
+        function refreshCart(){
+          if (rootScope && typeof rootScope.updateCart === 'function') {
+            rootScope.updateCart(false);
+          }
+        }
+
+        function removeKey(key){
+          return fetch(window.Shopify.routes.root + 'cart/change.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ id: key, quantity: 0 })
+          }).then(function(r){
+            if (!r.ok) throw new Error('cart/change.js failed: ' + r.status);
+            return r.json();
+          });
+        }
+
+        var addPromise;
+        if (survivors.length > 0) {
+          addPromise = fetch(window.Shopify.routes.root + 'cart/add.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({
+              items: survivors.map(function(s){ return { id: s.variantId, quantity: 1 }; })
+            })
+          }).then(function(r){
+            if (!r.ok) throw new Error('cart/add.js failed: ' + r.status);
+            return r.json();
+          });
+        } else {
+          addPromise = Promise.resolve();
+        }
+
+        addPromise
+          .then(function(){ return removeKey(targetKey); })
+          .then(function(){
+            return survivors.reduce(function(chain, s){
+              return chain.then(function(){ return removeKey(s.key); });
+            }, Promise.resolve());
+          })
+          .then(function(){ refreshCart(); })
+          .catch(function(err){
+            console.error('[bundle-cart-edit] removeSlot failed', err);
+            self.error = 'Could not remove the item. Please try again.';
+            self.loading = false;
+            // Refresh anyway so the user sees the actual cart state.
+            refreshCart();
+          });
+        setTimeout(function(){ self.loading = false; }, 6000);
+      },
+
+      totals: function() {
+        var sum = 0;
+        for (var i = 0; i < this.slots.length; i++) {
+          var p = this.currentProduct(i);
+          sum += (p && typeof p.price === 'number') ? p.price : 0;
+        }
+        var savings = Math.round(sum * 0.10);
+        return { subtotal: sum, savings: savings, total: sum - savings };
+      },
+
+      formatTotal: function() {
+        return this.formatMoney(this.totals().total);
+      },
+
+      /* Product titles are stored as "<Color> - <Type>"; the swatch
+       * dropdown only needs the color part (slot type is implied
+       * by which slot's dropdown is open). Mirrors the PDP trifecta
+       * shortName helper. */
+      shortName: function(title) {
+        if (!title) return '';
+        var idx = title.indexOf(' - ');
+        return idx > 0 ? title.slice(0, idx) : title;
+      },
+      formatMoney: function(cents) {
+        if (window.Shopify && window.Shopify.formatMoney) {
+          return window.Shopify.formatMoney(cents || 0);
+        }
+        return '$' + ((cents || 0) / 100).toFixed(2);
+      },
+
+      /* ============ Cart-drawer collapsed-row helpers ============
+       * These methods power the collapsed bundle row in the cart
+       * drawer (snippets/bundle__cart-group.liquid). They live on
+       * the factory rather than being layered on with Object.assign
+       * so the x-data expression stays simple and the methods are
+       * guaranteed to be properties on the Alpine reactive proxy
+       * with the correct `this` binding.
+       */
+
+      /* Toggle for the collapsible inline editor in the cart row. */
+      bundleOpen: false,
+      /* True while the qty stepper's cart fetches are in flight. */
+      bundleQtyLoading: false,
+      /* Local override the qty stepper uses for instant optimistic
+       * UI before the cart re-reads from /cart/change.js. */
+      _bundleQtyLocal: 0,
+
+      /* Cached lookup of the cart-drawer Alpine root scope so we can
+       * read cart.items / call changeCartItemQuantity without stale
+       * closure references to the parent x-for `item`. */
+      _getRootScope: function() {
+        return (window.Alpine && document.body) ? window.Alpine.$data(document.body) : null;
+      },
+
+      /* Live quantity for the bundle. Prefers the cart.items value
+       * (server truth) looked up by cart-line key; falls back to
+       * the optimistic local value during dispatch; falls back to
+       * the captured group's quantity if even that's missing. */
+      bundleQty: function() {
+        var root = this._getRootScope();
+        var keys = (this.cartItemKeys || []).filter(Boolean);
+        var items = (root && root.cart && root.cart.items) || [];
+        for (var i = 0; i < items.length; i++) {
+          if (keys.indexOf(items[i].key) !== -1) return items[i].quantity || 1;
+        }
+        if (this._bundleQtyLocal > 0) return this._bundleQtyLocal;
+        return (groupItems && groupItems[0] && groupItems[0].quantity) || 1;
+      },
+
+      /* qty-aware bundle line total / subtotal. The factory's
+       * totals() returns the per-unit bundle total (10% off the
+       * sum of slot unit prices); multiplying by bundleQty gives
+       * the customer-facing bundle line price for the cart drawer. */
+      bundleLineTotal: function() {
+        return this.bundleQty() * this.totals().total;
+      },
+      bundleLineSubtotal: function() {
+        return this.bundleQty() * this.totals().subtotal;
+      },
+
+      /* Qty stepper entry point — split from the dispatch so we can
+       * (a) optimistically update the UI before the fetch and
+       * (b) defer the actual fetch to setTimeout(0) so the click
+       * event has finished propagating before any reactive change.
+       * That second part is what stops the cart panel's
+       * @click.outside listener from spuriously firing during the
+       * click cycle and closing the drawer. */
+      setBundleQty: function(qty) {
+        if (this.bundleQtyLoading) return;
+        var n = parseInt(qty, 10);
+        if (isNaN(n) || n < 1) {
+          var self0 = this;
+          setTimeout(function(){ self0.removeBundle(); }, 0);
+          return;
+        }
+        this._bundleQtyLocal = n;
+        if (groupItems) {
+          for (var i = 0; i < groupItems.length; i++) {
+            groupItems[i].quantity = n;
+            if (typeof groupItems[i].price === 'number') {
+              groupItems[i].line_price = groupItems[i].price * n;
+            }
+          }
+        }
+        var self = this;
+        setTimeout(function(){ self._dispatchBundleQty(n); }, 0);
+      },
+
+      _dispatchBundleQty: function(n) {
+        var keys = (this.cartItemKeys || []).filter(Boolean);
+        if (!keys.length) return;
+        var rootScope = this._getRootScope();
+        if (!rootScope || typeof rootScope.changeCartItemQuantity !== 'function') return;
+        this.bundleQtyLoading = true;
+        var self = this;
+        /* refresh=false on every call. refresh=true triggers a
+         * window.location.reload() which closes the drawer; the
+         * cart still updates reactively because the root method
+         * assigns cart.items / cart.total_price from the response. */
+        keys.reduce(function(chain, key) {
+          return chain.then(function(){
+            return rootScope.changeCartItemQuantity(key, n, false, false);
+          });
+        }, Promise.resolve()).finally(function(){
+          self._applyBundleDiscount();
+          setTimeout(function(){ self.bundleQtyLoading = false; }, 150);
+        });
+      },
+
+      /* Idempotent: for each bundle line item in the live cart,
+       * rewrite line_price to price * qty * 0.9 (the displayed-only
+       * Trifecta 10% off — the discount code resolves at checkout,
+       * not in /cart/change.js), then recompute cart.total_price
+       * by summing every cart line's line_price. Re-runs on initial
+       * mount and on the global cart:updated event so the
+       * grand-total stays in sync no matter what triggered the
+       * update. */
+      _applyBundleDiscount: function() {
+        var root = this._getRootScope();
+        if (!root || !root.cart || !Array.isArray(root.cart.items)) return;
+        var bundleKeys = (this.cartItemKeys || []).filter(Boolean);
+        if (!bundleKeys.length) return;
+        var newTotal = 0;
+        for (var i = 0; i < root.cart.items.length; i++) {
+          var ci = root.cart.items[i];
+          if (bundleKeys.indexOf(ci.key) !== -1) {
+            var unit = (typeof ci.price === 'number') ? ci.price : 0;
+            var qty = ci.quantity || 0;
+            var discounted = Math.round(unit * qty * 0.9);
+            ci.line_price = discounted;
+            ci.final_line_price = discounted;
+          }
+          newTotal += (ci.line_price || 0);
+        }
+        root.cart.total_price = newTotal;
+      }
+    };
+  };
+
+  // Inline builder for the cart upsell flow: lets the customer pick
+  // missing slot products WITHOUT leaving the cart drawer. Reads the
+  // same #bundle-cart-edit-data JSON as the edit widget.
+  //
+  // Methods named to mirror bundleCartEdit so the picker markup is
+  // identical (toggleDropdown / currentProduct / typesForSlot /
+  // productsForCurrentType / selectType / selectProduct).
+  window.cartTrifectaInlineBuilder = function() {
+    return {
+      slots: [],
+      selectedIndex: [0, 0, 0],
+      selectedType: { 0: '', 1: '', 2: '' },
+      dropdownOpen: -1,
+      productsPerSlot: 200,
+      building: false,
+      loading: false,
+      error: '',
+
+      init: function() {
+        var dataEl = document.getElementById('bundle-cart-edit-data');
+        if (!dataEl) return;
+        try {
+          var data = JSON.parse(dataEl.textContent);
+          this.slots = (data.slots || []).map(function(s){
+            return {
+              label: s.label,
+              collectionHandle: s.collectionHandle || '',
+              products: (s.products || []).slice()
+            };
+          });
+          this.productsPerSlot = data.productsPerSlot || 200;
+        } catch (e) {
+          console.error('[cart-trifecta-builder] data parse failed', e);
+          return;
+        }
+        this.selectedIndex = [0, 0, 0];
+        this.selectedType = { 0: '', 1: '', 2: '' };
+      },
+
+      slotIdxFromLabel: function(label) {
+        for (var i = 0; i < this.slots.length; i++) {
+          if (this.slots[i].label === label) return i;
+        }
+        return -1;
+      },
+
+      missingSlotIndexes: function(missingLabels) {
+        var self = this;
+        return (missingLabels || []).map(function(l){ return self.slotIdxFromLabel(l); }).filter(function(i){ return i >= 0; });
+      },
+
+      currentProduct: function(sIdx) {
+        if (sIdx < 0 || sIdx >= this.slots.length) return {};
+        var slot = this.slots[sIdx];
+        if (!slot || !slot.products || !slot.products.length) return {};
+        var idx = this.selectedIndex[sIdx] || 0;
+        return slot.products[idx] || slot.products[0] || {};
+      },
+
+      typesForSlot: function(sIdx) {
+        if (sIdx < 0) return [];
+        var slot = this.slots[sIdx];
+        if (!slot || !slot.products) return [];
+        var seen = {}, out = [];
+        for (var i = 0; i < slot.products.length; i++) {
+          var t = slot.products[i].type;
+          if (t && !seen[t]) { seen[t] = true; out.push(t); }
+        }
+        return out;
+      },
+
+      productsForCurrentType: function(sIdx) {
+        if (sIdx < 0) return [];
+        var slot = this.slots[sIdx];
+        if (!slot || !slot.products) return [];
+        var cap = this.productsPerSlot || 200;
+        var type = this.selectedType[sIdx];
+        var list = type
+          ? slot.products.filter(function(p){ return p.type === type; })
+          : slot.products;
+        return list.slice(0, cap);
+      },
+
+      selectType: function(sIdx, type) {
+        if (sIdx < 0) return;
+        this.selectedType[sIdx] = type;
+      },
+
+      selectProduct: function(sIdx, p) {
+        if (sIdx < 0 || !p || !p.available) return;
+        var slot = this.slots[sIdx];
+        if (!slot) return;
+        for (var i = 0; i < slot.products.length; i++) {
+          if (slot.products[i].handle === p.handle) {
+            this.selectedIndex[sIdx] = i;
+            break;
+          }
+        }
+        // Close this dropdown; auto-advance to the next un-picked missing
+        // slot if any. Better UX than forcing the customer to find the
+        // next "Change" button manually.
+        this.dropdownOpen = -1;
+      },
+
+      toggleDropdown: function(sIdx) {
+        if (this.loading) return;
+        if (this.dropdownOpen === sIdx) { this.dropdownOpen = -1; return; }
+        this.dropdownOpen = sIdx;
+        this.selectedType[sIdx] = '';
+      },
+
+      startBuilding: function(missingLabels) {
+        if (this.loading) return;
+        this.building = true;
+        this.error = '';
+        var firstMissing = this.missingSlotIndexes(missingLabels)[0];
+        if (typeof firstMissing === 'number' && firstMissing >= 0) {
+          this.dropdownOpen = firstMissing;
+        }
+      },
+
+      cancelBuilding: function() {
+        this.building = false;
+        this.dropdownOpen = -1;
+        this.error = '';
+      },
+
+      buildBundle: function(status) {
+        if (this.loading || !status) return;
+        var slotsOrder = ['Wallet', 'Lanyard', 'Chapstick'];
+        var eligibleByLabel = {};
+        (status.eligibleItems || []).forEach(function(eli){
+          eligibleByLabel[eli.slotLabel] = eli;
+        });
+
+        var items = [];
+        var keysToRemove = [];
+        for (var i = 0; i < slotsOrder.length; i++) {
+          var label = slotsOrder[i];
+          var existing = eligibleByLabel[label];
+          var variantId;
+          if (existing) {
+            variantId = existing.variantId;
+            if (existing.key) keysToRemove.push(existing.key);
+          } else {
+            var sIdx = this.slotIdxFromLabel(label);
+            var p = this.currentProduct(sIdx);
+            if (!p || !p.variantId) {
+              this.error = 'Please pick a ' + label;
+              return;
+            }
+            variantId = p.variantId;
+          }
+          items.push({
+            id: variantId,
+            quantity: 1,
+            properties: {
+              'Bundle Slot': label,
+              '_bundle_id': '__pending__'
+            }
+          });
+        }
+        // Stamp bundle id last so all three share it.
+        var bundleId = 'tri_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        items.forEach(function(it){ it.properties['_bundle_id'] = bundleId; });
+
+        this.loading = true;
+        this.error = '';
+        var self = this;
+        var rootScope = (window.Alpine && document.body) ? window.Alpine.$data(document.body) : null;
+        var discountCode = (window.__trifectaEligibility && window.__trifectaEligibility.discountCode) || '';
+
+        fetch(window.Shopify.routes.root + 'cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ items: items })
+        })
+        .then(function(r){
+          if (!r.ok) throw new Error('cart/add.js failed: ' + r.status);
+          return r.json();
+        })
+        .then(function(){
+          return keysToRemove.reduce(function(chain, key){
+            return chain.then(function(){
+              return fetch(window.Shopify.routes.root + 'cart/change.js', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: key, quantity: 0 })
+              });
+            });
+          }, Promise.resolve());
+        })
+        .then(function(){
+          /* Discount attach is fire-and-forget — see the parallel
+           * comment in sections/theme__cart.liquid combineCartIntoBundle
+           * for the same reasoning. Drops the /discount/<code>
+           * latency from the cart-refresh critical path. */
+          if (discountCode) {
+            fetch('/discount/' + encodeURIComponent(discountCode), {
+              method: 'GET',
+              credentials: 'same-origin'
+            }).catch(function(){});
+          }
+          self.building = false;
+          self.loading = false;
+          self.dropdownOpen = -1;
+          if (rootScope && typeof rootScope.updateCart === 'function') {
+            rootScope.updateCart(false);
+          }
+        })
+        .catch(function(err){
+          console.error('[cart-trifecta-builder] buildBundle failed', err);
+          self.error = 'Could not add bundle. Please try again.';
+          self.loading = false;
+          if (rootScope && typeof rootScope.updateCart === 'function') {
+            rootScope.updateCart(false);
+          }
+        });
+      },
+
+      /* Product titles are stored as "<Color> - <Type>"; the swatch
+       * dropdown only needs the color part (slot type is implied
+       * by which slot's dropdown is open). Mirrors the PDP trifecta
+       * shortName helper. */
+      shortName: function(title) {
+        if (!title) return '';
+        var idx = title.indexOf(' - ');
+        return idx > 0 ? title.slice(0, idx) : title;
+      },
+      formatMoney: function(cents) {
+        if (window.Shopify && window.Shopify.formatMoney) {
+          return window.Shopify.formatMoney(cents || 0);
+        }
+        return '$' + ((cents || 0) / 100).toFixed(2);
+      }
+    };
+  };
+})();
+</script>
+
+{%- endif -%}

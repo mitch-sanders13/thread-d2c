@@ -1,0 +1,135 @@
+<!-- snippets/script__fast-add.liquid -->
+{% comment %}
+  Fast add-to-cart: removes one full network round-trip of perceived
+  lag from every add-to-cart (quick-add on collection cards, PDP buy
+  button, sticky bar, upsells — anything routed through the root
+  scope's addCartItem).
+
+  The stock flow in main-*.js is sequential:
+    POST /cart/add.js  →  wait  →  GET /cart.js  →  render line item
+  so the customer stares at an unchanged drawer for two RTTs.
+
+  This wrapper patches addCartItem on the root Alpine scope. Same
+  request, same arguments, same error handling — but when the
+  /cart/add.js response lands, the returned line items (which use the
+  exact same JSON shape as /cart.js items) are merged into cart.items
+  immediately, so the drawer shows the new line one round-trip sooner.
+  The original GET /cart.js reconcile still runs right after and
+  remains the source of truth for totals, discounts, and ordering.
+
+  Safety posture:
+    - If Alpine or addCartItem is missing, nothing is patched and the
+      theme behaves exactly as before.
+    - The optimistic merge is wrapped in try/catch — any surprise in
+      the response shape falls through to the stock updateCart path.
+    - Remove this snippet's render from layout/theme.liquid to fully
+      revert to stock behavior.
+{% endcomment %}
+
+<script>
+  (function () {
+    if (window.__csFastAddPatched) return;
+
+    function patch() {
+      if (window.__csFastAddPatched) return true;
+      if (!window.Alpine || typeof window.Alpine.$data !== 'function') return false;
+      var root;
+      try { root = window.Alpine.$data(document.documentElement); } catch (e) { return false; }
+      if (!root || typeof root.addCartItem !== 'function' || typeof root.updateCart !== 'function') return false;
+
+      window.__csFastAddPatched = true;
+
+      root.addCartItem = function (variantID, sellingPlanId, quantity, openCart, properties) {
+        var self = this;
+        self.cart_loading = true;
+
+        /* Properties normalization — mirrors the stock implementation:
+           an HTMLCollection of inputs (PDP form) or a plain object. */
+        var propertiesObj = {};
+        if (properties instanceof HTMLCollection) {
+          var arr = [];
+          for (var i = 0; i < properties.length; i++) {
+            arr.push([properties[i].name, properties[i].value]);
+          }
+          if (arr.length > 0) propertiesObj = Object.fromEntries(arr);
+        } else if (properties) {
+          propertiesObj = properties;
+        }
+
+        var line = { id: variantID, quantity: quantity, properties: propertiesObj };
+        if (sellingPlanId != 0) line.selling_plan = sellingPlanId;
+
+        fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: [line] })
+        }).then(function (response) {
+          return response.json().then(function (data) {
+            if (response.status === 200) {
+              /* Optimistic render: merge the added line items into the
+                 reactive cart NOW, so the drawer updates one RTT before
+                 the /cart.js reconcile lands. Best-effort — bail to the
+                 stock path on any surprise. */
+              try {
+                var added = data.items || [data];
+                var rate = (window.Shopify && +window.Shopify.currency.rate) || 1;
+                added.forEach(function (li) {
+                  if (!li || !li.key) return;
+                  var existing = null;
+                  for (var j = 0; j < self.cart.items.length; j++) {
+                    if (self.cart.items[j].key === li.key) { existing = self.cart.items[j]; break; }
+                  }
+                  var addedQty = quantity || li.quantity || 1;
+                  var addedPrice = (li.final_price != null ? li.final_price : li.price) * addedQty;
+                  if (existing) {
+                    existing.quantity += addedQty;
+                    if (existing.final_line_price != null) existing.final_line_price += addedPrice;
+                    if (existing.line_price != null) existing.line_price += addedPrice;
+                  } else {
+                    /* Shopify lists most-recently-added first. */
+                    self.cart.items.unshift(li);
+                  }
+                  self.cart.item_count += addedQty;
+                  self.cart.total_price += addedPrice;
+                });
+                if (self.progress_bar_threshold) {
+                  self.cart.shipping_gap = self.progress_bar_threshold * rate - self.cart.total_price;
+                  self.cart.shipping_progress = (self.cart.total_price / (self.progress_bar_threshold * rate)) * 100 + '%';
+                }
+                /* Drawer open happens here instead of waiting for the
+                   reconcile, matching the stock openCart behaviors. */
+                if (openCart == true && self.cart_behavior == 'drawer') {
+                  self.cart_drawer = true;
+                }
+              } catch (e) {
+                /* Optimistic merge failed — reconcile below still
+                   guarantees a correct render, just one RTT later. */
+              }
+              if (typeof self.checkAndAddUpgrade === 'function') self.checkAndAddUpgrade();
+              self.updateCart(openCart);
+            } else {
+              self.error_title = data.message;
+              self.error_message = data.description;
+              self.show_alert = true;
+              self.cart_loading = false;
+            }
+          });
+        }).catch(function (error) {
+          console.error('Error:', error);
+          self.cart_loading = false;
+        });
+      };
+      return true;
+    }
+
+    /* main.js is a type="module" script (deferred), so this inline
+       script always runs first — the listener is registered before
+       Alpine boots. The retry loop covers any exotic load order. */
+    document.addEventListener('alpine:initialized', patch);
+    var tries = 0;
+    (function retry() {
+      if (patch() || ++tries > 50) return;
+      setTimeout(retry, 100);
+    })();
+  })();
+</script>

@@ -1,0 +1,267 @@
+<!-- sections/theme__announcement.liquid -->
+{% comment %}
+  Marquee-style announcement bar (continuous horizontal scroll).
+{% endcomment %}
+
+<style>
+  .marquee-bar-{{ section.id }} {
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+  }
+  .marquee-track-{{ section.id }} {
+    display: inline-flex;
+    animation: marquee-{{ section.id }} var(--marquee-duration, 30s) linear infinite;
+  }
+  .marquee-bar-{{ section.id }}:hover .marquee-track-{{ section.id }} {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track-{{ section.id }} { animation: none; }
+  }
+  .marquee-item-{{ section.id }} {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 0 {{ section.settings.item_spacing }}px;
+    font-family: var({{ section.settings.font_family }});
+    font-size: {{ section.settings.font_size }}px;
+    font-weight: {{ section.settings.font_weight }};
+    letter-spacing: {{ section.settings.letter_spacing }};
+    text-transform: {{ section.settings.text_transform }};
+    color: {{ section.settings.text_color }} !important;
+    line-height: 1;
+  }
+  .marquee-item-{{ section.id }} *,
+  .marquee-item-{{ section.id }} p,
+  .marquee-item-{{ section.id }} a,
+  .marquee-item-{{ section.id }} span {
+    color: {{ section.settings.text_color }} !important;
+  }
+  .marquee-item-{{ section.id }} p {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    line-height: inherit;
+  }
+  .marquee-item-{{ section.id }} a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  @keyframes marquee-{{ section.id }} {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+</style>
+
+<section class="relative {{ section.settings.visibility }} {{ section.settings.color_scheme }}"
+  style="{% if section.settings.bg_color != blank %}background-color:{{ section.settings.bg_color }} !important;{% endif %}">
+  <div class="marquee-bar-{{ section.id }}" style="padding: 8px 0;">
+    <div class="marquee-track-{{ section.id }}" style="--marquee-duration: {{ section.settings.marquee_speed }}s;">
+
+      {%- comment -%} Two identical halves for seamless loop — animation scrolls first half out {%- endcomment -%}
+      {% for half in (1..2) %}
+        <span class="marquee-half-{{ section.id }}" style="display:inline-flex;">
+          {% for i in (1..6) %}
+            {% for block in section.blocks %}
+              <span class="marquee-item-{{ section.id }}" {% if half == 1 and i == 1 %}{{ block.shopify_attributes }}{% endif %}>
+                {{ block.settings.content }}
+              </span>
+            {% endfor %}
+          {% endfor %}
+        </span>
+      {% endfor %}
+
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name":"t:sections.theme_announcement.name",
+  "settings":[
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__1.content"
+    },
+    {
+      "type":"select",
+      "id":"color_scheme",
+      "label":"t:sections.all.colors.settings.color_scheme.label",
+      "options":[
+        {
+          "value":"color__bg-body color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value":"color__bg-neutral color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value":"color__bg-overlay-1 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value":"color__bg-overlay-2 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value":"color__bg-overlay-3 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value":"color__bg-primary color__primary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value":"color__bg-secondary color__secondary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value":"color__bg-tertiary color__tertiary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default":"color__bg-overlay-1 color__text"
+    },
+    {
+      "type":"range",
+      "id":"marquee_speed",
+      "label":"Scroll speed (seconds)",
+      "info":"Lower = faster. Full loop duration.",
+      "min":10,
+      "max":60,
+      "step":5,
+      "default":15
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Custom background color",
+      "info": "Overrides color scheme above"
+    },
+    { "type": "header", "content": "Typography" },
+    {
+      "type": "select",
+      "id": "font_family",
+      "label": "Font family",
+      "options": [
+        { "value": "--type-font-body-family", "label": "Body (Forma)" },
+        { "value": "--type-font-header-family", "label": "Heading (PP Right Grotesk)" }
+      ],
+      "default": "--type-font-body-family"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Font weight",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select",
+      "id": "letter_spacing",
+      "label": "Letter spacing",
+      "options": [
+        { "value": "0em", "label": "None" },
+        { "value": "0.02em", "label": "Tight" },
+        { "value": "0.05em", "label": "Normal" },
+        { "value": "0.08em", "label": "Wide" },
+        { "value": "0.12em", "label": "Wider" }
+      ],
+      "default": "0.02em"
+    },
+    {
+      "type": "select",
+      "id": "text_transform",
+      "label": "Text case",
+      "options": [
+        { "value": "none", "label": "Normal" },
+        { "value": "uppercase", "label": "UPPERCASE" },
+        { "value": "capitalize", "label": "Capitalize" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "item_spacing",
+      "label": "Spacing between items",
+      "min": 8,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__8.content"
+    },
+    {
+      "type":"select",
+      "id":"visibility",
+      "label":"t:sections.all.visibility.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.visibility.options__1.label"
+        },
+        {
+          "value":"md:hidden",
+          "label":"t:sections.all.visibility.options__2.label"
+        },
+        {
+          "value":"hidden md:block",
+          "label":"t:sections.all.visibility.options__3.label"
+        }
+      ],
+      "default":""
+    }
+  ],
+  "blocks":[
+    {
+      "type":"text",
+      "name":"t:sections.theme_announcement.blocks.text.name",
+      "limit":10,
+      "settings":[
+        {
+          "type":"richtext",
+          "id":"content",
+          "label":"t:sections.theme_announcement.blocks.text.settings.content.label",
+          "default":{
+            "en":"<p>Make announcements or share a promotion.</p>",
+            "es": "<p>Haz anuncios o comparte una promoción.</p>",
+            "it": "<p>Fai annunci o condividi una promozione.</p>",
+            "de": "<p>Machen Sie Ankündigungen oder teilen Sie eine Werbeaktion.</p>",
+            "fr": "<p>Faites des annonces ou partagez une promotion.</p>"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["custom.overlay"]
+  }
+}
+{% endschema %}

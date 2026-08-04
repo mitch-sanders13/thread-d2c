@@ -1,0 +1,374 @@
+<!-- sections/testimonial.liquid -->
+{% comment %} 
+  Grid of testimonials.
+
+  Globals:
+    - settings.layout_horizontal: horizontaly margin
+    - settings.enable_animations: boolean to enable animations
+    - settings.thumbnails_color_border: border color
+    - settings.thumbmails_color_scheme: color scheme of thumbnails
+
+  Possible enhancements:
+    - Add alternative layout with large quote.
+{% endcomment %}
+
+<section class="
+  {{ section.settings.visibility }}
+  {{ section.settings.color_scheme }} 
+  {{ section.settings.color_border }}
+  {{ section.settings.style_border }}">
+  <div class="{{ settings.layout_horizontal }}"
+    style="
+      padding-top:{{ section.settings.spacing_top }}px;
+      padding-bottom:{{ section.settings.spacing_bottom }}px;" >
+
+    {% render 'component__section-header' %} 
+    <div class="md:grid-cols-3 grid grid-cols-1 mt-8"
+      style="
+        column-gap: {{ settings.layout_gap_size }}px;
+        row-gap: {{ settings.layout_gap_size | times: 1.5 }}px;">
+
+      {% for block in section.blocks %}
+        <div>
+          <div class="m-0--clear pl-4 mb-2 border--l-width
+            {{ section.settings.color_border }}">
+            {{ block.settings.content }}
+          </div>
+          <div class="flex items-center">
+            {%- if block.settings.avatar == blank %}
+              <div class="relative w-[40px] border__button--radius
+                {{ settings.thumbmails_color_scheme }}
+                {{ settings.thumbnails_color_border }}">
+                {{ 'image' | placeholder_svg_tag: 'w-full object-cover aspect-[1/1]' }}
+              </div>
+            {%- else -%}
+              <div class="w-[40px]">
+                <div class="border__button--radius overflow-hidden object-cover aspect-[1/1] aspect-w-1 aspect-h-1
+                  {{ settings.thumbmails_color_scheme }}">
+                  {{ block.settings.avatar | image_url: width: 80 | image_tag: style: 'object-fit:cover', class: 'h-full w-full object-cover aspect-[1/1]', loading: 'lazy', alt: block.settings.avatar.alt }}
+                </div>
+              </div>
+            {% endif %}
+            <div class="m-0--clear type--small ml-2">
+              {{ block.settings.title }}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+
+    </div>
+    
+  </div>
+</section>
+
+{% schema %}
+{
+  "name":"t:sections.testimonials.name",
+  "settings":[
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__4.content"
+    },
+    {
+      "type":"text",
+      "id":"heading",
+      "label":"t:sections.all.content.settings.heading.label"
+    },
+    {
+      "type":"richtext",
+      "id":"content",
+      "label":"t:sections.all.content.settings.content.label"
+    },
+    {
+      "type":"text",
+      "id":"button_label",
+      "label":"t:sections.all.content.settings.button_label.label"
+    },
+    {
+      "type":"url",
+      "id":"button_url",
+      "label":"t:sections.all.content.settings.button_url.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.headers.header__22.content"
+    },
+    {
+      "type": "range",
+      "id": "spacing_top",
+      "min": 0,
+      "max": 300,
+      "step": 20,
+      "unit": "px",
+      "label": "t:sections.all.layout.settings.spacing.label_top",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "spacing_bottom",
+      "min": 0,
+      "max": 300,
+      "step": 20,
+      "unit": "px",
+      "label": "t:sections.all.layout.settings.spacing.label_bottom",
+      "default": 100
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__1.content"
+    },
+    {
+      "type":"select",
+      "id":"color_scheme",
+      "label":"t:sections.all.colors.settings.color_scheme.label",
+      "options":[
+        {
+          "value":"color__bg-body color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__1.label"
+        },
+        {
+          "value":"color__bg-neutral color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__2.label"
+        },
+        {
+          "value":"color__bg-overlay-1 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__3.label"
+        },
+        {
+          "value":"color__bg-overlay-2 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__4.label"
+        },
+        {
+          "value":"color__bg-overlay-3 color__text",
+          "label":"t:sections.all.colors.settings.color_scheme.options__5.label"
+        },
+        {
+          "value":"color__bg-primary color__primary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__6.label"
+        },
+        {
+          "value":"color__bg-secondary color__secondary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__7.label"
+        },
+        {
+          "value":"color__bg-tertiary color__tertiary",
+          "label":"t:sections.all.colors.settings.color_scheme.options__8.label"
+        }
+      ],
+      "default":"color__bg-body color__text"
+    },
+    {
+      "type":"select",
+      "id":"color_border",
+      "label":"t:sections.all.colors.settings.color_border.label",
+      "options":[
+        {
+          "value":"color__border-divider-1",
+          "label":"t:sections.all.colors.settings.color_border.options__1.label"
+        },
+        {
+          "value":"color__border-selected-1",
+          "label":"t:sections.all.colors.settings.color_border.options__2.label"
+        }
+      ],
+      "default":"color__border-divider-1"
+    },
+    {
+      "type":"select",
+      "id":"color_button",
+      "label":"t:sections.all.colors.settings.color_button.label",
+      "options":[
+        {
+          "value":"btn",
+          "label":"t:sections.all.colors.settings.color_button.options__1.label"
+        },
+        {
+          "value":"btn btn--secondary",
+          "label":"t:sections.all.colors.settings.color_button.options__2.label"
+        },
+        {
+          "value":"btn btn--tertiary",
+          "label":"t:sections.all.colors.settings.color_button.options__5.label"
+        },
+        {
+          "value":"btn btn--neutral",
+          "label":"t:sections.all.colors.settings.color_button.options__3.label"
+        },
+        {
+          "value":"btn btn--plain",
+          "label":"t:sections.all.colors.settings.color_button.options__4.label"
+        },
+        {
+          "value":"btn--minimal-light",
+          "label":"t:sections.all.colors.settings.color_button.options__6.label"
+        },
+        {
+          "value":"btn--minimal-dark",
+          "label":"t:sections.all.colors.settings.color_button.options__7.label"
+        }
+      ],
+      "default":"btn btn--secondary"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__2.content"
+    },
+    {
+      "type":"select",
+      "id":"style_border",
+      "label":"t:sections.all.styles.settings.style_border.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.styles.settings.style_border.options__1.label"
+        },
+        {
+          "value":"border--t-width",
+          "label":"t:sections.all.styles.settings.style_border.options__2.label"
+        },
+        {
+          "value":"border--b-width",
+          "label":"t:sections.all.styles.settings.style_border.options__3.label"
+        },
+        {
+          "value":"border--b-width border--t-width",
+          "label":"t:sections.all.styles.settings.style_border.options__4.label"
+        }
+      ],
+      "default":"border--b-width"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__3.content"
+   },
+    {
+      "type": "select",
+      "id": "layout_x_alignment",
+      "label": "t:sections.all.layout.settings.layout_x_alignment.label",
+      "options": [
+        {
+          "value": "justify-between",
+          "label": "t:sections.all.layout.settings.layout_x_alignment.options__1.label"
+        },
+        {
+          "value": "text-center justify-center flex-col items-center",
+          "label": "t:sections.all.layout.settings.layout_x_alignment.options__2.label"
+        },
+        {
+          "value": "text-right justify-end flex-col items-end",
+          "label": "t:sections.all.layout.settings.layout_x_alignment.options__3.label"
+        }
+      ],
+      "default": "justify-between"
+    },
+    {
+      "type":"header",
+      "content":"t:sections.all.headers.header__8.content"
+    },
+    {
+      "type":"select",
+      "id":"visibility",
+      "label":"t:sections.all.visibility.label",
+      "options":[
+        {
+          "value":"",
+          "label":"t:sections.all.visibility.options__1.label"
+        },
+        {
+          "value":"md:hidden",
+          "label":"t:sections.all.visibility.options__2.label"
+        },
+        {
+          "value":"hidden md:block",
+          "label":"t:sections.all.visibility.options__3.label"
+        }
+      ],
+      "default":""
+    }
+  ],
+  "blocks":[
+    {
+      "type":"testimonial",
+      "name":"t:sections.testimonials.blocks.testimonial.name",
+      "limit":3,
+      "settings":[
+        {
+          "type":"header",
+          "content":"t:sections.all.headers.header__4.content"
+        },
+        {
+          "type":"richtext",
+          "id":"content",
+          "label":"t:sections.testimonials.blocks.testimonial.settings.content.label",
+          "default":{
+            "en":"<p>Include a valuable review or testimonial that shows customers how much people enjoy your products.</p>",
+            "es": "<p>Incluye una reseña o testimonio valioso que muestre a los clientes cuánto disfrutan las personas de tus productos.</p>",
+            "it": "<p>Includi una recensione o una testimonianza preziosa che mostri ai clienti quanto le persone apprezzano i tuoi prodotti.</p>",
+            "de": "<p>Fügen Sie eine wertvolle Bewertung oder ein Testimonial hinzu, das den Kunden zeigt, wie sehr die Menschen Ihre Produkte genießen.</p>",
+            "fr": "<p>Incluez un avis ou un témoignage précieux qui montre aux clients à quel point les gens apprécient vos produits.</p>"
+          }
+        },
+        {
+          "type":"richtext",
+          "id":"title",
+          "label":"t:sections.testimonials.blocks.testimonial.settings.title.label",
+          "default":{
+            "en":"<p>Reviewer name</p>",
+            "es": "<p>Nombre del revisor</p>",
+            "it": "<p>Nome del revisore</p>",
+            "de": "<p>Name des Prüfers</p>",
+            "fr": "<p>Nom de l’évaluateur</p>"
+          }
+        },
+        {
+          "type":"image_picker",
+          "id":"avatar",
+          "label":"t:sections.testimonials.blocks.testimonial.settings.avatar.label",
+          "info":"t:sections.testimonials.blocks.testimonial.settings.avatar.info"
+        }
+      ]
+    }
+  ],
+  "presets":[
+    {
+      "name":"t:sections.testimonials.name",
+      "settings":{
+        "color_scheme":"color__bg-body color__text",
+        "color_border":"color__border-divider-1",
+        "color_button":"btn btn--secondary",
+        "style_border":"border--b-width",
+        "heading":"Testimonials",
+        "content":"<p>Tell customers more about how loved your products are.</p>",
+        "button_label":"Button",
+        "button_url":"/"
+      },
+      "blocks":[
+        {
+          "type":"testimonial",
+          "settings":{
+            "content":"<p>Include a valuable review or testimonial that shows customers how much people enjoy your products.</p>",
+            "title":"<p>Reviewer name</p>"
+          }
+        },
+        {
+          "type":"testimonial",
+          "settings":{
+            "content":"<p>Include a valuable review or testimonial that shows customers how much people enjoy your products.</p>",
+            "title":"<p>Reviewer name</p>"
+          }
+        },
+        {
+          "type":"testimonial",
+          "settings":{
+            "content":"<p>Include a valuable review or testimonial that shows customers how much people enjoy your products.</p>",
+            "title":"<p>Reviewer name</p>"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["custom.overlay"]
+  }
+}
+{% endschema %}

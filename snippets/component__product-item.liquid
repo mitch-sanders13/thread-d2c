@@ -1,0 +1,534 @@
+{%- comment -%} Card position in its grid (param name `forloop` is
+  shadowed inside for-loops — capture it first). Only the first 4 cards
+  of a grid load their image eagerly; everything else is lazy so
+  above-the-fold products aren't starved by 20+ competing downloads. {%- endcomment -%}
+{%- assign _pc_card_pos = forloop | default: 0 -%}
+{%- assign _pc_eager_card = false -%}
+{%- if _pc_card_pos > 0 and _pc_card_pos <= 4 -%}{%- assign _pc_eager_card = true -%}{%- endif -%}
+<!-- snippets/component__product-item.liquid -->
+{% comment %}
+  Standard product thumbnail.
+  Accepts:
+    - product: liquid product object
+    - source: accessibility variable
+
+  Usage:
+    {% render 'component__product-item',
+      product: product,
+      source: 'section-name' %}
+  Globals:
+    - settings.enable_animations: boolean to enable animations
+    - settings.thumbnails_border_style: border style of thumbnails
+    - settings.thumbnails_ratio: set the aspect ratio of thumbnails
+    - settings.thumbnails_object: set the image object sizing
+    - settings.type_seperator: setting to pick the type of seperator between text
+    - settings.savings_badge: can be set to 'dollar', 'percent', or 'none'
+    - settings.stock_threshold: number to set the threshold for when to show stock count
+    - settings.enable_thumbnails_product_type: boolean to enable product type
+    - settings.enable_thumbnails_vendor: boolean to enable vendor
+    - settings.enable_thumbnails_variant_count: boolean to enable variant count
+
+  Possible enhancements:
+    - Add setting to disable video on hover, can cause performance issues.
+
+  Pro tips:
+    - Use this while looping through products. For example on collection product grids.
+{% endcomment %}
+
+{%- comment %} disable quick add tag {%- endcomment %}
+{% if product.tags contains 'disable_quick_add' %}
+  {% assign disable_quick_add = true %}
+{% else %}
+  {% assign disable_quick_add = false %}
+{% endif %}
+
+{% assign hideproduct = false %}
+{% for tag in product.tags %}
+  {% if tag contains 'hideproduct' %}
+    {% assign hideproduct = true %}
+  {% endif %}
+  {% comment %} Hide collegiate products from non-collegiate collections (but allow on search pages) {% endcomment %}
+  {% if tag == 'collegiate' and collection.handle != 'collegiate' and template != 'search' %}
+    {% assign hideproduct = true %}
+  {% endif %}
+{% endfor %}
+
+{% assign hide_sale = false %}
+{% if product.tags contains 'hide_sale' %}
+  {% assign hide_sale = true %}
+{% endif %}
+
+{%- comment -%}
+  Sale-price text color: matches the badge background so the "Sale" pill
+  and the discounted price read as a pair. Falls back to primary for
+  outline/overlay schemes that have no solid bg.
+{%- endcomment -%}
+{%- assign _sale_price_color = 'var(--color-primary-button-background-light)' -%}
+{%- case settings.product-cards_badge_scheme -%}
+  {%- when 'primary'   -%}{%- assign _sale_price_color = 'var(--color-primary-button-background-light)'   -%}
+  {%- when 'secondary' -%}{%- assign _sale_price_color = 'var(--color-secondary-button-background-light)' -%}
+  {%- when 'tertiary'  -%}{%- assign _sale_price_color = 'var(--color-tertiary-button-background-light)'  -%}
+  {%- when 'neutral'   -%}{%- assign _sale_price_color = 'var(--color-neutral-button-background-light)'   -%}
+{%- endcase -%}
+{%- assign _is_on_sale = false -%}
+{%- if product.price < product.compare_at_price and hide_sale == false -%}
+  {%- assign _is_on_sale = true -%}
+{%- endif -%}
+
+{%- comment -%}
+  Title presentation:
+  Products are conventionally titled "<Style> - <Type>" (e.g.
+  "Clark - Elastic Wallet"). When the section's "Show product type
+  below name" setting is on, render only the style part as the main
+  title and put the type on its own muted line below — same pattern
+  the Related Styles dropdown uses via shortName(). Falls back to the
+  full title when the dash convention isn't followed; falls back to
+  product.type for the type line when the title can't be split.
+{%- endcomment -%}
+{%- assign _pi_title_text = product.title -%}
+{%- assign _pi_type_text = '' -%}
+{%- if settings.product_card_show_type -%}
+  {%- assign _pi_title_parts = product.title | split: ' - ' -%}
+  {%- if _pi_title_parts.size > 1 -%}
+    {%- assign _pi_title_text = _pi_title_parts | first -%}
+    {%- assign _pi_type_text = _pi_title_parts | last -%}
+  {%- else -%}
+    {%- assign _pi_type_text = product.type -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- comment -%}
+  Review stars — same Okendo rating metafields the PDP title uses
+  (product.metafields.reviews.rating / rating_count), rendered
+  self-contained (text-star fill, no Okendo SVG symbols — those are
+  only guaranteed on the PDP). One subdued line: stars + count.
+  Hidden when the toggle is off, the product has no reviews, or it
+  carries the hide_ratings tag. Styles live in theme__styles.liquid
+  (.pc-rating).
+{%- endcomment -%}
+{%- assign _pi_rating_html = '' -%}
+{%- if settings.product_card_show_rating -%}
+  {%- assign _pi_rating_count = product.metafields.reviews.rating_count | times: 1 -%}
+  {%- unless product.tags contains 'hide_ratings' or _pi_rating_count < 1 -%}
+    {%- assign _pi_rating_val = product.metafields.reviews.rating.value.rating | times: 1.0 -%}
+    {%- assign _pi_rating_max = product.metafields.reviews.rating.value.scale_max | times: 1.0 | at_least: 1.0 -%}
+    {%- assign _pi_rating_pct = _pi_rating_val | divided_by: _pi_rating_max | times: 100.0 | round -%}
+    {%- capture _pi_rating_html -%}
+      <p class="pc-rating !leading-none" style="padding: 0 {{ settings.product_card_title_pad_h | default: 0 }}px;">
+        <span class="pc-stars" role="img" aria-label="Rated {{ _pi_rating_val }} out of {{ _pi_rating_max }} stars">
+          <span class="pc-stars__base" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+          <span class="pc-stars__fill" aria-hidden="true" style="width: {{ _pi_rating_pct }}%;">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+        </span>
+        <span class="pc-rating-count">({{ _pi_rating_count }})</span>
+      </p>
+    {%- endcapture -%}
+  {%- endunless -%}
+{%- endif -%}
+
+{% unless hideproduct %}
+  <div
+    class="
+      group relative w-full
+      {% if settings.thumbnails_border_style == 'thumbnail' %}
+        border--radius overflow-hidden
+      {% endif %}
+    "
+    x-data="{ button_loading: false }"
+  >
+    {%- comment -%} Badges {%- endcomment -%}
+    {% capture badge_background %}
+      {% if settings.product-cards_badge_scheme == "light_outline" or settings.product-cards_badge_scheme == "dark_outline" %}
+        trasnsparent
+      {% else %}
+        {{ settings.product-cards_badge_scheme }}
+      {% endif %}
+    {% endcapture %}
+    {% capture badge_foreground %}
+      {% if settings.product-cards_badge_scheme == "light_outline" %}
+        light
+      {% elsif settings.product-cards_badge_scheme == "dark_outline" %}
+        dark
+      {% else %}
+        {{ settings.product-cards_badge_scheme }}
+      {% endif %}
+    {% endcapture %}
+    <div class="js-product-card-badges absolute top-0 left-0 z-[5] flex flex-wrap w-full gap-1 p-2 whitespace-normal">
+      {% for tag in product.tags %}
+        {% if tag contains 'badge_' %}
+          {% capture badge_content %}{{ tag | remove: "badge_" }}{% endcapture %}
+          {% render 'component__badge',
+            background: badge_background,
+            text: badge_foreground,
+            border: badge_foreground,
+            icon: '',
+            content: badge_content
+          %}
+        {% endif %}
+      {% endfor %}
+
+      {% if product.price < product.compare_at_price and hide_sale == false %}
+        {% capture badge_content %}Sale{% endcapture %}
+        {% render 'component__badge',
+          background: badge_background,
+          text: badge_foreground,
+          border: badge_foreground,
+          icon: '',
+          content: badge_content
+        %}
+      {% endif %}
+
+      {% if settings.stock_threshold %}
+        {% assign product_qty = 0 %}
+        {% for variant in product.variants %}
+          {% if variant.inventory_quantity > 0 %}
+            {% assign product_qty = product_qty | plus: variant.inventory_quantity %}
+          {% endif %}
+        {% endfor %}
+        {% if product_qty < settings.stock_threshold and product_qty > 0 %}
+          {%- capture badge -%}
+            {% comment %} <span class="inline-flex w-2 h-2 mr-2">
+              <span class="absolute inline-flex w-2 h-2 rounded-full animate-ping color__bg-primary"></span>
+              <span class="inline-flex w-2 h-2 rounded-full color__bg-primary"></span>
+            </span>
+            <span class="type--small">{{ product_qty }} {{ 'products.inventory.remaining' | t }}</span>
+          {% endcomment %}
+          Low Stock
+          {%- endcapture -%}
+          {% render 'component__badge',
+            background: badge_background,
+            text: badge_foreground,
+            border: badge_foreground,
+            icon: '',
+            content: badge
+          %}
+        {% endif %}
+      {% endif %}
+
+      {% unless product.available %}
+        {%- capture badge -%}
+          {{ 'products.general.sold_out' | t }}
+        {%- endcapture -%}
+        {% render 'component__badge',
+          background: badge_background,
+          text: badge_foreground,
+          border: badge_foreground,
+          icon: '',
+          content: badge
+        %}
+      {% endunless %}
+
+      {% assign metafield = product.metafields.custom.badge %}
+      {% if metafield %}
+        {% capture badge_content %}{{ metafield }}{% endcapture %}
+        {% render 'component__badge',
+          background: badge_background,
+          text: badge_foreground,
+          border: badge_foreground,
+          icon: '',
+          content: badge_content
+        %}
+      {% endif %}
+    </div>
+
+    {%- comment -%}
+      Image carousel — multi-image with desktop hover-arrows and mobile swipe + progress bar.
+      Each slide is its own <a> so touch-drag on the track scrolls without
+      triggering a link tap. Swatch-hover preview lives as an <a> overlay
+      on top of the track that's hidden by default.
+    {%- endcomment -%}
+    {%- assign _pc_images = product.images -%}
+    {%- assign _pc_max = 5 -%}
+    {%- assign _pc_count = _pc_images.size -%}
+    {%- if _pc_count > _pc_max -%}{%- assign _pc_count = _pc_max -%}{%- endif -%}
+    {%- if settings['thumbnails_object-sizing'] == 'cover' -%}
+      {%- assign _pc_object_cls = 'object-cover' -%}
+    {%- else -%}
+      {%- assign _pc_object_cls = 'object-contain' -%}
+    {%- endif -%}
+
+    <div
+      class="pc-media {% if settings.thumbnails_border_style == 'image' %}border--radius overflow-hidden{% endif %}"
+      data-pc-media
+      data-pc-base-href="{{ product.url }}"
+      data-pc-count="{{ _pc_count }}"
+      {%- if settings.product_card_hover_crossfade and _pc_count > 1 %}
+      data-pc-hover-src="{{ _pc_images[1] | image_url: width: 600 }}"
+      {%- endif %}
+    >
+      <div class="pc-media__frame {{ settings.thumbnails_ratio }} color__bg-overlay-1">
+        <div class="pc-media__track" data-pc-track>
+          {%- if _pc_count == 0 -%}
+            <a class="pc-media__slide" href="{{ product.url }}"></a>
+          {%- else -%}
+            {%- for _img in _pc_images limit: _pc_max -%}
+              <a class="pc-media__slide" href="{{ product.url }}">
+                <img
+                  class="pc-media__img w-full h-full {{ _pc_object_cls }}"
+                  src="{{ _img | image_url: width: 600 }}"
+                  srcset="{{ _img | image_url: width: 400 }} 400w, {{ _img | image_url: width: 600 }} 600w, {{ _img | image_url: width: 900 }} 900w, {{ _img | image_url: width: 1200 }} 1200w"
+                  sizes="(min-width: 768px) 33vw, 50vw"
+                  alt="{{ _img.alt | default: product.title | escape }}"
+                  loading="{% if forloop.first and _pc_eager_card %}eager{% else %}lazy{% endif %}"
+                  {% if forloop.first and _pc_eager_card %}fetchpriority="high"{% endif %}
+                  width="{{ _img.width }}"
+                  height="{{ _img.height }}"
+                >
+              </a>
+            {%- endfor -%}
+          {%- endif -%}
+        </div>
+      </div>
+
+      {%- comment -%} Swatch-hover preview overlay — its own <a> so clicks route to the hovered swatch's product {%- endcomment -%}
+      <a class="pc-media__preview-link" href="{{ product.url }}" data-pc-preview-link hidden>
+        <img class="pc-media__preview {{ _pc_object_cls }}" alt="" loading="lazy" data-pc-preview>
+      </a>
+
+      {%- comment -%} Desktop hover arrows (hidden on mobile & when only one image) {%- endcomment -%}
+      {% if _pc_count > 1 %}
+        <button type="button" class="pc-media__arrow pc-media__arrow--left" data-pc-prev aria-label="Previous image" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button type="button" class="pc-media__arrow pc-media__arrow--right" data-pc-next aria-label="Next image" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+
+        {%- comment -%} Mobile progress bar (hidden on desktop) {%- endcomment -%}
+        <div class="pc-media__progress" aria-hidden="true" data-pc-progress style="--pc-total: {{ _pc_count }};">
+          <div class="pc-media__progress-dot" data-pc-progress-dot></div>
+        </div>
+      {% endif %}
+
+      {%- comment -%}
+        Quick-add icon overlay — circular semi-transparent button on the
+        product image. Visibility (off / mobile / desktop / both) and
+        position (bottom-left / bottom-right) come from Theme settings →
+        Quick add. Single-variant products are added directly; multi-
+        variant products open the existing quick-add popup.
+      {%- endcomment -%}
+      {%- assign _qa_vis = settings.quick_add_icon_visibility | default: 'off' -%}
+      {%- if disable_quick_add == false and product.available and _qa_vis != 'off' -%}
+        {%- assign _qa_pos = settings.quick_add_icon_position | default: 'bottom-right' -%}
+        {%- assign _qa_size = settings.quick_add_icon_size | default: 48 -%}
+        {%- assign _qa_inset = settings.quick_add_icon_inset | default: 12 -%}
+        {%- assign _qa_alpha = settings.quick_add_icon_alpha | default: 70 | times: 1.0 | divided_by: 100.0 -%}
+        {%- assign _qa_vis_cls = '' -%}
+        {%- if _qa_vis == 'mobile' -%}{%- assign _qa_vis_cls = 'md:hidden' -%}
+        {%- elsif _qa_vis == 'desktop' -%}{%- assign _qa_vis_cls = 'hidden md:flex' -%}
+        {%- endif -%}
+        <button type="button"
+          class="pc-quick-add no-js--hide {{ _qa_vis_cls }}"
+          aria-label="{{ 'products.general.add_to_cart' | t }}"
+          title="{{ 'products.general.add_to_cart' | t }}"
+          data-cs-quick-add="true"
+          {% if product.variants.size == 1 %}
+            data-cs-quick-add-variant-id="{{ product.variants.first.id }}"
+            {% if product.tags contains 'sale' %}data-cs-quick-add-sale="true"{% endif %}
+          {% else %}
+            data-cs-quick-add-handle="{{ product.handle }}"
+          {% endif %}
+          @click.prevent.stop="
+            button_loading = true;
+            {% if product.variants.size == 1 %}
+              /* Open the drawer immediately instead of waiting for the
+                 sequential POST /cart/add.js → GET /cart.js round-trips
+                 to finish — the cart drawer already shows its own
+                 cart_loading spinner, and the items appear the moment
+                 updateCart() resolves. */
+              cart_drawer = true;
+              {% if product.tags contains 'sale' %}
+                addCartItem({{ product.variants.first.id }}, 0, 1, true, { 'SALE': 'ALL SALES FINAL ON ITEM' });
+              {% else %}
+                addCartItem({{ product.variants.first.id }}, 0, 1, true);
+              {% endif %}
+            {% else %}
+              fetchAndRenderQuickAdd('{{ product.handle }}', 'product');
+            {% endif %}
+            setTimeout(function(){ button_loading = false }, 250);
+          "
+          :class="{ 'pc-quick-add--loading': button_loading }"
+          style="
+            position: absolute;
+            bottom: {{ _qa_inset }}px;
+            {% if _qa_pos == 'bottom-left' %}left: {{ _qa_inset }}px;{% else %}right: {{ _qa_inset }}px;{% endif %}
+            z-index: 4;
+            width: {{ _qa_size }}px;
+            height: {{ _qa_size }}px;
+            border-radius: var(--thread-radius-pill);
+            background: rgba(255, 255, 255, {{ _qa_alpha }});
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 0;
+            padding: 0;
+            display: {% if _qa_vis == 'desktop' %}none{% else %}flex{% endif %};
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--thread-ink);
+            transition: background 0.2s ease, transform 0.15s ease;
+          ">
+          <svg width="{{ _qa_size | times: 0.5 | round }}" height="{{ _qa_size | times: 0.5 | round }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 7h14l-1 12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 7z"/>
+            <path d="M9 7V5a3 3 0 0 1 6 0v2"/>
+            <line x1="12" y1="11" x2="12" y2="17"/>
+            <line x1="9" y1="14" x2="15" y2="14"/>
+          </svg>
+        </button>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Swatch visibility toggle from Theme Settings > Product Cards > Swatches {%- endcomment -%}
+    {%- assign _sw_vis = settings.product_card_swatches_visibility | default: 'desktop' -%}
+    {%- assign _sw_show_desktop = false -%}
+    {%- assign _sw_show_mobile = false -%}
+    {%- if _sw_vis == 'both' -%}{%- assign _sw_show_desktop = true -%}{%- assign _sw_show_mobile = true -%}
+    {%- elsif _sw_vis == 'desktop' -%}{%- assign _sw_show_desktop = true -%}
+    {%- elsif _sw_vis == 'mobile' -%}{%- assign _sw_show_mobile = true -%}
+    {%- endif -%}
+
+    {%- comment -%} Content - Desktop only (OV-style: swatches > title > colors | price) {%- endcomment -%}
+    {% assign swatch_class = product.type | handle %}
+    {% assign is_collegiate_product = false %}
+    {% assign school_tag = '' %}
+    {% for tag in product.tags %}
+      {% assign tag_lowercase = tag | downcase | strip %}
+      {% if tag_lowercase == 'collegiate' %}{% assign is_collegiate_product = true %}{% endif %}
+      {% if tag_lowercase contains 'school_' %}{% assign school_tag = tag_lowercase | remove: 'school_' %}{% endif %}
+    {% endfor %}
+    {% if is_collegiate_product %}
+      {% assign swatch_class = 'collegiate-' | append: swatch_class %}
+      {% if school_tag != '' %}{% assign swatch_class = swatch_class | append: '-' | append: school_tag %}{% endif %}
+    {% endif %}
+
+    <div class="hidden md:block hover:no-underline no-underline whitespace-normal relative flex flex-col justify-end {{ settings.thumbnails_alignment }}"
+      style="padding: {{ settings.product_card_content_pad_v | default: 8 }}px {{ settings.product_card_content_pad_h | default: 8 }}px 0;">
+
+      {%- comment -%} 1. Swatches (desktop) — server-rendered carousel {%- endcomment -%}
+      {% if _sw_show_desktop %}
+        {% render 'component__swatch-list', product: product, breakpoint: 'desktop' %}
+      {% endif %}
+
+      {%- comment -%} 2. Product title {%- endcomment -%}
+      <h3 class="!leading-tight" aria-level="2"
+        style="margin: 0 0 {{ settings.product_card_title_mb | default: 4 }}px 0; padding: 0 {{ settings.product_card_title_pad_h | default: 0 }}px; font-family: var({{ settings.product_card_title_font | default: '--type-font-body-family' }}); font-size: {{ settings.product_card_title_size_desktop | default: 16 }}px; font-weight: {{ settings.product_card_title_weight | default: '500' }}; text-transform: {{ settings.product_card_title_case | default: 'none' }}; letter-spacing: {{ settings.product_card_title_ls | default: '0em' }};{% if settings.product_card_title_color %} color: {{ settings.product_card_title_color }};{% endif %}">
+        {{ _pi_title_text }}
+      </h3>
+
+      {%- comment -%} 2b. Product type — small muted line below the title {%- endcomment -%}
+      {%- if settings.product_card_show_type and _pi_type_text != blank -%}
+        <p class="!leading-tight"
+          style="margin: 0 0 {{ settings.product_card_type_mb | default: 4 }}px 0; padding: 0 {{ settings.product_card_title_pad_h | default: 0 }}px; font-family: var({{ settings.product_card_type_font | default: '--type-font-body-family' }}); font-size: {{ settings.product_card_type_size_desktop | default: 12 }}px; font-weight: {{ settings.product_card_type_weight | default: '400' }}; text-transform: {{ settings.product_card_type_case | default: 'none' }}; letter-spacing: {{ settings.product_card_type_ls | default: '0em' }};{% if settings.product_card_type_color != blank %} color: {{ settings.product_card_type_color }};{% else %} color: var(--thread-grey);{% endif %}">
+          {{ _pi_type_text }}
+        </p>
+      {%- endif -%}
+
+      {%- comment -%} 2c. Review stars {%- endcomment -%}
+      {{ _pi_rating_html }}
+
+      {%- comment -%} 3. Price {%- endcomment -%}
+      {%- assign _pf = settings.product_card_price_font | default: '--type-font-body-family' -%}
+      {%- assign _ps = settings.product_card_price_size | default: 12 -%}
+      {%- assign _pw = settings.product_card_price_weight | default: '700' -%}
+      {%- assign _pcase = settings.product_card_price_case | default: 'none' -%}
+      {%- assign _pls = settings.product_card_price_ls | default: '0em' -%}
+      {%- assign _pstyle = settings.product_card_price_style | default: 'normal' -%}
+      {%- assign _plh = settings.product_card_price_line_height | default: 120 -%}
+      {%- assign _popacity = settings.product_card_price_opacity | default: 75 | divided_by: 100.0 -%}
+      <div class="flex items-center gap-0" style="padding: 0 {{ settings.product_card_price_pad_h | default: 0 }}px; margin-bottom: {{ settings.product_card_price_mb | default: 0 }}px; font-family: var({{ _pf }}) !important; font-size: {{ _ps }}px !important; text-transform: {{ _pcase }}; letter-spacing: {{ _pls }}; font-style: {{ _pstyle }}; line-height: {{ _plh | divided_by: 100.0 }}; opacity: {{ _popacity }};">
+        <span style="font-family: var({{ _pf }}) !important; font-size: {{ _ps }}px !important; font-weight: {{ _pw }}; text-transform: {{ _pcase }}; letter-spacing: {{ _pls }}; font-style: {{ _pstyle }}; line-height: {{ _plh | divided_by: 100.0 }};{% if _is_on_sale %} color: {{ _sale_price_color }};{% elsif settings.product_card_price_color %} color: {{ settings.product_card_price_color }};{% endif %}"
+          data-product-id="{{ product.id }}" data-variant-id="{{ product.selected_or_first_available_variant.id }}">
+          {{ product.price_min | money }}
+        </span>
+        {% if product.compare_at_price_max > product.price_min %}
+          {%- assign _cf = settings.product_card_compare_font | default: '--type-font-body-family' -%}
+          {%- assign _cs = settings.product_card_compare_size | default: 12 -%}
+          {%- assign _cw = settings.product_card_compare_weight | default: '400' -%}
+          {%- assign _ccase = settings.product_card_compare_case | default: 'none' -%}
+          {%- assign _cls = settings.product_card_compare_ls | default: '0em' -%}
+          {%- assign _cstyle = settings.product_card_compare_style | default: 'normal' -%}
+          {%- assign _cop = settings.product_card_compare_opacity | default: 75 | divided_by: 100.0 -%}
+          {%- assign _cgap = settings.product_card_compare_gap | default: 4 -%}
+          {%- assign _cstrike = 'line-through' -%}
+          {%- unless settings.product_card_compare_strikethrough == false -%}{%- assign _cstrike = 'line-through' -%}{%- else -%}{%- assign _cstrike = 'none' -%}{%- endunless -%}
+          <span style="font-family: var({{ _cf }}) !important; font-size: {{ _cs }}px !important; font-weight: {{ _cw }}; text-transform: {{ _ccase }}; letter-spacing: {{ _cls }}; font-style: {{ _cstyle }}; line-height: {{ _plh | divided_by: 100.0 }}; text-decoration: {{ _cstrike }}; opacity: {{ _cop }}; margin-left: {{ _cgap }}px;{% if settings.product_card_compare_color %} color: {{ settings.product_card_compare_color }};{% endif %}"
+            data-product-id="{{ product.id }}" data-variant-id="{{ product.selected_or_first_available_variant.id }}">
+            {{ product.compare_at_price_max | money }}
+          </span>
+        {% endif %}
+      </div>
+    </div>
+
+    {%- comment -%} Content - Mobile only (OV-style: title > colors | price) {%- endcomment -%}
+    <div class="md:hidden hover:no-underline no-underline whitespace-normal relative flex flex-col justify-end"
+      style="padding: {{ settings.product_card_content_pad_v | default: 8 }}px {{ settings.product_card_content_pad_h | default: 8 }}px 0;">
+
+      {%- comment -%} 1. Swatches (mobile) — server-rendered carousel {%- endcomment -%}
+      {% if _sw_show_mobile %}
+        {% render 'component__swatch-list', product: product, breakpoint: 'mobile' %}
+      {% endif %}
+
+      {%- comment -%} 2. Product title {%- endcomment -%}
+      <h3 class="!leading-tight" aria-level="2"
+        style="margin: 0 0 {{ settings.product_card_title_mb | default: 4 }}px 0; padding: 0 {{ settings.product_card_title_pad_h | default: 0 }}px; font-family: var({{ settings.product_card_title_font | default: '--type-font-body-family' }}); font-size: {{ settings.product_card_title_size_mobile | default: 14 }}px; font-weight: {{ settings.product_card_title_weight | default: '500' }}; text-transform: {{ settings.product_card_title_case | default: 'none' }}; letter-spacing: {{ settings.product_card_title_ls | default: '0em' }}; word-break: break-word;{% if settings.product_card_title_color %} color: {{ settings.product_card_title_color }};{% endif %}">
+        {{ _pi_title_text }}
+      </h3>
+
+      {%- comment -%} 2b. Product type — small muted line below the title (mobile) {%- endcomment -%}
+      {%- if settings.product_card_show_type and _pi_type_text != blank -%}
+        <p class="!leading-tight"
+          style="margin: 0 0 {{ settings.product_card_type_mb | default: 4 }}px 0; padding: 0 {{ settings.product_card_title_pad_h | default: 0 }}px; font-family: var({{ settings.product_card_type_font | default: '--type-font-body-family' }}); font-size: {{ settings.product_card_type_size_mobile | default: 11 }}px; font-weight: {{ settings.product_card_type_weight | default: '400' }}; text-transform: {{ settings.product_card_type_case | default: 'none' }}; letter-spacing: {{ settings.product_card_type_ls | default: '0em' }};{% if settings.product_card_type_color != blank %} color: {{ settings.product_card_type_color }};{% else %} color: var(--thread-grey);{% endif %}">
+          {{ _pi_type_text }}
+        </p>
+      {%- endif -%}
+
+      {%- comment -%} 2c. Review stars (mobile) {%- endcomment -%}
+      {{ _pi_rating_html }}
+
+      {%- comment -%} 2. Colors | Price {%- endcomment -%}
+      {%- assign _pfm = settings.product_card_price_font | default: '--type-font-body-family' -%}
+      {%- assign _psm = settings.product_card_price_size_mobile | default: 12 -%}
+      {%- assign _pwm = settings.product_card_price_weight | default: '700' -%}
+      {%- assign _pcasem = settings.product_card_price_case | default: 'none' -%}
+      {%- assign _plsm = settings.product_card_price_ls | default: '0em' -%}
+      {%- assign _pstylem = settings.product_card_price_style | default: 'normal' -%}
+      {%- assign _plhm = settings.product_card_price_line_height | default: 120 -%}
+      {%- assign _popacitym = settings.product_card_price_opacity | default: 75 | divided_by: 100.0 -%}
+      <div class="flex items-center gap-0" style="padding: {{ settings.product_card_price_mobile_pad_v | default: 0 }}px {{ settings.product_card_price_mobile_pad_h | default: 0 }}px; font-family: var({{ _pfm }}) !important; font-size: {{ _psm }}px !important; text-transform: {{ _pcasem }}; letter-spacing: {{ _plsm }}; font-style: {{ _pstylem }}; line-height: {{ _plhm | divided_by: 100.0 }}; opacity: {{ _popacitym }};">
+        <span style="font-family: var({{ _pfm }}) !important; font-size: {{ _psm }}px !important; font-weight: {{ _pwm }}; text-transform: {{ _pcasem }}; letter-spacing: {{ _plsm }}; font-style: {{ _pstylem }}; line-height: {{ _plhm | divided_by: 100.0 }};{% if _is_on_sale %} color: {{ _sale_price_color }};{% elsif settings.product_card_price_color %} color: {{ settings.product_card_price_color }};{% endif %}"
+          data-product-id="{{ product.id }}" data-variant-id="{{ product.selected_or_first_available_variant.id }}">
+          {{ product.price_min | money }}
+        </span>
+        {% if product.compare_at_price_max > product.price_min %}
+          {%- assign _cfm = settings.product_card_compare_font | default: '--type-font-body-family' -%}
+          {%- assign _csm = settings.product_card_compare_size_mobile | default: 12 -%}
+          {%- assign _cwm = settings.product_card_compare_weight | default: '400' -%}
+          {%- assign _ccasem = settings.product_card_compare_case | default: 'none' -%}
+          {%- assign _clsm = settings.product_card_compare_ls | default: '0em' -%}
+          {%- assign _cstylem = settings.product_card_compare_style | default: 'normal' -%}
+          {%- assign _copm = settings.product_card_compare_opacity | default: 75 | divided_by: 100.0 -%}
+          {%- assign _cgapm = settings.product_card_compare_gap | default: 4 -%}
+          {%- assign _cstrikem = 'line-through' -%}
+          {%- unless settings.product_card_compare_strikethrough == false -%}{%- assign _cstrikem = 'line-through' -%}{%- else -%}{%- assign _cstrikem = 'none' -%}{%- endunless -%}
+          <span style="font-family: var({{ _cfm }}) !important; font-size: {{ _csm }}px !important; font-weight: {{ _cwm }}; text-transform: {{ _ccasem }}; letter-spacing: {{ _clsm }}; font-style: {{ _cstylem }}; line-height: {{ _plhm | divided_by: 100.0 }}; text-decoration: {{ _cstrikem }}; opacity: {{ _copm }}; margin-left: {{ _cgapm }}px;{% if settings.product_card_compare_color %} color: {{ settings.product_card_compare_color }};{% endif %}"
+            data-product-id="{{ product.id }}" data-variant-id="{{ product.selected_or_first_available_variant.id }}">
+            {{ product.compare_at_price_max | money }}
+          </span>
+        {% endif %}
+      </div>
+    </div>
+
+    {%- comment -%}
+      Quick add popup target. The ID must match the lookup in
+      fetchAndRenderQuickAdd(handle, 'product') (main-dQpL3fW1.js),
+      which looks for js:quickAdd-product-{handle}. Using section.id
+      here meant the lookup never matched — single-variant products
+      worked because the document-level handler short-circuits to
+      addCartItem(), but multi-variant products (e.g. laptop sleeves
+      with size options) silently did nothing. The modal is fixed
+      position / inset-0, so duplicate IDs across cards on the same
+      page are not a visual problem — only one container ever
+      receives the popup HTML, but it overlays the whole viewport.
+    {%- endcomment -%}
+    <div id="js:quickAdd-product-{{ product.handle }}"></div>
+  </div>
+{% endunless %}

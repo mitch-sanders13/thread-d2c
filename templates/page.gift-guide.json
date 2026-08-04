@@ -1,0 +1,707 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "page__main",
+      "disabled": true,
+      "settings": {
+        "color_scheme": "color__bg-body color__text",
+        "layout_horizontal": "window--wide"
+      }
+    },
+    "banner_WD7fpB": {
+      "type": "banner",
+      "settings": {
+        "url": "",
+        "image_background_desktop": "shopify://shop_images/holiday24_giftguide.jpg",
+        "image_background_mobile": "shopify://shop_images/mobile_e148e056-cc7f-47c2-a613-c1a74d5b8717.jpg",
+        "show_video_background_mobile": true,
+        "show_entire_image": false,
+        "enable_lazy_loading": false,
+        "color_scheme": "color__bg-overlay-1 color__text",
+        "color_text": "",
+        "color_border": "color__border-divider-1",
+        "enable_gradient": false,
+        "style_border": "",
+        "layout_y_spacing": "min-h-[450px] md:min-h-[550px]",
+        "layout_y_alignment": "items-end",
+        "layout_x_alignment": "justify-start",
+        "visibility": ""
+      }
+    },
+    "slideshow_yXfUhV": {
+      "type": "slideshow",
+      "blocks": {
+        "slide_j7tiKJ": {
+          "type": "slide",
+          "settings": {
+            "image_background_desktop": "shopify://shop_images/holiday24_giftguide.jpg",
+            "image_background_mobile": "shopify://shop_images/mobile_e148e056-cc7f-47c2-a613-c1a74d5b8717.jpg",
+            "show_entire_image": false,
+            "show_video_background_mobile": false,
+            "heading": "",
+            "content": "",
+            "button_color": "btn",
+            "button_label": "",
+            "button_url": "/collections/all",
+            "secondary_button_color": "btn btn--neutral",
+            "secondary_button_label": "",
+            "secondary_button_url": "/collections/all"
+          }
+        }
+      },
+      "block_order": [
+        "slide_j7tiKJ"
+      ],
+      "disabled": true,
+      "settings": {
+        "color_scheme": "color__bg-overlay-1 color__text",
+        "color_text": "",
+        "color_border": "color__border-divider-1",
+        "enable_gradient": false,
+        "style_border": "border--b-width",
+        "layout_y_spacing": "min-h-[450px] md:min-h-[550px]",
+        "layout_y_alignment": "items-end",
+        "layout_x_alignment": "justify-start",
+        "visibility": "",
+        "auto_scroll_delay": 5,
+        "auto_scroll": false
+      }
+    },
+    "content_grid_alt_an3CY7": {
+      "type": "content-grid-alt",
+      "blocks": {
+        "content_mbVYAV": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "content2": "",
+            "show_image_above": true,
+            "button_label": "SHOP UTILITY TOTES",
+            "button_url": "shopify://collections/utility-tote-bags",
+            "image_featured": "shopify://shop_images/webite_utility1.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": false,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "content_aQwjmn": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "content2": "",
+            "show_image_above": true,
+            "button_label": "SHOP SLOUCHY BAGS",
+            "button_url": "shopify://collections/large-slouchy-shoulder-bags",
+            "image_featured": "shopify://shop_images/slouchy_pdp_green.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": false,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "content_BRzJCN": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "content2": "",
+            "show_image_above": true,
+            "button_label": "SHOP VERTICAL WALLETS",
+            "button_url": "shopify://collections/vertical-leather-wallets",
+            "image_featured": "shopify://shop_images/thread-blossom-920712.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": false,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        }
+      },
+      "block_order": [
+        "content_mbVYAV",
+        "content_aQwjmn",
+        "content_BRzJCN"
+      ],
+      "settings": {
+        "heading": "Gift Guide",
+        "content": "<p><strong>BEST SELLERS</strong></p>",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 0,
+        "spacing_bottom": 20,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--b-width",
+        "row_size_desktop": "md:grid-cols-3",
+        "row_size_mobile": "grid-cols-1",
+        "layout_x_alignment": "justify-between",
+        "layout_horizontal": "window--full",
+        "visibility": ""
+      }
+    },
+    "content_grid_alt_fj4HKy": {
+      "type": "content-grid-alt",
+      "blocks": {
+        "content_bgRTJy": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "content2": "",
+            "show_image_above": true,
+            "button_label": "Shop Retro Bifold Wallets",
+            "button_url": "shopify://collections/velcro-bifold-wallets",
+            "image_featured": "shopify://shop_images/594A9864.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": false,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "content_7idmCQ": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "content2": "",
+            "show_image_above": true,
+            "button_label": "Shop Vertical Wallets",
+            "button_url": "shopify://collections/vertical-leather-wallets",
+            "image_featured": "shopify://shop_images/gifts_for_him_01.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": false,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "content_kewMxB": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "content2": "",
+            "show_image_above": true,
+            "button_label": "shop Keychain Clips",
+            "button_url": "shopify://collections/keychain-clips",
+            "image_featured": "shopify://shop_images/PDP_B2S_SYCAMORE_KeychainClip.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": false,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "content_GBTVP9": {
+          "type": "content",
+          "disabled": true,
+          "settings": {
+            "heading": "Block heading",
+            "content": "<p>Describe a product, make announcements, or inform customers about a promotion.</p>",
+            "content2": "<p>Describe a product, make announcements, or inform customers about a promotion.</p>",
+            "show_image_above": true,
+            "button_label": "Button",
+            "button_url": "shopify://collections/all",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 80,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "color__border-divider-1",
+            "color_text": "color__text",
+            "color_button": "btn btn--secondary",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": true,
+            "enable_shift": true,
+            "visibility": ""
+          }
+        }
+      },
+      "block_order": [
+        "content_bgRTJy",
+        "content_7idmCQ",
+        "content_kewMxB",
+        "content_GBTVP9"
+      ],
+      "settings": {
+        "heading": "",
+        "content": "<h2><strong>GIFTS FOR HIM</strong></h2>",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 0,
+        "spacing_bottom": 20,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--b-width",
+        "row_size_desktop": "md:grid-cols-3",
+        "row_size_mobile": "grid-cols-1",
+        "layout_x_alignment": "justify-between",
+        "layout_horizontal": "window--full",
+        "visibility": ""
+      }
+    },
+    "content_grid_alt_7L39XC": {
+      "type": "content-grid-alt",
+      "blocks": {
+        "content_7hbBeT": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "content2": "",
+            "show_image_above": true,
+            "button_label": "SHOP FP MOVEMENT",
+            "button_url": "shopify://collections/fp-movement",
+            "image_featured": "shopify://shop_images/fp-movement-mobile.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": false,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "content_ajFm8z": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "content2": "",
+            "show_image_above": true,
+            "button_label": "SHOP SLOUCHY BAGS",
+            "button_url": "shopify://collections/large-slouchy-shoulder-bags",
+            "image_featured": "shopify://shop_images/Untitled-3_4de8d17c-bb43-4e85-8a2c-2ee1721f0b2c.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": false,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "content_cUcMbV": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "content2": "",
+            "show_image_above": true,
+            "button_label": "SHOP ZIPPER WALLETS",
+            "button_url": "shopify://collections/leather-zip-wallets",
+            "image_featured": "shopify://shop_images/zipper_wallet_offwhite.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": false,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        }
+      },
+      "block_order": [
+        "content_7hbBeT",
+        "content_ajFm8z",
+        "content_cUcMbV"
+      ],
+      "settings": {
+        "heading": "",
+        "content": "<h2><strong>GIFTS FOR HER</strong></h2>",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 0,
+        "spacing_bottom": 20,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--b-width",
+        "row_size_desktop": "md:grid-cols-3",
+        "row_size_mobile": "grid-cols-1",
+        "layout_x_alignment": "justify-between",
+        "layout_horizontal": "window--full",
+        "visibility": ""
+      }
+    },
+    "content_grid_alt_3WR3gy": {
+      "type": "content-grid-alt",
+      "blocks": {
+        "content_nLBRDj": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "content2": "",
+            "show_image_above": true,
+            "button_label": "SHOP LIP BALM HOLDERS",
+            "button_url": "shopify://collections/chapstick-holder-keychains",
+            "image_featured": "shopify://shop_images/Stocking_Stuffers_-_elastic_wallet.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": false,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "content_7DGQxJ": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "content2": "",
+            "show_image_above": true,
+            "button_label": "SHOP ELASTIC WALLETS",
+            "button_url": "/",
+            "image_featured": "shopify://shop_images/Stocking_Stuffers_-_lip_balm.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": false,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "content_WYnJmb": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "content2": "",
+            "show_image_above": true,
+            "button_label": "SHOP WRIST LANYARDS",
+            "button_url": "shopify://collections/wristlet-keychains",
+            "image_featured": "shopify://shop_images/Wrist-2.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": false,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        }
+      },
+      "block_order": [
+        "content_nLBRDj",
+        "content_7DGQxJ",
+        "content_WYnJmb"
+      ],
+      "settings": {
+        "heading": "",
+        "content": "<h2><strong>STOCKING STUFFERS</strong></h2>",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 0,
+        "spacing_bottom": 20,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--b-width",
+        "row_size_desktop": "md:grid-cols-3",
+        "row_size_mobile": "grid-cols-1",
+        "layout_x_alignment": "justify-between",
+        "layout_horizontal": "window--full",
+        "visibility": ""
+      }
+    },
+    "content_grid_alt_hqWztN": {
+      "type": "content-grid-alt",
+      "blocks": {
+        "content_mCpcFz": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "content2": "",
+            "show_image_above": true,
+            "button_label": "SHOP BACKPACKS",
+            "button_url": "shopify://collections/backpacks",
+            "image_featured": "shopify://shop_images/jupiter_backpack_56e06f08-ffad-4994-99a8-653488c92fb7.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": false,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "content_6eWr6T": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "content2": "",
+            "show_image_above": true,
+            "button_label": "SHOP LAPTOP SLEEVES",
+            "button_url": "shopify://collections/laptop-sleeves",
+            "image_featured": "shopify://shop_images/Untitled-3_e7dc9ad8-190f-4cfa-961c-90418e269cd0.jpg",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": false,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        },
+        "content_rDCdxb": {
+          "type": "content",
+          "settings": {
+            "heading": "",
+            "content": "",
+            "content2": "",
+            "show_image_above": true,
+            "button_label": "SHOP ORGANIZING POUCHES",
+            "button_url": "shopify://collections/organizing-pouches",
+            "image_featured": "shopify://shop_images/Solids_organizingpouches.png",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "enable_linked": true,
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "color_scheme": "color__bg-body color__text",
+            "color_border": "!color__border-transparent",
+            "color_text": "color__text",
+            "color_button": "btn",
+            "enable_gradient": false,
+            "layout_y_alignment": "items-end",
+            "layout_x_alignment": "",
+            "layout_row_span": "row-span-1",
+            "layout_col_span": "col-span-1 md: md:col-span-1",
+            "enable_padding": false,
+            "enable_shift": false,
+            "visibility": ""
+          }
+        }
+      },
+      "block_order": [
+        "content_mCpcFz",
+        "content_6eWr6T",
+        "content_rDCdxb"
+      ],
+      "disabled": true,
+      "settings": {
+        "heading": "",
+        "content": "<h2><strong>TRAVEL SUPPLIES</strong></h2>",
+        "button_label": "",
+        "button_url": "",
+        "spacing_top": 0,
+        "spacing_bottom": 100,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn btn--secondary",
+        "style_border": "border--b-width",
+        "row_size_desktop": "md:grid-cols-3",
+        "row_size_mobile": "grid-cols-1",
+        "layout_x_alignment": "justify-between",
+        "layout_horizontal": "window--full",
+        "visibility": ""
+      }
+    }
+  },
+  "order": [
+    "main",
+    "banner_WD7fpB",
+    "slideshow_yXfUhV",
+    "content_grid_alt_an3CY7",
+    "content_grid_alt_fj4HKy",
+    "content_grid_alt_7L39XC",
+    "content_grid_alt_3WR3gy",
+    "content_grid_alt_hqWztN"
+  ]
+}

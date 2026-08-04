@@ -1,0 +1,59 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "f5fdc79f-23bd-47e1-937f-992523067165": {
+      "type": "text",
+      "settings": {
+        "heading": "",
+        "content": "<h1>REVIEWS<\/h1>",
+        "button_label": "SHOP NOW",
+        "button_url": "shopify:\/\/collections\/all",
+        "spacing_top": 100,
+        "spacing_bottom": 0,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn--minimal-dark",
+        "style_border": "",
+        "layout_x_alignment": "text-center justify-center",
+        "content_x_alignment": "text-left",
+        "visibility": ""
+      }
+    },
+    "16894939765b4e40bc": {
+      "type": "apps",
+      "blocks": {
+        "cacd7e34-5605-4eb4-804e-c60e67d16928": {
+          "type": "shopify:\/\/apps\/okendo\/blocks\/reviews-widget\/bb689e69-ea70-4661-8fb7-ad24a2e23c29",
+          "settings": {
+            "product": "",
+            "widget_type": "combined_widget"
+          }
+        }
+      },
+      "block_order": [
+        "cacd7e34-5605-4eb4-804e-c60e67d16928"
+      ],
+      "settings": {
+        "spacing_top": 100,
+        "spacing_bottom": 100,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "style_border": "border--b-width",
+        "layout_horizontal": "window",
+        "layout_padding": false
+      }
+    }
+  },
+  "order": [
+    "f5fdc79f-23bd-47e1-937f-992523067165",
+    "16894939765b4e40bc"
+  ]
+}

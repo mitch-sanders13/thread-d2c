@@ -1,0 +1,1323 @@
+<!-- sections/banner.liquid -->
+{% comment %}
+  Banner section — rebuilt v3.
+  Fixes:
+  - Image always visible behind content (z-index corrected)
+  - Buttons block no longer breaks layout
+  - Font vars fixed to match theme CSS vars
+  - Spacing range expanded to 200px, negative top offset added
+  - Left/right padding per block
+  - Custom color picker per text block and per button
+  - layout_x_offset added for left/right block nudge
+{% endcomment %}
+
+{% if section.settings.url %}<a{% else %}<section{% endif %}
+  href="{{ section.settings.url }}"
+  class="relative overflow-hidden flex items-center justify-center hover:opacity-100 no-underline hover:no-underline
+  {{ section.settings.visibility }}
+  {{ section.settings.color_scheme }}
+  {{ section.settings.color_border }}
+  {{ section.settings.style_border }}{% if section.settings.use_global_spacing == 'global' %} spacing-global{% elsif section.settings.use_global_spacing == 'global-sides' %} spacing-sides{% endif %}"
+  {% if section.settings.url %}aria-label="Link: {{ section.settings.url }}"{% endif %}>
+
+  {% assign lazy_loading = 'eager' %}
+  {% if section.settings.enable_lazy_loading %}{% assign lazy_loading = 'lazy' %}{% endif %}
+  {% if lazy_loading == 'eager' %}
+    {% assign fetch_priority = 'high' %}
+  {% else %}
+    {% assign fetch_priority = 'auto' %}
+  {% endif %}
+
+  {% comment %} Background image — z-index 0, sits behind everything {% endcomment %}
+  {% if section.settings.image_background_desktop %}
+    {% if section.settings.show_entire_image %}
+      {{ section.settings.image_background_desktop | image_url: width: 5760 | image_tag:
+        class: 'hidden md:block w-full h-full absolute inset-0 object-contain z-0',
+        loading: lazy_loading, fetchpriority: fetch_priority, decoding: 'async' }}
+    {% else %}
+      {{ section.settings.image_background_desktop | image_url: width: 5760 | image_tag:
+        class: 'hidden md:block w-full h-full absolute inset-0 object-cover z-0',
+        loading: lazy_loading, fetchpriority: fetch_priority, decoding: 'async' }}
+    {% endif %}
+  {% endif %}
+
+  {% if section.settings.image_background_mobile %}
+    {{ section.settings.image_background_mobile | image_url: width: 900 | image_tag:
+      class: 'md:hidden w-full h-full absolute inset-0 object-cover z-0',
+      loading: lazy_loading, fetchpriority: fetch_priority, decoding: 'async' }}
+  {% elsif section.settings.image_background_desktop %}
+    {{ section.settings.image_background_desktop | image_url: width: 900 | image_tag:
+      class: 'md:hidden w-full h-full absolute inset-0 object-cover z-0',
+      loading: lazy_loading, fetchpriority: fetch_priority, decoding: 'async' }}
+  {% endif %}
+
+  {% comment %}
+    Background video — performance-optimized
+    - Separate desktop/mobile videos; only the visible one downloads bytes
+    - muted + playsinline so autoplay works on iOS without audio
+    - preload="metadata" (just headers), posters provide instant paint
+  {% endcomment %}
+  {% assign _video_mobile = section.settings.video_mobile | default: section.settings.video_background %}
+
+  {% if section.settings.video_background != blank %}
+    <video
+      class="hidden md:block absolute inset-0 w-full h-full object-cover z-0"
+      autoplay loop muted playsinline preload="metadata"
+      {% if section.settings.video_poster_desktop != blank %}
+        poster="{{ section.settings.video_poster_desktop | image_url: width: 1920 }}"
+      {% endif %}
+      aria-hidden="true">
+      {% for src in section.settings.video_background.sources %}
+        <source src="{{ src.url }}" type="{{ src.mime_type }}">
+      {% endfor %}
+    </video>
+  {% endif %}
+
+  {% if _video_mobile != blank and section.settings.show_video_background_mobile %}
+    <video
+      class="md:hidden block absolute inset-0 w-full h-full object-cover z-0"
+      autoplay loop muted playsinline preload="metadata"
+      {% if section.settings.video_poster_mobile != blank %}
+        poster="{{ section.settings.video_poster_mobile | image_url: width: 800 }}"
+      {% elsif section.settings.video_poster_desktop != blank %}
+        poster="{{ section.settings.video_poster_desktop | image_url: width: 800 }}"
+      {% endif %}
+      aria-hidden="true">
+      {% for src in _video_mobile.sources %}
+        <source src="{{ src.url }}" type="{{ src.mime_type }}">
+      {% endfor %}
+    </video>
+  {% endif %}
+
+  {% comment %} Gradient overlay — z-index 1, above image but below content {% endcomment %}
+  {% if section.settings.enable_gradient %}
+    {%- assign _grad_alpha = section.settings.gradient_opacity | default: 40 | divided_by: 100.0 -%}
+    {%- assign _grad_color = section.settings.gradient_color | default: '#000000' -%}
+    <div class="absolute inset-0 z-10"
+      style="background: linear-gradient(to bottom, {{ _grad_color | color_modify: 'alpha', 0 }}, {{ _grad_color | color_modify: 'alpha', _grad_alpha }});"></div>
+  {% endif %}
+
+  {% comment %} Content wrapper — z-index 20, always above image and gradient {% endcomment %}
+  <div class="relative z-20 w-full"
+    style="
+      {% if section.settings.layout_y_spacing == 'custom' %}
+        min-height: {{ section.settings.custom_height_px }}px;
+      {% endif %}
+    ">
+
+    <div class="w-full flex flex-row flex-wrap py-8
+      {{ section.settings.layout_horizontal }}
+      {{ section.settings.layout_x_alignment }}
+      {{ section.settings.layout_y_alignment }}
+      {% unless section.settings.layout_y_spacing == 'custom' %}{{ section.settings.layout_y_spacing }}{% endunless %}"
+      style="
+        {% if section.settings.layout_y_spacing == 'custom' %}
+          min-height: {{ section.settings.custom_height_px }}px;
+        {% endif %}
+        {% if section.settings.content_offset_top > 0 %}padding-top:{{ section.settings.content_offset_top }}px;{% endif %}
+        {% if section.settings.content_offset_bottom > 0 %}padding-bottom:{{ section.settings.content_offset_bottom }}px;{% endif %}
+      ">
+
+      {% comment %} Check if any blocks use beside layout {% endcomment %}
+      {% assign has_beside = false %}
+      {% for block in section.blocks %}
+        {% if block.settings.block_layout == 'beside' %}{% assign has_beside = true %}{% endif %}
+      {% endfor %}
+
+      {% if has_beside %}
+        {% comment %} Two-column layout {% endcomment %}
+        <div class="flex flex-col md:flex-row w-full gap-8">
+
+          <div class="flex flex-col gap-2
+            {% if section.settings.layout_x_alignment contains 'text-center' %}items-center{% endif %}
+            {% if section.settings.layout_x_alignment contains 'text-right' %}items-end{% endif %}">
+            {% for block in section.blocks %}
+              {% unless block.settings.block_layout == 'beside' %}
+                {% render 'banner__block', block: block, section: section %}
+              {% endunless %}
+            {% endfor %}
+          </div>
+
+          <div class="flex flex-col gap-2">
+            {% for block in section.blocks %}
+              {% if block.settings.block_layout == 'beside' %}
+                {% render 'banner__block', block: block, section: section %}
+              {% endif %}
+            {% endfor %}
+          </div>
+
+        </div>
+
+      {% else %}
+        {% comment %} Single column {% endcomment %}
+        <div class="flex flex-col gap-2
+          {% if section.settings.layout_x_alignment contains 'text-center' %}items-center{% endif %}
+          {% if section.settings.layout_x_alignment contains 'text-right' %}items-end{% endif %}">
+
+          {% for block in section.blocks %}
+            {% if block.type == 'button' %}
+              {% comment %} Start a button row if this is the first button block in a sequence {% endcomment %}
+              {% assign prev_index = forloop.index0 | minus: 1 %}
+              {% assign is_first_button = true %}
+              {% if prev_index >= 0 %}
+                {% assign prev_block = section.blocks[prev_index] %}
+                {% if prev_block.type == 'button' %}
+                  {% assign is_first_button = false %}
+                {% endif %}
+              {% endif %}
+
+              {% if is_first_button %}
+                <div class="flex flex-wrap gap-2"
+                  style="padding-top:{{ block.settings.spacing_top }}px;padding-bottom:{{ block.settings.spacing_bottom }}px;padding-left:{{ block.settings.spacing_left }}px;padding-right:{{ block.settings.spacing_right }}px;">
+              {% endif %}
+
+              {% render 'banner__block', block: block, section: section %}
+
+              {% comment %} Close the button row if the next block isn't a button {% endcomment %}
+              {% assign next_index = forloop.index %}
+              {% assign is_last_button = true %}
+              {% if next_index < section.blocks.size %}
+                {% assign next_block = section.blocks[next_index] %}
+                {% if next_block.type == 'button' %}
+                  {% assign is_last_button = false %}
+                {% endif %}
+              {% endif %}
+
+              {% if is_last_button %}
+                </div>
+              {% endif %}
+            {% else %}
+              {% render 'banner__block', block: block, section: section %}
+            {% endif %}
+          {% endfor %}
+
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+{% if section.settings.url %}</a>{% else %}</section>{% endif %}
+
+{% schema %}
+{
+  "name": "Banner",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "url",
+      "id": "url",
+      "label": "Banner link URL",
+      "info": "Makes the entire banner clickable. Leave blank to use button blocks instead."
+    },
+    {
+      "type": "image_picker",
+      "id": "image_background_desktop",
+      "label": "Desktop image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_background_mobile",
+      "label": "Mobile image",
+      "info": "Defaults to desktop image if blank."
+    },
+    {
+      "type": "video",
+      "id": "video_background",
+      "label": "Desktop background video",
+      "info": "Upload an MP4. Audio is stripped automatically — videos are muted for autoplay."
+    },
+    {
+      "type": "image_picker",
+      "id": "video_poster_desktop",
+      "label": "Desktop video poster",
+      "info": "Shown instantly while the video buffers. Highly recommended — use a frame from the video."
+    },
+    {
+      "type": "video",
+      "id": "video_mobile",
+      "label": "Mobile background video",
+      "info": "Optional. Defaults to the desktop video if blank. Use a smaller, vertical-optimized file for faster mobile loading."
+    },
+    {
+      "type": "image_picker",
+      "id": "video_poster_mobile",
+      "label": "Mobile video poster",
+      "info": "Falls back to desktop poster if blank."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_video_background_mobile",
+      "label": "Show video on mobile",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_entire_image",
+      "label": "Show entire image (object-contain)",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_lazy_loading",
+      "label": "Lazy load image",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Color"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Background",
+      "options": [
+        { "value": "color__bg-body color__text", "label": "Body" },
+        { "value": "color__bg-neutral color__text", "label": "Neutral" },
+        { "value": "color__bg-overlay-1 color__text", "label": "Accent 1" },
+        { "value": "color__bg-overlay-2 color__text", "label": "Accent 2" },
+        { "value": "color__bg-overlay-3 color__text", "label": "Accent 3" },
+        { "value": "color__bg-primary color__primary", "label": "Primary" },
+        { "value": "color__bg-secondary color__secondary", "label": "Secondary" },
+        { "value": "color__bg-tertiary color__tertiary", "label": "Tertiary" }
+      ],
+      "default": "color__bg-overlay-1 color__text"
+    },
+    {
+      "type": "select",
+      "id": "color_text",
+      "label": "Text color",
+      "options": [
+        { "value": "", "label": "Default" },
+        { "value": "color__light", "label": "Light" },
+        { "value": "color__dark", "label": "Dark" }
+      ],
+      "default": ""
+    },
+    {
+      "type": "select",
+      "id": "color_border",
+      "label": "Border color",
+      "options": [
+        { "value": "color__border-divider-1", "label": "Subtle" },
+        { "value": "color__border-selected-1", "label": "Strong" },
+        { "value": "!color__border-transparent", "label": "None" }
+      ],
+      "default": "!color__border-transparent"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_gradient",
+      "label": "Use gradient overlay",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "gradient_color",
+      "label": "Gradient color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "gradient_opacity",
+      "label": "Gradient strength (%)",
+      "info": "Opacity at the bottom edge — the gradient always fades to fully transparent at the top.",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "select",
+      "id": "style_border",
+      "label": "Border position",
+      "options": [
+        { "value": "", "label": "None" },
+        { "value": "border--t-width", "label": "Top" },
+        { "value": "border--b-width", "label": "Bottom" },
+        { "value": "border--b-width border--t-width", "label": "Top and bottom" }
+      ],
+      "default": ""
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout_horizontal",
+      "label": "Horizontal margin",
+      "options": [
+        { "value": "window--narrow", "label": "Narrow" },
+        { "value": "window", "label": "Standard" },
+        { "value": "window--wide", "label": "Wide" },
+        { "value": "window--full", "label": "Full width" },
+        { "value": "window--edge", "label": "Edge to edge (no padding)" }
+      ],
+      "default": "window--full"
+    },
+    {
+      "type": "select",
+      "id": "layout_y_spacing",
+      "label": "Vertical size",
+      "options": [
+        { "value": "min-h-[200px] md:min-h-[300px]", "label": "XS" },
+        { "value": "min-h-[300px] md:min-h-[400px]", "label": "Small" },
+        { "value": "min-h-[400px] md:min-h-[500px]", "label": "Medium" },
+        { "value": "min-h-[500px] md:min-h-[650px]", "label": "Large" },
+        { "value": "min-h-[650px] md:min-h-[800px]", "label": "XL" },
+        { "value": "min-h-[800px] md:min-h-[1000px]", "label": "2XL" },
+        { "value": "custom", "label": "Custom (use field below)" }
+      ],
+      "default": "min-h-[400px] md:min-h-[500px]"
+    },
+    {
+      "type": "range",
+      "id": "custom_height_px",
+      "label": "Custom height (px)",
+      "info": "Only used when Vertical size is set to Custom.",
+      "min": 100,
+      "max": 1100,
+      "step": 10,
+      "default": 500
+    },
+    {
+      "type": "select",
+      "id": "layout_y_alignment",
+      "label": "Vertical alignment",
+      "options": [
+        { "value": "items-start", "label": "Top" },
+        { "value": "items-center", "label": "Middle" },
+        { "value": "items-end", "label": "Bottom" }
+      ],
+      "default": "items-end"
+    },
+    {
+      "type": "range",
+      "id": "content_offset_top",
+      "label": "Content push from top (px)",
+      "info": "Adds padding above block group. Combine with Top alignment.",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "content_offset_bottom",
+      "label": "Content push from bottom (px)",
+      "info": "Adds padding below block group. Combine with Bottom alignment.",
+      "min": 0,
+      "max": 500,
+      "step": 5,
+      "default": 40
+    },
+    {
+      "type": "select",
+      "id": "layout_x_alignment",
+      "label": "Horizontal alignment",
+      "options": [
+        { "value": "justify-start", "label": "Left" },
+        { "value": "justify-center text-center", "label": "Center" },
+        { "value": "justify-end text-right", "label": "Right" }
+      ],
+      "default": "justify-start"
+    },
+    {
+      "type": "header",
+      "content": "Display"
+    },
+    {
+      "type": "select",
+      "id": "use_global_spacing",
+      "label": "Spacing mode",
+      "options": [
+        { "value": "global", "label": "↳ Use global spacing" },
+        { "value": "global-sides", "label": "↳ Use global sides only" },
+        { "value": "custom", "label": "Custom (use settings below)" }
+      ],
+      "default": "custom",
+      "info": "Global spacing is set in Theme Settings > Typography tokens"
+    },
+    {
+      "type": "select",
+      "id": "visibility",
+      "label": "Visibility",
+      "options": [
+        { "value": "", "label": "Show on all devices" },
+        { "value": "md:hidden", "label": "Mobile only" },
+        { "value": "hidden md:block", "label": "Desktop only" }
+      ],
+      "default": ""
+    }
+  ],
+  "blocks": [
+    {
+      "type": "eyebrow",
+      "name": "Eyebrow label",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "text",
+          "id": "content",
+          "label": "Text",
+          "default": { "en": "Season 01 · Drop 1" }
+        },
+        {
+          "type": "header",
+          "content": "Layout"
+        },
+        {
+          "type": "select",
+          "id": "block_layout",
+          "label": "Column",
+          "options": [
+            { "value": "stack", "label": "Main column" },
+            { "value": "beside", "label": "Right column" }
+          ],
+          "default": "stack"
+        },
+        {
+          "type": "range",
+          "id": "spacing_top",
+          "label": "Padding top (px)",
+          "min": 0, "max": 200, "step": 2, "default": 0
+        },
+        {
+          "type": "range",
+          "id": "spacing_bottom",
+          "label": "Padding bottom (px)",
+          "min": 0, "max": 200, "step": 2, "default": 4
+        },
+        {
+          "type": "range",
+          "id": "spacing_left",
+          "label": "Padding left (px)",
+          "min": 0, "max": 200, "step": 2, "default": 0
+        },
+        {
+          "type": "range",
+          "id": "spacing_right",
+          "label": "Padding right (px)",
+          "min": 0, "max": 200, "step": 2, "default": 0
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "select",
+          "id": "font_family",
+          "label": "Font family",
+          "options": [
+            { "value": "token-display", "label": "↳ Use theme token (Display)" },
+            { "value": "token-h1", "label": "↳ Use theme token (H1)" },
+            { "value": "token-h2", "label": "↳ Use theme token (H2)" },
+            { "value": "token-h3", "label": "↳ Use theme token (H3)" },
+            { "value": "token-body", "label": "↳ Use theme token (Body)" },
+            { "value": "token-small", "label": "↳ Use theme token (Small)" },
+            { "value": "token-label", "label": "↳ Use theme token (Label)" },
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "body", "label": "Forma DJR" },
+            { "value": "heading", "label": "PP Right Grotesk" },
+            { "value": "handwritten", "label": "Thread Handwritten" }
+          ],
+          "default": "body"
+        },
+        {
+          "type": "text",
+          "id": "font_family_custom",
+          "label": "Custom Google Font",
+          "info": "Type any Google Font name e.g. 'Playfair Display'. Overrides selection above.",
+          "placeholder": "e.g. Playfair Display"
+        },
+        {
+          "type": "range",
+          "id": "font_size",
+          "label": "Font size (px)",
+          "min": 8, "max": 48, "step": 1, "default": 11
+        },
+        {
+          "type": "select",
+          "id": "font_weight",
+          "label": "Font weight",
+          "options": [
+            { "value": "300", "label": "Light" },
+            { "value": "400", "label": "Regular" },
+            { "value": "600", "label": "Semibold" },
+            { "value": "700", "label": "Bold" }
+          ],
+          "default": "400"
+        },
+        {
+          "type": "select",
+          "id": "text_transform",
+          "label": "Text case",
+          "options": [
+            { "value": "none", "label": "Normal" },
+            { "value": "uppercase", "label": "UPPERCASE" },
+            { "value": "lowercase", "label": "lowercase" },
+            { "value": "capitalize", "label": "Capitalize" }
+          ],
+          "default": "uppercase"
+        },
+        {
+          "type": "select",
+          "id": "letter_spacing",
+          "label": "Letter spacing",
+          "options": [
+            { "value": "0em", "label": "None" },
+            { "value": "0.05em", "label": "Tight" },
+            { "value": "0.085em", "label": "Brand (0.085em)" },
+            { "value": "0.10em", "label": "Normal" },
+            { "value": "0.16em", "label": "Wide" },
+            { "value": "0.24em", "label": "Wider" }
+          ],
+          "default": "0.085em"
+        },
+        {
+          "type": "header",
+          "content": "Color"
+        },
+        {
+          "type": "color",
+          "id": "custom_color",
+          "label": "Custom text color",
+          "info": "Overrides theme text color. Leave blank to use theme color."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "name": "Heading",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "content",
+          "label": "Heading text"
+        },
+        {
+          "type": "checkbox",
+          "id": "outline_last_word",
+          "label": "Outline last word",
+          "info": "Renders the last word with a transparent fill and 2px stroke in the heading color.",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Layout"
+        },
+        {
+          "type": "select",
+          "id": "block_layout",
+          "label": "Column",
+          "options": [
+            { "value": "stack", "label": "Main column" },
+            { "value": "beside", "label": "Right column" }
+          ],
+          "default": "stack"
+        },
+        {
+          "type": "range",
+          "id": "spacing_top",
+          "label": "Padding top (px)",
+          "min": 0, "max": 200, "step": 2, "default": 0
+        },
+        {
+          "type": "range",
+          "id": "spacing_bottom",
+          "label": "Padding bottom (px)",
+          "min": 0, "max": 200, "step": 2, "default": 0
+        },
+        {
+          "type": "range",
+          "id": "spacing_left",
+          "label": "Padding left (px)",
+          "min": 0, "max": 200, "step": 2, "default": 0
+        },
+        {
+          "type": "range",
+          "id": "spacing_right",
+          "label": "Padding right (px)",
+          "min": 0, "max": 200, "step": 2, "default": 0
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "select",
+          "id": "font_family",
+          "label": "Font family",
+          "options": [
+            { "value": "token-display", "label": "↳ Use theme token (Display)" },
+            { "value": "token-h1", "label": "↳ Use theme token (H1)" },
+            { "value": "token-h2", "label": "↳ Use theme token (H2)" },
+            { "value": "token-h3", "label": "↳ Use theme token (H3)" },
+            { "value": "token-body", "label": "↳ Use theme token (Body)" },
+            { "value": "token-small", "label": "↳ Use theme token (Small)" },
+            { "value": "token-label", "label": "↳ Use theme token (Label)" },
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "body", "label": "Forma DJR" },
+            { "value": "heading", "label": "PP Right Grotesk" },
+            { "value": "handwritten", "label": "Thread Handwritten" }
+          ],
+          "default": "heading"
+        },
+        {
+          "type": "text",
+          "id": "font_family_custom",
+          "label": "Custom Google Font",
+          "info": "Type any Google Font name e.g. 'Playfair Display'. Overrides selection above.",
+          "placeholder": "e.g. Playfair Display"
+        },
+        {
+          "type": "range",
+          "id": "font_size",
+          "label": "Font size (px)",
+          "min": 16, "max": 160, "step": 2, "default": 80
+        },
+        {
+          "type": "select",
+          "id": "font_weight",
+          "label": "Font weight",
+          "options": [
+            { "value": "300", "label": "Light" },
+            { "value": "400", "label": "Regular" },
+            { "value": "600", "label": "Semibold" },
+            { "value": "700", "label": "Bold" }
+          ],
+          "default": "700"
+        },
+        {
+          "type": "select",
+          "id": "text_transform",
+          "label": "Text case",
+          "options": [
+            { "value": "none", "label": "Normal" },
+            { "value": "uppercase", "label": "UPPERCASE" },
+            { "value": "lowercase", "label": "lowercase" },
+            { "value": "capitalize", "label": "Capitalize" }
+          ],
+          "default": "uppercase"
+        },
+        {
+          "type": "select",
+          "id": "letter_spacing",
+          "label": "Letter spacing",
+          "options": [
+            { "value": "0em", "label": "None" },
+            { "value": "0.02em", "label": "Tight" },
+            { "value": "0.05em", "label": "Brand body (0.05em)" },
+            { "value": "0.06em", "label": "Normal" },
+            { "value": "0.12em", "label": "Wide" },
+            { "value": "0.18em", "label": "Wider" }
+          ],
+          "default": "0.05em"
+        },
+        {
+          "type": "range",
+          "id": "line_height",
+          "label": "Line height (%)",
+          "info": "100 = normal, 90 = tight, 80 = very tight",
+          "min": 70, "max": 150, "step": 5, "default": 95
+        },
+        {
+          "type": "header",
+          "content": "Color"
+        },
+        {
+          "type": "color",
+          "id": "custom_color",
+          "label": "Custom text color",
+          "info": "Overrides theme text color. Leave blank to use theme color."
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "name": "Content",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Content",
+          "default": { "en": "<p>Highlight key selling features of your product</p>" }
+        },
+        {
+          "type": "header",
+          "content": "Layout"
+        },
+        {
+          "type": "select",
+          "id": "block_layout",
+          "label": "Column",
+          "options": [
+            { "value": "stack", "label": "Main column" },
+            { "value": "beside", "label": "Right column" }
+          ],
+          "default": "stack"
+        },
+        {
+          "type": "range",
+          "id": "spacing_top",
+          "label": "Padding top (px)",
+          "min": 0, "max": 200, "step": 2, "default": 0
+        },
+        {
+          "type": "range",
+          "id": "spacing_bottom",
+          "label": "Padding bottom (px)",
+          "min": 0, "max": 200, "step": 2, "default": 0
+        },
+        {
+          "type": "range",
+          "id": "spacing_left",
+          "label": "Padding left (px)",
+          "min": 0, "max": 200, "step": 2, "default": 0
+        },
+        {
+          "type": "range",
+          "id": "spacing_right",
+          "label": "Padding right (px)",
+          "min": 0, "max": 200, "step": 2, "default": 0
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "select",
+          "id": "font_family",
+          "label": "Font family",
+          "options": [
+            { "value": "token-display", "label": "↳ Use theme token (Display)" },
+            { "value": "token-h1", "label": "↳ Use theme token (H1)" },
+            { "value": "token-h2", "label": "↳ Use theme token (H2)" },
+            { "value": "token-h3", "label": "↳ Use theme token (H3)" },
+            { "value": "token-body", "label": "↳ Use theme token (Body)" },
+            { "value": "token-small", "label": "↳ Use theme token (Small)" },
+            { "value": "token-label", "label": "↳ Use theme token (Label)" },
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "body", "label": "Forma DJR" },
+            { "value": "heading", "label": "PP Right Grotesk" },
+            { "value": "handwritten", "label": "Thread Handwritten" }
+          ],
+          "default": "body"
+        },
+        {
+          "type": "text",
+          "id": "font_family_custom",
+          "label": "Custom Google Font",
+          "info": "Type any Google Font name e.g. 'Playfair Display'. Overrides selection above.",
+          "placeholder": "e.g. Playfair Display"
+        },
+        {
+          "type": "range",
+          "id": "font_size",
+          "label": "Font size (px)",
+          "min": 10, "max": 60, "step": 1, "default": 16
+        },
+        {
+          "type": "select",
+          "id": "font_weight",
+          "label": "Font weight",
+          "options": [
+            { "value": "300", "label": "Light" },
+            { "value": "400", "label": "Regular" },
+            { "value": "600", "label": "Semibold" },
+            { "value": "700", "label": "Bold" }
+          ],
+          "default": "400"
+        },
+        {
+          "type": "select",
+          "id": "text_transform",
+          "label": "Text case",
+          "options": [
+            { "value": "none", "label": "Normal" },
+            { "value": "uppercase", "label": "UPPERCASE" },
+            { "value": "lowercase", "label": "lowercase" },
+            { "value": "capitalize", "label": "Capitalize" }
+          ],
+          "default": "none"
+        },
+        {
+          "type": "select",
+          "id": "letter_spacing",
+          "label": "Letter spacing",
+          "options": [
+            { "value": "0em", "label": "None" },
+            { "value": "0.02em", "label": "Tight" },
+            { "value": "0.06em", "label": "Normal" },
+            { "value": "0.07em", "label": "Body (0.07em)" },
+            { "value": "0.12em", "label": "Wide" }
+          ],
+          "default": "0.02em"
+        },
+        {
+          "type": "header",
+          "content": "Color"
+        },
+        {
+          "type": "color",
+          "id": "custom_color",
+          "label": "Custom text color",
+          "info": "Overrides theme text color. Leave blank to use theme color."
+        }
+      ]
+    },
+    {
+      "type": "buttons",
+      "name": "Buttons",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "header",
+          "content": "Primary button"
+        },
+        {
+          "type": "select",
+          "id": "button_color",
+          "label": "Button style",
+          "options": [
+            { "value": "btn", "label": "Primary" },
+            { "value": "btn btn--secondary", "label": "Secondary" },
+            { "value": "btn btn--tertiary", "label": "Tertiary" },
+            { "value": "btn btn--neutral", "label": "Neutral" },
+            { "value": "btn btn--plain", "label": "Plain" },
+            { "value": "btn--minimal-light", "label": "Minimal light" },
+            { "value": "btn--minimal-dark", "label": "Minimal dark" },
+            { "value": "btn--glass", "label": "Glass (light)" },
+            { "value": "btn--glass-dark", "label": "Glass (dark)" }
+          ],
+          "default": "btn--minimal-light"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": { "en": "Shop now" }
+        },
+        {
+          "type": "checkbox",
+          "id": "button_show_arrow",
+          "label": "Show arrow after label",
+          "default": false
+        },
+        {
+          "type": "url",
+          "id": "button_url",
+          "label": "Button URL"
+        },
+        {
+          "type": "color",
+          "id": "button_custom_bg",
+          "label": "Custom background color",
+          "info": "Overrides button style. Leave blank to use style above."
+        },
+        {
+          "type": "color",
+          "id": "button_custom_text",
+          "label": "Custom text color",
+          "info": "Overrides button style. Leave blank to use style above."
+        },
+        {
+          "type": "header",
+          "content": "Secondary button"
+        },
+        {
+          "type": "select",
+          "id": "secondary_button_color",
+          "label": "Button style",
+          "options": [
+            { "value": "btn", "label": "Primary" },
+            { "value": "btn btn--secondary", "label": "Secondary" },
+            { "value": "btn btn--tertiary", "label": "Tertiary" },
+            { "value": "btn btn--neutral", "label": "Neutral" },
+            { "value": "btn btn--plain", "label": "Plain" },
+            { "value": "btn--minimal-light", "label": "Minimal light" },
+            { "value": "btn--minimal-dark", "label": "Minimal dark" },
+            { "value": "btn--glass", "label": "Glass (light)" },
+            { "value": "btn--glass-dark", "label": "Glass (dark)" }
+          ],
+          "default": "btn btn--neutral"
+        },
+        {
+          "type": "text",
+          "id": "secondary_button_label",
+          "label": "Button label"
+        },
+        {
+          "type": "url",
+          "id": "secondary_button_url",
+          "label": "Button URL"
+        },
+        {
+          "type": "color",
+          "id": "secondary_button_custom_bg",
+          "label": "Custom background color"
+        },
+        {
+          "type": "color",
+          "id": "secondary_button_custom_text",
+          "label": "Custom text color"
+        },
+        {
+          "type": "header",
+          "content": "Third button"
+        },
+        {
+          "type": "select",
+          "id": "tertiary_button_color",
+          "label": "Button style",
+          "options": [
+            { "value": "btn", "label": "Primary" },
+            { "value": "btn btn--secondary", "label": "Secondary" },
+            { "value": "btn btn--tertiary", "label": "Tertiary" },
+            { "value": "btn btn--neutral", "label": "Neutral" },
+            { "value": "btn btn--plain", "label": "Plain" },
+            { "value": "btn--minimal-light", "label": "Minimal light" },
+            { "value": "btn--minimal-dark", "label": "Minimal dark" },
+            { "value": "btn--glass", "label": "Glass (light)" },
+            { "value": "btn--glass-dark", "label": "Glass (dark)" }
+          ],
+          "default": "btn btn--neutral"
+        },
+        {
+          "type": "text",
+          "id": "tertiary_button_label",
+          "label": "Button label"
+        },
+        {
+          "type": "url",
+          "id": "tertiary_button_url",
+          "label": "Button URL"
+        },
+        {
+          "type": "color",
+          "id": "tertiary_button_custom_bg",
+          "label": "Custom background color"
+        },
+        {
+          "type": "color",
+          "id": "tertiary_button_custom_text",
+          "label": "Custom text color"
+        },
+        {
+          "type": "header",
+          "content": "Typography (all buttons)"
+        },
+        {
+          "type": "select", "id": "btns_font", "label": "Font family",
+          "options": [
+            { "value": "inherit", "label": "Inherit (button default)" },
+            { "value": "body",    "label": "Body (Forma)" },
+            { "value": "heading", "label": "Heading (PP Right Grotesk)" },
+            { "value": "nav",     "label": "Nav" },
+            { "value": "handwritten", "label": "Handwritten" }
+          ],
+          "default": "inherit"
+        },
+        { "type": "range", "id": "btns_size", "label": "Font size", "info": "0 = use button default", "min": 0, "max": 32, "step": 1, "unit": "px", "default": 0 },
+        {
+          "type": "select", "id": "btns_weight", "label": "Font weight",
+          "options": [
+            { "value": "",    "label": "Default" },
+            { "value": "100", "label": "Thin" },
+            { "value": "200", "label": "Extra Light" },
+            { "value": "300", "label": "Light" },
+            { "value": "400", "label": "Regular" },
+            { "value": "500", "label": "Medium" },
+            { "value": "600", "label": "Semi-bold" },
+            { "value": "700", "label": "Bold" },
+            { "value": "800", "label": "Extra bold" }
+          ],
+          "default": ""
+        },
+        {
+          "type": "select", "id": "btns_case", "label": "Case",
+          "options": [
+            { "value": "",           "label": "Default" },
+            { "value": "none",       "label": "Normal" },
+            { "value": "uppercase",  "label": "UPPERCASE" },
+            { "value": "lowercase",  "label": "lowercase" },
+            { "value": "capitalize", "label": "Capitalize" }
+          ],
+          "default": ""
+        },
+        {
+          "type": "select", "id": "btns_ls", "label": "Letter spacing",
+          "options": [
+ { "value": "0.085em", "label": "Brand (0.085em)" },            { "value": "",       "label": "Default" },
+            { "value": "0em",    "label": "None" },
+            { "value": "0.02em", "label": "Tight" },
+            { "value": "0.05em", "label": "Normal" },
+            { "value": "0.08em", "label": "Wide" },
+            { "value": "0.12em", "label": "Wider" },
+            { "value": "0.16em", "label": "Widest" }
+          ],
+          "default": ""
+        },
+        {
+          "type": "select", "id": "btns_style", "label": "Style",
+          "options": [
+            { "value": "",       "label": "Default" },
+            { "value": "normal", "label": "Normal" },
+            { "value": "italic", "label": "Italic" }
+          ],
+          "default": ""
+        },
+        {
+          "type": "header",
+          "content": "Layout"
+        },
+        {
+          "type": "select",
+          "id": "block_layout",
+          "label": "Column",
+          "options": [
+            { "value": "stack", "label": "Main column" },
+            { "value": "beside", "label": "Right column" }
+          ],
+          "default": "stack"
+        },
+        {
+          "type": "range",
+          "id": "spacing_top",
+          "label": "Padding top (px)",
+          "min": 0, "max": 200, "step": 2, "default": 8
+        },
+        {
+          "type": "range",
+          "id": "spacing_bottom",
+          "label": "Padding bottom (px)",
+          "min": 0, "max": 200, "step": 2, "default": 0
+        },
+        {
+          "type": "range",
+          "id": "spacing_left",
+          "label": "Padding left (px)",
+          "min": 0, "max": 200, "step": 2, "default": 0
+        },
+        {
+          "type": "range",
+          "id": "spacing_right",
+          "label": "Padding right (px)",
+          "min": 0, "max": 200, "step": 2, "default": 0
+        },
+        {
+          "type": "header",
+          "content": "Typography"
+        },
+        {
+          "type": "select",
+          "id": "font_family",
+          "label": "Font family",
+          "options": [
+            { "value": "inherit", "label": "Theme default" },
+            { "value": "body", "label": "Body (Forma DJR)" },
+            { "value": "heading", "label": "Heading (PP Right Grotesk)" },
+            { "value": "'Georgia', serif", "label": "Georgia" },
+            { "value": "'Arial', sans-serif", "label": "Arial" }
+          ],
+          "default": "inherit"
+        },
+        {
+          "type": "text",
+          "id": "font_family_custom",
+          "label": "Custom Google Font",
+          "placeholder": "e.g. Playfair Display"
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "Button",
+      "settings": [
+        {
+          "type": "text",
+          "id": "btn_label",
+          "label": "Button label",
+          "default": "Shop now"
+        },
+        {
+          "type": "url",
+          "id": "btn_url",
+          "label": "Button URL"
+        },
+        {
+          "type": "select",
+          "id": "btn_style",
+          "label": "Button style",
+          "options": [
+            { "value": "btn", "label": "Primary" },
+            { "value": "btn btn--secondary", "label": "Secondary" },
+            { "value": "btn btn--tertiary", "label": "Tertiary" },
+            { "value": "btn btn--neutral", "label": "Neutral" },
+            { "value": "btn btn--plain", "label": "Plain" },
+            { "value": "btn--minimal-light", "label": "Minimal light" },
+            { "value": "btn--minimal-dark", "label": "Minimal dark" },
+            { "value": "btn--glass", "label": "Glass (light)" },
+            { "value": "btn--glass-dark", "label": "Glass (dark)" }
+          ],
+          "default": "btn--minimal-light"
+        },
+        {
+          "type": "header",
+          "content": "Custom colors"
+        },
+        {
+          "type": "color",
+          "id": "btn_custom_bg",
+          "label": "Background color",
+          "info": "Leave blank to use button style"
+        },
+        {
+          "type": "color",
+          "id": "btn_custom_text",
+          "label": "Text color",
+          "info": "Leave blank to use button style"
+        },
+        {
+          "type": "color",
+          "id": "btn_custom_border_color",
+          "label": "Border color",
+          "info": "Leave blank to use button style"
+        },
+        {
+          "type": "header",
+          "content": "Size & shape"
+        },
+        {
+          "type": "range",
+          "id": "btn_font_size",
+          "label": "Font size (px)",
+          "min": 10,
+          "max": 24,
+          "step": 1,
+          "default": 14
+        },
+        {
+          "type": "range",
+          "id": "btn_pad_v",
+          "label": "Padding vertical (px)",
+          "min": 4,
+          "max": 24,
+          "step": 1,
+          "default": 12
+        },
+        {
+          "type": "range",
+          "id": "btn_pad_h",
+          "label": "Padding horizontal (px)",
+          "min": 8,
+          "max": 48,
+          "step": 2,
+          "default": 24
+        },
+        {
+          "type": "range",
+          "id": "btn_border_width",
+          "label": "Border width (px)",
+          "min": 0,
+          "max": 4,
+          "step": 1,
+          "default": 1
+        },
+        {
+          "type": "range",
+          "id": "btn_radius",
+          "label": "Border radius (px)",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "default": 50
+        },
+        {
+          "type": "header",
+          "content": "Button row spacing"
+        },
+        {
+          "type": "range",
+          "id": "spacing_top",
+          "label": "Padding top (px)",
+          "info": "Only applies to the first button in a row",
+          "min": 0, "max": 200, "step": 2, "default": 8
+        },
+        {
+          "type": "range",
+          "id": "spacing_bottom",
+          "label": "Padding bottom (px)",
+          "info": "Only applies to the first button in a row",
+          "min": 0, "max": 200, "step": 2, "default": 0
+        },
+        {
+          "type": "range",
+          "id": "spacing_left",
+          "label": "Padding left (px)",
+          "info": "Only applies to the first button in a row",
+          "min": 0, "max": 200, "step": 2, "default": 0
+        },
+        {
+          "type": "range",
+          "id": "spacing_right",
+          "label": "Padding right (px)",
+          "info": "Only applies to the first button in a row",
+          "min": 0, "max": 200, "step": 2, "default": 0
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Banner",
+      "settings": {
+        "color_scheme": "color__bg-overlay-1 color__text",
+        "color_border": "!color__border-transparent",
+        "style_border": "",
+        "layout_horizontal": "window--full",
+        "layout_y_spacing": "min-h-[400px] md:min-h-[500px]",
+        "layout_y_alignment": "items-end",
+        "layout_x_alignment": "justify-start",
+        "content_offset_top": 0,
+        "content_offset_bottom": 40
+      },
+      "blocks": [
+        {
+          "type": "eyebrow",
+          "settings": { "content": "Season 01 · Drop 1" }
+        },
+        {
+          "type": "heading",
+          "settings": { "content": "Season 01" }
+        },
+        {
+          "type": "content",
+          "settings": { "content": "<p>Drop 1</p>", "block_layout": "stack" }
+        },
+        {
+          "type": "buttons",
+          "settings": {
+            "button_label": "Shop now",
+            "button_url": "/collections/all",
+            "button_color": "btn--minimal-light"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["custom.overlay"]
+  }
+}
+{% endschema %}

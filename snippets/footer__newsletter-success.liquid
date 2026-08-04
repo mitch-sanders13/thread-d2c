@@ -1,0 +1,53 @@
+{% comment %}
+  snippets/footer__newsletter-success.liquid
+
+  Hidden by default. The submit script flips display:none → '' on this
+  panel and hides [data-nl-body] when the user successfully subscribes.
+
+  Accepts: block (required)
+
+  Block settings used:
+    success_image       — image picker (gif/png/jpg)
+    success_image_width — range (px)
+    success_icon        — text (emoji or short string, e.g. "🎉")
+    success_icon_size   — range (px)
+    success_title       — text (headline)
+    success            — richtext (body message)
+    success_align       — select (left / center / right)
+    success_title_size  — range (px)
+    success_title_font  — select
+    success_title_color — color
+    success_body_color  — color
+{% endcomment %}
+
+{%- assign _align = block.settings.success_align | default: 'left' -%}
+{%- capture _title_fam -%}var(--type-font-{% if block.settings.success_title_font == 'heading' %}header{% else %}{{ block.settings.success_title_font | default: 'heading' }}{% endif %}-family){%- endcapture -%}
+
+<div data-nl-success-full style="display:none;text-align:{{ _align }};">
+  {% if block.settings.success_image != blank %}
+    <div style="margin:0 {% if _align == 'center' %}auto{% elsif _align == 'right' %}0 0 auto{% endif %} {{ block.settings.success_image_mb | default: 12 }}px;{% if _align == 'left' %}margin-left:0;{% endif %}{% if block.settings.success_image_width and block.settings.success_image_width > 0 %}max-width:{{ block.settings.success_image_width }}px;{% endif %}">
+      <img src="{{ block.settings.success_image | image_url: width: 800 }}"
+        alt="{{ block.settings.success_title | default: 'Success' | escape }}"
+        loading="lazy"
+        style="display:block;width:100%;height:auto;{% if block.settings.success_image_radius and block.settings.success_image_radius > 0 %}border-radius:{{ block.settings.success_image_radius }}px;{% endif %}">
+    </div>
+  {% endif %}
+
+  {% if block.settings.success_icon != blank %}
+    <div aria-hidden="true" style="font-size:{{ block.settings.success_icon_size | default: 40 }}px;line-height:1;margin-bottom:{{ block.settings.success_icon_mb | default: 8 }}px;">
+      {{ block.settings.success_icon }}
+    </div>
+  {% endif %}
+
+  {% if block.settings.success_title != blank %}
+    <h3 style="margin:0 0 {{ block.settings.success_title_mb | default: 8 }}px 0;font-family:{{ _title_fam }};font-size:{{ block.settings.success_title_size | default: 20 }}px;font-weight:{{ block.settings.success_title_weight | default: '700' }};line-height:1.2;{% if block.settings.success_title_color != blank %}color:{{ block.settings.success_title_color }};{% endif %}">
+      {{ block.settings.success_title }}
+    </h3>
+  {% endif %}
+
+  {%- unless block.settings.success == blank -%}
+    <div class="ft-body m-0--clear"{% if block.settings.success_body_color != blank %} style="color:{{ block.settings.success_body_color }};"{% endif %}>
+      {{ block.settings.success }}
+    </div>
+  {%- endunless -%}
+</div>

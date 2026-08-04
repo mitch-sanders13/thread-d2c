@@ -1,0 +1,15 @@
+<a href="{{ article.url }}" class="pb-4 no-underline">
+	<img src="{{ article.image | image_url: width: 336, height: 189, crop: 'center', format: 'jpg' }}" alt="{{ article.title }}" class="w-full" loading="lazy" decoding="async">
+
+	<div class="pt-2">
+		<h2 class="type--big !m-0 font-semibold">{{ article.title }}</h2>
+		<p class="">
+			{{ article.published_at | date: '%b %d, %Y' }}
+			<span class="">
+				{% for tag in article.tags %}
+					<a class="" href="https://www.threadwallets.com/blogs/thread-wallets/tagged/{{tag}}">#{{ tag }}</a>
+				{% endfor %}
+			</span>
+		</p>
+	</div>
+</a>

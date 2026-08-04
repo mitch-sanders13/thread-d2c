@@ -1,0 +1,106 @@
+<!-- snippets/component__school-filter.liquid -->
+{% comment %}
+  School filter UI (desktop/mobile) used only on Collegiate collections.
+
+  Usage examples:
+    {% render 'component__school-filter', filter: school_filter, variant: 'desktop' %}
+    {% render 'component__school-filter', filter: school_filter, variant: 'mobile' %}
+{% endcomment %}
+
+{% assign variant = variant | default: 'desktop' %}
+
+{% if variant == 'desktop' %}
+  {% capture popup_label %}
+    Filter: School
+    {%- if filter.active_values.size > 0 -%}
+      <span class="ml-1 opacity-75">({{ filter.active_values.size }})</span>
+    {%- endif -%}
+    {% render 'component__icon', icon: 'chevron-down', size: '16', class: 'ml-1' %}
+  {% endcapture %}
+
+  {% capture popup_content %}
+    <div class="min-w-[240px]">
+      {%- comment -%} Add "All Schools" option to clear filter {%- endcomment -%}
+      <label class="hover:color__bg-overlay-1 flex items-center px-4 py-2" for="Filter-{{ filter.param_name }}-clear">
+        <input type="radio"
+          class="form-radio"
+          name="{{ filter.param_name }}"
+          value=""
+          id="Filter-{{ filter.param_name }}-clear"
+          {% unless filter.active_values.size > 0 -%}checked{%- endunless %}
+          @change="$el.closest('form').dispatchEvent(new Event('change'))">
+          <span class="type--base ml-2">All Schools</span>
+          <span class="type--base ml-1 opacity-75">({{ collection.products.size }})</span>
+      </label>
+      
+      {%- for filter_value in filter.values -%}
+        <label class="hover:color__bg-overlay-1 flex items-center px-4 py-2" for="Filter-{{ filter.param_name }}-{{ forloop.index }}">
+          <input type="radio"
+            class="form-radio"
+            name="{{ filter.param_name }}"
+            value="{{ filter_value.value }}"
+            id="Filter-{{ filter.param_name }}-{{ forloop.index }}"
+            {% if filter_value.active -%}checked{%- endif %}
+            {% if filter_value.count == 0 and filter_value.active == false -%}disabled{%- endif %}
+            @change="$el.closest('form').dispatchEvent(new Event('change'))">
+            <span class="type--base ml-2">{{ filter_value.label }}</span>
+            <span class="type--base ml-1 opacity-75">({{ filter_value.count }})</span>
+        </label>
+      {%- endfor -%}
+    </div>
+  {% endcapture %}
+
+  {% render 'component__dropdown',
+    direction: 'down',
+    position: 'left',
+    container_class: 'h-full flex',
+    button_class: 'type--smaller type__nav',
+    button_label: popup_label,
+    content: popup_content %}
+
+{% elsif variant == 'mobile' %}
+  {% capture accordion_title %}
+    School {%- if filter.active_values.size > 0 -%}<span class="ml-1">({{ filter.active_values.size }})</span>{%- endif -%}
+  {% endcapture %}
+
+  {% capture accordion_content %}
+    <div class="py-4">
+      {%- comment -%} Add "All Schools" option to clear filter {%- endcomment -%}
+      <label class="flex items-center mb-4" for="Filter-Mob-{{ filter.param_name }}-clear">
+        <input type="radio"
+          class="form-radio"
+          name="{{ filter.param_name }}"
+          value=""
+          id="Filter-Mob-{{ filter.param_name }}-clear"
+          {% unless filter.active_values.size > 0 -%}checked{%- endunless %}
+          @change="$el.closest('form').dispatchEvent(new Event('change'))">
+          <span class="type--base ml-2">All Schools</span>
+          <span class="type--base ml-1 opacity-75">({{ collection.products.size }})</span>
+      </label>
+      
+      {%- for filter_value in filter.values -%}
+        <label class="flex items-center mb-4" for="Filter-Mob-{{ filter.param_name }}-{{ forloop.index }}">
+          <input type="radio"
+            class="form-radio"
+            name="{{ filter.param_name }}"
+            value="{{ filter_value.value }}"
+            id="Filter-Mob-{{ filter.param_name }}-{{ forloop.index }}"
+            {% if filter_value.active -%}checked{%- endif %}
+            {% if filter_value.count == 0 and filter_value.active == false -%}disabled{%- endif %}
+            @change="$el.closest('form').dispatchEvent(new Event('change'))">
+            <span class="type--base ml-2">{{ filter_value.label }}</span>
+            <span class="type--base ml-1 opacity-75">({{ filter_value.count }})</span>
+        </label>
+      {%- endfor -%}
+    </div>
+  {% endcapture %}
+
+  {% render 'component__accordion',
+    container_class: 'border--b-width color__border-divider-1',
+    inner_class: 'px-4',
+    button_class: 'type--smaller',
+    button_label: accordion_title,
+    content: accordion_content %}
+{% endif %}
+
+

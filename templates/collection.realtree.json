@@ -1,0 +1,255 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "banner": {
+      "type": "collection__banner",
+      "disabled": true,
+      "settings": {
+        "color_scheme": "color__bg-body color__text",
+        "color_text": "color__dark",
+        "color_border": "color__border-divider-1",
+        "enable_gradient": false,
+        "style_border": "",
+        "banner_min_height_mobile": 70,
+        "banner_min_height_desktop": 120,
+        "banner_padding_top": 0,
+        "banner_padding_bottom": 16,
+        "layout_y_alignment": "items-end",
+        "layout_x_alignment": "justify-center text-center",
+        "visibility": "",
+        "enable_bar": false,
+        "enable_description": false,
+        "enable_title": true,
+        "title_font": "--type-font-header-family",
+        "title_size": 56,
+        "title_size_mobile": 36,
+        "title_weight": "700",
+        "title_case": "uppercase",
+        "title_ls": "0.02em",
+        "title_color": ""
+      }
+    },
+    "collection_banner_jaEnzU": {
+      "type": "collection__banner",
+      "settings": {
+        "color_scheme": "color__bg-body color__text",
+        "color_text": "color__dark",
+        "color_border": "color__border-divider-1",
+        "enable_gradient": false,
+        "style_border": "",
+        "banner_min_height_mobile": 70,
+        "banner_min_height_desktop": 120,
+        "banner_padding_top": 0,
+        "banner_padding_bottom": 16,
+        "layout_y_alignment": "items-end",
+        "layout_x_alignment": "justify-center text-center",
+        "visibility": "",
+        "enable_bar": false,
+        "enable_description": false,
+        "enable_title": true,
+        "title_font": "--type-font-header-family",
+        "title_size": 56,
+        "title_size_mobile": 36,
+        "title_weight": "700",
+        "title_case": "uppercase",
+        "title_ls": "0.02em",
+        "title_color": ""
+      }
+    },
+    "4d273fb4-868d-426e-9ed2-994d976da4c3": {
+      "type": "collection__sidebar",
+      "blocks": {
+        "content_fG3b6A": {
+          "type": "content",
+          "settings": {
+            "video": "shopify://files/videos/realtree_zipper_pdp.mp4",
+            "mobile_video": "shopify://files/videos/realtree_zipper_pdp.mp4",
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "url": "shopify://products/realtree-advantage-leather-zip-wallet",
+            "heading": "",
+            "content": "",
+            "button_label": "",
+            "index": 4,
+            "paginate_index": 1,
+            "background_color_scheme": "color__bg-body color__text",
+            "column_size": "lg:col-span-1"
+          }
+        },
+        "content_fnzJqm": {
+          "type": "content",
+          "settings": {
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "image_background": "shopify://shop_images/max_aqua.png",
+            "mobile_image_background": "shopify://shop_images/max_aqua.png",
+            "url": "shopify://products/realtree-max-water-bottle-sling-bag",
+            "heading": "",
+            "content": "",
+            "button_label": "",
+            "index": 8,
+            "paginate_index": 1,
+            "background_color_scheme": "color__bg-body color__text",
+            "column_size": "lg:col-span-1"
+          }
+        },
+        "content_3yHyaT": {
+          "type": "content",
+          "settings": {
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "image_background": "shopify://shop_images/edge_crossbody.png",
+            "mobile_image_background": "shopify://shop_images/edge_crossbody.png",
+            "url": "shopify://products/realtree-edge-crossbody-bag",
+            "heading": "",
+            "content": "",
+            "button_label": "",
+            "index": 14,
+            "paginate_index": 1,
+            "background_color_scheme": "color__bg-body color__text",
+            "column_size": "lg:col-span-1"
+          }
+        },
+        "content_CjDUFd": {
+          "type": "content",
+          "settings": {
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "image_background": "shopify://shop_images/realtree-mobile.jpg",
+            "mobile_image_background": "shopify://shop_images/realtree-mobile.jpg",
+            "url": "shopify://products/realtree-edge-vegan-leather-bifold-wallet",
+            "heading": "",
+            "content": "",
+            "button_label": "",
+            "index": 18,
+            "paginate_index": 1,
+            "background_color_scheme": "color__bg-body color__text",
+            "column_size": "lg:col-span-1"
+          }
+        },
+        "content_NHCwN8": {
+          "type": "content",
+          "settings": {
+            "enable_autoplay": true,
+            "enable_mute_toggle": true,
+            "enable_loop": true,
+            "image_background": "shopify://shop_images/max_elastic.png",
+            "mobile_image_background": "shopify://shop_images/max_elastic.png",
+            "url": "shopify://products/realtree-max-elastic-wallet",
+            "heading": "",
+            "content": "",
+            "button_label": "",
+            "index": 24,
+            "paginate_index": 1,
+            "background_color_scheme": "color__bg-body color__text",
+            "column_size": "lg:col-span-1"
+          }
+        }
+      },
+      "block_order": [
+        "content_fG3b6A",
+        "content_fnzJqm",
+        "content_3yHyaT",
+        "content_CjDUFd",
+        "content_NHCwN8"
+      ],
+      "settings": {
+        "display_mode": "products",
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "!color__border-transparent",
+        "row_size_desktop": "md:grid-cols-4",
+        "row_size_mobile": "grid-cols-2",
+        "grid_edge_padding": 12,
+        "grid_edge_padding_desktop": 120,
+        "grid_col_gap": 8,
+        "grid_col_gap_desktop": 16,
+        "grid_row_gap": 32,
+        "grid_row_gap_desktop": 40,
+        "grid_top_padding": 0,
+        "grid_bottom_padding": 36,
+        "hide_sublinks_divider": false,
+        "quickfilter_active_color": "#1e7db3",
+        "quickfilter_underline_offset": 2,
+        "quickfilter_underline_thickness": 1,
+        "quickfilter_font": "body",
+        "quickfilter_weight": "700",
+        "quickfilter_text_transform": "uppercase",
+        "quickfilter_letter_spacing": "0.085em",
+        "quickfilter_size_mobile": 14,
+        "quickfilter_size_desktop": 14,
+        "quickfilter_text_color": "",
+        "quickfilter_pad_v_mobile": 16,
+        "quickfilter_pad_v_desktop": 24,
+        "quickfilter_pad_h_mobile": 14,
+        "quickfilter_pad_h_desktop": 20,
+        "quickfilter_gap_mobile": 0,
+        "quickfilter_gap_desktop": 0,
+        "filtersort_font": "inherit",
+        "filtersort_weight": "700",
+        "filtersort_text_transform": "uppercase",
+        "filtersort_letter_spacing": "0.085em",
+        "filtersort_size_mobile": 13,
+        "filtersort_size_desktop": 14,
+        "filtersort_text_color": "",
+        "filtersort_row_pad_v_mobile": 0,
+        "filtersort_row_pad_v_desktop": 12,
+        "filtersort_item_gap": 16,
+        "filtersort_btn_pad_v": 16,
+        "filtersort_btn_pad_h": 14,
+        "filtersort_pill_row_mt": 12,
+        "filtersort_pill_pad_v": 6,
+        "filtersort_pill_pad_h": 12,
+        "filtersort_pill_gap": 8,
+        "enable_sort": true,
+        "sort_show_manual": true,
+        "sort_show_best_selling": true,
+        "sort_show_title_ascending": false,
+        "sort_show_title_descending": false,
+        "sort_show_price_ascending": true,
+        "sort_show_price_descending": false,
+        "sort_show_created_ascending": false,
+        "sort_show_created_descending": true,
+        "enable_filter": false,
+        "collection_enable_description": false,
+        "products_per_page": 48,
+        "lifestyle_show_in_grid": true,
+        "lifestyle_frequency": 6,
+        "show_lifestyle_tiles": false,
+        "lifestyle_tile_interval": 6
+      }
+    },
+    "recent": {
+      "type": "recent-grid",
+      "settings": {
+        "heading": "Recently viewed",
+        "content": "",
+        "spacing_top": 100,
+        "spacing_bottom": 0,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "style_border": "",
+        "layout_horizontal": "window--full",
+        "layout_horizontal_description": "window--full",
+        "visibility": ""
+      }
+    }
+  },
+  "order": [
+    "banner",
+    "collection_banner_jaEnzU",
+    "4d273fb4-868d-426e-9ed2-994d976da4c3",
+    "recent"
+  ]
+}

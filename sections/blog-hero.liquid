@@ -1,0 +1,181 @@
+<section class="w-full blog-hero color__bg-overlay-1 
+  {{ section.settings.visibility }}
+  {{ section.settings.color_scheme }}
+  {{ section.settings.color_border }}
+  {{ section.settings.style_border }}">
+
+  <div class="window--wide overflow-hidden md:py-[100px] px-5 py-8">
+
+      {% if section.settings.show_crumbs %}
+      <!-- Top Navigation / Breadcrumbs -->
+      <nav class="pb-6 md:pb-4 text-sm md:text-sm font-medium text-black-400 tracking-tight fade-in-up">
+          <a href="{{ blog.url }}" class="hover:text-gray-900 cursor-pointer transition-colors font-base tracking-[2%]">
+              Blog
+          </a>
+          <span class="mx-1 text-gray-400">/</span>
+          <span class="text-black font-base tracking-[2%]">
+              {{ article.title }}
+          </span>
+      </nav>
+      {% endif %}
+
+      <!-- Hero Section Content -->
+      <div class="flex hero-wrapper flex-col md:flex-row items-center gap-6 md:pb-8">
+
+          <!-- Left Column: Text Content -->
+          <div class="w-full md:w-1/2 flex flex-col justify-center md:pt-12 order-2 md:order-1">
+
+              {% unless article.title == blank %}
+              <!-- Heading -->
+              <h1 class="font-display hero-title text-black mb-6 md:mb-8 tracking-tight fade-in-up delay-100">
+                  {{ article.title }}
+              </h1>
+              {% endunless %}
+
+              {% if article.excerpt != blank %}
+              <!-- Description -->
+              <p class="text-black hero-desc text-base md:text-lg font-base leading fade-in-up delay-200">
+                  {{ article.excerpt | strip_html }}
+              </p>
+              {% endif %}
+
+          </div>
+
+          <!-- Right Column: Image -->
+          {% if section.settings.enable_image %}
+          {% unless article.image == blank %}
+          <div class="w-full hero-img-col order-1 md:order-2 fade-in-up delay-200 group">
+              <div class="img-container relative w-full aspect-[16/9] overflow-hidden">
+                  {{
+                    article.image
+                    | image_url: width: 2000
+                    | image_tag:
+                    class: 'img-zoom w-full h-full object-cover object-center',
+                    loading: 'eager',
+                    fetchpriority: 'high',
+                    alt: article.title
+                  }}
+              </div>
+          </div>
+          {% endunless %}
+          {% endif %}
+
+      </div>
+
+      <!-- Bottom Meta Info -->
+      <div class="flex flex-row flex-wrap sm:items-center justify-between pt-6 mt-auto fade-in-up delay-300">
+
+          {% if section.settings.enable_author %}
+          <div class="mb-4 sm:mb-0">
+              <span class="text-lg font-display text-black uppercase tracking-wide">
+                  By {{ article.author }}
+              </span>
+          </div>
+          {% endif %}
+
+          {% if section.settings.enable_date %}
+          <div class="text-right">
+              <span class="text-lg font-display text-black uppercase tracking-wide">
+                  Posted: {{ article.published_at | date: "%Y %b" }}
+              </span>
+          </div>
+          {% endif %}
+
+      </div>
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Blog Hero",
+  "settings": [
+
+    {
+      "type": "checkbox",
+      "id": "show_crumbs",
+      "label": "Show breadcrumbs",
+      "default": true
+    },
+
+    {
+      "type": "checkbox",
+      "id": "enable_image",
+      "label": "Show article image",
+      "default": true
+    },
+
+    {
+      "type": "checkbox",
+      "id": "enable_author",
+      "label": "Show author",
+      "default": true
+    },
+
+    {
+      "type": "checkbox",
+      "id": "enable_date",
+      "label": "Show publish date",
+      "default": true
+    },
+
+    {
+      "type": "select",
+      "id": "visibility",
+      "label": "Visibility",
+      "options": [
+        { "value": "", "label": "Show everywhere" },
+        { "value": "md:hidden", "label": "Mobile only" },
+        { "value": "hidden md:block", "label": "Desktop only" }
+      ],
+      "default": ""
+    },
+
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "options": [
+        { "value": "color__bg-body color__text", "label": "Default" },
+        { "value": "color__bg-neutral color__text", "label": "Neutral" },
+        { "value": "color__bg-overlay-1 color__text", "label": "Overlay 1" },
+        { "value": "color__bg-overlay-2 color__text", "label": "Overlay 2" }
+      ],
+      "default": "color__bg-body color__text"
+    },
+
+    {
+      "type": "select",
+      "id": "color_border",
+      "label": "Border color",
+      "options": [
+        { "value": "color__border-divider-1", "label": "Divider" },
+        { "value": "color__border-selected-1", "label": "Accent" }
+      ],
+      "default": "color__border-divider-1"
+    },
+
+    {
+      "type": "select",
+      "id": "style_border",
+      "label": "Border style",
+      "options": [
+        { "value": "", "label": "None" },
+        { "value": "border--t-width", "label": "Top" },
+        { "value": "border--b-width", "label": "Bottom" },
+        { "value": "border--b-width border--t-width", "label": "Top + Bottom" }
+      ],
+      "default": ""
+    }
+
+  ],
+
+  "templates": ["article"],
+
+  "presets": [
+    {
+      "name": "Blog Hero"
+    }
+  ]
+}
+{% endschema %}

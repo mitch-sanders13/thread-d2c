@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html
+  class="min-h-[100vh]"
+  :class="{ 'drawer-open': cart_drawer || menu_drawer }"
+  lang="{{ request.locale.iso_code }}"
+  x-data="app()"
+  x-init="
+    if (window.location.search.includes('?cart')) cart_drawer = true;
+    handleSharedCart();
+    updateCart(false);">
+
+  <head>
+    {% render 'theme__meta' %}
+    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+    {%- unless settings.type_font_heading.system? and settings.type_font_body.system? -%}
+      <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+    {%- endunless -%}
+    {%- comment -%}
+      Font-picker preloads removed: the rendered families are the brand
+      fonts (FormaDJR / PP Right Grotesk), so preloading the picker
+      fonts spent high-priority bandwidth on faces that rarely paint.
+    {%- endcomment -%}
+    {%- comment -%}
+      Custom font preloads — these are the brand's actual body /
+      heading fonts (not Shopify's font-picker fallback). The body
+      design renders at weight 300 (Light), so preload that .otf in
+      addition to the Regular .woff2 — without it the browser shows
+      the fallback then swaps when Light arrives, producing the FOUT
+      flash on first paint. fetchpriority=high so the preloads win
+      the race against the rest of the page assets.
+    {%- endcomment -%}
+    <link rel="preload" as="font" href="{{ 'FormaDJRDisplay-Light.woff2' | asset_url }}" type="font/woff2" crossorigin fetchpriority="high">
+    <link rel="preload" as="font" href="{{ 'FormaDJRDisplay-Regular-Testing.woff2' | file_url }}" type="font/woff2" crossorigin fetchpriority="high">
+    <link rel="preload" as="font" href="https://cdn.shopify.com/s/files/1/1030/4291/files/PPRightGrotesk-TightBold.woff2?v=1712089722" type="font/woff2" crossorigin fetchpriority="high">
+    {%- comment -%}
+      Typekit stylesheet (https://use.typekit.net/cuk8lrh.css) was
+      removed — a grep across the theme found zero `font-family`
+      references to any Typekit-served font, so the stylesheet was
+      pure render-blocking dead weight. If a Typekit font is needed
+      in the future re-add this <link> tag.
+
+      The previous `<link rel="preload" as="fetch" href=logo.json>`
+      tag was also removed — the theme has no JS that actually
+      consumes that JSON file, so the preload was a wasted network
+      fetch on every page load.
+    {%- endcomment -%}
+    {% render 'theme__pwa' %}
+    {% render 'theme__structured-data' %}
+    {% render 'theme__styles' %}
+    {% render 'script__product-card-media' %}
+    
+    {{ settings.snippet_head }}
+    {% render 'assets' with 'styles.css', preload_stylesheet: true %}
+    {%- comment -%}
+      bundle-builder.css (~44KB) is only meaningful on the bundle-builder
+      page, the cart drawer when a bundle is in cart, and the Trifecta
+      widgets on PDPs / related-styles. None of that is in the first
+      paint critical path on the vast majority of page loads, so we
+      load it non-blocking via the preload+onload swap pattern. The
+      <noscript> fallback keeps JS-disabled visitors covered.
+    {%- endcomment -%}
+    <link rel="preload" as="style" href="{{ 'bundle-builder.css' | asset_url }}" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ 'bundle-builder.css' | asset_url }}"></noscript>
+    {{ content_for_header }}    
+
+    <script>
+      window.Shopify = window.Shopify || {theme: {id: {{ theme.id }}, role: '{{ theme.role }}' } };
+      window._template = {
+          directory: "{{ template.directory }}",
+          name: "{{ template.name }}",
+          suffix: "{{ template.suffix }}"
+      };
+    </script>
+    
+  </head>
+  <body 
+    class="
+      min-h-[100vh] break-words 
+      {{ template | handle }}
+    "
+    x-init="initScroll()"
+    x-intersect.half:enter="scroll_up = false"
+    x-intersect.half:leave="scroll_up = true">
+
+    <a href="#root"
+      class="top-4 left-4 color__bg-body focus:translate-y-0 border__button--radius fixed z-50 px-4 py-2 no-underline transform -translate-y-20 shadow-md">
+      {{ 'general.accessibility.skip_to_content' | t }}
+    </a>
+
+    {% assign is_homepage = false %}
+    {% if template.name == 'index' %}
+      {% assign is_homepage = true %}
+    {% endif %}
+
+    {% if is_homepage %}
+      <script>
+        (function() {
+          var header;
+          var ticking = false;
+          var apply = function() {
+            ticking = false;
+            var scrolled = window.scrollY > 10;
+            document.documentElement.classList.toggle('is-scrolled', scrolled);
+            if (header === undefined) header = document.querySelector('header.header--transparent');
+            if (header) header.classList.toggle('header--scrolled', scrolled);
+          };
+          var update = function() {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(apply);
+          };
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', update);
+          } else {
+            update();
+          }
+          window.addEventListener('scroll', update, { passive: true });
+          window.addEventListener('resize', update, { passive: true });
+        })();
+      </script>
+    {% endif %}
+
+    <header class="z-50
+      {{ settings.header_position }}
+      {% if settings.header_position == 'dynamic' %}sticky top-0 left-0 right-0 animation-300{% endif %}
+      {% if settings.header_position == 'sticky' %}sticky top-0{% endif %}
+      {% if is_homepage %}header--transparent{% endif %}"
+      :class="{
+        '!z-50' : hide_header
+      }"
+      x-ref="header"
+      {% if settings.header_position == 'dynamic' %}
+        x-bind:style="is_scrolled ?
+          'transform: translateY(-2rem); opacity: 0;' :
+          'transform: translateY(0%); opacity: 1;'
+        "
+      {% endif %}>
+      {% sections 'header-group' %}
+    </header>
+    {% section 'theme__cart' %}
+    {% section 'theme__menu' %}
+
+    <main id="root" role="main">
+      {{ content_for_layout }}
+    </main>
+
+    <section aria-label="Footer Group">
+      {% sections 'footer-group' %}
+    </section> 
+    {% sections 'overlay-group' %}
+
+    {% render 'theme__localization-popup' %}
+    {% render 'theme__audio-popup' %}
+    {% render 'theme__error-popup' %}
+    {% render 'bundle__eligibility-data' %}
+    {% render 'assets' with 'main.js' %}
+    {% render 'script__fast-add' %}
+    {% render 'theme__scripts' %}
+    
+    {{ settings.snippet_body }}
+</body>
+
+</html>

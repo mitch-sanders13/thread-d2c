@@ -1,0 +1,182 @@
+<!-- sections/help-center.liquid -->
+{% comment %} 
+  Contact form with tabbed list of accordion blocks 
+{% endcomment %}
+
+<section>
+    
+    <div class="flex flex-col justify-center items-center py-8 border--b-width color__border-divider-1">
+        <h1 class="mb-0 type--big">
+        {{ page.title | escape }}
+        </h1>
+    </div>
+
+    <div
+        class="flex flex-col justify-center items-start mx-auto md:flex md:flex-row py-24
+        window--wide">
+
+        <!-- Contact info -->
+        <div class="w-full p-5 mr-3 color__bg-overlay-1 order-2 md:order-1 md:mr-3 md:w-1/3">
+            <div>
+                <p class="text-base lg:text-lg uppercase font-black">Contact Us</p>
+                <p class="uppercase font-thin m-0">Hours</p>
+                <p class="type--small">{{ section.settings.hours_id }}</p>
+            
+                <p class="uppercase font-thin m-0">Address</p>
+                <p class="type--small">{{ section.settings.address_id }}</p>
+            
+                <p class="uppercase font-thin m-0">Email</p>
+                <p class="type--small">{{ section.settings.email_id }}</p>
+            </div>
+        </div>
+
+        <!-- Tablist -->
+        <div x-data="{ activeTab: 'tab1' }" class="w-full md:w-2/3 pb-8 order-1 md:order-2 md:ml-3">
+            <div class="flex color__bg-overlay-1 overflow-hidden overflow-x-auto">
+
+                {%- assign tab_titles = section.settings.tab_titles | split: ',' -%}
+                {%- for title in tab_titles -%}
+                    <input x-model="activeTab" value="tab{{ forloop.index }}" class="hidden" type="radio" id="tab{{ forloop.index }}" name="tabs">
+                    <label class="flex-grow text-center p-2 type__nav type--small" for="tab{{ forloop.index }}" :class="{ 'rounded-none border-t border-l border-r border-b-0 color__border-divider-1 color__bg-body': activeTab === 'tab{{ forloop.index }}' }">{{ title }}</label>
+                {%- endfor -%}
+
+            </div>
+
+            <!-- Tab contents with accordions -->
+            {%- for title in tab_titles -%}
+            {%- assign stripped_title = title | strip  -%}
+
+            <div {% if forloop.first != true %}x-cloak {% endif %} x-show="activeTab === 'tab{{ forloop.index }}'" id="{{ stripped_title }}" class="px-2 border--width color__border-divider-1 color__bg-body text-left {% if forloop.first == true %}block{% endif %}">
+                {% for block in section.blocks %}
+                    {% if block.settings.tab_content_title == stripped_title %}
+
+                        {% unless block.settings.tab_content_headline ==  blank %}
+                        <p class="type--small type__nav py-4 mb-0 border--b-width color__border-divider-1 w-full">{{ block.settings.tab_content_headline }}</p>
+                        {% endunless %}
+            
+                        {% unless block.settings.tab_content_description ==  blank %}
+                        <p class="type--base">{{ block.settings.tab_content_description }}</p>
+                        {% endunless %}
+
+                        {% unless block.settings.tab_content_question ==  blank %}
+                        {% capture accordion_content %}
+                            <div class="max-w-prose p-0 m-0 type--base">
+                                {{ block.settings.tab_content_answer }}
+                            </div>
+                        {% endcapture %}
+                        {% render 'component__accordion', 
+                            index: forloop.index,
+                            button_label: block.settings.tab_content_question, 
+                            button_class: "!px-0",
+                            container_class: "border--b-width color__border-divider-1 w-full",
+                            content: accordion_content,
+                            inner_class: 'mb-4' %}
+                        {% endunless %}
+
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {%- endfor -%}
+            
+            <!-- Trigger for Modal -->
+            <a href="/pages/contact-us" class="btn btn--secondary mt-6">Ask a question</a>
+            <hr class="block md:hidden mt-8">
+        </div>
+        
+    </div>
+</section>
+
+{% schema %}
+{
+    "name": "[custom] Help center",
+    "settings": [
+        {
+        "type": "header",
+        "content": "CONTACT"
+        },
+        {
+        "type": "text",
+        "id": "hours_id",
+        "label": "Hours",
+        "default": "M-F 10AM-4PM (MST)"
+        },
+        {
+        "type": "text",
+        "id": "address_id",
+        "label": "Address",
+        "default": "125 W 500 S PROVO, UT 84601"
+        },
+        {
+        "type": "text",
+        "id": "email_id",
+        "label": "Email",
+        "default": "contact@threadwallets.com"
+        },
+        {
+        "type": "header",
+        "content": "TABBED LIST"
+        },
+        {
+        "type": "text",
+        "id": "tab_titles",
+        "label": "Tab titles",
+        "info": "Comma separated list of tab titles",
+        "default": "General, Shipping, Returns, Warranty, Collaboration"
+        }
+    ],
+    "blocks": [
+        {
+            "type":"Accordions",
+            "name":"Accordion",
+            "limit":30,
+            "settings":[
+                {
+                "type": "text",
+                "id": "tab_content_title",
+                "label": "Tab",
+                "info": "What tab does this content belong to? This should match the title for the desired tab exactly."
+                },
+                {
+                "type": "text",
+                "id": "tab_content_headline",
+                "label": "Headline"
+                },
+                {
+                "type": "text",
+                "id": "tab_content_description",
+                "label": "Description"
+                },
+                {
+                "type": "text",
+                "id": "tab_content_question",
+                "label": "Question"
+                },
+                {
+                "type": "richtext",
+                "id": "tab_content_answer",
+                "label": "Answer"
+                }
+            ]
+        }
+    ],
+    "presets": [
+        {
+            "name":"[custom] Help center"
+        }
+    ]
+}
+{% endschema %}
+
+
+
+
+
+
+
+
+
+
+
+
+
