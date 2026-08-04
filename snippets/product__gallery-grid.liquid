@@ -93,6 +93,12 @@
         {% endif %}
       {% endfor %}
 
+      {% render 'product__presale-badge',
+        background: 'secondary',
+        text: 'secondary',
+        border: 'secondary'
+      %}
+
       {% if settings.savings_badge != "none" %}
         {% if product.price < product.compare_at_price %}
           {% if settings.savings_badge == "percent" %}
@@ -264,6 +270,12 @@
               content: badge_content %}
           {% endif %}
         {% endfor %}
+
+        {% render 'product__presale-badge',
+          background: 'secondary',
+          text: 'secondary',
+          border: 'secondary'
+        %}
         
         {% if settings.savings_badge != "none" %}
           {% if product.price < product.compare_at_price %}

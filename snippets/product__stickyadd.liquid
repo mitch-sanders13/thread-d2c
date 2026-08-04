@@ -147,7 +147,7 @@
           role="button"
           @click.prevent="
             if (cart_behavior === 'drawer') cart_drawer = true;
-            addCartItem(defaultVariantId, defaultSellingPlanId, quantity, true);
+            addCartItem(defaultVariantId, defaultSellingPlanId, quantity, true, document.getElementsByClassName('custom-input_{{ product.handle }}'));
             button_loading = true;
             option_popup = false;
             setTimeout(function(){ button_loading = false}, 500);"
@@ -155,6 +155,8 @@
           <div class="btn__content">
             {% if product.metafields.custom.button_text %}
               {{ product.metafields.custom.button_text }} {% if settings.type_seperator == 'dot' %}·{% else %}|{% endif %}
+            {% elsif template.suffix == 'presale' %}
+              {{ 'products.presale.pre_order' | t }} {% if settings.type_seperator == 'dot' %}·{% else %}|{% endif %}
             {% else %}
             {{ 'products.general.add_to_cart' | t }} {% if settings.type_seperator == 'dot' %}·{% else %}|{% endif %}
             {% endif %}

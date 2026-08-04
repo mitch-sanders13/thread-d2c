@@ -374,7 +374,9 @@ const cart = {
     let properties = document.getElementsByClassName(`custom-input_${productHandle}`);
     if (properties) {
       for (const property of properties) {
-        propertiesArr.push([property.name, property.value]);
+        // Inputs use name="properties[Key]"; Cart API wants { Key: value }
+        let name = property.name.replace(/^properties\[/, "").replace(/\]$/, "");
+        propertiesArr.push([name, property.value]);
       }
       if (propertiesArr.length > 0) {
         propertiesObj = Object.fromEntries(propertiesArr);
@@ -453,7 +455,9 @@ const cart = {
     if (properties instanceof HTMLCollection) {
       let propertiesArr = [];
       for (const property of properties) {
-        propertiesArr.push([property.name, property.value]);
+        // Inputs use name="properties[Key]"; Cart API wants { Key: value }
+        let name = property.name.replace(/^properties\[/, "").replace(/\]$/, "");
+        propertiesArr.push([name, property.value]);
       }
       if (propertiesArr.length > 0) {
         propertiesObj = Object.fromEntries(propertiesArr);
