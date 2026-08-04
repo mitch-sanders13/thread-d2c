@@ -1626,3 +1626,12 @@
   opacity: 1;
   font-weight: 700;
 }
+
+/* ============ Market Tote PDP CTA ============ */
+.market-tote-pdp-cta {
+  width: 100%;
+}
+.market-tote-pdp-cta__btn {
+  width: 100%;
+}
+

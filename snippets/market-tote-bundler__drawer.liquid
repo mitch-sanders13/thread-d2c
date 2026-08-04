@@ -1,0 +1,163 @@
+{% comment %}
+  Slide-over drawer that hosts the Market Tote bundler wizard via the
+  Section Rendering API (loads sections/market-tote-bundler.liquid from
+  the standalone page template).
+
+  Inputs:
+    - drawer_id: REQUIRED unique key
+    - bundle_page_path: defaults to theme setting /pages/build-your-tote-bundle
+    - bundle_section_id: defaults to 'market_tote_bundler'
+    - title: drawer header text
+
+  External API:
+    - window.dispatchEvent(new CustomEvent('market-tote-drawer:open', {
+        detail: { drawerId, mode, payload }
+      }))
+        mode: 'lock' — PDP CTA. payload: { slotLabel, productHandle }
+    - window.dispatchEvent(new CustomEvent('market-tote-drawer:close'))
+{% endcomment %}
+
+{% doc %}
+  Drawer host for the Market Tote bundler wizard.
+  @param {string} drawer_id - Unique drawer id for event targeting
+  @param {string} [bundle_page_path] - Page path that hosts the bundler section
+  @param {string} [bundle_section_id] - Section key in the page JSON template
+  @param {string} [title] - Drawer header title
+  @example
+  {% render 'market-tote-bundler__drawer', drawer_id: 'market-tote-drawer-pdp' %}
+{% enddoc %}
+
+{%- assign _drawer_id = drawer_id | default: 'market-tote-drawer' -%}
+{%- assign _bundle_page_path = bundle_page_path | default: settings.market_tote_page_path | default: '/pages/build-your-tote-bundle' -%}
+{%- assign _bundle_section_id = bundle_section_id | default: 'market_tote_bundler' -%}
+{%- assign _title = title | default: settings.market_tote_drawer_title | default: 'Build Your Tote Bundle' -%}
+
+<div
+  class="bundle-drawer market-tote-drawer"
+  data-drawer-id="{{ _drawer_id }}"
+  x-data="{
+    open: false,
+    loaded: false,
+    loading: false,
+    error: '',
+    bundlePagePath: '{{ _bundle_page_path | escape }}',
+    bundleSectionId: '{{ _bundle_section_id | escape }}',
+    pendingMode: null,
+    pendingPayload: null,
+
+    init() {
+      var self = this;
+      var myId = '{{ _drawer_id | escape }}';
+      window.addEventListener('market-tote-drawer:open', function(e) {
+        if (!e.detail || e.detail.drawerId !== myId) return;
+        self.pendingMode = e.detail.mode || null;
+        self.pendingPayload = e.detail.payload || null;
+        self.openDrawer();
+      });
+      window.addEventListener('market-tote-drawer:close', function() {
+        self.open = false;
+      });
+    },
+
+    async openDrawer() {
+      this.open = true;
+      if (this.loaded) {
+        this.$nextTick(() => this.applyMode());
+        return;
+      }
+      if (this.loading) return;
+      this.loading = true;
+      this.error = '';
+      try {
+        let url = this.bundlePagePath + '?section_id=' + this.bundleSectionId;
+        const previewId = new URLSearchParams(window.location.search || '').get('preview_theme_id');
+        if (previewId) url += '&preview_theme_id=' + encodeURIComponent(previewId);
+        const r = await fetch(url, { headers: { 'Accept': 'text/html' }, credentials: 'same-origin' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const html = await r.text();
+        const target = this.$refs.body;
+        if (!target) return;
+        target.innerHTML = html;
+        // Scripts inserted via innerHTML never run — clone/replace so the
+        // Alpine factory + JSON data from the section execute.
+        target.querySelectorAll('script').forEach(function(oldScript) {
+          var newScript = document.createElement('script');
+          for (var i = 0; i < oldScript.attributes.length; i++) {
+            var a = oldScript.attributes[i];
+            newScript.setAttribute(a.name, a.value);
+          }
+          newScript.textContent = oldScript.textContent;
+          oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+        if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+          window.Alpine.initTree(target);
+        }
+        this.loaded = true;
+        this.$nextTick(() => this.applyMode());
+      } catch (e) {
+        console.error('[market-tote-drawer]', e);
+        this.error = 'Could not load the tote bundler. Please try again.';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    builderData() {
+      const target = this.$refs.body;
+      if (!target || !window.Alpine) return null;
+      const el = target.querySelector('[x-data^=&quot;marketToteBundler_&quot;]');
+      if (!el) return null;
+      return window.Alpine.$data(el);
+    },
+
+    applyMode() {
+      const data = this.builderData();
+      if (!data) return;
+      if (this.pendingMode === 'lock' && this.pendingPayload) {
+        if (typeof data.lockSlot === 'function') {
+          data.lockSlot(this.pendingPayload.slotLabel, this.pendingPayload.productHandle);
+        }
+      }
+    }
+  }"
+  x-init="init()"
+  x-show="open"
+  x-cloak
+  @keydown.escape.window="open = false">
+
+  <div
+    class="bundle-drawer__overlay"
+    x-show="open"
+    x-transition.opacity
+    @click="open = false"></div>
+
+  <div
+    class="bundle-drawer__panel"
+    x-show="open"
+    x-transition:enter="transition transform ease-out duration-300"
+    x-transition:enter-start="translate-x-full"
+    x-transition:enter-end="translate-x-0"
+    x-transition:leave="transition transform ease-in duration-200"
+    x-transition:leave-start="translate-x-0"
+    x-transition:leave-end="translate-x-full"
+    role="dialog"
+    aria-modal="true"
+    aria-label="{{ _title | escape }}">
+
+    <header class="bundle-drawer__header">
+      <h3 class="m-0">{{ _title }}</h3>
+      <button
+        type="button"
+        class="bundle-drawer__close"
+        aria-label="Close"
+        @click="open = false">×</button>
+    </header>
+
+    <div class="bundle-drawer__body">
+      <div x-show="loading" x-cloak class="p-6 text-center type--small">Loading…</div>
+      <div x-show="error" x-cloak class="p-6 text-center type--small color__text-error" x-text="error"></div>
+      <div x-ref="body"></div>
+    </div>
+
+  </div>
+</div>

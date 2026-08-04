@@ -2972,5 +2972,55 @@
       { "type": "range", "id": "trifecta_dropdown_grid_gap","label": "Dropdown swatch grid gap (px)",          "min": 0, "max": 24, "step": 1, "default": 8 },
       { "type": "range", "id": "trifecta_dropdown_swatch_min", "label": "Dropdown swatch min width (px)",       "min": 48, "max": 160, "step": 4, "default": 72 }
     ]
+  },
+  {
+    "name": "Market Tote bundle",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Buy-3 Market Tote bundler. Create a matching 25% discount in Shopify admin (Discounts) and enter its code below. Customers are silently sent through /discount/CODE after add-to-cart."
+      },
+      {
+        "type": "checkbox",
+        "id": "market_tote_pdp_enable",
+        "label": "Show \"Build a tote bundle\" CTA on Market Tote PDPs",
+        "default": true
+      },
+      {
+        "type": "collection",
+        "id": "market_tote_collection",
+        "label": "Market Tote collection",
+        "info": "Used for PDP eligibility and as the default product source. Prefer reusable-market-tote-bags."
+      },
+      {
+        "type": "text",
+        "id": "market_tote_page_path",
+        "label": "Bundler page path",
+        "default": "/pages/build-your-tote-bundle",
+        "info": "Create a page in Shopify admin, assign the \"market-tote-bundler\" template, and match that URL here. The PDP drawer loads the wizard from this page."
+      },
+      {
+        "type": "text",
+        "id": "market_tote_pdp_cta_text",
+        "label": "PDP button text",
+        "default": "Build a tote bundle — Save 25%"
+      },
+      {
+        "type": "text",
+        "id": "market_tote_drawer_title",
+        "label": "Drawer title",
+        "default": "Build Your Tote Bundle"
+      },
+      {
+        "type": "header",
+        "content": "Checkout discount"
+      },
+      {
+        "type": "text",
+        "id": "market_tote_discount_code",
+        "label": "Market Tote discount code",
+        "info": "Must match a discount created in Shopify admin. Section-level discount_code overrides this when set."
+      }
+    ]
   }
 ]

@@ -1,0 +1,28 @@
+{
+  "sections": {
+    "market_tote_bundler": {
+      "type": "market-tote-bundler",
+      "settings": {
+        "heading": "Build Your Tote Bundle",
+        "subheading": "<p>Pick 3 Market Totes and save 25%</p>",
+        "savings_label": "Save 25% when you buy 3 Market Totes",
+        "cta_text": "Add Bundle to Cart",
+        "source_collection": "reusable-market-tote-bags",
+        "slot_1_label": "Tote 1",
+        "slot_2_label": "Tote 2",
+        "slot_3_label": "Tote 3",
+        "discount_type": "percent",
+        "discount_value": 25,
+        "discount_code": "",
+        "spacing_top": 60,
+        "spacing_bottom": 60,
+        "layout_horizontal": "window",
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "style_border": "",
+        "visibility": ""
+      }
+    }
+  },
+  "order": ["market_tote_bundler"]
+}

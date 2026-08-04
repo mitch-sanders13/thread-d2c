@@ -1,0 +1,62 @@
+{% comment %}
+  PDP entry for the Market Tote bundler. Shows only when the current
+  product belongs to the configured Market Tote collection (default:
+  reusable-market-tote-bags). Opens the full wizard in a drawer with
+  this product locked as Tote 1.
+
+  Cart upsell is intentionally skipped for V1.
+{% endcomment %}
+
+{% doc %}
+  Market Tote PDP CTA + drawer host. Renders nothing when the product
+  is not in the Market Tote collection or the feature is disabled.
+  @example
+  {% render 'market-tote-bundler__pdp-cta' %}
+{% enddoc %}
+
+{%- liquid
+  assign tote_handle = 'reusable-market-tote-bags'
+  if settings.market_tote_collection.handle != blank
+    assign tote_handle = settings.market_tote_collection.handle
+  endif
+
+  assign is_market_tote = false
+  for c in product.collections
+    if c.handle == tote_handle
+      assign is_market_tote = true
+      break
+    endif
+  endfor
+
+  assign drawer_id = 'market-tote-drawer-pdp-' | append: product.id
+  assign cta_text = settings.market_tote_pdp_cta_text | default: 'Build a tote bundle — Save 25%'
+  assign page_path = settings.market_tote_page_path | default: '/pages/build-your-tote-bundle'
+-%}
+
+{%- if settings.market_tote_pdp_enable and is_market_tote -%}
+  <div class="market-tote-pdp-cta px-4 py-4">
+    <button
+      type="button"
+      class="btn btn--secondary w-full market-tote-pdp-cta__btn"
+      @click="
+        window.dispatchEvent(new CustomEvent('market-tote-drawer:open', {
+          detail: {
+            drawerId: {{ drawer_id | json }},
+            mode: 'lock',
+            payload: {
+              slotLabel: 'Tote 1',
+              productHandle: {{ product.handle | json }}
+            }
+          }
+        }));
+      ">
+      {{ cta_text }}
+    </button>
+  </div>
+
+  {% render 'market-tote-bundler__drawer',
+      drawer_id: drawer_id,
+      bundle_page_path: page_path,
+      bundle_section_id: 'market_tote_bundler',
+      title: settings.market_tote_drawer_title %}
+{%- endif -%}

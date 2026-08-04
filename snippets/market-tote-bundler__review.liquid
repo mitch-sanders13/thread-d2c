@@ -1,0 +1,71 @@
+{% comment %}
+  Final review step for the Market Tote bundler. No auto-match toggle —
+  customers may intentionally pick the same tote in multiple slots.
+
+  Inputs:
+    - discount_type / discount_value — passed through to price summary
+    - cta_text — final add-to-cart button label
+{% endcomment %}
+
+{% doc %}
+  Review screen for the Market Tote 3-pack bundler.
+  @param {string} discount_type - percent | fixed_off | none
+  @param {number} discount_value - display savings amount
+  @param {string} [cta_text] - Final CTA button label
+  @example
+  {% render 'market-tote-bundler__review', discount_type: 'percent', discount_value: 25, cta_text: 'Add Bundle to Cart' %}
+{% enddoc %}
+
+{%- assign button_label = cta_text | default: 'Add Bundle to Cart' -%}
+
+<h3 class="bundle-wizard__review-title">Review your tote bundle</h3>
+
+<ul class="bundle-wizard__review-list">
+  <template x-for="(slot, idx) in slots" :key="idx">
+    <li
+      class="bundle-wizard__review-item"
+      role="button"
+      tabindex="0"
+      @click="reviewMode = false; goToStep(idx)"
+      @keydown.enter.prevent="reviewMode = false; goToStep(idx)">
+      <img
+        :src="currentProduct(idx)?.swatchImage"
+        :alt="currentProduct(idx)?.title || slot.label"
+        width="80"
+        height="80"
+        loading="lazy" />
+      <div>
+        <p class="type--xsmall opacity-60" style="text-transform:uppercase;letter-spacing:0.5px;" x-text="slot.label"></p>
+        <p class="font-medium" x-text="currentProduct(idx)?.title || 'Pick one'"></p>
+        <p class="type--small" x-text="currentProduct(idx) ? formatMoney(currentProduct(idx).price) : ''"></p>
+      </div>
+      <span class="bundle-wizard__review-edit" aria-hidden="true">Change</span>
+    </li>
+  </template>
+</ul>
+
+<div style="padding: 16px 16px 0;">
+  {% render 'bundle__price-summary',
+      discount_type: discount_type,
+      discount_value: discount_value %}
+</div>
+
+<div class="bundle-wizard__review-cta">
+  <button
+    type="button"
+    class="btn btn--primary w-full"
+    :disabled="!canAddToCart() || cartLoading"
+    :class="{ 'opacity-50 cursor-not-allowed': !canAddToCart() || cartLoading }"
+    @click="finalizeBundle()">
+    <span
+      x-show="!cartLoading"
+      x-text="{{ button_label | json }}"></span>
+    <span x-show="cartLoading" x-cloak>Adding…</span>
+  </button>
+
+  <p
+    class="type--small pt-2 text-center"
+    x-show="incompleteReason"
+    x-text="incompleteReason"
+    x-cloak></p>
+</div>
