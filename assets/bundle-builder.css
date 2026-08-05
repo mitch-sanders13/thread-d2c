@@ -1733,6 +1733,12 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: filter 120ms ease, opacity 120ms ease;
+}
+.mtb-pdp__hero.is-loading img {
+  filter: blur(6px);
+  transform: scale(1.03);
+  opacity: 0.9;
 }
 
 .mtb-pdp__title {

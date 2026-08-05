@@ -33,38 +33,38 @@
           class="mtb-pdp__thumb"
           :class="{ 'is-active': galleryIndex === imgIdx }"
           :aria-selected="galleryIndex === imgIdx"
-          @click="selectGallery(imgIdx)">
+          @click="selectGallery(imgIdx)"
+          @mouseenter="prefetchUrl(image.hero900 || image.hero)">
           <img
             :src="image.thumb"
             width="80"
             height="80"
             :alt="(previewProduct()?.title || '') + ' image ' + (imgIdx + 1)"
-            loading="lazy" />
+            loading="lazy"
+            decoding="async" />
         </button>
       </template>
     </div>
 
-    <div class="mtb-pdp__hero">
-      <template x-if="currentHero()">
-        <img
-          :src="currentHero().hero"
-          :srcset="(currentHero().hero600 || '') + ' 600w, ' + (currentHero().hero900 || '') + ' 900w, ' + (currentHero().hero || '') + ' 1200w'"
-          sizes="(min-width: 990px) 45vw, 100vw"
-          width="1200"
-          height="1200"
-          :alt="previewProduct()?.title || ''"
-          loading="eager" />
-      </template>
+    <div class="mtb-pdp__hero" :class="{ 'is-loading': !heroReady }">
+      <img
+        x-show="heroSrc"
+        :src="heroSrc"
+        :srcset="heroSrcset || null"
+        sizes="(min-width: 990px) 45vw, 100vw"
+        width="1200"
+        height="1200"
+        :alt="heroAlt"
+        decoding="async"
+        fetchpriority="high" />
     </div>
   </div>
 
   <div class="mtb-pdp__info">
-    <template x-if="previewProduct()">
-      <div>
-        <h3 class="mtb-pdp__title" x-text="previewProduct().title"></h3>
-        <p class="mtb-pdp__price" x-text="formatMoney(previewProduct().price)"></p>
-      </div>
-    </template>
+    <div x-show="previewProduct()">
+      <h3 class="mtb-pdp__title" x-text="previewProduct()?.title || ''"></h3>
+      <p class="mtb-pdp__price" x-text="previewProduct() ? formatMoney(previewProduct().price) : ''"></p>
+    </div>
 
     <div class="mtb-pdp__styles-header">
       <p class="mtb-pdp__styles-label">
@@ -86,6 +86,8 @@
           :aria-selected="isPreview(product.handle)"
           :aria-label="product.title"
           :disabled="!product.available"
+          @mouseenter="prefetchProduct(product.handle)"
+          @focus="prefetchProduct(product.handle)"
           @click="selectPreview(product.handle)">
           <span class="mtb-pdp__swatch-img">
             <img
@@ -93,7 +95,8 @@
               width="120"
               height="120"
               :alt="product.title"
-              loading="lazy" />
+              loading="lazy"
+              decoding="async" />
             <span
               class="mtb-pdp__swatch-check"
               x-show="isPreview(product.handle)"

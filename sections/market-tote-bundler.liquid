@@ -118,6 +118,15 @@
       picks: [],
       previewHandle: null,
       galleryIndex: 0,
+      // Stable hero <img> state — avoid x-if remount flash on SKU switch.
+      heroSrc: '',
+      heroSrcset: '',
+      heroAlt: '',
+      heroReady: false,
+      _pendingHero: '',
+      _prefetchCache: {},
+      // handle|galleryIndex → { src, srcset } after first successful load
+      _heroCache: {},
       requiredCount: {{ required_count }},
       cartLoading: false,
       incompleteReason: '',
@@ -135,8 +144,11 @@
         this.products = data.products || [];
         this.picks = [];
         this.galleryIndex = 0;
+        this._prefetchCache = {};
+        this._heroCache = {};
         var first = this.products.find(function(p){ return p.available; }) || this.products[0] || null;
         this.previewHandle = first ? first.handle : null;
+        this.applyHero(true);
       },
 
       lockSlot(slotLabel, productHandle) {
@@ -153,6 +165,7 @@
         }
         this.previewHandle = productHandle;
         this.galleryIndex = 0;
+        this.applyHero(true);
         if (this.picks.length === 0 && match.available) {
           this.picks = [productHandle];
         }
@@ -173,17 +186,112 @@
         if (!images.length) {
           var p = this.previewProduct();
           if (!p) return null;
-          return { hero: p.swatchImage, hero600: p.swatchImage, hero900: p.swatchImage };
+          return {
+            thumb: p.swatchImage,
+            hero: p.swatchImage,
+            hero600: p.swatchImage,
+            hero900: p.swatchImage
+          };
         }
         var idx = this.galleryIndex;
         if (idx < 0 || idx >= images.length) idx = 0;
         return images[idx];
       },
 
+      heroSrcsetFor(image) {
+        if (!image) return '';
+        return (image.hero600 || '') + ' 600w, ' + (image.hero900 || '') + ' 900w, ' + (image.hero || '') + ' 1200w';
+      },
+
+      _heroCacheKey() {
+        return (this.previewHandle || '') + '|' + this.galleryIndex;
+      },
+
+      // Show a tiny already-cached image immediately, then swap in the
+      // large hero once it finishes loading (no <img> remount).
+      applyHero(useSwatchPlaceholder) {
+        var p = this.previewProduct();
+        var image = this.currentHero();
+        if (!p || !image) return;
+
+        this.heroAlt = p.title || '';
+        var cacheKey = this._heroCacheKey();
+        var cached = this._heroCache[cacheKey];
+        // Instant swap when this SKU/gallery frame was already loaded
+        if (cached) {
+          if (this.heroSrc === cached.src && this.heroReady) return;
+          this._pendingHero = cached.src;
+          this.heroSrc = cached.src;
+          this.heroSrcset = cached.srcset || '';
+          this.heroReady = true;
+          return;
+        }
+
+        var placeholder = useSwatchPlaceholder
+          ? (p.swatchImage || image.thumb || image.hero600 || image.hero)
+          : (image.thumb || p.swatchImage || image.hero600 || image.hero);
+
+        var target = image.hero || image.hero900 || placeholder;
+        var targetSrcset = this.heroSrcsetFor(image);
+
+        // Already showing this large hero — nothing to do
+        if (this.heroSrc === target && this.heroReady) return;
+
+        this.heroSrc = placeholder;
+        this.heroSrcset = '';
+        this.heroReady = false;
+        this._loadHero(target, targetSrcset, cacheKey);
+      },
+
+      _loadHero(src, srcset, cacheKey) {
+        if (!src) return;
+        this._pendingHero = src;
+        var self = this;
+        var img = new Image();
+        img.onload = function() {
+          if (self._pendingHero !== src) return;
+          self.heroSrc = src;
+          self.heroSrcset = srcset || '';
+          self.heroReady = true;
+          if (cacheKey) {
+            self._heroCache[cacheKey] = { src: src, srcset: srcset || '' };
+          }
+        };
+        img.onerror = function() {
+          if (self._pendingHero !== src) return;
+          self.heroReady = true;
+        };
+        if (srcset) {
+          img.sizes = '(min-width: 990px) 45vw, 100vw';
+          img.srcset = srcset;
+        }
+        img.src = src;
+      },
+
+      // Warm the primary hero for a tote on swatch hover/focus only —
+      // not a bulk preload of the whole collection (egress-safe).
+      prefetchProduct(handle) {
+        var p = this.productByHandle(handle);
+        if (!p) return;
+        var image = (p.images && p.images[0]) || null;
+        var url = image
+          ? (image.hero900 || image.hero || p.swatchImage)
+          : p.swatchImage;
+        this.prefetchUrl(url);
+      },
+
+      prefetchUrl(url) {
+        if (!url || this._prefetchCache[url]) return;
+        this._prefetchCache[url] = true;
+        var img = new Image();
+        img.src = url;
+      },
+
       selectGallery(index) {
         var images = this.previewImages();
         if (index < 0 || index >= images.length) return;
         this.galleryIndex = index;
+        this.applyHero(false);
       },
 
       productByHandle(handle) {
@@ -201,6 +309,7 @@
         if (!p) return;
         this.previewHandle = handle;
         this.galleryIndex = 0;
+        this.applyHero(true);
       },
 
       isPreview(handle) {
