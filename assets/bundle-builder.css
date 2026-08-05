@@ -478,26 +478,58 @@
   font-size: 0.75rem;
   font-weight: 600;
 }
+/* Quiet Change affordance — deliberately low contrast so it doesn't
+ * compete with the Add Bundle CTA. Desktop: nearly invisible until
+ * the card is hovered, focused, or its dropdown is open. Mobile: always
+ * visible at low contrast (no reliable hover). */
 .bundle-pdp-preview__item-change-hint {
   margin-top: 3px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  font-size: 0.58rem;
+  gap: 2px;
+  font-size: 0.55rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
-  opacity: 0.65;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+  opacity: 0.4;
+  transition: opacity 0.15s ease;
 }
-.bundle-pdp-preview__item-card:hover .bundle-pdp-preview__item-change-hint { opacity: 1; }
+.bundle-pdp-preview__item-card:hover .bundle-pdp-preview__item-change-hint,
+.bundle-pdp-preview__item-card:focus-visible .bundle-pdp-preview__item-change-hint,
+.bundle-pdp-preview__item.is-active-dropdown .bundle-pdp-preview__item-change-hint {
+  opacity: 0.85;
+}
+@media (hover: hover) and (pointer: fine) {
+  /* Desktop with a real pointer: hide at rest so the price stays the
+   * last strong signal on the card. Touch devices keep the quieter
+   * resting opacity above. */
+  .bundle-pdp-preview__item-change-hint {
+    opacity: 0;
+  }
+  .bundle-pdp-preview__item-card:hover .bundle-pdp-preview__item-change-hint,
+  .bundle-pdp-preview__item-card:focus-visible .bundle-pdp-preview__item-change-hint,
+  .bundle-pdp-preview__item.is-active-dropdown .bundle-pdp-preview__item-change-hint {
+    opacity: 0.75;
+  }
+}
 .bundle-pdp-preview__item-caret {
   display: inline-block;
   transition: transform 0.2s ease;
-  font-size: 0.6rem;
+  font-size: 0.55rem;
 }
 .bundle-pdp-preview__item.is-active-dropdown .bundle-pdp-preview__item-caret {
   transform: rotate(180deg);
+}
+
+/* Nudge shown when 1–2 slots are checked — explains why Save 10% left
+ * the CTA and how to get it back. */
+.bundle-pdp-preview__bundle-hint {
+  margin: 0 0 10px;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  opacity: 0.7;
 }
 
 .bundle-pdp-preview__summary {
@@ -529,6 +561,17 @@
   display: inline-flex;
   align-items: baseline;
   opacity: 0.7;
+}
+/* Dollar savings callout — sits after the struck compare price so the
+ * discount is concrete ($X.XX) not only a percent on the button. */
+.bundle-pdp-preview__summary-save {
+  display: inline-flex;
+  align-items: baseline;
+  font-size: 0.85em;
+  font-weight: 600;
+  /* Same bronze as Market Tote / thread accents so the savings
+   * callout matches the rest of the brand price treatment. */
+  color: var(--thread-bronze, var(--thread-gold, #c08951));
 }
 
 .bundle-pdp-preview__actions {

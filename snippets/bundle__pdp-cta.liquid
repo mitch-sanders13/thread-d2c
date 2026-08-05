@@ -511,6 +511,11 @@
   /* ----- Spacing (Heading + Items + Summary + Actions) ----- */
   .bundle-pdp-preview__heading      { margin-bottom: {{ settings.trifecta_heading_mb | default: 12 }}px; }
   .bundle-pdp-preview__items        { gap: {{ settings.trifecta_items_gap | default: 8 }}px; margin-bottom: {{ settings.trifecta_items_mb | default: 12 }}px; }
+  /* Incomplete-bundle helper sits between the card row and the CTA /
+   * dropdown. Uses a fixed small gap so it doesn't fight the merchant's
+   * items_mb setting (that setting still controls space below the row
+   * when the hint is hidden). */
+  .bundle-pdp-preview__bundle-hint  { margin: -4px 0 10px; }
   /* Summary now lives BELOW the actions per merchant layout: the
    * mb setting becomes the gap between button and summary, and the
    * mt setting becomes the gap above the button (still the gap
@@ -941,14 +946,35 @@
           <p class="bundle-pdp-preview__item-type" x-text="currentProduct(sIdx).type || ''"></p>
           {%- endif -%}
           <p class="bundle-pdp-preview__item-price" x-text="formatMoney(currentProduct(sIdx).price || 0)"></p>
+          {%- comment -%}
+            Quiet Change affordance: sits below the price so it doesn't
+            compete with the Add Bundle CTA. On desktop the label stays
+            nearly invisible until the card is hovered / focused / open;
+            mobile keeps a low-contrast caret+label always visible
+            (no hover). See .bundle-pdp-preview__item-change-hint in
+            assets/bundle-builder.css.
+          {%- endcomment -%}
           <span class="bundle-pdp-preview__item-change-hint" x-cloak>
-            <span x-text="dropdownOpen === sIdx ? 'Close' : 'Change'"></span>
+            <span class="bundle-pdp-preview__item-change-label" x-text="dropdownOpen === sIdx ? 'Close' : 'Change'"></span>
             <span class="bundle-pdp-preview__item-caret" aria-hidden="true">▾</span>
           </span>
         </button>
       </li>
     </template>
   </ol>
+
+  {%- comment -%}
+    Incomplete-bundle helper — only when 1–2 slots are checked.
+    Explains why the CTA lost "Save 10%" and nudges the customer back
+    to the full Trifecta. Hidden at 0 (CTA already says "Select at
+    least one item") and at 3 (discount unlocked).
+  {%- endcomment -%}
+  <p
+    class="bundle-pdp-preview__bundle-hint"
+    x-show="checkedCount() > 0 && checkedCount() < 3"
+    x-cloak>
+    Select all 3 to unlock 10% off
+  </p>
 
   {%- comment -%}
     Dropdown panel — single panel anchored below the row, swaps content
@@ -1063,6 +1089,15 @@
       {%- endcomment -%}
       <strong class="{% unless settings.trifecta_price_override %}pdp-price-regular {% endunless %}bundle-pdp-preview__summary-now" x-text="formatMoney(totals().total)"></strong>
       <s class="{% unless settings.trifecta_price_override %}pdp-price-compare {% endunless %}bundle-pdp-preview__summary-was" x-show="totals().bundled" x-text="formatMoney(totals().subtotal)" x-cloak></s>
+      {%- comment -%}
+        Dollar savings next to the struck price so "Save 10%" isn't
+        abstract — only when all 3 slots are checked (bundled).
+      {%- endcomment -%}
+      <span
+        class="bundle-pdp-preview__summary-save"
+        x-show="totals().bundled && totals().savings > 0"
+        x-text="'Save ' + formatMoney(totals().savings)"
+        x-cloak></span>
     </p>
   </div>
 </div>
