@@ -1698,25 +1698,26 @@
   gap: 3px;
   flex: 1 1 0;
   min-width: 0;
-  padding: 5px 4px;
+  padding: 5px 3px;
   margin: 0;
   border: 2px solid #dc2626;
   border-radius: 4px;
   background: transparent;
   color: inherit;
   font: inherit;
-  font-size: 0.62rem;
+  font-size: 0.55rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   text-transform: uppercase;
   cursor: pointer;
-  line-height: 1.15;
+  line-height: 1.1;
   transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 .tri-pdp__slot-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-align: center;
+  white-space: normal;
+  overflow: visible;
+  line-height: 1.15;
 }
 .tri-pdp__slot.is-empty:hover {
   background: rgba(220, 38, 38, 0.06);
@@ -1741,15 +1742,15 @@
 }
 .tri-pdp__slot-check {
   color: #16a34a;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   flex-shrink: 0;
 }
 @media (min-width: 750px) {
   .tri-pdp__slot {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     padding: 6px 8px;
     gap: 4px;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.02em;
   }
 }
 .tri-pdp__type-filters {

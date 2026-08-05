@@ -80,7 +80,9 @@
           }"
           :aria-selected="activeSlotIndex === sIdx"
           @click="selectSlot(sIdx)">
-          <span class="tri-pdp__slot-label" x-text="slot.label"></span>
+          <span
+            class="tri-pdp__slot-label"
+            x-html="(slot.label || '').replace(/ /g, '<br>')"></span>
           <span class="tri-pdp__slot-check" x-show="slotFilled(sIdx)" aria-hidden="true">✓</span>
         </button>
       </template>
