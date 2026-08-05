@@ -1671,7 +1671,9 @@
   font-weight: 700;
 }
 
-/* ============ Trifecta + Market Tote PDP CTA ============ */
+/* ============ Everyday Carry + Market Tote PDP CTA ============
+   Thread Copper fill (--thread-bronze) so both "Build a…" buttons
+   read as the same branded secondary action under Add to cart. */
 .market-tote-pdp-cta,
 .trifecta-pdp-cta {
   width: 100%;
@@ -1681,6 +1683,20 @@
   width: 100%;
   text-align: center;
   text-decoration: none;
+  background-color: var(--thread-bronze, #c08951);
+  border-color: var(--thread-bronze, #c08951);
+  color: #fff;
+}
+.market-tote-pdp-cta__btn:hover,
+.trifecta-pdp-cta__btn:hover {
+  background-color: color-mix(in srgb, var(--thread-bronze, #c08951) 88%, #000);
+  border-color: color-mix(in srgb, var(--thread-bronze, #c08951) 88%, #000);
+  color: #fff;
+  box-shadow: none;
+}
+.market-tote-pdp-cta__btn:focus,
+.trifecta-pdp-cta__btn:focus {
+  color: #fff;
 }
 
 /* Trifecta / Everyday Carry Set slot tabs + type filters */
