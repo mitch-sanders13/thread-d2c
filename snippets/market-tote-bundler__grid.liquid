@@ -1,0 +1,61 @@
+{% comment %}
+  Single product grid for the Market Tote multi-select bundler.
+  Click toggles selection (add / remove). Max 3 handled by the factory.
+{% endcomment %}
+
+{% doc %}
+  Market Tote bundler product grid (multi-select).
+  @example
+  {% render 'market-tote-bundler__grid' %}
+{% enddoc %}
+
+<div class="bundle-wizard__grid" role="group" aria-label="Choose Market Totes">
+  <template x-for="product in visibleProducts()" :key="product.handle">
+    <button
+      type="button"
+      role="checkbox"
+      :aria-checked="isSelected(product.handle)"
+      :aria-label="product.title"
+      :disabled="!product.available || (!isSelected(product.handle) && selectedHandles.length >= requiredCount)"
+      class="bundle-wizard__tile"
+      :class="{
+        'is-selected': isSelected(product.handle),
+        'is-unavailable': !product.available
+      }"
+      @click="toggleProduct(product.handle)">
+      <div class="bundle-wizard__tile-img">
+        <img
+          :src="product.swatchImage"
+          :srcset="(product.swatchImage400 || '') + ' 400w, ' + (product.swatchImage600 || '') + ' 600w, ' + (product.swatchImage900 || '') + ' 900w'"
+          sizes="(min-width: 750px) 25vw, 33vw"
+          width="400"
+          height="400"
+          :alt="product.title"
+          loading="lazy" />
+        <span
+          class="bundle-wizard__tile-check"
+          x-show="isSelected(product.handle)"
+          aria-hidden="true">✓</span>
+      </div>
+      <p class="bundle-wizard__tile-title" x-text="product.title"></p>
+      <p class="bundle-wizard__tile-price" x-text="formatMoney(product.price)"></p>
+    </button>
+  </template>
+</div>
+
+<p
+  class="type--small italic text-center"
+  style="padding: 24px 16px;"
+  x-show="products.length === 0"
+  x-cloak>
+  No Market Totes available.
+</p>
+
+<div class="bundle-wizard__load-more" x-show="hasMore()" x-cloak>
+  <button
+    type="button"
+    class="btn btn--secondary"
+    @click="showMore()">
+    Show more
+  </button>
+</div>

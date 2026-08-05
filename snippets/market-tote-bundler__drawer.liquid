@@ -13,7 +13,7 @@
     - window.dispatchEvent(new CustomEvent('market-tote-drawer:open', {
         detail: { drawerId, mode, payload }
       }))
-        mode: 'lock' — PDP CTA. payload: { slotLabel, productHandle }
+        mode: 'lock' — PDP CTA. payload: { productHandle } (slotLabel optional / ignored)
     - window.dispatchEvent(new CustomEvent('market-tote-drawer:close'))
 {% endcomment %}
 
@@ -114,8 +114,11 @@
       const data = this.builderData();
       if (!data) return;
       if (this.pendingMode === 'lock' && this.pendingPayload) {
-        if (typeof data.lockSlot === 'function') {
-          data.lockSlot(this.pendingPayload.slotLabel, this.pendingPayload.productHandle);
+        var handle = this.pendingPayload.productHandle;
+        if (typeof data.preselect === 'function') {
+          data.preselect(handle);
+        } else if (typeof data.lockSlot === 'function') {
+          data.lockSlot(this.pendingPayload.slotLabel, handle);
         }
       }
     }

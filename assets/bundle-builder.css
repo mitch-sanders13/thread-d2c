@@ -1635,3 +1635,18 @@
   width: 100%;
 }
 
+.market-tote-bundler__remaining {
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 16px 16px;
+  min-height: 1.4em;
+}
+.market-tote-bundler__remaining.is-complete {
+  color: #16a34a;
+}
+.market-tote-bundler__footer .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+

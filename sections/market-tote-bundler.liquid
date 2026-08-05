@@ -1,16 +1,15 @@
 {% comment %}
-  Market Tote bundler — pick 3 Market Totes for a configurable discount.
+  Market Tote bundler — multi-select 3 from one grid.
 
-  Same product may be selected in multiple slots. Discount display is
-  controlled by section settings; real checkout discount is applied via
-  a Shopify discount code (settings.discount_code → silent /discount/CODE
-  fetch after add-to-cart), matching the Trifecta pattern.
+  Click a tote to add it to the selection; click again to deselect.
+  Bottom CTA is Add to Cart only (enabled at exactly 3 selected).
+  Status copy: "Select three/two/one more" until the bundle is full.
 
-  Used in three places:
-    1. Standalone page (templates/page.market-tote-bundler.json)
-    2. PDP drawer — market-tote-bundler__drawer.liquid fetches this
-       section and calls lockSlot() to pin the current product as Tote 1
-    3. Collection pages — drop this section in the theme editor
+  Discount display is section settings; real checkout discount applies via
+  Shopify discount code (silent /discount/CODE after add-to-cart).
+
+  Used on: standalone page, collection sections, PDP drawer (preselects
+  the current product when opened from a Market Tote PDP).
 {% endcomment %}
 
 {%- liquid
@@ -18,13 +17,10 @@
   assign js_id = section.id | replace: '-', '_'
   assign discount_type = section.settings.discount_type
   assign discount_value = section.settings.discount_value | default: 25
-  assign slot_count = 3
+  assign required_count = 3
   assign savings_label = section.settings.savings_label | default: 'Save 25% when you buy 3 Market Totes'
+  assign button_label = section.settings.cta_text | default: 'Add Bundle to Cart'
 
-  comment
-    Resolve source collection. Setting type=collection returns an object
-    via dot access; fall back to the known handle when blank.
-  endcomment
   assign tote_coll = section.settings.source_collection
   if tote_coll == blank
     if settings.market_tote_collection != blank
@@ -66,38 +62,58 @@
       </div>
     {%- endunless -%}
 
-    {% render 'bundle__wizard-header', savings_label: savings_label %}
+    <div class="bundle-wizard__savings-strip">{{ savings_label }}</div>
 
-    {%- for i in (1..slot_count) -%}
-      {%- assign slot_index = i | minus: 1 -%}
-      <div x-show="!reviewMode && currentStep === {{ slot_index }}" x-cloak>
-        {% render 'market-tote-bundler__step', slot_index: slot_index %}
-      </div>
-    {%- endfor -%}
+    <p
+      class="market-tote-bundler__remaining"
+      x-text="remainingLabel()"
+      x-show="remainingCount() > 0"
+      aria-live="polite"></p>
+    <p
+      class="market-tote-bundler__remaining is-complete"
+      x-show="remainingCount() === 0"
+      x-cloak
+      aria-live="polite">
+      Bundle ready — add to cart
+    </p>
 
-    <div x-show="reviewMode" x-cloak>
-      {% render 'market-tote-bundler__review',
+    {% render 'market-tote-bundler__grid' %}
+
+    <div class="px-4 pt-4" x-show="selectedHandles.length > 0" x-cloak>
+      {% render 'bundle__price-summary',
           discount_type: discount_type,
-          discount_value: discount_value,
-          cta_text: section.settings.cta_text %}
+          discount_value: discount_value %}
     </div>
 
-    <div x-show="!reviewMode" x-cloak>
-      {% render 'bundle__wizard-footer' %}
+    <div class="bundle-wizard__footer market-tote-bundler__footer">
+      <p
+        class="bundle-wizard__footer-price"
+        x-text="formatMoney(totalCents())"
+        aria-label="Bundle total"></p>
+      <button
+        type="button"
+        class="btn btn--primary"
+        :disabled="!canAddToCart() || cartLoading"
+        :class="{ 'opacity-50 cursor-not-allowed': !canAddToCart() || cartLoading }"
+        @click="finalizeBundle()">
+        <span x-show="!cartLoading">{{ button_label }}</span>
+        <span x-show="cartLoading" x-cloak>Adding…</span>
+      </button>
     </div>
+
+    <p
+      class="type--small px-4 pb-4 text-center"
+      x-show="incompleteReason"
+      x-text="incompleteReason"
+      x-cloak></p>
 
   </div>
 </section>
 
-{%- comment -%} Product catalog for all 3 slots (same collection) {%- endcomment -%}
 <script type="application/json" id="{{ section_id }}-data">
 {
   "discountCode": {{ section.settings.discount_code | default: settings.market_tote_discount_code | default: '' | strip | json }},
-  "slotLabels": [
-    {{ section.settings.slot_1_label | default: 'Tote 1' | json }},
-    {{ section.settings.slot_2_label | default: 'Tote 2' | json }},
-    {{ section.settings.slot_3_label | default: 'Tote 3' | json }}
-  ],
+  "requiredCount": {{ required_count | json }},
   "products": [
     {%- if tote_coll != blank -%}
       {%- paginate tote_coll.products by 50 -%}
@@ -127,15 +143,14 @@
 (function() {
   function marketToteBundlerFactory_{{ js_id }}() {
     return {
-      slots: [],
+      products: [],
+      selectedHandles: [],
+      requiredCount: {{ required_count }},
       cartLoading: false,
       incompleteReason: '',
       discountCode: '',
-      currentStep: 0,
-      reviewMode: false,
-      visitedSteps: [],
       pageSize: 12,
-      pagesShown: [],
+      pagesShown: 1,
 
       init() {
         var dataEl = document.getElementById('{{ section_id }}-data');
@@ -145,61 +160,72 @@
         catch (e) { console.error('[market-tote-bundler] bad JSON data', e); return; }
 
         this.discountCode = (data.discountCode || '').trim();
-        var products = data.products || [];
-        var labels = data.slotLabels || ['Tote 1', 'Tote 2', 'Tote 3'];
-        var firstAvailable = products.find(function(p){ return p.available; }) || products[0] || null;
-
-        this.slots = labels.map(function(label) {
-          return {
-            label: label,
-            required: true,
-            products: products,
-            selectedHandle: firstAvailable ? firstAvailable.handle : null,
-            locked: false
-          };
-        });
-        this.pagesShown = this.slots.map(function() { return 1; });
-        this.visitedSteps = this.slots.map(function(_, i) { return i === 0; });
+        this.requiredCount = data.requiredCount || {{ required_count }};
+        this.products = data.products || [];
+        this.pagesShown = 1;
+        this.selectedHandles = [];
       },
 
+      // PDP drawer entry: seed the current product as the first pick.
       lockSlot(slotLabel, productHandle) {
-        var target = (slotLabel || '').toLowerCase();
-        for (var i = 0; i < this.slots.length; i++) {
-          if (this.slots[i].label.toLowerCase() !== target) continue;
-          var match = this.slots[i].products.find(function(p){ return p.handle === productHandle; });
-          if (match) {
-            this.slots[i].selectedHandle = productHandle;
-            this.slots[i].locked = true;
-            this.visitedSteps[i] = true;
-            var firstIncomplete = this.firstIncompleteStep();
-            if (firstIncomplete >= 0) this.currentStep = firstIncomplete;
-            return true;
-          }
+        return this.preselect(productHandle);
+      },
+
+      preselect(productHandle) {
+        if (!productHandle) return false;
+        var match = this.products.find(function(p){ return p.handle === productHandle; });
+        if (!match) {
           console.warn('[market-tote-bundler] product not in catalog', productHandle);
           return false;
         }
-        console.warn('[market-tote-bundler] no slot with label', slotLabel);
-        return false;
+        if (this.isSelected(productHandle)) return true;
+        if (this.selectedHandles.length >= this.requiredCount) {
+          this.selectedHandles = this.selectedHandles.slice(0, this.requiredCount - 1);
+        }
+        this.selectedHandles.push(productHandle);
+        return true;
       },
 
-      currentProduct(slotIdx) {
-        var slot = this.slots[slotIdx];
-        if (!slot || !slot.selectedHandle) return null;
-        return slot.products.find(function(p){ return p.handle === slot.selectedHandle; }) || null;
+      isSelected(handle) {
+        return this.selectedHandles.indexOf(handle) !== -1;
       },
 
-      selectColor(slotIdx, handle) {
-        var slot = this.slots[slotIdx];
-        if (!slot || slot.locked) return;
-        slot.selectedHandle = handle;
+      toggleProduct(handle) {
+        var product = this.products.find(function(p){ return p.handle === handle; });
+        if (!product || !product.available) return;
+
+        var idx = this.selectedHandles.indexOf(handle);
+        if (idx !== -1) {
+          this.selectedHandles.splice(idx, 1);
+          return;
+        }
+        if (this.selectedHandles.length >= this.requiredCount) return;
+        this.selectedHandles.push(handle);
+      },
+
+      remainingCount() {
+        return Math.max(0, this.requiredCount - this.selectedHandles.length);
+      },
+
+      remainingLabel() {
+        var n = this.remainingCount();
+        if (n <= 0) return '';
+        if (n === 1) return 'Select one more';
+        if (n === 2) return 'Select two more';
+        return 'Select three more';
+      },
+
+      productByHandle(handle) {
+        return this.products.find(function(p){ return p.handle === handle; }) || null;
       },
 
       subtotalCents() {
         var sum = 0;
-        for (var i = 0; i < this.slots.length; i++) {
-          var p = this.currentProduct(i);
+        var self = this;
+        this.selectedHandles.forEach(function(handle) {
+          var p = self.productByHandle(handle);
           if (p) sum += p.price;
-        }
+        });
         return sum;
       },
 
@@ -217,6 +243,7 @@
       },
 
       totalCents() {
+        if (!this.canAddToCart()) return this.subtotalCents();
         return Math.max(0, this.subtotalCents() - this.discountCents());
       },
 
@@ -229,74 +256,24 @@
       },
 
       canAddToCart() {
-        for (var i = 0; i < this.slots.length; i++) {
-          var slot = this.slots[i];
-          if (!slot.required) continue;
-          var p = this.currentProduct(i);
+        if (this.selectedHandles.length !== this.requiredCount) return false;
+        for (var i = 0; i < this.selectedHandles.length; i++) {
+          var p = this.productByHandle(this.selectedHandles[i]);
           if (!p || !p.available) return false;
         }
         return true;
       },
 
-      stepComplete(idx) {
-        var slot = this.slots[idx];
-        if (!slot) return false;
-        if (!slot.required) return true;
-        var p = this.currentProduct(idx);
-        return !!(p && p.available);
+      visibleProducts() {
+        return this.products.slice(0, this.pageSize * this.pagesShown);
       },
 
-      firstIncompleteStep() {
-        for (var i = 0; i < this.slots.length; i++) {
-          if (!this.stepComplete(i)) return i;
-        }
-        // All complete — when locking from PDP, jump to the first unlocked slot
-        for (var j = 0; j < this.slots.length; j++) {
-          if (!this.slots[j].locked) return j;
-        }
-        return -1;
+      hasMore() {
+        return this.products.length > this.pageSize * this.pagesShown;
       },
 
-      goToStep(idx) {
-        if (idx < 0 || idx >= this.slots.length) return;
-        if (!(this.visitedSteps[idx] || this.stepComplete(idx))) return;
-        this.currentStep = idx;
-        this.reviewMode = false;
-        this.visitedSteps[idx] = true;
-      },
-
-      goBack() {
-        if (this.currentStep > 0) {
-          this.currentStep -= 1;
-        }
-      },
-
-      advanceFromCurrent() {
-        if (!this.stepComplete(this.currentStep)) return;
-        this.visitedSteps[this.currentStep] = true;
-        if (this.currentStep < this.slots.length - 1) {
-          this.currentStep += 1;
-          this.visitedSteps[this.currentStep] = true;
-        } else {
-          this.reviewMode = true;
-        }
-      },
-
-      visibleProducts(slotIdx) {
-        var slot = this.slots[slotIdx];
-        if (!slot) return [];
-        var limit = this.pageSize * (this.pagesShown[slotIdx] || 1);
-        return slot.products.slice(0, limit);
-      },
-
-      hasMore(slotIdx) {
-        var slot = this.slots[slotIdx];
-        if (!slot) return false;
-        return slot.products.length > this.pageSize * (this.pagesShown[slotIdx] || 1);
-      },
-
-      showMore(slotIdx) {
-        this.pagesShown[slotIdx] = (this.pagesShown[slotIdx] || 1) + 1;
+      showMore() {
+        this.pagesShown += 1;
       },
 
       finalizeBundle() {
@@ -306,15 +283,14 @@
 
         var bundleId = 'tote_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
         var items = [];
-        for (var i = 0; i < this.slots.length; i++) {
-          var slot = this.slots[i];
-          var p = this.currentProduct(i);
+        for (var i = 0; i < this.selectedHandles.length; i++) {
+          var p = this.productByHandle(this.selectedHandles[i]);
           if (!p) continue;
           items.push({
             id: p.variantId,
             quantity: 1,
             properties: {
-              'Bundle Slot': slot.label,
+              'Bundle Slot': 'Tote ' + (i + 1),
               '_bundle_id': bundleId,
               '_bundle_type': 'market_tote'
             }
@@ -336,9 +312,6 @@
           });
         })
         .then(function() {
-          // Attach discount code in parallel with cart refresh — same pattern
-          // as Trifecta. /discount/CODE only sets a session cookie; line prices
-          // in the drawer stay the same until checkout.
           if (self.discountCode) {
             fetch('/discount/' + encodeURIComponent(self.discountCode), {
               method: 'GET',
@@ -411,7 +384,7 @@
     {
       "type": "text",
       "id": "cta_text",
-      "label": "Final add-to-cart button text",
+      "label": "Add-to-cart button text",
       "default": "Add Bundle to Cart"
     },
     {
@@ -422,25 +395,7 @@
       "type": "collection",
       "id": "source_collection",
       "label": "Market Tote collection",
-      "info": "Products shown in every slot. Defaults to reusable-market-tote-bags when blank."
-    },
-    {
-      "type": "text",
-      "id": "slot_1_label",
-      "label": "Slot 1 label",
-      "default": "Tote 1"
-    },
-    {
-      "type": "text",
-      "id": "slot_2_label",
-      "label": "Slot 2 label",
-      "default": "Tote 2"
-    },
-    {
-      "type": "text",
-      "id": "slot_3_label",
-      "label": "Slot 3 label",
-      "default": "Tote 3"
+      "info": "Products shown in the grid. Defaults to reusable-market-tote-bags when blank."
     },
     {
       "type": "header",
