@@ -1933,5 +1933,26 @@
 }
 .mtb-pdp__summary {
   margin-top: 12px;
+  text-align: center;
+}
+.mtb-pdp__summary-total {
+  margin: 0;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.mtb-pdp__summary-label {
+  font-weight: 700;
+}
+.mtb-pdp__summary-now {
+  font-weight: 700;
+  color: var(--thread-bronze, var(--thread-gold, #c08951));
+}
+.mtb-pdp__summary-was {
+  opacity: 0.7;
+  font-weight: 400;
 }
 
