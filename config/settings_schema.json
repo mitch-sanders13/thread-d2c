@@ -2997,7 +2997,7 @@
         "id": "market_tote_page_path",
         "label": "Bundler page path",
         "default": "/pages/build-your-tote-bundle",
-        "info": "Create a page in Shopify admin, assign the \"market-tote-bundler\" template, and match that URL here. The PDP drawer loads the wizard from this page."
+        "info": "Optional standalone page (assign the market-tote-bundler template). The PDP drawer preloads the bundler and does not require this page."
       },
       {
         "type": "text",

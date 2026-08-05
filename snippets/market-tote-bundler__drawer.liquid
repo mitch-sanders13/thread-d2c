@@ -1,13 +1,17 @@
 {% comment %}
-  Slide-over drawer that hosts the Market Tote bundler wizard via the
-  Section Rendering API (loads sections/market-tote-bundler.liquid from
-  the standalone page template).
+  Slide-over drawer that hosts the Market Tote bundler wizard.
+
+  Prefer preload (server-rendered instance in the drawer body) so the PDP
+  CTA works even when /pages/build-your-tote-bundle is missing or not
+  assigned the market-tote-bundler template. Fetch remains as a fallback
+  when preload is off.
 
   Inputs:
     - drawer_id: REQUIRED unique key
     - bundle_page_path: defaults to theme setting /pages/build-your-tote-bundle
     - bundle_section_id: defaults to 'market_tote_bundler'
     - title: drawer header text
+    - preload: when true, render the bundler instance into the body now
 
   External API:
     - window.dispatchEvent(new CustomEvent('market-tote-drawer:open', {
@@ -23,23 +27,26 @@
   @param {string} [bundle_page_path] - Page path that hosts the bundler section
   @param {string} [bundle_section_id] - Section key in the page JSON template
   @param {string} [title] - Drawer header title
+  @param {boolean} [preload] - Server-render bundler into the drawer (PDP)
   @example
-  {% render 'market-tote-bundler__drawer', drawer_id: 'market-tote-drawer-pdp' %}
+  {% render 'market-tote-bundler__drawer', drawer_id: 'market-tote-drawer-pdp', preload: true %}
 {% enddoc %}
 
 {%- assign _drawer_id = drawer_id | default: 'market-tote-drawer' -%}
 {%- assign _bundle_page_path = bundle_page_path | default: settings.market_tote_page_path | default: '/pages/build-your-tote-bundle' -%}
 {%- assign _bundle_section_id = bundle_section_id | default: 'market_tote_bundler' -%}
 {%- assign _title = title | default: settings.market_tote_drawer_title | default: 'Build Your Tote Bundle' -%}
+{%- assign _preload = preload | default: false -%}
 
 <div
   class="bundle-drawer market-tote-drawer"
   data-drawer-id="{{ _drawer_id }}"
   x-data="{
     open: false,
-    loaded: false,
+    loaded: {{ _preload | json }},
     loading: false,
     error: '',
+    preloaded: {{ _preload | json }},
     bundlePagePath: '{{ _bundle_page_path | escape }}',
     bundleSectionId: '{{ _bundle_section_id | escape }}',
     pendingMode: null,
@@ -61,7 +68,8 @@
 
     async openDrawer() {
       this.open = true;
-      if (this.loaded) {
+      // Preloaded on PDP — no Section Rendering fetch required.
+      if (this.preloaded || this.loaded) {
         this.$nextTick(() => this.applyMode());
         return;
       }
@@ -110,9 +118,16 @@
       return window.Alpine.$data(el);
     },
 
-    applyMode() {
+    applyMode(attempt) {
       const data = this.builderData();
-      if (!data) return;
+      if (!data) {
+        // Child Alpine may not be ready on the first tick after open
+        if ((attempt || 0) < 5) {
+          var self = this;
+          setTimeout(function() { self.applyMode((attempt || 0) + 1); }, 50);
+        }
+        return;
+      }
       if (this.pendingMode === 'lock' && this.pendingPayload) {
         var handle = this.pendingPayload.productHandle;
         if (typeof data.preselect === 'function') {
@@ -159,7 +174,17 @@
     <div class="bundle-drawer__body">
       <div x-show="loading" x-cloak class="p-6 text-center type--small">Loading…</div>
       <div x-show="error" x-cloak class="p-6 text-center type--small color__text-error" x-text="error"></div>
-      <div x-ref="body"></div>
+      <div x-ref="body">
+        {%- if _preload -%}
+          {% render 'market-tote-bundler__instance',
+            instance_id: _drawer_id,
+            source_collection: settings.market_tote_collection,
+            discount_code: settings.market_tote_discount_code,
+            compact: true,
+            layout_horizontal: 'window--full'
+          %}
+        {%- endif -%}
+      </div>
     </div>
 
   </div>
