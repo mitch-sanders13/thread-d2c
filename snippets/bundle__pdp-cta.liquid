@@ -1,13 +1,13 @@
 {% comment %}
-  PDP entry for the Trifecta bundler — Market Tote pattern.
+  PDP entry for the Everyday Carry Set bundler.
 
   Shows a secondary CTA on Wallet / Lanyard / Chapstick Holder PDPs
-  (matched by product.type). Opens the full picker in a drawer with
-  this product locked into its slot.
+  (matched by product.type). Links to the standalone bundler page with
+  this product pre-selected (not locked) via ?slot_<key>=<handle>.
 {% endcomment %}
 
 {% doc %}
-  Trifecta PDP CTA + drawer host.
+  Everyday Carry Set PDP CTA — navigates to the bundler page.
   @example
   {% render 'bundle__pdp-cta' %}
 {% enddoc %}
@@ -26,44 +26,23 @@
     assign trifecta_slot = "Chapstick"
   endif
 
-  assign drawer_id = 'bundle-drawer-pdp-' | append: product.id
-  assign cta_text = settings.trifecta_pdp_cta_text | default: 'Build a Trifecta — Save 10%'
+  assign cta_text = settings.trifecta_pdp_cta_text | default: 'Build an Everyday Carry Set — Save 10%'
   assign page_path = settings.trifecta_page_path | default: '/pages/build-your-trifecta'
   assign pdp_enable = settings.trifecta_pdp_preview_enable
+
+  assign bundler_url = page_path
+  if trifecta_slot != blank
+    assign slot_key = trifecta_slot | downcase
+    assign bundler_url = page_path | append: '?slot_' | append: slot_key | append: '=' | append: product.handle
+  endif
 -%}
 
 {%- if pdp_enable and trifecta_slot != blank -%}
-  {%- comment -%}
-    Put ids on data-* attrs — do NOT use | json inside @click="...".
-    | json emits double quotes and terminates the HTML attribute early.
-  {%- endcomment -%}
   <div class="trifecta-pdp-cta px-4 py-4">
-    <button
-      type="button"
-      class="btn btn--secondary w-full trifecta-pdp-cta__btn"
-      data-drawer-id="{{ drawer_id | escape }}"
-      data-slot-label="{{ trifecta_slot | escape }}"
-      data-product-handle="{{ product.handle | escape }}"
-      @click="
-        window.dispatchEvent(new CustomEvent('bundle-drawer:open', {
-          detail: {
-            drawerId: $el.dataset.drawerId,
-            mode: 'lock',
-            payload: {
-              slotLabel: $el.dataset.slotLabel,
-              productHandle: $el.dataset.productHandle
-            }
-          }
-        }));
-      ">
+    <a
+      href="{{ bundler_url }}"
+      class="btn btn--secondary w-full trifecta-pdp-cta__btn">
       {{ cta_text }}
-    </button>
+    </a>
   </div>
-
-  {% render 'bundle__drawer',
-      drawer_id: drawer_id,
-      bundle_page_path: page_path,
-      bundle_section_id: 'bundle_builder',
-      title: settings.trifecta_drawer_title,
-      preload: true %}
 {%- endif -%}

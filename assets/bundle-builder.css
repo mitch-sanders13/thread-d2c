@@ -1677,6 +1677,8 @@
 .market-tote-pdp-cta__btn,
 .trifecta-pdp-cta__btn {
   width: 100%;
+  text-align: center;
+  text-decoration: none;
 }
 
 /* Trifecta slot tabs (Market Tote–style picker) */

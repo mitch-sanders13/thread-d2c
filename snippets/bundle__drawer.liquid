@@ -35,7 +35,7 @@
 {%- assign _drawer_id = drawer_id | default: 'bundle-drawer' -%}
 {%- assign _bundle_page_path = bundle_page_path | default: settings.trifecta_page_path | default: '/pages/build-your-trifecta' -%}
 {%- assign _bundle_section_id = bundle_section_id | default: 'bundle_builder' -%}
-{%- assign _title = title | default: settings.trifecta_drawer_title | default: 'Build Your Trifecta' -%}
+{%- assign _title = title | default: settings.trifecta_drawer_title | default: 'Build Your Everyday Carry Set' -%}
 {%- assign _preload = preload | default: false -%}
 
 <div
@@ -101,7 +101,7 @@
         this.$nextTick(() => this.applyMode());
       } catch (e) {
         console.error('[bundle-drawer]', e);
-        this.error = 'Could not load the Trifecta bundler. Please try again.';
+        this.error = 'Could not load the Everyday Carry Set bundler. Please try again.';
       } finally {
         this.loading = false;
       }

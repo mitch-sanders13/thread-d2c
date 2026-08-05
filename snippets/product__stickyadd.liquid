@@ -22,10 +22,9 @@
 
 {%- liquid
   comment
-    Trifecta upgrade strip: thin tappable banner above sticky ATC.
-    Opens the Trifecta bundler drawer (same as the PDP CTA), locking
-    the current product into its slot. Slot type lists must stay in
-    sync with snippets/bundle__pdp-cta.liquid.
+    Everyday Carry Set upgrade strip: thin tappable banner above sticky
+    ATC. Links to the bundler page with this product pre-selected (not
+    locked). Slot type lists must stay in sync with bundle__pdp-cta.
   endcomment
   assign _trifecta_wallet_types = "Adventure Pouch Wallet|Elastic Wallet|Envelope Wallet|Leather Bifold Wallet|Leather Zip Wallet|Magnetic Wallet|Mystery Wallet|Phone Case Wallet|Stick On Wallet|Vegan Leather Bifold Wallet|Velcro Bifold Wallet|Vertical Leather Wallet|Wallet" | split: "|"
   assign _trifecta_lanyard_types = "Keychain Clip|Mystery Lanyard|Neck Lanyard|Wide Wrist Lanyard|Wristlet Keychain" | split: "|"
@@ -45,7 +44,12 @@
   if _trifecta_slot != blank
     assign _is_trifecta_pdp = true
   endif
-  assign _drawer_id = 'bundle-drawer-pdp-' | append: product.id
+  assign _page_path = settings.trifecta_page_path | default: '/pages/build-your-trifecta'
+  assign _bundler_url = _page_path
+  if _trifecta_slot != blank
+    assign _slot_key = _trifecta_slot | downcase
+    assign _bundler_url = _page_path | append: '?slot_' | append: _slot_key | append: '=' | append: product.handle
+  endif
 -%}
 
 {% case blocksettings.color_scheme %}
@@ -83,30 +87,15 @@
   {% endif %}>
   <div class="{{ settings.layout_horizontal }}">
     {%- if _is_trifecta_pdp -%}
-      <button
-        type="button"
-        class="bundle-sticky-upgrade"
-        data-drawer-id="{{ _drawer_id | escape }}"
-        data-slot-label="{{ _trifecta_slot | escape }}"
-        data-product-handle="{{ product.handle | escape }}"
-        @click="
-          window.dispatchEvent(new CustomEvent('bundle-drawer:open', {
-            detail: {
-              drawerId: $el.dataset.drawerId,
-              mode: 'lock',
-              payload: {
-                slotLabel: $el.dataset.slotLabel,
-                productHandle: $el.dataset.productHandle
-              }
-            }
-          }));
-        ">
+      <a
+        href="{{ _bundler_url }}"
+        class="bundle-sticky-upgrade">
         <span class="bundle-sticky-upgrade__icon" aria-hidden="true">★</span>
         <span class="bundle-sticky-upgrade__text">
           {{ settings.trifecta_pdp_sticky_text }}
         </span>
         <span class="bundle-sticky-upgrade__arrow" aria-hidden="true">→</span>
-      </button>
+      </a>
     {%- endif -%}
     <div class="flex flex-row flex-wrap items-center justify-between gap-4">
       <div class="md:w-1/2 md:block hidden w-full">

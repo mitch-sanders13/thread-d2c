@@ -14,7 +14,7 @@
 
 {%- if settings.trifecta_upsell_enable -%}
   {%- assign _copy = settings.trifecta_upsell_copy -%}
-  {%- assign _button = settings.trifecta_upsell_button | default: 'Complete your Trifecta' -%}
+  {%- assign _button = settings.trifecta_upsell_button | default: 'Complete your Everyday Carry Set' -%}
 
   {%- comment -%}
     Partial trifecta (1-2 of 3 types in cart): inline builder. Customer
@@ -59,7 +59,7 @@
     <div class="cart__bundle-group" x-show="building" x-cloak>
       <div class="cart__bundle-header">
         <div class="cart__bundle-header-title">
-          <strong>Build your Trifecta</strong>
+          <strong>Build your Everyday Carry Set</strong>
         </div>
         <button
           type="button"
@@ -202,7 +202,7 @@
     x-cloak>
     <div class="cart__trifecta-upsell-text">
       <p class="cart__trifecta-upsell-status">
-        <strong>You qualify for a Trifecta Bundle!</strong>
+        <strong>You qualify for an Everyday Carry Set!</strong>
       </p>
       <div class="cart__trifecta-upsell-copy">
         Save 10% by combining your wallet, lanyard, and chapstick holder.

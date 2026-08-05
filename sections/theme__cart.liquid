@@ -1827,7 +1827,7 @@
                     href="{{ _trifecta_url }}"
                     class="cart__trifecta-promo-cta btn btn--secondary"
                     @click="cart_drawer = false">
-                    {{ section.settings.trifecta_promo_button_label | default: 'Build Your Trifecta' }}
+                    {{ section.settings.trifecta_promo_button_label | default: 'Build Your Everyday Carry Set' }}
                   </a>
                 </div>
               {%- endif -%}
@@ -3801,30 +3801,30 @@
 
     {
       "type": "header",
-      "content": "Trifecta bundle promo"
+      "content": "Everyday Carry Set promo"
     },
     {
       "type": "checkbox",
       "id": "trifecta_promo_enable",
-      "label": "Show trifecta bundle banner in cart drawer",
+      "label": "Show Everyday Carry Set banner in cart drawer",
       "default": false
     },
     {
       "type": "richtext",
       "id": "trifecta_promo_text",
       "label": "Promo banner text",
-      "default": "<p><strong>Save 10%</strong> when you build a Trifecta — wallet, lanyard, chapstick.</p>"
+      "default": "<p><strong>Save 10%</strong> when you build an Everyday Carry Set — wallet, lanyard, chapstick.</p>"
     },
     {
       "type": "url",
       "id": "trifecta_promo_url",
-      "label": "Trifecta page URL"
+      "label": "Everyday Carry Set page URL"
     },
     {
       "type": "text",
       "id": "trifecta_promo_button_label",
       "label": "Promo button label",
-      "default": "Build Your Trifecta"
+      "default": "Build Your Everyday Carry Set"
     },
     {
       "type": "header",

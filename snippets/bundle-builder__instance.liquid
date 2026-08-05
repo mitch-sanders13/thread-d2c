@@ -1,11 +1,14 @@
 {% comment %}
-  Shared Trifecta bundler instance (page section + PDP drawer).
+  Shared Everyday Carry Set bundler instance (page section + cart drawer).
 
   Market Tote–style picker with three typed slots:
     Wallet → Lanyard → Chapstick Holder
 
   Cart line property "Bundle Slot" still uses Wallet / Lanyard / Chapstick
   so cart grouping, inline edit, and upsell keep working.
+
+  PDP CTAs link here with ?slot_<key>=<handle> to pre-select (not lock)
+  the product the customer came from.
 {% endcomment %}
 
 {% doc %}
@@ -42,7 +45,7 @@
   if compact
     assign heading = heading | default: ''
   else
-    assign heading = heading | default: 'Build Your Trifecta'
+    assign heading = heading | default: 'Build Your Everyday Carry Set'
   endif
   assign savings_label = savings_label | default: 'Save 10% when you bundle a wallet, lanyard, and chapstick holder'
 
