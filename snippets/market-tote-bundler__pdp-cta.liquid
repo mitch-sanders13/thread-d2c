@@ -34,18 +34,25 @@
 -%}
 
 {%- if settings.market_tote_pdp_enable and is_market_tote -%}
+  {%- comment -%}
+    Put ids on data-* attrs — do NOT use | json inside @click="...".
+    | json emits double quotes and terminates the HTML attribute early,
+    so Alpine never binds the handler and the button appears dead.
+  {%- endcomment -%}
   <div class="market-tote-pdp-cta px-4 py-4">
     <button
       type="button"
       class="btn btn--secondary w-full market-tote-pdp-cta__btn"
+      data-drawer-id="{{ drawer_id | escape }}"
+      data-product-handle="{{ product.handle | escape }}"
       @click="
         window.dispatchEvent(new CustomEvent('market-tote-drawer:open', {
           detail: {
-            drawerId: {{ drawer_id | json }},
+            drawerId: $el.dataset.drawerId,
             mode: 'lock',
             payload: {
               slotLabel: 'Tote 1',
-              productHandle: {{ product.handle | json }}
+              productHandle: $el.dataset.productHandle
             }
           }
         }));
