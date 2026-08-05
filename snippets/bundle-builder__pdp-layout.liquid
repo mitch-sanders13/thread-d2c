@@ -80,10 +80,22 @@
           }"
           :aria-selected="activeSlotIndex === sIdx"
           @click="selectSlot(sIdx)">
-          <span
-            class="tri-pdp__slot-label"
-            x-html="(slot.label || '').replace(/ /g, '<br>')"></span>
-          <span class="tri-pdp__slot-check" x-show="slotFilled(sIdx)" aria-hidden="true">✓</span>
+          <span class="tri-pdp__slot-top">
+            <span
+              class="tri-pdp__slot-label"
+              x-html="(slot.label || '').replace(/ /g, '<br>')"></span>
+            <span class="tri-pdp__slot-check" x-show="slotFilled(sIdx)" aria-hidden="true">✓</span>
+          </span>
+          <span class="tri-pdp__slot-thumb" aria-hidden="true">
+            <img
+              :src="slotThumb(sIdx)"
+              width="56"
+              height="56"
+              :alt="''"
+              :class="{ 'is-silhouette': !slotFilled(sIdx) }"
+              loading="lazy"
+              decoding="async" />
+          </span>
         </button>
       </template>
     </div>

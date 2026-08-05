@@ -314,18 +314,21 @@
     {
       "key": "Wallet",
       "label": "Wallet",
+      "silhouette": "https://cdn.shopify.com/s/files/1/1030/4291/files/mystery_elastic.jpg?v=1761880186",
       "collectionHandle": {{ wallet_coll.handle | default: '' | json }},
       "products": [{{ slot_products_wallet | strip }}]
     },
     {
       "key": "Lanyard",
       "label": "Lanyard",
+      "silhouette": "https://cdn.shopify.com/s/files/1/1030/4291/files/mystery_lanyard.jpg?v=1761880151",
       "collectionHandle": {{ lanyard_coll.handle | default: '' | json }},
       "products": [{{ slot_products_lanyard | strip }}]
     },
     {
       "key": "Chapstick",
       "label": "Chapstick Holder",
+      "silhouette": "https://cdn.shopify.com/s/files/1/1030/4291/files/mystery_lp.jpg?v=1761880027",
       "collectionHandle": {{ chapstick_coll.handle | default: '' | json }},
       "products": [{{ slot_products_chapstick | strip }}]
     }
@@ -371,6 +374,7 @@
           return {
             key: slot.key,
             label: slot.label,
+            silhouette: slot.silhouette || '',
             collectionHandle: slot.collectionHandle || '',
             products: (slot.products || []).filter(function(p) {
               var t = (p.type || '').toLowerCase();
@@ -942,6 +946,17 @@
 
       slotFilled(slotIdx) {
         return !!(this.slots[slotIdx] && this.slots[slotIdx].selectedHandle);
+      },
+
+      // Selected product swatch, or the slot silhouette when empty.
+      slotThumb(slotIdx) {
+        var slot = this.slots[slotIdx];
+        if (!slot) return '';
+        if (slot.selectedHandle) {
+          var p = this.pickProduct(slotIdx);
+          if (p && p.swatchImage) return p.swatchImage;
+        }
+        return slot.silhouette || '';
       },
 
       subtotalCents() {
