@@ -117,6 +117,7 @@
           "compareAtPrice": {{ first_variant.compare_at_price | default: 0 | json }},
           "available": {{ first_variant.available | json }},
           "variantId": {{ first_variant.id | json }},
+          "type": {{ product.type | json }},
           "colorTag": {{ color_tag | json }},
           "swatchImage": {{ product.featured_image | image_url: width: 200 | json }},
           "images": [
@@ -156,6 +157,7 @@
           "compareAtPrice": {{ first_variant.compare_at_price | default: 0 | json }},
           "available": {{ first_variant.available | json }},
           "variantId": {{ first_variant.id | json }},
+          "type": {{ product.type | json }},
           "colorTag": {{ color_tag | json }},
           "swatchImage": {{ product.featured_image | image_url: width: 200 | json }},
           "images": [
@@ -195,6 +197,7 @@
           "compareAtPrice": {{ first_variant.compare_at_price | default: 0 | json }},
           "available": {{ first_variant.available | json }},
           "variantId": {{ first_variant.id | json }},
+          "type": {{ product.type | json }},
           "colorTag": {{ color_tag | json }},
           "swatchImage": {{ product.featured_image | image_url: width: 200 | json }},
           "images": [
@@ -287,6 +290,7 @@
       slots: [],
       activeSlotIndex: 0,
       previewHandle: null,
+      typeFilter: 'all',
       galleryIndex: 0,
       heroSrc: '',
       heroSrcset: '',
@@ -321,6 +325,7 @@
         });
         this.requiredCount = this.slots.length || 3;
         this.galleryIndex = 0;
+        this.typeFilter = 'all';
         this._prefetchCache = {};
         this._heroCache = {};
         this.activeSlotIndex = 0;
@@ -332,15 +337,40 @@
         try {
           var params = new URLSearchParams(window.location.search || '');
           var items = [];
-          var self = this;
           this.slots.forEach(function(slot) {
             var handle = params.get('slot_' + slot.key.toLowerCase());
             if (handle) items.push({ slotLabel: slot.key, handle: handle, key: null });
           });
           if (!items.length) return;
           var replaceKeys = (params.get('replace_keys') || '').split(',').filter(Boolean);
-          this.prefillForUpsell({ items: items });
+          this._prefillSlots({ items: items });
+          this.editingBundleId = null;
           this.editingKeys = replaceKeys;
+
+          if (replaceKeys.length) {
+            // Cart upsell: jump to the first slot still needing a pick.
+            var next = this.firstIncompleteSlot();
+            this.activeSlotIndex = next >= 0 ? next : 0;
+            this.typeFilter = 'all';
+            this._syncPreviewFromActive(true);
+          } else {
+            // PDP deep link: land on the product the customer came from
+            // (selected, not locked) so they see it immediately.
+            var landIdx = -1;
+            var first = items[0];
+            if (first) {
+              var target = (first.slotLabel || '').toLowerCase();
+              for (var j = 0; j < this.slots.length; j++) {
+                if (this.slots[j].key.toLowerCase() === target) {
+                  landIdx = j;
+                  break;
+                }
+              }
+            }
+            this.activeSlotIndex = landIdx >= 0 ? landIdx : 0;
+            this._syncPreviewFromActive(true);
+            this._matchTypeFilterToPreview();
+          }
         } catch (e) {
           console.error('[bundle-builder] url prefill failed', e);
         }
@@ -353,6 +383,64 @@
       activeProducts() {
         var slot = this.activeSlot();
         return slot ? slot.products : [];
+      },
+
+      activeTypeFilters() {
+        var seen = {};
+        var types = [];
+        this.activeProducts().forEach(function(p) {
+          var t = (p.type || '').trim();
+          if (!t || seen[t]) return;
+          seen[t] = true;
+          types.push(t);
+        });
+        types.sort(function(a, b) { return a.localeCompare(b); });
+        return types;
+      },
+
+      showTypeFilters() {
+        return this.activeTypeFilters().length > 1;
+      },
+
+      filteredProducts() {
+        var products = this.activeProducts();
+        if (!this.typeFilter || this.typeFilter === 'all') return products;
+        var filter = this.typeFilter;
+        return products.filter(function(p) { return p.type === filter; });
+      },
+
+      shortTypeLabel(type) {
+        if (!type) return '';
+        return type
+          .replace(/\s+Holder Keychain$/i, '')
+          .replace(/\s+Keychain$/i, '')
+          .replace(/\s+Wallet$/i, '')
+          .replace(/\s+Lanyard$/i, '')
+          .trim() || type;
+      },
+
+      setTypeFilter(type) {
+        this.typeFilter = type || 'all';
+        var list = this.filteredProducts();
+        var self = this;
+        var stillVisible = list.some(function(p) { return p.handle === self.previewHandle; });
+        if (!stillVisible) {
+          var first = this._firstAvailable(list);
+          if (first) {
+            this.previewHandle = first.handle;
+            this.galleryIndex = 0;
+            this.applyHero(true);
+          }
+        }
+      },
+
+      _matchTypeFilterToPreview() {
+        var p = this.previewProduct();
+        if (p && p.type && this.activeTypeFilters().length > 1) {
+          this.typeFilter = p.type;
+        } else {
+          this.typeFilter = 'all';
+        }
       },
 
       _firstAvailable(products) {
@@ -369,7 +457,9 @@
         var selected = slot.selectedHandle
           ? this.productByHandleInSlot(this.activeSlotIndex, slot.selectedHandle)
           : null;
-        var fallback = this._firstAvailable(slot.products);
+        var pool = this.filteredProducts();
+        if (!pool.length) pool = slot.products;
+        var fallback = this._firstAvailable(pool);
         this.previewHandle = (selected || fallback) ? (selected || fallback).handle : null;
         this.galleryIndex = 0;
         this.applyHero(!!useSwatchPlaceholder);
@@ -378,7 +468,13 @@
       selectSlot(idx) {
         if (idx < 0 || idx >= this.slots.length) return;
         this.activeSlotIndex = idx;
+        this.typeFilter = 'all';
         this._syncPreviewFromActive(true);
+        // If this slot already has a pick, filter to that product's type.
+        var slot = this.activeSlot();
+        if (slot && slot.selectedHandle) {
+          this._matchTypeFilterToPreview();
+        }
       },
 
       lockSlot(slotLabel, productHandle) {
@@ -395,6 +491,7 @@
           slot.locked = true;
           var next = this.firstIncompleteSlot();
           this.activeSlotIndex = next >= 0 ? next : i;
+          this.typeFilter = 'all';
           this._syncPreviewFromActive(true);
           return true;
         }
@@ -425,6 +522,7 @@
         this.editingBundleId = (payload && payload.bundleId) || null;
         this.editingKeys = (payload && payload.items || []).map(function(p){ return p.key; }).filter(Boolean);
         this.activeSlotIndex = 0;
+        this.typeFilter = 'all';
         this._syncPreviewFromActive(true);
       },
 
@@ -434,6 +532,7 @@
         this.editingKeys = (payload && payload.items || []).map(function(p){ return p.key; }).filter(Boolean);
         var next = this.firstIncompleteSlot();
         this.activeSlotIndex = next >= 0 ? next : 0;
+        this.typeFilter = 'all';
         this._syncPreviewFromActive(true);
       },
 
@@ -639,6 +738,7 @@
         if (!slot || slot.locked) return;
         slot.selectedHandle = null;
         if (this.activeSlotIndex === slotIdx) {
+          this.typeFilter = 'all';
           this._syncPreviewFromActive(true);
         }
       },
@@ -647,6 +747,19 @@
         var slot = this.slots[slotIdx];
         if (!slot || !slot.selectedHandle) return null;
         return this.productByHandleInSlot(slotIdx, slot.selectedHandle);
+      },
+
+      filledPicks() {
+        var out = [];
+        for (var i = 0; i < this.slots.length; i++) {
+          if (!this.slots[i].selectedHandle) continue;
+          out.push({
+            idx: i,
+            slot: this.slots[i],
+            product: this.pickProduct(i)
+          });
+        }
+        return out;
       },
 
       slotFilled(slotIdx) {

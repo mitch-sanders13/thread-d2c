@@ -1,12 +1,12 @@
 {% comment %}
-  PDP-style Trifecta bundler body: slot tabs, hero, swatches, progress,
-  picks strip, and Add to Bundle / Add to Cart CTA.
+  Everyday Carry Set bundler body: slot tabs, type filters, hero,
+  swatches, progress, picks strip, and Add to Bundle / Add to Cart CTA.
 
   Reuses Market Tote (.mtb-pdp*) visual classes for a consistent look.
 {% endcomment %}
 
 {% doc %}
-  Trifecta bundler PDP layout.
+  Everyday Carry Set bundler layout.
   @param {string} add_bundle_label
   @param {string} cart_label
   @param {string} discount_type
@@ -70,6 +70,7 @@
           :class="{
             'is-active': activeSlotIndex === sIdx,
             'is-filled': slotFilled(sIdx),
+            'is-empty': !slotFilled(sIdx),
             'is-locked': slot.locked
           }"
           :aria-selected="activeSlotIndex === sIdx"
@@ -90,7 +91,7 @@
         Select Your <span x-text="activeSlot()?.label || 'Style'"></span>
         <span
           class="mtb-pdp__styles-count"
-          x-text="'(' + activeProducts().length + ' styles)'"></span>
+          x-text="'(' + filteredProducts().length + ' styles)'"></span>
       </p>
       <p class="tri-pdp__locked-note type--small" x-show="activeSlot()?.locked" x-cloak>
         Locked from this product page
@@ -98,10 +99,33 @@
     </div>
 
     <div
+      class="tri-pdp__type-filters"
+      x-show="showTypeFilters()"
+      x-cloak
+      role="group"
+      :aria-label="(activeSlot()?.label || 'Product') + ' type filters'">
+      <button
+        type="button"
+        class="tri-pdp__type-filter"
+        :class="{ 'is-active': typeFilter === 'all' }"
+        @click="setTypeFilter('all')">
+        All
+      </button>
+      <template x-for="type in activeTypeFilters()" :key="type">
+        <button
+          type="button"
+          class="tri-pdp__type-filter"
+          :class="{ 'is-active': typeFilter === type }"
+          @click="setTypeFilter(type)"
+          x-text="shortTypeLabel(type)"></button>
+      </template>
+    </div>
+
+    <div
       class="mtb-pdp__swatches"
       role="listbox"
       :aria-label="(activeSlot()?.label || 'Product') + ' styles'">
-      <template x-for="product in activeProducts()" :key="product.handle">
+      <template x-for="product in filteredProducts()" :key="product.handle">
         <button
           type="button"
           role="option"
@@ -134,6 +158,13 @@
         </button>
       </template>
     </div>
+
+    <p
+      class="tri-pdp__filter-empty type--small"
+      x-show="showTypeFilters() && filteredProducts().length === 0"
+      x-cloak>
+      No styles in this filter. Try All or another type.
+    </p>
 
     <div class="mtb-pdp__progress" aria-label="Bundle progress">
       <template x-for="i in dotIndexes()" :key="i">
@@ -184,28 +215,28 @@
       </p>
     </div>
 
-    <div class="mtb-pdp__picks" x-show="totalSelected() > 0" x-cloak>
+    <div class="mtb-pdp__picks" x-show="filledPicks().length > 0" x-cloak>
       <p class="mtb-pdp__picks-label type--small">In your bundle</p>
       <ul class="mtb-pdp__picks-list">
-        <template x-for="(slot, idx) in slots" :key="slot.key">
-          <li class="mtb-pdp__pick" x-show="slot.selectedHandle" x-cloak>
+        <template x-for="pick in filledPicks()" :key="pick.slot.key">
+          <li class="mtb-pdp__pick">
             <img
-              :src="pickProduct(idx)?.swatchImage"
+              :src="pick.product?.swatchImage"
               width="48"
               height="48"
-              :alt="pickProduct(idx)?.title || ''"
+              :alt="pick.product?.title || ''"
               loading="lazy" />
             <span class="mtb-pdp__pick-name">
-              <span class="tri-pdp__pick-slot" x-text="slot.label"></span>
-              <span x-text="shortName(pickProduct(idx)?.title || '')"></span>
+              <span class="tri-pdp__pick-slot" x-text="pick.slot.label"></span>
+              <span x-text="shortName(pick.product?.title || '')"></span>
             </span>
             <button
               type="button"
               class="mtb-pdp__pick-remove"
-              x-show="!slot.locked"
-              :aria-label="'Remove ' + slot.label + ' from bundle'"
-              @click="removePick(idx)">Remove from Bundle</button>
-            <span class="tri-pdp__pick-locked type--small" x-show="slot.locked" x-cloak>Locked</span>
+              x-show="!pick.slot.locked"
+              :aria-label="'Remove ' + pick.slot.label + ' from bundle'"
+              @click="removePick(pick.idx)">Remove from Bundle</button>
+            <span class="tri-pdp__pick-locked type--small" x-show="pick.slot.locked" x-cloak>Locked</span>
           </li>
         </template>
       </ul>
