@@ -17,7 +17,9 @@
 {%- assign _cart_label = cart_label | default: 'Add Bundle to Cart' -%}
 
 <div class="mtb-pdp" x-show="products.length > 0" x-cloak>
-  <div class="mtb-pdp__media">
+  <div
+    class="mtb-pdp__media"
+    :class="{ 'mtb-pdp__media--solo': previewImages().length <= 1 }">
     <div
       class="mtb-pdp__thumbs"
       x-show="previewImages().length > 1"
