@@ -88,6 +88,29 @@
       <span class="mtb-pdp__progress-label type--small" x-text="totalSelected() + ' of ' + requiredCount + ' added'"></span>
     </div>
 
+    <div class="mtb-pdp__cta">
+      <button
+        type="button"
+        class="btn btn--primary w-full"
+        x-show="!isComplete()"
+        :disabled="!canAddToBundle()"
+        :class="{ 'opacity-50 cursor-not-allowed': !canAddToBundle() }"
+        @click="addToBundle()">
+        {{ _add_label }}
+      </button>
+      <button
+        type="button"
+        class="btn btn--primary w-full"
+        x-show="isComplete()"
+        x-cloak
+        :disabled="!canAddToCart() || cartLoading"
+        :class="{ 'opacity-50 cursor-not-allowed': !canAddToCart() || cartLoading }"
+        @click="finalizeBundle()">
+        <span x-show="!cartLoading">{{ _cart_label }}</span>
+        <span x-show="cartLoading" x-cloak>Adding…</span>
+      </button>
+    </div>
+
     <div class="mtb-pdp__picks" x-show="totalSelected() > 0" x-cloak>
       <p class="mtb-pdp__picks-label type--small">In your bundle</p>
       <ul class="mtb-pdp__picks-list">
@@ -114,29 +137,6 @@
       {% render 'bundle__price-summary',
           discount_type: discount_type,
           discount_value: discount_value %}
-    </div>
-
-    <div class="mtb-pdp__cta">
-      <button
-        type="button"
-        class="btn btn--primary w-full"
-        x-show="!isComplete()"
-        :disabled="!canAddToBundle()"
-        :class="{ 'opacity-50 cursor-not-allowed': !canAddToBundle() }"
-        @click="addToBundle()">
-        {{ _add_label }}
-      </button>
-      <button
-        type="button"
-        class="btn btn--primary w-full"
-        x-show="isComplete()"
-        x-cloak
-        :disabled="!canAddToCart() || cartLoading"
-        :class="{ 'opacity-50 cursor-not-allowed': !canAddToCart() || cartLoading }"
-        @click="finalizeBundle()">
-        <span x-show="!cartLoading">{{ _cart_label }}</span>
-        <span x-show="cartLoading" x-cloak>Adding…</span>
-      </button>
     </div>
   </div>
 </div>
