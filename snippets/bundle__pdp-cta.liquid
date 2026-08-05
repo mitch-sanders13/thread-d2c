@@ -6,7 +6,9 @@
       auto-picked companions.
     - Tap an unlocked card → its dropdown panel opens below the row,
       showing product-type tabs at the top and a swatch grid below.
-      Picking a swatch updates the selection and closes the panel.
+      Picking a swatch previews the selection on the card; "Add to
+      Bundle" commits it and closes the panel. ✕ / Close / Escape
+      discard an unconfirmed preview.
     - The locked card has no dropdown — customer is already on its PDP.
 
   Server-side ranking (per non-locked slot):
@@ -881,7 +883,7 @@
   x-cloak
   x-data="bundlePdpPreview_{{ product.id }}()"
   x-init="init()"
-  @keydown.escape.window="dropdownOpen = -1"
+  @keydown.escape.window="cancelDropdown()"
   {%- comment -%}
     Drives the global `bundle_in_view` flag (defined in
     snippets/theme__scripts.liquid). Both sticky ATC implementations
@@ -947,12 +949,10 @@
           {%- endif -%}
           <p class="bundle-pdp-preview__item-price" x-text="formatMoney(currentProduct(sIdx).price || 0)"></p>
           {%- comment -%}
-            Quiet Change affordance: sits below the price so it doesn't
-            compete with the Add Bundle CTA. On desktop the label stays
-            nearly invisible until the card is hovered / focused / open;
-            mobile keeps a low-contrast caret+label always visible
-            (no hover). See .bundle-pdp-preview__item-change-hint in
-            assets/bundle-builder.css.
+            Change affordance — always visible at rest (desktop + mobile)
+            so customers can discover they can swap a companion. Slightly
+            quieter than the primary Add Bundle CTA via opacity/weight;
+            brightens on hover / when the dropdown is open.
           {%- endcomment -%}
           <span class="bundle-pdp-preview__item-change-hint" x-cloak>
             <span class="bundle-pdp-preview__item-change-label" x-text="dropdownOpen === sIdx ? 'Close' : 'Change'"></span>
@@ -1013,7 +1013,7 @@
       type="button"
       class="bundle-pdp-preview__dropdown-close"
       aria-label="Close"
-      @click="dropdownOpen = -1">✕</button>
+      @click="cancelDropdown()">✕</button>
   </div>
   <div
     class="bundle-pdp-preview__dropdown"
@@ -1046,6 +1046,24 @@
       x-cloak>
       No products available in this type.
     </p>
+
+    {%- comment -%}
+      Confirm footer — swatch clicks only preview the pick on the card.
+      "Add to Bundle" commits that preview and closes the panel. ✕ /
+      Close / Escape revert to the selection that was active when the
+      dropdown opened (see _openSnapshot in the Alpine component).
+    {%- endcomment -%}
+    <div
+      class="bundle-pdp-preview__dropdown-confirm"
+      x-show="dropdownOpen >= 0"
+      x-cloak>
+      <button
+        type="button"
+        class="btn btn--primary w-full bundle-pdp-preview__dropdown-confirm-btn"
+        @click="confirmSelection()">
+        Add to Bundle
+      </button>
+    </div>
   </div>
 
   {%- comment -%}
@@ -1113,6 +1131,11 @@
        * fewer checked → add selected items individually at full price. */
       checked: [true, true, true],
       dropdownOpen: -1,
+      /* Snapshot of selectedIndex for the open slot, taken when the
+       * dropdown opens. Swatch clicks preview live on the card; ✕ /
+       * Close / Escape restore this index. confirmSelection keeps the
+       * preview and clears the snapshot. */
+      _openSnapshot: null,
       loading: false,
       error: '',
       productsPerSlot: 200,
@@ -1392,11 +1415,16 @@
 
       toggleDropdown: function(sIdx) {
         if (this.dropdownOpen === sIdx) {
-          this.dropdownOpen = -1;
+          this.cancelDropdown();
           return;
         }
+        // Switching slots mid-browse: revert the previous slot's
+        // unconfirmed preview before opening the new one.
+        if (this.dropdownOpen >= 0) {
+          this._revertOpenSnapshot();
+        }
         // Cache the absolute scrollY that we want to land on after the
-        // user picks a swatch. Computed BEFORE the open-scroll, when
+        // user confirms a pick. Computed BEFORE the open-scroll, when
         // pageYOffset is fresh (no in-flight programmatic scroll), so
         // it's reliable on iOS Safari. The target = position where the
         // bundle widget's top sits closeOffset below viewport top.
@@ -1405,6 +1433,10 @@
         var closeOffset = isMobile ? 96 : 110;
         this._closeTargetY = Math.max(0, window.pageYOffset + rect.top - closeOffset);
 
+        this._openSnapshot = {
+          sIdx: sIdx,
+          index: this.selectedIndex[sIdx] || 0
+        };
         this.dropdownOpen = sIdx;
         this.selectedType[sIdx] = '';
         // Synchronous scroll inside the click handler — iOS allows this
@@ -1412,6 +1444,8 @@
         this._scrollToWidget();
       },
 
+      /* Swatch click — preview only. Updates the card (and totals) live
+       * but leaves the dropdown open until confirmSelection / cancel. */
       selectProduct: function(sIdx, p) {
         if (sIdx < 0 || !p || !p.available) return;
         var slot = this.slots[sIdx];
@@ -1422,6 +1456,32 @@
             break;
           }
         }
+      },
+
+      /* Commit the current preview and close the panel (with the same
+       * iOS-safe scroll snap used previously on swatch-select). */
+      confirmSelection: function() {
+        this._openSnapshot = null;
+        this._closeDropdown();
+      },
+
+      /* Dismiss without keeping an unconfirmed preview. */
+      cancelDropdown: function() {
+        this._revertOpenSnapshot();
+        this._closeDropdown();
+      },
+
+      _revertOpenSnapshot: function() {
+        if (!this._openSnapshot) return;
+        var sIdx = this._openSnapshot.sIdx;
+        if (sIdx >= 0 && sIdx < this.selectedIndex.length) {
+          this.selectedIndex[sIdx] = this._openSnapshot.index;
+        }
+        this._openSnapshot = null;
+      },
+
+      _closeDropdown: function() {
+        if (this.dropdownOpen < 0) return;
         // Two-part close fix:
         //   (1) Disable the dropdown's CSS transition so the collapse is
         //       instant. The animated collapse races with our close-scroll
@@ -1538,6 +1598,10 @@
         }
         this.loading = true;
         this.error = '';
+        /* Keep any live preview the customer was browsing — they are
+         * explicitly adding the current selection to cart. Clear the
+         * open-snapshot so a later cancel path can't restore it. */
+        this._openSnapshot = null;
         this.dropdownOpen = -1;
         /* Apply Trifecta bundling properties (and discount code) only
          * when all 3 slots are checked. Partial selections go in as
