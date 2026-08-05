@@ -91,9 +91,16 @@
             "available": {{ first_variant.available | json }},
             "variantId": {{ first_variant.id | json }},
             "swatchImage": {{ product.featured_image | image_url: width: 200 | json }},
-            "heroImage": {{ product.featured_image | image_url: width: 1200 | json }},
-            "heroImage600": {{ product.featured_image | image_url: width: 600 | json }},
-            "heroImage900": {{ product.featured_image | image_url: width: 900 | json }}
+            "images": [
+              {%- for image in product.images limit: 8 -%}
+                {
+                  "thumb": {{ image | image_url: width: 160 | json }},
+                  "hero": {{ image | image_url: width: 1200 | json }},
+                  "hero600": {{ image | image_url: width: 600 | json }},
+                  "hero900": {{ image | image_url: width: 900 | json }}
+                }{%- unless forloop.last -%},{%- endunless -%}
+              {%- endfor -%}
+            ]
           }{%- unless forloop.last -%},{%- endunless -%}
         {%- endfor -%}
       {%- endpaginate -%}
@@ -110,6 +117,7 @@
       // Ordered picks (handles). Length ≤ requiredCount. Duplicates allowed.
       picks: [],
       previewHandle: null,
+      galleryIndex: 0,
       requiredCount: {{ required_count }},
       cartLoading: false,
       incompleteReason: '',
@@ -126,6 +134,7 @@
         this.requiredCount = data.requiredCount || {{ required_count }};
         this.products = data.products || [];
         this.picks = [];
+        this.galleryIndex = 0;
         var first = this.products.find(function(p){ return p.available; }) || this.products[0] || null;
         this.previewHandle = first ? first.handle : null;
       },
@@ -143,6 +152,7 @@
           return false;
         }
         this.previewHandle = productHandle;
+        this.galleryIndex = 0;
         if (this.picks.length === 0 && match.available) {
           this.picks = [productHandle];
         }
@@ -151,6 +161,29 @@
 
       previewProduct() {
         return this.productByHandle(this.previewHandle) || this.products[0] || null;
+      },
+
+      previewImages() {
+        var p = this.previewProduct();
+        return (p && p.images && p.images.length) ? p.images : [];
+      },
+
+      currentHero() {
+        var images = this.previewImages();
+        if (!images.length) {
+          var p = this.previewProduct();
+          if (!p) return null;
+          return { hero: p.swatchImage, hero600: p.swatchImage, hero900: p.swatchImage };
+        }
+        var idx = this.galleryIndex;
+        if (idx < 0 || idx >= images.length) idx = 0;
+        return images[idx];
+      },
+
+      selectGallery(index) {
+        var images = this.previewImages();
+        if (index < 0 || index >= images.length) return;
+        this.galleryIndex = index;
       },
 
       productByHandle(handle) {
@@ -167,6 +200,7 @@
         var p = this.productByHandle(handle);
         if (!p) return;
         this.previewHandle = handle;
+        this.galleryIndex = 0;
       },
 
       isPreview(handle) {

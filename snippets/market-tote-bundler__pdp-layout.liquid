@@ -18,15 +18,39 @@
 
 <div class="mtb-pdp" x-show="products.length > 0" x-cloak>
   <div class="mtb-pdp__media">
+    <div
+      class="mtb-pdp__thumbs"
+      x-show="previewImages().length > 1"
+      x-cloak
+      role="listbox"
+      aria-label="Product images">
+      <template x-for="(image, imgIdx) in previewImages()" :key="imgIdx">
+        <button
+          type="button"
+          role="option"
+          class="mtb-pdp__thumb"
+          :class="{ 'is-active': galleryIndex === imgIdx }"
+          :aria-selected="galleryIndex === imgIdx"
+          @click="selectGallery(imgIdx)">
+          <img
+            :src="image.thumb"
+            width="80"
+            height="80"
+            :alt="(previewProduct()?.title || '') + ' image ' + (imgIdx + 1)"
+            loading="lazy" />
+        </button>
+      </template>
+    </div>
+
     <div class="mtb-pdp__hero">
-      <template x-if="previewProduct()">
+      <template x-if="currentHero()">
         <img
-          :src="previewProduct().heroImage || previewProduct().swatchImage"
-          :srcset="(previewProduct().heroImage600 || '') + ' 600w, ' + (previewProduct().heroImage900 || '') + ' 900w, ' + (previewProduct().heroImage || '') + ' 1200w'"
-          sizes="(min-width: 990px) 50vw, 100vw"
+          :src="currentHero().hero"
+          :srcset="(currentHero().hero600 || '') + ' 600w, ' + (currentHero().hero900 || '') + ' 900w, ' + (currentHero().hero || '') + ' 1200w'"
+          sizes="(min-width: 990px) 45vw, 100vw"
           width="1200"
           height="1200"
-          :alt="previewProduct().title"
+          :alt="previewProduct()?.title || ''"
           loading="eager" />
       </template>
     </div>
