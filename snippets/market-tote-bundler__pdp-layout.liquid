@@ -135,7 +135,7 @@
         :disabled="!canAddToCart() || cartLoading"
         :class="{ 'opacity-50 cursor-not-allowed': !canAddToCart() || cartLoading }"
         @click="finalizeBundle()">
-        <span x-show="!cartLoading">Add Bundle &mdash; Save {{ discount_value | default: 25 }}%</span>
+        <span x-show="!cartLoading">{{ _cart_label }} &mdash; Save {{ discount_value | default: 25 }}%</span>
         <span x-show="cartLoading" x-cloak>Adding&hellip;</span>
       </button>
     </div>
