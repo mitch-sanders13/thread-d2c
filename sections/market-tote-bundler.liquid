@@ -1,15 +1,15 @@
 {% comment %}
-  Market Tote bundler — multi-select 3 from one grid.
+  Market Tote bundler — pick 3 totes from one grid with per-product qty.
 
-  Click a tote to add it to the selection; click again to deselect.
-  Bottom CTA is Add to Cart only (enabled at exactly 3 selected).
-  Status copy: "Select three/two/one more" until the bundle is full.
+  Each tote has a +/- quantity control. Total quantity across all totes
+  must equal 3. Same tote can be added more than once. Bottom CTA is
+  Add to Cart only. Status copy: "Select three/two/one more".
 
   Discount display is section settings; real checkout discount applies via
   Shopify discount code (silent /discount/CODE after add-to-cart).
 
   Used on: standalone page, collection sections, PDP drawer (preselects
-  the current product when opened from a Market Tote PDP).
+  qty 1 of the current product when opened from a Market Tote PDP).
 {% endcomment %}
 
 {%- liquid
@@ -79,7 +79,7 @@
 
     {% render 'market-tote-bundler__grid' %}
 
-    <div class="px-4 pt-4" x-show="selectedHandles.length > 0" x-cloak>
+    <div class="px-4 pt-4" x-show="totalSelected() > 0" x-cloak>
       {% render 'bundle__price-summary',
           discount_type: discount_type,
           discount_value: discount_value %}
@@ -144,7 +144,8 @@
   function marketToteBundlerFactory_{{ js_id }}() {
     return {
       products: [],
-      selectedHandles: [],
+      // handle → quantity (0 omitted). Total across handles ≤ requiredCount.
+      quantities: {},
       requiredCount: {{ required_count }},
       cartLoading: false,
       incompleteReason: '',
@@ -163,10 +164,10 @@
         this.requiredCount = data.requiredCount || {{ required_count }};
         this.products = data.products || [];
         this.pagesShown = 1;
-        this.selectedHandles = [];
+        this.quantities = {};
       },
 
-      // PDP drawer entry: seed the current product as the first pick.
+      // PDP drawer entry: seed qty 1 of the current product.
       lockSlot(slotLabel, productHandle) {
         return this.preselect(productHandle);
       },
@@ -178,33 +179,61 @@
           console.warn('[market-tote-bundler] product not in catalog', productHandle);
           return false;
         }
-        if (this.isSelected(productHandle)) return true;
-        if (this.selectedHandles.length >= this.requiredCount) {
-          this.selectedHandles = this.selectedHandles.slice(0, this.requiredCount - 1);
-        }
-        this.selectedHandles.push(productHandle);
+        if (this.qtyOf(productHandle) > 0) return true;
+        if (this.totalSelected() >= this.requiredCount) return false;
+        this.quantities = Object.assign({}, this.quantities, { [productHandle]: 1 });
         return true;
       },
 
-      isSelected(handle) {
-        return this.selectedHandles.indexOf(handle) !== -1;
+      qtyOf(handle) {
+        return this.quantities[handle] || 0;
       },
 
-      toggleProduct(handle) {
-        var product = this.products.find(function(p){ return p.handle === handle; });
-        if (!product || !product.available) return;
+      isSelected(handle) {
+        return this.qtyOf(handle) > 0;
+      },
 
-        var idx = this.selectedHandles.indexOf(handle);
-        if (idx !== -1) {
-          this.selectedHandles.splice(idx, 1);
-          return;
+      totalSelected() {
+        var total = 0;
+        var q = this.quantities;
+        Object.keys(q).forEach(function(handle) {
+          total += q[handle] || 0;
+        });
+        return total;
+      },
+
+      canIncrease(handle) {
+        var product = this.productByHandle(handle);
+        if (!product || !product.available) return false;
+        return this.totalSelected() < this.requiredCount;
+      },
+
+      increaseQty(handle) {
+        if (!this.canIncrease(handle)) return;
+        var next = this.qtyOf(handle) + 1;
+        this.quantities = Object.assign({}, this.quantities, { [handle]: next });
+      },
+
+      decreaseQty(handle) {
+        var current = this.qtyOf(handle);
+        if (current <= 0) return;
+        var next = current - 1;
+        var copy = Object.assign({}, this.quantities);
+        if (next <= 0) {
+          delete copy[handle];
+        } else {
+          copy[handle] = next;
         }
-        if (this.selectedHandles.length >= this.requiredCount) return;
-        this.selectedHandles.push(handle);
+        this.quantities = copy;
+      },
+
+      // Tile image click: +1 if room, otherwise no-op. Qty 0→1 via + or image.
+      addOrIgnore(handle) {
+        this.increaseQty(handle);
       },
 
       remainingCount() {
-        return Math.max(0, this.requiredCount - this.selectedHandles.length);
+        return Math.max(0, this.requiredCount - this.totalSelected());
       },
 
       remainingLabel() {
@@ -222,9 +251,10 @@
       subtotalCents() {
         var sum = 0;
         var self = this;
-        this.selectedHandles.forEach(function(handle) {
+        Object.keys(this.quantities).forEach(function(handle) {
           var p = self.productByHandle(handle);
-          if (p) sum += p.price;
+          var qty = self.quantities[handle] || 0;
+          if (p && qty) sum += p.price * qty;
         });
         return sum;
       },
@@ -256,12 +286,12 @@
       },
 
       canAddToCart() {
-        if (this.selectedHandles.length !== this.requiredCount) return false;
-        for (var i = 0; i < this.selectedHandles.length; i++) {
-          var p = this.productByHandle(this.selectedHandles[i]);
-          if (!p || !p.available) return false;
-        }
-        return true;
+        if (this.totalSelected() !== this.requiredCount) return false;
+        var self = this;
+        return Object.keys(this.quantities).every(function(handle) {
+          var p = self.productByHandle(handle);
+          return p && p.available && self.quantities[handle] > 0;
+        });
       },
 
       visibleProducts() {
@@ -283,21 +313,28 @@
 
         var bundleId = 'tote_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
         var items = [];
-        for (var i = 0; i < this.selectedHandles.length; i++) {
-          var p = this.productByHandle(this.selectedHandles[i]);
-          if (!p) continue;
-          items.push({
-            id: p.variantId,
-            quantity: 1,
-            properties: {
-              'Bundle Slot': 'Tote ' + (i + 1),
-              '_bundle_id': bundleId,
-              '_bundle_type': 'market_tote'
-            }
-          });
-        }
-
+        var slot = 1;
         var self = this;
+        Object.keys(this.quantities).forEach(function(handle) {
+          var p = self.productByHandle(handle);
+          var qty = self.quantities[handle] || 0;
+          if (!p || qty < 1) return;
+          // One cart line per unit so Bundle Slot labels stay unique when
+          // the same tote is chosen more than once.
+          for (var i = 0; i < qty; i++) {
+            items.push({
+              id: p.variantId,
+              quantity: 1,
+              properties: {
+                'Bundle Slot': 'Tote ' + slot,
+                '_bundle_id': bundleId,
+                '_bundle_type': 'market_tote'
+              }
+            });
+            slot += 1;
+          }
+        });
+
         var rootScope = (window.Alpine && document.body) ? window.Alpine.$data(document.body) : null;
 
         return fetch(window.Shopify.routes.root + 'cart/add.js', {

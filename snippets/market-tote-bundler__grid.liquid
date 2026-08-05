@@ -1,45 +1,69 @@
 {% comment %}
-  Single product grid for the Market Tote multi-select bundler.
-  Click toggles selection (add / remove). Max 3 handled by the factory.
+  Product grid with per-tote quantity steppers. Total qty across all
+  totes is capped at 3 by the Alpine factory (canIncrease / increaseQty).
 {% endcomment %}
 
 {% doc %}
-  Market Tote bundler product grid (multi-select).
+  Market Tote bundler product grid with quantity selectors.
   @example
   {% render 'market-tote-bundler__grid' %}
 {% enddoc %}
 
 <div class="bundle-wizard__grid" role="group" aria-label="Choose Market Totes">
   <template x-for="product in visibleProducts()" :key="product.handle">
-    <button
-      type="button"
-      role="checkbox"
-      :aria-checked="isSelected(product.handle)"
-      :aria-label="product.title"
-      :disabled="!product.available || (!isSelected(product.handle) && selectedHandles.length >= requiredCount)"
-      class="bundle-wizard__tile"
+    <div
+      class="bundle-wizard__tile market-tote-bundler__tile"
       :class="{
         'is-selected': isSelected(product.handle),
         'is-unavailable': !product.available
-      }"
-      @click="toggleProduct(product.handle)">
-      <div class="bundle-wizard__tile-img">
-        <img
-          :src="product.swatchImage"
-          :srcset="(product.swatchImage400 || '') + ' 400w, ' + (product.swatchImage600 || '') + ' 600w, ' + (product.swatchImage900 || '') + ' 900w'"
-          sizes="(min-width: 750px) 25vw, 33vw"
-          width="400"
-          height="400"
-          :alt="product.title"
-          loading="lazy" />
+      }">
+      <button
+        type="button"
+        class="market-tote-bundler__tile-hit"
+        :aria-label="'Add ' + product.title"
+        :disabled="!product.available || !canIncrease(product.handle)"
+        @click="addOrIgnore(product.handle)">
+        <div class="bundle-wizard__tile-img">
+          <img
+            :src="product.swatchImage"
+            :srcset="(product.swatchImage400 || '') + ' 400w, ' + (product.swatchImage600 || '') + ' 600w, ' + (product.swatchImage900 || '') + ' 900w'"
+            sizes="(min-width: 750px) 25vw, 33vw"
+            width="400"
+            height="400"
+            :alt="product.title"
+            loading="lazy" />
+          <span
+            class="bundle-wizard__tile-check"
+            x-show="isSelected(product.handle)"
+            x-text="qtyOf(product.handle)"
+            aria-hidden="true"></span>
+        </div>
+        <p class="bundle-wizard__tile-title" x-text="product.title"></p>
+        <p class="bundle-wizard__tile-price" x-text="formatMoney(product.price)"></p>
+      </button>
+
+      <div
+        class="market-tote-bundler__qty"
+        x-show="product.available"
+        @click.stop>
+        <button
+          type="button"
+          class="market-tote-bundler__qty-btn"
+          :aria-label="'Decrease quantity of ' + product.title"
+          :disabled="qtyOf(product.handle) <= 0"
+          @click="decreaseQty(product.handle)">−</button>
         <span
-          class="bundle-wizard__tile-check"
-          x-show="isSelected(product.handle)"
-          aria-hidden="true">✓</span>
+          class="market-tote-bundler__qty-value"
+          x-text="qtyOf(product.handle)"
+          aria-live="polite"></span>
+        <button
+          type="button"
+          class="market-tote-bundler__qty-btn"
+          :aria-label="'Increase quantity of ' + product.title"
+          :disabled="!canIncrease(product.handle)"
+          @click="increaseQty(product.handle)">+</button>
       </div>
-      <p class="bundle-wizard__tile-title" x-text="product.title"></p>
-      <p class="bundle-wizard__tile-price" x-text="formatMoney(product.price)"></p>
-    </button>
+    </div>
   </template>
 </div>
 
