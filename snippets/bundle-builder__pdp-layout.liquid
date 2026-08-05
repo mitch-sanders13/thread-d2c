@@ -61,6 +61,11 @@
   </div>
 
   <div class="mtb-pdp__info">
+    <div x-show="previewProduct()">
+      <h3 class="mtb-pdp__title" x-text="previewProduct()?.title || ''"></h3>
+      <p class="mtb-pdp__price" x-text="previewProduct() ? formatMoney(previewProduct().price) : ''"></p>
+    </div>
+
     <div class="tri-pdp__slots" role="tablist" aria-label="Bundle slots">
       <template x-for="(slot, sIdx) in slots" :key="slot.key">
         <button
@@ -79,11 +84,6 @@
           <span class="tri-pdp__slot-check" x-show="slotFilled(sIdx)" aria-hidden="true">✓</span>
         </button>
       </template>
-    </div>
-
-    <div x-show="previewProduct()">
-      <h3 class="mtb-pdp__title" x-text="previewProduct()?.title || ''"></h3>
-      <p class="mtb-pdp__price" x-text="previewProduct() ? formatMoney(previewProduct().price) : ''"></p>
     </div>
 
     <div class="mtb-pdp__styles-header">
