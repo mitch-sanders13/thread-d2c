@@ -1636,8 +1636,12 @@
 }
 
 /* ============ Market Tote bundler — PDP layout ============ */
-.market-tote-bundler {
-  position: relative;
+.mtb-pdp__savings {
+  margin: 10px 0 0;
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  font-weight: 600;
+  color: var(--thread-bronze, var(--thread-gold, #c08951));
+  line-height: 1.35;
 }
 
 .mtb-pdp {

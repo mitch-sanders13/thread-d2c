@@ -192,7 +192,6 @@
       "type": "market-tote-bundler",
       "settings": {
         "heading": "Build Your Tote Bundle",
-        "subheading": "<p>Pick 3 Market Totes and save 25%</p>",
         "savings_label": "Save 25% when you buy 3 Market Totes",
         "cta_text": "Add Bundle to Cart",
         "source_collection": "reusable-market-tote-bags",

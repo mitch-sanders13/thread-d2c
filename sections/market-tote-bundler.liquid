@@ -16,7 +16,6 @@
   assign discount_type = section.settings.discount_type
   assign discount_value = section.settings.discount_value | default: 25
   assign required_count = 3
-  assign savings_label = section.settings.savings_label | default: 'Save 25% when you buy 3 Market Totes'
   assign add_bundle_label = section.settings.add_to_bundle_text | default: 'Add to Bundle'
   assign cart_label = section.settings.cta_text | default: 'Add Bundle to Cart'
 
@@ -46,22 +45,18 @@
     "
     x-data="marketToteBundler_{{ js_id }}">
 
-    {%- unless section.settings.heading == blank and section.settings.subheading == blank -%}
+    {%- unless section.settings.heading == blank and section.settings.savings_label == blank -%}
       <div class="flex flex-col items-center px-4 pb-4 text-center">
         <div class="max-w-prose">
           {%- unless section.settings.heading == blank -%}
             <h2>{{ section.settings.heading }}</h2>
           {%- endunless -%}
-          {%- unless section.settings.subheading == blank -%}
-            <div class="m-0--clear pt-2">
-              {{ section.settings.subheading }}
-            </div>
+          {%- unless section.settings.savings_label == blank -%}
+            <p class="mtb-pdp__savings">{{ section.settings.savings_label }}</p>
           {%- endunless -%}
         </div>
       </div>
     {%- endunless -%}
-
-    <div class="bundle-wizard__savings-strip">{{ savings_label }}</div>
 
     {% render 'market-tote-bundler__pdp-layout',
         add_bundle_label: add_bundle_label,
@@ -363,16 +358,11 @@
       "default": "Build Your Tote Bundle"
     },
     {
-      "type": "richtext",
-      "id": "subheading",
-      "label": "Subheading",
-      "default": "<p>Pick 3 Market Totes and save 25%</p>"
-    },
-    {
       "type": "text",
       "id": "savings_label",
-      "label": "Savings strip text",
-      "default": "Save 25% when you buy 3 Market Totes"
+      "label": "Savings line (under heading)",
+      "default": "Save 25% when you buy 3 Market Totes",
+      "info": "Shown under the heading in Thread copper/gold. Leave blank to hide."
     },
     {
       "type": "text",
