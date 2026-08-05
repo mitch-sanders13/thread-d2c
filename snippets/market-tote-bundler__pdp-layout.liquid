@@ -169,8 +169,8 @@
             <button
               type="button"
               class="mtb-pdp__pick-remove"
-              :aria-label="'Remove ' + shortName(pickProduct(idx)?.title || 'tote')"
-              @click="removePick(idx)">×</button>
+              :aria-label="'Remove ' + shortName(pickProduct(idx)?.title || 'tote') + ' from bundle'"
+              @click="removePick(idx)">Remove from Bundle</button>
           </li>
         </template>
       </ul>
