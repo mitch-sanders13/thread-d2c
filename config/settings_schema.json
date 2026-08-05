@@ -2631,52 +2631,43 @@
       },
       {
         "type": "header",
-        "content": "PDP inline preview"
+        "content": "PDP CTA (Market Tote pattern)"
       },
       {
         "type": "paragraph",
-        "content": "On any product whose Type matches a Trifecta slot (Wallet types like Elastic Wallet / Leather Bifold etc.; Lanyard types like Neck Lanyard / Keychain Clip / Wristlet Keychain etc.; or Chapstick Holder Keychain types), show an Amazon-style 'frequently bought together' preview with this product plus two suggested companions from the eligibility collections above. The customer can one-tap Add Bundle, or open the full wizard to customize. Slot detection lists live in snippets/bundle__pdp-cta.liquid — edit there if a new wallet/lanyard/chapstick product type is added to the catalog."
+        "content": "On any product whose Type matches a Trifecta slot (Wallet / Lanyard / Chapstick Holder Keychain types), show a secondary CTA that opens the Trifecta bundler drawer with this product locked into its slot — same relationship as Market Tote page + PDP. Slot type lists live in snippets/bundle__pdp-cta.liquid."
       },
       {
         "type": "checkbox",
         "id": "trifecta_pdp_preview_enable",
-        "label": "Show Trifecta preview on tagged PDPs",
-        "default": false
+        "label": "Show Trifecta CTA on eligible PDPs",
+        "default": true
       },
       {
         "type": "text",
-        "id": "trifecta_pdp_preview_heading",
-        "label": "Preview heading",
-        "default": "Save 10% with a Trifecta"
-      },
-      {
-        "type": "paragraph",
-        "content": "Default product type per slot. When picking the suggested companion for a non-locked slot, the snippet prefers products of this type (case-sensitive, must match Shopify's product type field exactly). Color-match still wins over type-match. Leave blank to skip type-preference and just pick first-available."
+        "id": "trifecta_pdp_cta_text",
+        "label": "PDP CTA button text",
+        "default": "Build a Trifecta — Save 10%"
       },
       {
         "type": "text",
-        "id": "trifecta_default_wallet_type",
-        "label": "Default wallet type",
-        "default": "Vertical Leather Wallet"
+        "id": "trifecta_page_path",
+        "label": "Standalone bundler page path",
+        "default": "/pages/build-your-trifecta",
+        "info": "Optional standalone page (assign the bundle-builder / page.bundle-builder template). The PDP drawer preloads the bundler and does not require this page."
       },
       {
         "type": "text",
-        "id": "trifecta_default_lanyard_type",
-        "label": "Default lanyard type",
-        "default": "Neck Lanyard"
-      },
-      {
-        "type": "text",
-        "id": "trifecta_default_chapstick_type",
-        "label": "Default chapstick type",
-        "default": "Chapstick Holder Keychain"
+        "id": "trifecta_drawer_title",
+        "label": "Drawer title",
+        "default": "Build Your Trifecta"
       },
       {
         "type": "text",
         "id": "trifecta_pdp_sticky_text",
         "label": "Sticky bar upgrade strip text",
-        "info": "Shown above the sticky add-to-cart button on bundle-tagged PDPs. Tap adds the full Trifecta. Leave blank to hide the strip even when the preview is enabled.",
-        "default": "Save 10% with a Trifecta — Add Bundle"
+        "info": "Shown above the sticky add-to-cart button on eligible PDPs. Tap opens the Trifecta bundler drawer. Leave blank to hide the strip even when the CTA is enabled.",
+        "default": "Save 10% with a Trifecta — Build Bundle"
       },
       {
         "type": "header",

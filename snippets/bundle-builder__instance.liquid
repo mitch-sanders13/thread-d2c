@@ -1,0 +1,791 @@
+{% comment %}
+  Shared Trifecta bundler instance (page section + PDP drawer).
+
+  Market Tote–style picker with three typed slots:
+    Wallet → Lanyard → Chapstick Holder
+
+  Cart line property "Bundle Slot" still uses Wallet / Lanyard / Chapstick
+  so cart grouping, inline edit, and upsell keep working.
+{% endcomment %}
+
+{% doc %}
+  @param {string} instance_id - Unique id (section.id or drawer id)
+  @param {string} [heading]
+  @param {string} [savings_label]
+  @param {string} [add_bundle_label]
+  @param {string} [cart_label]
+  @param {string} [discount_type]
+  @param {number} [discount_value]
+  @param {string} [discount_code]
+  @param {object} [wallet_collection]
+  @param {object} [lanyard_collection]
+  @param {object} [chapstick_collection]
+  @param {number} [spacing_top]
+  @param {number} [spacing_bottom]
+  @param {string} [layout_horizontal]
+  @param {string} [color_scheme]
+  @param {string} [color_border]
+  @param {string} [style_border]
+  @param {string} [visibility]
+  @param {boolean} [compact]
+{% enddoc %}
+
+{%- liquid
+  assign instance_id = instance_id | default: 'trifecta'
+  assign section_id = 'bundle-builder-' | append: instance_id
+  assign js_id = instance_id | replace: '-', '_'
+
+  assign discount_type = discount_type | default: 'percent'
+  assign discount_value = discount_value | default: 10
+  assign add_bundle_label = add_bundle_label | default: 'Add to Bundle'
+  assign cart_label = cart_label | default: 'Add Bundle to Cart'
+  if compact
+    assign heading = heading | default: ''
+  else
+    assign heading = heading | default: 'Build Your Trifecta'
+  endif
+  assign savings_label = savings_label | default: 'Save 10% when you bundle a wallet, lanyard, and chapstick holder'
+
+  if discount_code == blank
+    assign discount_code = settings.trifecta_discount_code | default: ''
+  endif
+
+  assign wallet_coll = wallet_collection
+  if wallet_coll == blank
+    if settings.trifecta_wallet_collection != blank
+      assign wallet_coll = settings.trifecta_wallet_collection
+    else
+      assign wallet_coll = collections['all-wallets']
+    endif
+  endif
+
+  assign lanyard_coll = lanyard_collection
+  if lanyard_coll == blank
+    if settings.trifecta_lanyard_collection != blank
+      assign lanyard_coll = settings.trifecta_lanyard_collection
+    else
+      assign lanyard_coll = collections['lanyards']
+    endif
+  endif
+
+  assign chapstick_coll = chapstick_collection
+  if chapstick_coll == blank
+    if settings.trifecta_chapstick_collection != blank
+      assign chapstick_coll = settings.trifecta_chapstick_collection
+    else
+      assign chapstick_coll = collections['chapstick-holder-keychains']
+    endif
+  endif
+
+  assign spacing_top = spacing_top | default: 60
+  assign spacing_bottom = spacing_bottom | default: 60
+  if compact
+    assign spacing_top = 0
+    assign spacing_bottom = 16
+  endif
+  assign layout_horizontal = layout_horizontal | default: 'window'
+  assign color_scheme = color_scheme | default: 'color__bg-body color__text'
+  assign color_border = color_border | default: 'color__border-divider-1'
+  assign style_border = style_border | default: ''
+  assign visibility = visibility | default: ''
+-%}
+
+{%- comment -%}
+  Capture product JSON per slot so the Alpine data island stays readable.
+{%- endcomment -%}
+{%- capture slot_products_wallet -%}
+  {%- if wallet_coll != blank -%}
+    {%- paginate wallet_coll.products by 50 -%}
+      {%- for product in wallet_coll.products limit: 50 -%}
+        {%- assign first_variant = product.selected_or_first_available_variant -%}
+        {%- assign color_tag = '' -%}
+        {%- for tag in product.tags -%}
+          {%- assign tag_lc = tag | downcase | strip -%}
+          {%- if tag_lc contains 'color_' -%}
+            {%- assign color_tag = tag_lc | remove_first: 'color_' -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {
+          "handle": {{ product.handle | json }},
+          "title": {{ product.title | json }},
+          "url": {{ product.url | json }},
+          "price": {{ first_variant.price | json }},
+          "compareAtPrice": {{ first_variant.compare_at_price | default: 0 | json }},
+          "available": {{ first_variant.available | json }},
+          "variantId": {{ first_variant.id | json }},
+          "colorTag": {{ color_tag | json }},
+          "swatchImage": {{ product.featured_image | image_url: width: 200 | json }},
+          "images": [
+            {%- for image in product.images limit: 8 -%}
+              {
+                "thumb": {{ image | image_url: width: 160 | json }},
+                "hero": {{ image | image_url: width: 1200 | json }},
+                "hero600": {{ image | image_url: width: 600 | json }},
+                "hero900": {{ image | image_url: width: 900 | json }}
+              }{%- unless forloop.last -%},{%- endunless -%}
+            {%- endfor -%}
+          ]
+        }{%- unless forloop.last -%},{%- endunless -%}
+      {%- endfor -%}
+    {%- endpaginate -%}
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- capture slot_products_lanyard -%}
+  {%- if lanyard_coll != blank -%}
+    {%- paginate lanyard_coll.products by 50 -%}
+      {%- for product in lanyard_coll.products limit: 50 -%}
+        {%- assign first_variant = product.selected_or_first_available_variant -%}
+        {%- assign color_tag = '' -%}
+        {%- for tag in product.tags -%}
+          {%- assign tag_lc = tag | downcase | strip -%}
+          {%- if tag_lc contains 'color_' -%}
+            {%- assign color_tag = tag_lc | remove_first: 'color_' -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {
+          "handle": {{ product.handle | json }},
+          "title": {{ product.title | json }},
+          "url": {{ product.url | json }},
+          "price": {{ first_variant.price | json }},
+          "compareAtPrice": {{ first_variant.compare_at_price | default: 0 | json }},
+          "available": {{ first_variant.available | json }},
+          "variantId": {{ first_variant.id | json }},
+          "colorTag": {{ color_tag | json }},
+          "swatchImage": {{ product.featured_image | image_url: width: 200 | json }},
+          "images": [
+            {%- for image in product.images limit: 8 -%}
+              {
+                "thumb": {{ image | image_url: width: 160 | json }},
+                "hero": {{ image | image_url: width: 1200 | json }},
+                "hero600": {{ image | image_url: width: 600 | json }},
+                "hero900": {{ image | image_url: width: 900 | json }}
+              }{%- unless forloop.last -%},{%- endunless -%}
+            {%- endfor -%}
+          ]
+        }{%- unless forloop.last -%},{%- endunless -%}
+      {%- endfor -%}
+    {%- endpaginate -%}
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- capture slot_products_chapstick -%}
+  {%- if chapstick_coll != blank -%}
+    {%- paginate chapstick_coll.products by 50 -%}
+      {%- for product in chapstick_coll.products limit: 50 -%}
+        {%- assign first_variant = product.selected_or_first_available_variant -%}
+        {%- assign color_tag = '' -%}
+        {%- for tag in product.tags -%}
+          {%- assign tag_lc = tag | downcase | strip -%}
+          {%- if tag_lc contains 'color_' -%}
+            {%- assign color_tag = tag_lc | remove_first: 'color_' -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {
+          "handle": {{ product.handle | json }},
+          "title": {{ product.title | json }},
+          "url": {{ product.url | json }},
+          "price": {{ first_variant.price | json }},
+          "compareAtPrice": {{ first_variant.compare_at_price | default: 0 | json }},
+          "available": {{ first_variant.available | json }},
+          "variantId": {{ first_variant.id | json }},
+          "colorTag": {{ color_tag | json }},
+          "swatchImage": {{ product.featured_image | image_url: width: 200 | json }},
+          "images": [
+            {%- for image in product.images limit: 8 -%}
+              {
+                "thumb": {{ image | image_url: width: 160 | json }},
+                "hero": {{ image | image_url: width: 1200 | json }},
+                "hero600": {{ image | image_url: width: 600 | json }},
+                "hero900": {{ image | image_url: width: 900 | json }}
+              }{%- unless forloop.last -%},{%- endunless -%}
+            {%- endfor -%}
+          ]
+        }{%- unless forloop.last -%},{%- endunless -%}
+      {%- endfor -%}
+    {%- endpaginate -%}
+  {%- endif -%}
+{%- endcapture -%}
+
+<section
+  id="{{ section_id }}"
+  class="
+    {{ visibility }}
+    {{ color_scheme }}
+    {{ color_border }}
+    {{ style_border }}
+  ">
+  <div
+    class="trifecta-bundler {{ layout_horizontal }}"
+    style="
+      padding-top:{{ spacing_top }}px;
+      padding-bottom:{{ spacing_bottom }}px;
+    "
+    x-data="bundleBuilder_{{ js_id }}">
+
+    {%- unless heading == blank and savings_label == blank -%}
+      <div class="flex flex-col items-center px-4 pb-4 text-center">
+        <div class="max-w-prose">
+          {%- unless heading == blank -%}
+            <h2>{{ heading }}</h2>
+          {%- endunless -%}
+          {%- unless savings_label == blank -%}
+            <p class="mtb-pdp__savings">{{ savings_label }}</p>
+          {%- endunless -%}
+        </div>
+      </div>
+    {%- endunless -%}
+
+    {% render 'bundle-builder__pdp-layout',
+        add_bundle_label: add_bundle_label,
+        cart_label: cart_label,
+        discount_type: discount_type,
+        discount_value: discount_value %}
+
+    <p
+      class="type--small px-4 pb-4 text-center"
+      x-show="incompleteReason"
+      x-text="incompleteReason"
+      x-cloak></p>
+
+  </div>
+</section>
+
+<script type="application/json" id="{{ section_id }}-data">
+{
+  "discountCode": {{ discount_code | strip | json }},
+  "slots": [
+    {
+      "key": "Wallet",
+      "label": "Wallet",
+      "products": [{{ slot_products_wallet | strip }}]
+    },
+    {
+      "key": "Lanyard",
+      "label": "Lanyard",
+      "products": [{{ slot_products_lanyard | strip }}]
+    },
+    {
+      "key": "Chapstick",
+      "label": "Chapstick Holder",
+      "products": [{{ slot_products_chapstick | strip }}]
+    }
+  ]
+}
+</script>
+
+<script>
+(function() {
+  function bundleBuilderFactory_{{ js_id }}() {
+    return {
+      slots: [],
+      activeSlotIndex: 0,
+      previewHandle: null,
+      galleryIndex: 0,
+      heroSrc: '',
+      heroSrcset: '',
+      heroAlt: '',
+      heroReady: false,
+      _pendingHero: '',
+      _prefetchCache: {},
+      _heroCache: {},
+      requiredCount: 3,
+      cartLoading: false,
+      incompleteReason: '',
+      discountCode: '',
+      editingBundleId: null,
+      editingKeys: [],
+
+      init() {
+        var dataEl = document.getElementById('{{ section_id }}-data');
+        if (!dataEl) return;
+        var data;
+        try { data = JSON.parse(dataEl.textContent); }
+        catch (e) { console.error('[bundle-builder] bad JSON data', e); return; }
+
+        this.discountCode = (data.discountCode || '').trim();
+        this.slots = (data.slots || []).map(function(slot) {
+          return {
+            key: slot.key,
+            label: slot.label,
+            products: slot.products || [],
+            selectedHandle: null,
+            locked: false
+          };
+        });
+        this.requiredCount = this.slots.length || 3;
+        this.galleryIndex = 0;
+        this._prefetchCache = {};
+        this._heroCache = {};
+        this.activeSlotIndex = 0;
+        this._syncPreviewFromActive(true);
+        this._readUrlPrefill();
+      },
+
+      _readUrlPrefill() {
+        try {
+          var params = new URLSearchParams(window.location.search || '');
+          var items = [];
+          var self = this;
+          this.slots.forEach(function(slot) {
+            var handle = params.get('slot_' + slot.key.toLowerCase());
+            if (handle) items.push({ slotLabel: slot.key, handle: handle, key: null });
+          });
+          if (!items.length) return;
+          var replaceKeys = (params.get('replace_keys') || '').split(',').filter(Boolean);
+          this.prefillForUpsell({ items: items });
+          this.editingKeys = replaceKeys;
+        } catch (e) {
+          console.error('[bundle-builder] url prefill failed', e);
+        }
+      },
+
+      activeSlot() {
+        return this.slots[this.activeSlotIndex] || null;
+      },
+
+      activeProducts() {
+        var slot = this.activeSlot();
+        return slot ? slot.products : [];
+      },
+
+      _firstAvailable(products) {
+        if (!products || !products.length) return null;
+        return products.find(function(p){ return p.available; }) || products[0] || null;
+      },
+
+      _syncPreviewFromActive(useSwatchPlaceholder) {
+        var slot = this.activeSlot();
+        if (!slot) {
+          this.previewHandle = null;
+          return;
+        }
+        var selected = slot.selectedHandle
+          ? this.productByHandleInSlot(this.activeSlotIndex, slot.selectedHandle)
+          : null;
+        var fallback = this._firstAvailable(slot.products);
+        this.previewHandle = (selected || fallback) ? (selected || fallback).handle : null;
+        this.galleryIndex = 0;
+        this.applyHero(!!useSwatchPlaceholder);
+      },
+
+      selectSlot(idx) {
+        if (idx < 0 || idx >= this.slots.length) return;
+        this.activeSlotIndex = idx;
+        this._syncPreviewFromActive(true);
+      },
+
+      lockSlot(slotLabel, productHandle) {
+        var target = (slotLabel || '').toLowerCase();
+        for (var i = 0; i < this.slots.length; i++) {
+          var slot = this.slots[i];
+          if (slot.key.toLowerCase() !== target && slot.label.toLowerCase() !== target) continue;
+          var match = slot.products.find(function(p){ return p.handle === productHandle; });
+          if (!match) {
+            console.warn('[bundle-builder] product not in slot catalog', slotLabel, productHandle);
+            return false;
+          }
+          slot.selectedHandle = productHandle;
+          slot.locked = true;
+          var next = this.firstIncompleteSlot();
+          this.activeSlotIndex = next >= 0 ? next : i;
+          this._syncPreviewFromActive(true);
+          return true;
+        }
+        console.warn('[bundle-builder] no slot with label', slotLabel);
+        return false;
+      },
+
+      _prefillSlots(payload) {
+        if (!payload || !payload.items) return;
+        var self = this;
+        payload.items.forEach(function(it) {
+          var target = (it.slotLabel || '').toLowerCase();
+          for (var i = 0; i < self.slots.length; i++) {
+            var slot = self.slots[i];
+            if (slot.key.toLowerCase() !== target && slot.label.toLowerCase() !== target) continue;
+            var found = slot.products.find(function(p){ return p.handle === it.handle; });
+            if (found) {
+              slot.selectedHandle = it.handle;
+              slot.locked = false;
+            }
+            break;
+          }
+        });
+      },
+
+      prefillFromCart(payload) {
+        this._prefillSlots(payload);
+        this.editingBundleId = (payload && payload.bundleId) || null;
+        this.editingKeys = (payload && payload.items || []).map(function(p){ return p.key; }).filter(Boolean);
+        this.activeSlotIndex = 0;
+        this._syncPreviewFromActive(true);
+      },
+
+      prefillForUpsell(payload) {
+        this._prefillSlots(payload);
+        this.editingBundleId = null;
+        this.editingKeys = (payload && payload.items || []).map(function(p){ return p.key; }).filter(Boolean);
+        var next = this.firstIncompleteSlot();
+        this.activeSlotIndex = next >= 0 ? next : 0;
+        this._syncPreviewFromActive(true);
+      },
+
+      productByHandleInSlot(slotIdx, handle) {
+        var slot = this.slots[slotIdx];
+        if (!slot) return null;
+        return slot.products.find(function(p){ return p.handle === handle; }) || null;
+      },
+
+      productByHandle(handle) {
+        for (var i = 0; i < this.slots.length; i++) {
+          var p = this.productByHandleInSlot(i, handle);
+          if (p) return p;
+        }
+        return null;
+      },
+
+      previewProduct() {
+        return this.productByHandleInSlot(this.activeSlotIndex, this.previewHandle)
+          || this._firstAvailable(this.activeProducts());
+      },
+
+      previewImages() {
+        var p = this.previewProduct();
+        return (p && p.images && p.images.length) ? p.images : [];
+      },
+
+      currentHero() {
+        var images = this.previewImages();
+        if (!images.length) {
+          var p = this.previewProduct();
+          if (!p) return null;
+          return {
+            thumb: p.swatchImage,
+            hero: p.swatchImage,
+            hero600: p.swatchImage,
+            hero900: p.swatchImage
+          };
+        }
+        var idx = this.galleryIndex;
+        if (idx < 0 || idx >= images.length) idx = 0;
+        return images[idx];
+      },
+
+      heroSrcsetFor(image) {
+        if (!image) return '';
+        return (image.hero600 || '') + ' 600w, ' + (image.hero900 || '') + ' 900w, ' + (image.hero || '') + ' 1200w';
+      },
+
+      _heroCacheKey() {
+        return this.activeSlotIndex + '|' + (this.previewHandle || '') + '|' + this.galleryIndex;
+      },
+
+      applyHero(useSwatchPlaceholder) {
+        var p = this.previewProduct();
+        var image = this.currentHero();
+        if (!p || !image) return;
+
+        this.heroAlt = p.title || '';
+        var cacheKey = this._heroCacheKey();
+        var cached = this._heroCache[cacheKey];
+        if (cached) {
+          if (this.heroSrc === cached.src && this.heroReady) return;
+          this._pendingHero = cached.src;
+          this.heroSrc = cached.src;
+          this.heroSrcset = cached.srcset || '';
+          this.heroReady = true;
+          return;
+        }
+
+        var placeholder = useSwatchPlaceholder
+          ? (p.swatchImage || image.thumb || image.hero600 || image.hero)
+          : (image.thumb || p.swatchImage || image.hero600 || image.hero);
+
+        var target = image.hero || image.hero900 || placeholder;
+        var targetSrcset = this.heroSrcsetFor(image);
+
+        if (this.heroSrc === target && this.heroReady) return;
+
+        this.heroSrc = placeholder;
+        this.heroSrcset = '';
+        this.heroReady = false;
+        this._loadHero(target, targetSrcset, cacheKey);
+      },
+
+      _loadHero(src, srcset, cacheKey) {
+        if (!src) return;
+        this._pendingHero = src;
+        var self = this;
+        var img = new Image();
+        img.onload = function() {
+          if (self._pendingHero !== src) return;
+          self.heroSrc = src;
+          self.heroSrcset = srcset || '';
+          self.heroReady = true;
+          if (cacheKey) {
+            self._heroCache[cacheKey] = { src: src, srcset: srcset || '' };
+          }
+        };
+        img.onerror = function() {
+          if (self._pendingHero !== src) return;
+          self.heroReady = true;
+        };
+        if (srcset) {
+          img.sizes = '(min-width: 990px) 45vw, 100vw';
+          img.srcset = srcset;
+        }
+        img.src = src;
+      },
+
+      prefetchProduct(handle) {
+        var p = this.productByHandleInSlot(this.activeSlotIndex, handle);
+        if (!p) return;
+        var image = (p.images && p.images[0]) || null;
+        var url = image
+          ? (image.hero900 || image.hero || p.swatchImage)
+          : p.swatchImage;
+        this.prefetchUrl(url);
+      },
+
+      prefetchUrl(url) {
+        if (!url || this._prefetchCache[url]) return;
+        this._prefetchCache[url] = true;
+        var img = new Image();
+        img.src = url;
+      },
+
+      selectGallery(index) {
+        var images = this.previewImages();
+        if (index < 0 || index >= images.length) return;
+        this.galleryIndex = index;
+        this.applyHero(false);
+      },
+
+      shortName(title) {
+        if (!title) return '';
+        var idx = title.indexOf(' - ');
+        return idx > 0 ? title.slice(0, idx) : title;
+      },
+
+      selectPreview(handle) {
+        var p = this.productByHandleInSlot(this.activeSlotIndex, handle);
+        if (!p) return;
+        var slot = this.activeSlot();
+        if (slot && slot.locked) return;
+        this.previewHandle = handle;
+        this.galleryIndex = 0;
+        this.applyHero(true);
+      },
+
+      isPreview(handle) {
+        return this.previewHandle === handle;
+      },
+
+      totalSelected() {
+        var n = 0;
+        for (var i = 0; i < this.slots.length; i++) {
+          if (this.slots[i].selectedHandle) n++;
+        }
+        return n;
+      },
+
+      remainingCount() {
+        return Math.max(0, this.requiredCount - this.totalSelected());
+      },
+
+      dotIndexes() {
+        var out = [];
+        for (var i = 1; i <= this.requiredCount; i++) out.push(i);
+        return out;
+      },
+
+      firstIncompleteSlot() {
+        for (var i = 0; i < this.slots.length; i++) {
+          if (!this.slots[i].selectedHandle) return i;
+        }
+        return -1;
+      },
+
+      isComplete() {
+        return this.totalSelected() === this.requiredCount;
+      },
+
+      canAddToBundle() {
+        var slot = this.activeSlot();
+        if (!slot || slot.locked) return false;
+        var p = this.previewProduct();
+        return !!(p && p.available);
+      },
+
+      addToBundle() {
+        if (!this.canAddToBundle()) return;
+        var slot = this.activeSlot();
+        slot.selectedHandle = this.previewHandle;
+        var next = this.firstIncompleteSlot();
+        if (next >= 0) {
+          this.selectSlot(next);
+        }
+      },
+
+      removePick(slotIdx) {
+        var slot = this.slots[slotIdx];
+        if (!slot || slot.locked) return;
+        slot.selectedHandle = null;
+        if (this.activeSlotIndex === slotIdx) {
+          this._syncPreviewFromActive(true);
+        }
+      },
+
+      pickProduct(slotIdx) {
+        var slot = this.slots[slotIdx];
+        if (!slot || !slot.selectedHandle) return null;
+        return this.productByHandleInSlot(slotIdx, slot.selectedHandle);
+      },
+
+      slotFilled(slotIdx) {
+        return !!(this.slots[slotIdx] && this.slots[slotIdx].selectedHandle);
+      },
+
+      subtotalCents() {
+        var sum = 0;
+        for (var i = 0; i < this.slots.length; i++) {
+          var p = this.pickProduct(i);
+          if (p) sum += p.price;
+        }
+        return sum;
+      },
+
+      discountCents() {
+        var sub = this.subtotalCents();
+        if (!this.canAddToCart()) return 0;
+        {% case discount_type %}
+          {% when 'percent' %}
+            return Math.round(sub * ({{ discount_value | default: 0 }} / 100));
+          {% when 'fixed_off' %}
+            return Math.min(sub, {{ discount_value | default: 0 | times: 100 }});
+          {% else %}
+            return 0;
+        {% endcase %}
+      },
+
+      totalCents() {
+        if (!this.canAddToCart()) return this.subtotalCents();
+        return Math.max(0, this.subtotalCents() - this.discountCents());
+      },
+
+      formatMoney(cents) {
+        if (typeof cents !== 'number') return '';
+        if (window.Shopify && window.Shopify.formatMoney) {
+          return window.Shopify.formatMoney(cents, '{{ cart.currency.symbol }}');
+        }
+        return '$' + (cents / 100).toFixed(2);
+      },
+
+      canAddToCart() {
+        if (!this.isComplete()) return false;
+        for (var i = 0; i < this.slots.length; i++) {
+          var p = this.pickProduct(i);
+          if (!p || !p.available) return false;
+        }
+        return true;
+      },
+
+      finalizeBundle() {
+        if (!this.canAddToCart() || this.cartLoading) return Promise.resolve();
+        this.cartLoading = true;
+        this.incompleteReason = '';
+
+        var bundleId = 'tri_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        var items = [];
+        for (var i = 0; i < this.slots.length; i++) {
+          var slot = this.slots[i];
+          var p = this.pickProduct(i);
+          if (!p) continue;
+          items.push({
+            id: p.variantId,
+            quantity: 1,
+            properties: {
+              'Bundle Slot': slot.key,
+              '_bundle_id': bundleId
+            }
+          });
+        }
+
+        var self = this;
+        var rootScope = (window.Alpine && document.body) ? window.Alpine.$data(document.body) : null;
+        var isEditingExistingBundle = !!this.editingBundleId;
+        var editingKeys = this.editingKeys.slice();
+        var hasEditingKeys = editingKeys.length > 0;
+
+        return fetch(window.Shopify.routes.root + 'cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ items: items })
+        })
+        .then(function(r){
+          return r.json().then(function(body){
+            if (!r.ok) throw Object.assign(new Error('Add to cart failed'), { body: body });
+            return body;
+          });
+        })
+        .then(function(){
+          if (hasEditingKeys && rootScope && typeof rootScope.changeCartItemQuantity === 'function') {
+            return editingKeys.reduce(function(chain, key) {
+              return chain.then(function() {
+                return rootScope.changeCartItemQuantity(key, 0, false, false);
+              });
+            }, Promise.resolve());
+          }
+        })
+        .then(function() {
+          if (isEditingExistingBundle) {
+            if (rootScope && typeof rootScope.updateCart === 'function') {
+              rootScope.updateCart(true);
+            }
+            window.dispatchEvent(new CustomEvent('bundle-drawer:close'));
+            return;
+          }
+          if (self.discountCode) {
+            fetch('/discount/' + encodeURIComponent(self.discountCode), {
+              method: 'GET',
+              credentials: 'same-origin'
+            }).catch(function(){});
+          }
+          if (rootScope && typeof rootScope.updateCart === 'function') {
+            rootScope.updateCart(true);
+          }
+          window.dispatchEvent(new CustomEvent('bundle-drawer:close'));
+        })
+        .catch(function(err){
+          var msg = (err && err.body && err.body.description) || 'Could not add bundle to cart. Please try again.';
+          self.incompleteReason = msg;
+          if (rootScope) {
+            rootScope.error_title = (err && err.body && err.body.message) || 'Something went wrong';
+            rootScope.error_message = msg;
+            rootScope.show_alert = true;
+          }
+          console.error('[bundle-builder]', err);
+        })
+        .finally(function(){
+          self.cartLoading = false;
+        });
+      }
+    };
+  }
+
+  window.bundleBuilder_{{ js_id }} = bundleBuilderFactory_{{ js_id }};
+
+  function registerBundleBuilder_{{ js_id }}() {
+    if (!window.Alpine || typeof window.Alpine.data !== 'function') return false;
+    window.Alpine.data('bundleBuilder_{{ js_id }}', bundleBuilderFactory_{{ js_id }});
+    return true;
+  }
+  if (!registerBundleBuilder_{{ js_id }}()) {
+    document.addEventListener('alpine:init', registerBundleBuilder_{{ js_id }});
+  }
+})();
+</script>

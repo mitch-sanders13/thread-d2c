@@ -1,1 +1,27 @@
-{"sections":{"bundle_builder":{"type":"bundle-builder","blocks":{"slot_cBBKVX":{"type":"slot","settings":{"label":"Wallet","required":true,"default_silhouette":3,"silhouette_1_label":"Elastic Wallet","silhouette_1_collection":"elastic-wallets","silhouette_2_label":"Vertical Cardholder","silhouette_2_collection":"vertical-leather-wallets","silhouette_3_label":"Zipper Wallet","silhouette_3_collection":"leather-zip-wallets","silhouette_4_label":"","silhouette_4_collection":""}},"slot_lanyard":{"type":"slot","settings":{"label":"Lanyard","required":true,"default_silhouette":3,"silhouette_1_label":"Wristlet Lanyard","silhouette_1_collection":"wristlet-keychains","silhouette_2_label":"Neck Lanyard","silhouette_2_collection":"neck-lanyards","silhouette_3_label":"Keychain Clip","silhouette_3_collection":"keychain-clips","silhouette_4_label":"","silhouette_4_collection":""}},"slot_chapstick":{"type":"slot","settings":{"label":"Chapstick Holder","required":true,"default_silhouette":1,"silhouette_1_label":"Chapstick Holder","silhouette_1_collection":"chapstick-holder-keychains","silhouette_2_label":"","silhouette_2_collection":"","silhouette_3_label":"","silhouette_3_collection":"","silhouette_4_label":"","silhouette_4_collection":""}}},"block_order":["slot_cBBKVX","slot_lanyard","slot_chapstick"],"settings":{"heading":"Build Your Trifecta","subheading":"<p>Save 10% when you bundle a wallet, lanyard, and chapstick holder<\/p>","cta_text":"Add Bundle to Cart","auto_match_label":"Auto-match colors across slots","discount_type":"percent","discount_value":10,"discount_code":"","auto_match_default":true,"spacing_top":60,"spacing_bottom":60,"layout_horizontal":"window","color_scheme":"color__bg-body color__text","color_border":"color__border-divider-1","style_border":"","visibility":""}}},"order":["bundle_builder"]}
+{
+  "sections": {
+    "bundle_builder": {
+      "type": "bundle-builder",
+      "settings": {
+        "heading": "Build Your Trifecta",
+        "savings_label": "Save 10% when you bundle a wallet, lanyard, and chapstick holder",
+        "add_to_bundle_text": "Add to Bundle",
+        "cta_text": "Add Bundle to Cart",
+        "wallet_collection": "all-wallets",
+        "lanyard_collection": "lanyards",
+        "chapstick_collection": "chapstick-holder-keychains",
+        "discount_type": "percent",
+        "discount_value": 10,
+        "discount_code": "",
+        "spacing_top": 60,
+        "spacing_bottom": 60,
+        "layout_horizontal": "window",
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "style_border": "",
+        "visibility": ""
+      }
+    }
+  },
+  "order": ["bundle_builder"]
+}

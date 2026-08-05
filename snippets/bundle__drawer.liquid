@@ -1,51 +1,52 @@
 {% comment %}
-  Shared slide-over drawer that hosts the bundle-builder wizard.
+  Slide-over drawer that hosts the Trifecta bundler (Market Tote pattern).
 
-  Used by:
-    - snippets/bundle__pdp-cta.liquid (PDP "Make it a Trifecta" entry; mode=lock)
-    - sections/theme__cart.liquid (cart "Edit bundle" entry; mode=prefill)
-
-  Each call site mounts its own drawer with a unique `drawer_id`. The drawer
-  exposes an Alpine scope on its root element so the parent can interact via
-  $refs OR by dispatching a CustomEvent named after the drawer_id.
+  Prefer preload (server-rendered instance in the drawer body) so the PDP
+  CTA works even when /pages/build-your-trifecta is missing or not
+  assigned the bundle-builder template. Fetch remains as a fallback
+  when preload is off.
 
   Inputs:
-    - drawer_id: REQUIRED. Unique scope key, e.g. "bundle-drawer-pdp-12345"
-                 or "bundle-drawer-cart".
-    - bundle_page_path: defaults to '/pages/build-your-trifecta'
-    - bundle_section_id: defaults to 'bundle_builder' (matches the JSON
-                         template section key)
-    - title: drawer header text, defaults to "Build Your Trifecta"
+    - drawer_id: REQUIRED unique key
+    - bundle_page_path: defaults to theme setting /pages/build-your-trifecta
+    - bundle_section_id: defaults to 'bundle_builder'
+    - title: drawer header text
+    - preload: when true, render the bundler instance into the body now
 
   External API:
     - window.dispatchEvent(new CustomEvent('bundle-drawer:open', {
         detail: { drawerId, mode, payload }
       }))
         mode: 'lock'    — PDP CTA. payload: { slotLabel, productHandle }
-              'prefill' — Edit existing bundle from cart. Lands on Review.
-                          payload: { bundleId, items: [{slotLabel, handle, key}] }
-              'upsell'  — Complete a partial bundle from cart. Lands on the
-                          first incomplete step. The existing line items
-                          listed in payload.items are removed when the new
-                          bundle is added.
-                          payload: { items: [{slotLabel, handle, key}] }
+              'prefill' — Edit existing bundle from cart
+              'upsell'  — Complete a partial bundle from cart
     - window.dispatchEvent(new CustomEvent('bundle-drawer:close'))
-        Closes every drawer (broadcast).
 {% endcomment %}
 
+{% doc %}
+  Drawer host for the Trifecta bundler.
+  @param {string} drawer_id
+  @param {string} [bundle_page_path]
+  @param {string} [bundle_section_id]
+  @param {string} [title]
+  @param {boolean} [preload]
+{% enddoc %}
+
 {%- assign _drawer_id = drawer_id | default: 'bundle-drawer' -%}
-{%- assign _bundle_page_path = bundle_page_path | default: '/pages/build-your-trifecta' -%}
+{%- assign _bundle_page_path = bundle_page_path | default: settings.trifecta_page_path | default: '/pages/build-your-trifecta' -%}
 {%- assign _bundle_section_id = bundle_section_id | default: 'bundle_builder' -%}
-{%- assign _title = title | default: 'Build Your Trifecta' -%}
+{%- assign _title = title | default: settings.trifecta_drawer_title | default: 'Build Your Trifecta' -%}
+{%- assign _preload = preload | default: false -%}
 
 <div
-  class="bundle-drawer"
+  class="bundle-drawer trifecta-drawer"
   data-drawer-id="{{ _drawer_id }}"
   x-data="{
     open: false,
-    loaded: false,
+    loaded: {{ _preload | json }},
     loading: false,
     error: '',
+    preloaded: {{ _preload | json }},
     bundlePagePath: '{{ _bundle_page_path | escape }}',
     bundleSectionId: '{{ _bundle_section_id | escape }}',
     pendingMode: null,
@@ -67,7 +68,7 @@
 
     async openDrawer() {
       this.open = true;
-      if (this.loaded) {
+      if (this.preloaded || this.loaded) {
         this.$nextTick(() => this.applyMode());
         return;
       }
@@ -84,11 +85,6 @@
         const target = this.$refs.body;
         if (!target) return;
         target.innerHTML = html;
-        // <script> tags inserted via innerHTML are inert per HTML5 spec —
-        // they sit in the DOM but never execute. The bundle-builder section
-        // ships its Alpine factory + JSON data as inline scripts, so without
-        // this clone-and-replace step the drawer body stays empty (Alpine
-        // can't find bundleBuilder_<id>()).
         target.querySelectorAll('script').forEach(function(oldScript) {
           var newScript = document.createElement('script');
           for (var i = 0; i < oldScript.attributes.length; i++) {
@@ -105,7 +101,7 @@
         this.$nextTick(() => this.applyMode());
       } catch (e) {
         console.error('[bundle-drawer]', e);
-        this.error = 'Could not load the bundle builder. Please try again.';
+        this.error = 'Could not load the Trifecta bundler. Please try again.';
       } finally {
         this.loading = false;
       }
@@ -119,18 +115,26 @@
       return window.Alpine.$data(el);
     },
 
-    applyMode() {
+    applyMode(attempt) {
       const data = this.builderData();
-      if (!data) return;
+      if (!data) {
+        if ((attempt || 0) < 5) {
+          var self = this;
+          setTimeout(function() { self.applyMode((attempt || 0) + 1); }, 50);
+        }
+        return;
+      }
       if (this.pendingMode === 'lock' && this.pendingPayload) {
         if (typeof data.lockSlot === 'function') {
           data.lockSlot(this.pendingPayload.slotLabel, this.pendingPayload.productHandle);
         }
-      } else if (this.pendingMode === 'prefill' && this.pendingPayload) {
+      }
+      if (this.pendingMode === 'prefill' && this.pendingPayload) {
         if (typeof data.prefillFromCart === 'function') {
           data.prefillFromCart(this.pendingPayload);
         }
-      } else if (this.pendingMode === 'upsell' && this.pendingPayload) {
+      }
+      if (this.pendingMode === 'upsell' && this.pendingPayload) {
         if (typeof data.prefillForUpsell === 'function') {
           data.prefillForUpsell(this.pendingPayload);
         }
@@ -173,7 +177,19 @@
     <div class="bundle-drawer__body">
       <div x-show="loading" x-cloak class="p-6 text-center type--small">Loading…</div>
       <div x-show="error" x-cloak class="p-6 text-center type--small color__text-error" x-text="error"></div>
-      <div x-ref="body"></div>
+      <div x-ref="body">
+        {%- if _preload -%}
+          {% render 'bundle-builder__instance',
+            instance_id: _drawer_id,
+            wallet_collection: settings.trifecta_wallet_collection,
+            lanyard_collection: settings.trifecta_lanyard_collection,
+            chapstick_collection: settings.trifecta_chapstick_collection,
+            discount_code: settings.trifecta_discount_code,
+            compact: true,
+            layout_horizontal: 'window--full'
+          %}
+        {%- endif -%}
+      </div>
     </div>
 
   </div>

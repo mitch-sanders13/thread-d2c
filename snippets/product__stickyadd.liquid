@@ -22,33 +22,30 @@
 
 {%- liquid
   comment
-    Trifecta upgrade strip: render a thin tappable banner above the
-    sticky ATC when the merchant has enabled the PDP preview AND the
-    current product is bundle-tagged. Tap dispatches a window event
-    that the inline preview (snippets/bundle__pdp-cta.liquid) catches
-    via @bundle-pdp-preview:add.window — single source of truth for
-    the bundle add logic.
-  endcomment
-  comment
-    Trifecta eligibility now driven by product.type instead of the
-    bundle:wallet / bundle:lanyard / bundle:chapstick tag scheme.
-    Keep the slot type lists in sync with the equivalent block in
-    snippets/bundle__pdp-cta.liquid.
+    Trifecta upgrade strip: thin tappable banner above sticky ATC.
+    Opens the Trifecta bundler drawer (same as the PDP CTA), locking
+    the current product into its slot. Slot type lists must stay in
+    sync with snippets/bundle__pdp-cta.liquid.
   endcomment
   assign _trifecta_wallet_types = "Adventure Pouch Wallet|Elastic Wallet|Envelope Wallet|Leather Bifold Wallet|Leather Zip Wallet|Magnetic Wallet|Mystery Wallet|Phone Case Wallet|Stick On Wallet|Vegan Leather Bifold Wallet|Velcro Bifold Wallet|Vertical Leather Wallet|Wallet" | split: "|"
   assign _trifecta_lanyard_types = "Keychain Clip|Mystery Lanyard|Neck Lanyard|Wide Wrist Lanyard|Wristlet Keychain" | split: "|"
   assign _trifecta_chapstick_types = "Chapstick Holder Keychain|Mystery Chapstick Holder Keychain" | split: "|"
 
-  assign _is_trifecta_pdp = false
+  assign _trifecta_slot = blank
   if settings.trifecta_pdp_preview_enable and settings.trifecta_pdp_sticky_text != blank
     if _trifecta_wallet_types contains product.type
-      assign _is_trifecta_pdp = true
+      assign _trifecta_slot = 'Wallet'
     elsif _trifecta_lanyard_types contains product.type
-      assign _is_trifecta_pdp = true
+      assign _trifecta_slot = 'Lanyard'
     elsif _trifecta_chapstick_types contains product.type
-      assign _is_trifecta_pdp = true
+      assign _trifecta_slot = 'Chapstick'
     endif
   endif
+  assign _is_trifecta_pdp = false
+  if _trifecta_slot != blank
+    assign _is_trifecta_pdp = true
+  endif
+  assign _drawer_id = 'bundle-drawer-pdp-' | append: product.id
 -%}
 
 {% case blocksettings.color_scheme %}
@@ -89,15 +86,26 @@
       <button
         type="button"
         class="bundle-sticky-upgrade"
-        x-data="{ upgradeLoading: false }"
-        :disabled="upgradeLoading"
-        @click="upgradeLoading = true; window.dispatchEvent(new CustomEvent('bundle-pdp-preview:add')); setTimeout(function(){ upgradeLoading = false; }, 2500);">
+        data-drawer-id="{{ _drawer_id | escape }}"
+        data-slot-label="{{ _trifecta_slot | escape }}"
+        data-product-handle="{{ product.handle | escape }}"
+        @click="
+          window.dispatchEvent(new CustomEvent('bundle-drawer:open', {
+            detail: {
+              drawerId: $el.dataset.drawerId,
+              mode: 'lock',
+              payload: {
+                slotLabel: $el.dataset.slotLabel,
+                productHandle: $el.dataset.productHandle
+              }
+            }
+          }));
+        ">
         <span class="bundle-sticky-upgrade__icon" aria-hidden="true">★</span>
-        <span class="bundle-sticky-upgrade__text" x-show="!upgradeLoading">
+        <span class="bundle-sticky-upgrade__text">
           {{ settings.trifecta_pdp_sticky_text }}
         </span>
-        <span class="bundle-sticky-upgrade__text" x-show="upgradeLoading" x-cloak>Adding bundle…</span>
-        <span class="bundle-sticky-upgrade__arrow" aria-hidden="true" x-show="!upgradeLoading">→</span>
+        <span class="bundle-sticky-upgrade__arrow" aria-hidden="true">→</span>
       </button>
     {%- endif -%}
     <div class="flex flex-row flex-wrap items-center justify-between gap-4">

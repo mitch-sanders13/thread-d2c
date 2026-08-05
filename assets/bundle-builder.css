@@ -1669,12 +1669,74 @@
   font-weight: 700;
 }
 
-/* ============ Market Tote PDP CTA ============ */
-.market-tote-pdp-cta {
+/* ============ Trifecta + Market Tote PDP CTA ============ */
+.market-tote-pdp-cta,
+.trifecta-pdp-cta {
   width: 100%;
 }
-.market-tote-pdp-cta__btn {
+.market-tote-pdp-cta__btn,
+.trifecta-pdp-cta__btn {
   width: 100%;
+}
+
+/* Trifecta slot tabs (Market Tote–style picker) */
+.tri-pdp__slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.tri-pdp__slot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  margin: 0;
+  border: 1px solid var(--color-divider, #ddd);
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  line-height: 1.2;
+}
+.tri-pdp__slot:hover {
+  border-color: currentColor;
+}
+.tri-pdp__slot.is-active {
+  border-color: currentColor;
+  background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.04));
+}
+.tri-pdp__slot.is-filled:not(.is-active) {
+  border-color: #16a34a;
+}
+.tri-pdp__slot-check {
+  color: #16a34a;
+  font-size: 0.75rem;
+}
+.tri-pdp__locked-note {
+  margin: 6px 0 0;
+  opacity: 0.65;
+}
+.tri-pdp__pick-slot {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.65;
+  margin-bottom: 2px;
+}
+.tri-pdp__pick-locked {
+  opacity: 0.65;
+  font-weight: 600;
+}
+.mtb-pdp__swatch.is-picked .mtb-pdp__swatch-img {
+  border-color: #16a34a;
 }
 
 /* ============ Market Tote bundler — PDP layout ============ */

@@ -1,0 +1,222 @@
+{% comment %}
+  PDP-style Trifecta bundler body: slot tabs, hero, swatches, progress,
+  picks strip, and Add to Bundle / Add to Cart CTA.
+
+  Reuses Market Tote (.mtb-pdp*) visual classes for a consistent look.
+{% endcomment %}
+
+{% doc %}
+  Trifecta bundler PDP layout.
+  @param {string} add_bundle_label
+  @param {string} cart_label
+  @param {string} discount_type
+  @param {number} discount_value
+{% enddoc %}
+
+{%- assign _add_label = add_bundle_label | default: 'Add to Bundle' -%}
+{%- assign _cart_label = cart_label | default: 'Add Bundle to Cart' -%}
+
+<div class="mtb-pdp tri-pdp" x-show="slots.length > 0" x-cloak>
+  <div
+    class="mtb-pdp__media"
+    :class="{ 'mtb-pdp__media--solo': previewImages().length <= 1 }">
+    <div
+      class="mtb-pdp__thumbs"
+      x-show="previewImages().length > 1"
+      x-cloak
+      role="listbox"
+      aria-label="Product images">
+      <template x-for="(image, imgIdx) in previewImages()" :key="imgIdx">
+        <button
+          type="button"
+          role="option"
+          class="mtb-pdp__thumb"
+          :class="{ 'is-active': galleryIndex === imgIdx }"
+          :aria-selected="galleryIndex === imgIdx"
+          @click="selectGallery(imgIdx)"
+          @mouseenter="prefetchUrl(image.hero900 || image.hero)">
+          <img
+            :src="image.thumb"
+            width="80"
+            height="80"
+            :alt="(previewProduct()?.title || '') + ' image ' + (imgIdx + 1)"
+            loading="lazy"
+            decoding="async" />
+        </button>
+      </template>
+    </div>
+
+    <div class="mtb-pdp__hero" :class="{ 'is-loading': !heroReady }">
+      <img
+        x-show="heroSrc"
+        :src="heroSrc"
+        :srcset="heroSrcset || null"
+        sizes="(min-width: 990px) 45vw, 100vw"
+        width="1200"
+        height="1200"
+        :alt="heroAlt"
+        decoding="async"
+        fetchpriority="high" />
+    </div>
+  </div>
+
+  <div class="mtb-pdp__info">
+    <div class="tri-pdp__slots" role="tablist" aria-label="Bundle slots">
+      <template x-for="(slot, sIdx) in slots" :key="slot.key">
+        <button
+          type="button"
+          role="tab"
+          class="tri-pdp__slot"
+          :class="{
+            'is-active': activeSlotIndex === sIdx,
+            'is-filled': slotFilled(sIdx),
+            'is-locked': slot.locked
+          }"
+          :aria-selected="activeSlotIndex === sIdx"
+          @click="selectSlot(sIdx)">
+          <span class="tri-pdp__slot-label" x-text="slot.label"></span>
+          <span class="tri-pdp__slot-check" x-show="slotFilled(sIdx)" aria-hidden="true">✓</span>
+        </button>
+      </template>
+    </div>
+
+    <div x-show="previewProduct()">
+      <h3 class="mtb-pdp__title" x-text="previewProduct()?.title || ''"></h3>
+      <p class="mtb-pdp__price" x-text="previewProduct() ? formatMoney(previewProduct().price) : ''"></p>
+    </div>
+
+    <div class="mtb-pdp__styles-header">
+      <p class="mtb-pdp__styles-label">
+        Select Your <span x-text="activeSlot()?.label || 'Style'"></span>
+        <span
+          class="mtb-pdp__styles-count"
+          x-text="'(' + activeProducts().length + ' styles)'"></span>
+      </p>
+      <p class="tri-pdp__locked-note type--small" x-show="activeSlot()?.locked" x-cloak>
+        Locked from this product page
+      </p>
+    </div>
+
+    <div
+      class="mtb-pdp__swatches"
+      role="listbox"
+      :aria-label="(activeSlot()?.label || 'Product') + ' styles'">
+      <template x-for="product in activeProducts()" :key="product.handle">
+        <button
+          type="button"
+          role="option"
+          class="mtb-pdp__swatch"
+          :class="{
+            'is-current': isPreview(product.handle),
+            'is-unavailable': !product.available,
+            'is-picked': activeSlot()?.selectedHandle === product.handle
+          }"
+          :aria-selected="isPreview(product.handle)"
+          :aria-label="product.title"
+          :disabled="!product.available || !!activeSlot()?.locked"
+          @mouseenter="prefetchProduct(product.handle)"
+          @focus="prefetchProduct(product.handle)"
+          @click="selectPreview(product.handle)">
+          <span class="mtb-pdp__swatch-img">
+            <img
+              :src="product.swatchImage"
+              width="120"
+              height="120"
+              :alt="product.title"
+              loading="lazy"
+              decoding="async" />
+            <span
+              class="mtb-pdp__swatch-check"
+              x-show="isPreview(product.handle) || activeSlot()?.selectedHandle === product.handle"
+              aria-hidden="true">✓</span>
+          </span>
+          <span class="mtb-pdp__swatch-name" x-text="shortName(product.title)"></span>
+        </button>
+      </template>
+    </div>
+
+    <div class="mtb-pdp__progress" aria-label="Bundle progress">
+      <template x-for="i in dotIndexes()" :key="i">
+        <span
+          class="mtb-pdp__dot"
+          :class="{ 'is-filled': totalSelected() >= i }"
+          aria-hidden="true"></span>
+      </template>
+      <span
+        class="mtb-pdp__progress-label type--small"
+        x-text="totalSelected() + ' of ' + requiredCount + ' added'"></span>
+    </div>
+
+    <div class="mtb-pdp__cta">
+      <button
+        type="button"
+        class="btn btn--primary w-full"
+        x-show="!isComplete()"
+        :disabled="!canAddToBundle()"
+        :class="{ 'opacity-50 cursor-not-allowed': !canAddToBundle() }"
+        @click="addToBundle()">
+        {{ _add_label }}
+      </button>
+      <button
+        type="button"
+        class="btn btn--primary w-full"
+        x-show="isComplete()"
+        x-cloak
+        :disabled="!canAddToCart() || cartLoading"
+        :class="{ 'opacity-50 cursor-not-allowed': !canAddToCart() || cartLoading }"
+        @click="finalizeBundle()">
+        <span x-show="!cartLoading">{{ _cart_label }} &mdash; Save {{ discount_value | default: 10 }}%</span>
+        <span x-show="cartLoading" x-cloak>Adding&hellip;</span>
+      </button>
+    </div>
+
+    <div class="mtb-pdp__summary" x-show="totalSelected() > 0" x-cloak>
+      <p class="mtb-pdp__summary-total">
+        <span class="mtb-pdp__summary-label">Bundle total:</span>
+        <strong
+          class="mtb-pdp__summary-now"
+          x-text="formatMoney(isComplete() ? totalCents() : subtotalCents())"></strong>
+        <s
+          class="mtb-pdp__summary-was"
+          x-show="isComplete() && discountCents() > 0"
+          x-text="formatMoney(subtotalCents())"
+          x-cloak></s>
+      </p>
+    </div>
+
+    <div class="mtb-pdp__picks" x-show="totalSelected() > 0" x-cloak>
+      <p class="mtb-pdp__picks-label type--small">In your bundle</p>
+      <ul class="mtb-pdp__picks-list">
+        <template x-for="(slot, idx) in slots" :key="slot.key">
+          <li class="mtb-pdp__pick" x-show="slot.selectedHandle" x-cloak>
+            <img
+              :src="pickProduct(idx)?.swatchImage"
+              width="48"
+              height="48"
+              :alt="pickProduct(idx)?.title || ''"
+              loading="lazy" />
+            <span class="mtb-pdp__pick-name">
+              <span class="tri-pdp__pick-slot" x-text="slot.label"></span>
+              <span x-text="shortName(pickProduct(idx)?.title || '')"></span>
+            </span>
+            <button
+              type="button"
+              class="mtb-pdp__pick-remove"
+              x-show="!slot.locked"
+              :aria-label="'Remove ' + slot.label + ' from bundle'"
+              @click="removePick(idx)">Remove from Bundle</button>
+            <span class="tri-pdp__pick-locked type--small" x-show="slot.locked" x-cloak>Locked</span>
+          </li>
+        </template>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<p
+  class="type--small italic text-center"
+  style="padding: 24px 16px;"
+  x-show="slots.length === 0"
+  x-cloak>
+  No Trifecta products available.
+</p>

@@ -378,7 +378,8 @@
         // main ATC anchor is in view. Avoids two "Add ... to Cart" CTAs
         // showing simultaneously when the customer is interacting with
         // the bundle.
-        var bundleEl = section.querySelector('.bundle-pdp-preview');
+        // Hide sticky ATC while the Trifecta / Market Tote PDP CTA is on screen.
+        var bundleEl = section.querySelector('.trifecta-pdp-cta, .market-tote-pdp-cta, .bundle-pdp-preview');
 
         var mql = window.matchMedia('(max-width: 749px)');
         var anchorObserver = null;
