@@ -103,8 +103,22 @@
 {%- endcomment -%}
 {%- capture slot_products_wallet -%}
   {%- if wallet_coll != blank -%}
-    {%- paginate wallet_coll.products by 50 -%}
-      {%- for product in wallet_coll.products limit: 50 -%}
+    {%- comment -%}
+      Liquid caps collection.products at 50/page. Embed the first page for
+      fast paint; Alpine _loadMoreProducts fetches the rest via products.json.
+      Skip Bundle / trifecta SKUs (prebuilt sets) — same as best-sellers.
+    {%- endcomment -%}
+    {%- assign _ecs_emitted = 0 -%}
+    {%- paginate wallet_coll.products by 100 -%}
+      {%- for product in wallet_coll.products limit: 100 -%}
+        {%- if product.type == 'Bundle' or product.tags contains 'trifecta' -%}
+          {%- continue -%}
+        {%- endif -%}
+        {%- if _ecs_emitted >= 50 -%}
+          {%- break -%}
+        {%- endif -%}
+        {%- if _ecs_emitted > 0 -%},{%- endif -%}
+        {%- assign _ecs_emitted = _ecs_emitted | plus: 1 -%}
         {%- assign first_variant = product.selected_or_first_available_variant -%}
         {%- assign color_tag = '' -%}
         {%- for tag in product.tags -%}
@@ -135,7 +149,7 @@
               }{%- unless forloop.last -%},{%- endunless -%}
             {%- endfor -%}
           ]
-        }{%- unless forloop.last -%},{%- endunless -%}
+        }
       {%- endfor -%}
     {%- endpaginate -%}
   {%- endif -%}
@@ -143,8 +157,22 @@
 
 {%- capture slot_products_lanyard -%}
   {%- if lanyard_coll != blank -%}
-    {%- paginate lanyard_coll.products by 50 -%}
-      {%- for product in lanyard_coll.products limit: 50 -%}
+    {%- comment -%}
+      Liquid caps collection.products at 50/page. Embed the first page for
+      fast paint; Alpine _loadMoreProducts fetches the rest via products.json.
+      Skip Bundle / trifecta SKUs (prebuilt sets) — same as best-sellers.
+    {%- endcomment -%}
+    {%- assign _ecs_emitted = 0 -%}
+    {%- paginate lanyard_coll.products by 100 -%}
+      {%- for product in lanyard_coll.products limit: 100 -%}
+        {%- if product.type == 'Bundle' or product.tags contains 'trifecta' -%}
+          {%- continue -%}
+        {%- endif -%}
+        {%- if _ecs_emitted >= 50 -%}
+          {%- break -%}
+        {%- endif -%}
+        {%- if _ecs_emitted > 0 -%},{%- endif -%}
+        {%- assign _ecs_emitted = _ecs_emitted | plus: 1 -%}
         {%- assign first_variant = product.selected_or_first_available_variant -%}
         {%- assign color_tag = '' -%}
         {%- for tag in product.tags -%}
@@ -175,7 +203,7 @@
               }{%- unless forloop.last -%},{%- endunless -%}
             {%- endfor -%}
           ]
-        }{%- unless forloop.last -%},{%- endunless -%}
+        }
       {%- endfor -%}
     {%- endpaginate -%}
   {%- endif -%}
@@ -183,8 +211,22 @@
 
 {%- capture slot_products_chapstick -%}
   {%- if chapstick_coll != blank -%}
-    {%- paginate chapstick_coll.products by 50 -%}
-      {%- for product in chapstick_coll.products limit: 50 -%}
+    {%- comment -%}
+      Liquid caps collection.products at 50/page. Embed the first page for
+      fast paint; Alpine _loadMoreProducts fetches the rest via products.json.
+      Skip Bundle / trifecta SKUs (prebuilt sets) — same as best-sellers.
+    {%- endcomment -%}
+    {%- assign _ecs_emitted = 0 -%}
+    {%- paginate chapstick_coll.products by 100 -%}
+      {%- for product in chapstick_coll.products limit: 100 -%}
+        {%- if product.type == 'Bundle' or product.tags contains 'trifecta' -%}
+          {%- continue -%}
+        {%- endif -%}
+        {%- if _ecs_emitted >= 50 -%}
+          {%- break -%}
+        {%- endif -%}
+        {%- if _ecs_emitted > 0 -%},{%- endif -%}
+        {%- assign _ecs_emitted = _ecs_emitted | plus: 1 -%}
         {%- assign first_variant = product.selected_or_first_available_variant -%}
         {%- assign color_tag = '' -%}
         {%- for tag in product.tags -%}
@@ -215,7 +257,7 @@
               }{%- unless forloop.last -%},{%- endunless -%}
             {%- endfor -%}
           ]
-        }{%- unless forloop.last -%},{%- endunless -%}
+        }
       {%- endfor -%}
     {%- endpaginate -%}
   {%- endif -%}

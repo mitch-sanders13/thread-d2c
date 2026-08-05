@@ -1836,6 +1836,13 @@
   gap: 10px;
   align-items: start;
 }
+/* Mobile: main image first, gallery thumbs below (DOM order is thumbs then hero). */
+.mtb-pdp__media .mtb-pdp__hero {
+  order: 1;
+}
+.mtb-pdp__media .mtb-pdp__thumbs {
+  order: 2;
+}
 @media (min-width: 750px) {
   .mtb-pdp__media {
     grid-template-columns: 72px 1fr;
@@ -1843,6 +1850,10 @@
   }
   .mtb-pdp__media--solo {
     grid-template-columns: 1fr;
+  }
+  .mtb-pdp__media .mtb-pdp__hero,
+  .mtb-pdp__media .mtb-pdp__thumbs {
+    order: initial;
   }
 }
 
