@@ -1301,6 +1301,13 @@
               {%- when 'inventory' -%}
                 {% render 'product__inventory', blocksettings: block.settings %}
 
+              {%- when 'presale' -%}
+                {% comment %}
+                  Pre-sale ship date + final-sale notice. Used by the
+                  product.presale alternate template instead of inventory.
+                {% endcomment %}
+                {% render 'product__presale', blocksettings: block.settings %}
+
               {%- when 'pickup' -%}
                 {% render 'product__pickup', blocksettings: block.settings %}  
 
@@ -3613,6 +3620,122 @@
         { "type": "color", "id": "inv_color", "label": "Text color" },
         { "type": "color", "id": "inv_dot_color", "label": "Status dot color" },
 
+        { "type": "header", "content": "Design — Spacing" },
+        { "type": "range", "id": "mb_d", "label": "Margin bottom — desktop (px)", "min": 0, "max": 64, "step": 2, "default": 0 },
+        { "type": "range", "id": "mb_m", "label": "Margin bottom — mobile (px)",  "min": 0, "max": 64, "step": 2, "default": 0 }
+      ]
+    },
+    {
+      "type": "presale",
+      "name": "Pre-sale info",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Shows the estimated ship date from a SHIPS: DD/MM/YY product tag, plus a final-sale notice. Adds matching cart line properties on add-to-cart."
+        },
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__22.content"
+        },
+        {
+          "type": "range",
+          "id": "spacing_top",
+          "min": 0,
+          "max": 50,
+          "step": 5,
+          "unit": "px",
+          "label": "t:sections.all.layout.settings.spacing.label_top",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "spacing_bottom",
+          "min": 0,
+          "max": 50,
+          "step": 5,
+          "unit": "px",
+          "label": "t:sections.all.layout.settings.spacing.label_bottom",
+          "default": 10
+        },
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__1.content"
+        },
+        {
+          "type": "select",
+          "id": "color_scheme",
+          "label": "t:sections.all.colors.settings.color_scheme.label",
+          "options": [
+            {
+              "value": "color__bg-body color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__1.label"
+            },
+            {
+              "value": "color__bg-neutral color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__2.label"
+            },
+            {
+              "value": "color__bg-overlay-1 color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__3.label"
+            },
+            {
+              "value": "color__bg-overlay-2 color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__4.label"
+            },
+            {
+              "value": "color__bg-overlay-3 color__text",
+              "label": "t:sections.all.colors.settings.color_scheme.options__5.label"
+            },
+            {
+              "value": "color__bg-primary color__primary",
+              "label": "t:sections.all.colors.settings.color_scheme.options__6.label"
+            },
+            {
+              "value": "color__bg-secondary color__secondary",
+              "label": "t:sections.all.colors.settings.color_scheme.options__7.label"
+            }
+          ],
+          "default": "color__bg-body color__text"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.all.headers.header__2.content"
+        },
+        {
+          "type": "select",
+          "id": "style_border",
+          "label": "t:sections.all.styles.settings.style_border.label",
+          "options": [
+            {
+              "value": "",
+              "label": "t:sections.all.styles.settings.style_border.options__1.label"
+            },
+            {
+              "value": "border--t-width",
+              "label": "t:sections.all.styles.settings.style_border.options__2.label"
+            },
+            {
+              "value": "border--b-width",
+              "label": "t:sections.all.styles.settings.style_border.options__3.label"
+            },
+            {
+              "value": "border--b-width border--t-width",
+              "label": "t:sections.all.styles.settings.style_border.options__4.label"
+            }
+          ],
+          "default": ""
+        },
+        { "type": "header", "content": "Design — Ship date text" },
+        { "type": "select", "id": "ship_font", "label": "Font",
+          "options": [{ "value": "", "label": "Default" }, { "value": "body", "label": "Body (Forma)" }, { "value": "heading", "label": "Heading (PP Right Grotesk)" }, { "value": "handwritten", "label": "Handwritten" }], "default": "" },
+        { "type": "range", "id": "ship_size_d", "label": "Size — desktop (px)", "min": 0, "max": 24, "step": 1, "default": 0 },
+        { "type": "range", "id": "ship_size_m", "label": "Size — mobile (px)",  "min": 0, "max": 24, "step": 1, "default": 0 },
+        { "type": "select", "id": "ship_weight", "label": "Weight",
+          "options": [{ "value": "", "label": "Default" }, { "value": "400", "label": "Regular" }, { "value": "500", "label": "Medium" }, { "value": "600", "label": "Semi-bold" }, { "value": "700", "label": "Bold" }], "default": "" },
+        { "type": "color", "id": "ship_color", "label": "Text color" },
+        { "type": "color", "id": "ship_dot_color", "label": "Status dot color" },
+        { "type": "color", "id": "notice_color", "label": "Final-sale notice color" },
         { "type": "header", "content": "Design — Spacing" },
         { "type": "range", "id": "mb_d", "label": "Margin bottom — desktop (px)", "min": 0, "max": 64, "step": 2, "default": 0 },
         { "type": "range", "id": "mb_m", "label": "Margin bottom — mobile (px)",  "min": 0, "max": 64, "step": 2, "default": 0 }

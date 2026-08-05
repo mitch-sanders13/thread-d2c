@@ -116,6 +116,14 @@
       "save": "Save",
       "save_up_to": "Save up to"
     },
+    "presale": {
+      "badge": "Pre-Order",
+      "pre_order": "Pre-Order",
+      "ships_label": "Estimated ship date:",
+      "ships_tba": "Shipping date to be announced",
+      "ships_property": "Estimated Ship Date",
+      "final_sale": "Pre-orders are final sale and cannot be cancelled."
+    },
     "inventory": {
       "only": "Only",
       "remaining": "in stock"

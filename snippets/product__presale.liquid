@@ -1,0 +1,137 @@
+{% comment %}
+  Pre-sale buy-box block: estimated ship date + final-sale notice.
+
+  Reads a product tag shaped like "SHIPS: DD/MM/YY" (case-insensitive
+  on the SHIPS key). Also writes hidden cart line properties so the
+  ship date and final-sale message travel into the cart/order — same
+  custom-input_* pattern used by the sale tag in product__options.
+
+  Accepts:
+    - blocksettings: block settings from product__main
+    - featured: when true, pull product from section.settings.product
+
+  Used by:
+    - templates/product.presale.json (presale block)
+{% endcomment %}
+
+{% if featured %}
+  {%- assign product = section.settings.product -%}
+{% endif %}
+
+{%- liquid
+  assign ship_date = blank
+  for tag in product.tags
+    assign tag_parts = tag | split: ':'
+    if tag_parts.size >= 2
+      assign tag_key = tag_parts[0] | strip | upcase
+      if tag_key == 'SHIPS'
+        assign ship_date = tag_parts[1] | strip
+        break
+      endif
+    endif
+  endfor
+-%}
+
+<div
+  class="pdp-block pdp-block--presale pdp-presale px-4
+    {{ section.settings.color_border }}
+    {{ blocksettings.color_scheme }}
+    {{ blocksettings.style_border }}"
+  data-pdp-block
+  style="
+    padding-top:{{ blocksettings.spacing_top }}px;
+    padding-bottom:{{ blocksettings.spacing_bottom }}px;
+    {% if blocksettings.mb_d %}--presale-mb-d: {{ blocksettings.mb_d }}px;{% endif %}
+    {% if blocksettings.mb_m %}--presale-mb-m: {{ blocksettings.mb_m }}px;{% endif %}
+    {% if blocksettings.ship_color %}color: {{ blocksettings.ship_color }};{% endif %}
+  "
+>
+  {% comment %} Ship-date row — mirrors inventory block layout {% endcomment %}
+  <div class="pdp-presale-row relative flex items-center
+    {% if blocksettings.ship_font == 'body' %}font-body
+    {% elsif blocksettings.ship_font == 'heading' %}font-heading
+    {% elsif blocksettings.ship_font == 'handwritten' %}font-handwritten
+    {% endif %}
+    {% if blocksettings.ship_weight %}font-[{{ blocksettings.ship_weight }}]{% endif %}
+  "
+    style="
+      {% if blocksettings.ship_size_d > 0 %}font-size: {{ blocksettings.ship_size_d }}px;{% endif %}
+    "
+  >
+    <span class="inline-flex w-3 h-3 mr-2 shrink-0">
+      <span
+        class="animate-ping absolute inline-flex w-3 h-3 rounded-full
+          {% unless blocksettings.ship_dot_color %}color__bg-primary{% endunless %}"
+        {% if blocksettings.ship_dot_color %}style="background-color: {{ blocksettings.ship_dot_color }};"{% endif %}
+      ></span>
+      <span
+        class="inline-flex w-3 h-3 rounded-full
+          {% unless blocksettings.ship_dot_color %}color__bg-primary{% endunless %}"
+        {% if blocksettings.ship_dot_color %}style="background-color: {{ blocksettings.ship_dot_color }};"{% endif %}
+      ></span>
+    </span>
+
+    <span>
+      {% if ship_date != blank %}
+        {{ 'products.presale.ships_label' | t }} {{ ship_date }}
+      {% else %}
+        {{ 'products.presale.ships_tba' | t }}
+      {% endif %}
+    </span>
+  </div>
+
+  {% comment %} Final-sale notice under the ship date {% endcomment %}
+  <p
+    class="pdp-presale-final-sale mb-0 mt-2 type--small font-medium"
+    style="{% if blocksettings.notice_color %}color: {{ blocksettings.notice_color }};{% endif %}"
+  >
+    {{ 'products.presale.final_sale' | t }}
+  </p>
+
+  {% comment %}
+    Hidden cart line properties. Class custom-input_{handle} is collected
+    by addCartItem when the ATC passes those inputs as the properties arg.
+  {% endcomment %}
+  <div class="hidden" aria-hidden="true">
+    {% if ship_date != blank %}
+      <label for="custom-presale-ships-{{ product.id }}">{{ 'products.presale.ships_property' | t }}</label>
+      <input
+        id="custom-presale-ships-{{ product.id }}"
+        type="text"
+        name="properties[{{ 'products.presale.ships_property' | t }}]"
+        class="custom-input_{{ product.handle }}"
+        value="{{ ship_date | escape }}"
+        readonly
+        tabindex="-1"
+      >
+    {% endif %}
+    <label for="custom-presale-sale-{{ product.id }}">SALE</label>
+    <input
+      id="custom-presale-sale-{{ product.id }}"
+      type="text"
+      name="properties[SALE]"
+      class="custom-input_{{ product.handle }}"
+      value="{{ 'products.presale.final_sale' | t | escape }}"
+      readonly
+      tabindex="-1"
+    >
+  </div>
+</div>
+
+<style>
+  #shopify-section-{{ section.id }} .pdp-presale {
+    margin-bottom: var(--presale-mb-m, 0px);
+  }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .pdp-presale {
+      margin-bottom: var(--presale-mb-d, 0px);
+    }
+  }
+  {% if blocksettings.ship_size_m > 0 %}
+  @media (max-width: 767px) {
+    #shopify-section-{{ section.id }} .pdp-presale-row {
+      font-size: {{ blocksettings.ship_size_m }}px;
+    }
+  }
+  {% endif %}
+</style>

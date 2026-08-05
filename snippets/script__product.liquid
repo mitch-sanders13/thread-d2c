@@ -90,7 +90,7 @@
   buttonDisabled:  {% if product.has_only_default_variant %}false{% else %}true{% endif %},
   choosing: false,
   attributeName: 'x-on:submit.prevent',
-  attributeValue: 'addCartItem(defaultVariantId, defaultSellingPlanId, quantity, true); button_loading = true; option_popup = false; setTimeout(function(){ button_loading = false}, 500);',
+  attributeValue: 'addCartItem(defaultVariantId, defaultSellingPlanId, quantity, true, document.getElementsByClassName(\'custom-input_{{ product.handle }}\')); button_loading = true; option_popup = false; setTimeout(function(){ button_loading = false}, 500);',
   
   // slider data
   gallery_index: 0,

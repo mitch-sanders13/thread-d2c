@@ -155,6 +155,7 @@
                       {% render 'component__badge', background: badge_background, text: badge_foreground, border: badge_foreground, icon: '', content: badge_content %}
                     {% endif %}
                   {% endfor %}
+                  {% render 'product__presale-badge', background: badge_background, text: badge_foreground, border: badge_foreground %}
                   {% if product.price < product.compare_at_price and hide_sale == false %}
                     {% capture badge_content %}Sale{% endcapture %}
                     {% render 'component__badge', background: badge_background, text: badge_foreground, border: badge_foreground, icon: '', content: badge_content %}

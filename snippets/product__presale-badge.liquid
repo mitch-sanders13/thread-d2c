@@ -1,0 +1,36 @@
+{% comment %}
+  Renders a Pre-Order badge when this product is on the presale template
+  or has a SHIPS: DD/MM/YY tag (so collection cards match the PDP).
+
+  Accepts:
+    - background, text, border: same args as component__badge
+{% endcomment %}
+
+{%- liquid
+  assign show_presale_badge = false
+  if template.suffix == 'presale'
+    assign show_presale_badge = true
+  else
+    for tag in product.tags
+      assign tag_parts = tag | split: ':'
+      if tag_parts.size >= 2
+        assign tag_key = tag_parts[0] | strip | upcase
+        if tag_key == 'SHIPS'
+          assign show_presale_badge = true
+          break
+        endif
+      endif
+    endfor
+  endif
+-%}
+
+{% if show_presale_badge %}
+  {% capture badge_content %}{{ 'products.presale.badge' | t }}{% endcapture %}
+  {% render 'component__badge',
+    background: background,
+    text: text,
+    border: border,
+    icon: '',
+    content: badge_content
+  %}
+{% endif %}

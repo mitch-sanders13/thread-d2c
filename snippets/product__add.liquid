@@ -117,7 +117,7 @@
       :disabled="button_loading || incomplete_fields"
       @click.prevent="
         if (cart_behavior === 'drawer') cart_drawer = true;
-        addCartItem(defaultVariantId, defaultSellingPlanId, quantity, true);
+        addCartItem(defaultVariantId, defaultSellingPlanId, quantity, true, document.getElementsByClassName('custom-input_{{ product.handle }}'));
         button_loading = true;
         setTimeout(function(){ button_loading = false }, 500);"
       x-show="!buttonDisabled && defaultVariantExists && defaultAvailable"
@@ -125,6 +125,8 @@
       <div class="btn__content">
         {% if product.metafields.custom.button_text %}
           {{ product.metafields.custom.button_text }}
+        {% elsif template.suffix == 'presale' %}
+          {{ 'products.presale.pre_order' | t }}
         {% else %}
           {{ 'products.general.add_to_cart' | t }}
         {% endif %}
@@ -338,7 +340,7 @@
       :disabled="button_loading || incomplete_fields"
       @click.prevent="
         if (cart_behavior === 'drawer') cart_drawer = true;
-        addCartItem(defaultVariantId, defaultSellingPlanId, quantity, true);
+        addCartItem(defaultVariantId, defaultSellingPlanId, quantity, true, document.getElementsByClassName('custom-input_{{ product.handle }}'));
         button_loading = true;
         setTimeout(function(){ button_loading = false }, 500);
       "
@@ -348,6 +350,8 @@
       <div class="btn__content">
         {% if product.metafields.custom.button_text %}
           {{ product.metafields.custom.button_text }}
+        {% elsif template.suffix == 'presale' %}
+          {{ 'products.presale.pre_order' | t }}
         {% else %}
           {{ 'products.general.add_to_cart' | t }}
         {% endif %}
