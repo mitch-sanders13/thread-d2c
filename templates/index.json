@@ -1,1 +1,2129 @@
-{"sections":{"85942a7d-a700-4a34-9b4d-8e0a35c6feb7":{"type":"banner","blocks":{"eyebrow_QtLqMB":{"type":"eyebrow","disabled":true,"settings":{"content":"NEW ARRIVALS","block_layout":"stack","spacing_top":0,"spacing_bottom":8,"spacing_left":32,"spacing_right":0,"font_family":"body","font_family_custom":"","font_size":14,"font_weight":"700","text_transform":"uppercase","letter_spacing":"0.16em","custom_color":"#1e7db3"}},"heading_XGwGQT":{"type":"heading","disabled":true,"settings":{"content":"Everyday Carry. Elevated.","outline_last_word":false,"block_layout":"stack","spacing_top":0,"spacing_bottom":0,"spacing_left":32,"spacing_right":0,"font_family":"inherit","font_family_custom":"","font_size":76,"font_weight":"700","text_transform":"uppercase","letter_spacing":"0.02em","line_height":80,"custom_color":""}},"content_UDCwLK":{"type":"content","disabled":true,"settings":{"content":"<p>Functional & expressive wallets, bags and accessories.</p>","block_layout":"stack","spacing_top":0,"spacing_bottom":0,"spacing_left":32,"spacing_right":22,"font_family":"body","font_family_custom":"","font_size":18,"font_weight":"400","text_transform":"none","letter_spacing":"0.07em","custom_color":""}},"buttons_PjhpCe":{"type":"buttons","disabled":true,"settings":{"button_color":"btn btn--plain","button_label":"Shop Spring Collection","button_show_arrow":true,"button_url":"shopify://collections/all","button_custom_bg":"","button_custom_text":"#ffffff","secondary_button_color":"btn--glass-dark","secondary_button_label":"","secondary_button_url":"","secondary_button_custom_bg":"","secondary_button_custom_text":"","tertiary_button_color":"btn btn--neutral","tertiary_button_label":"","tertiary_button_url":"","tertiary_button_custom_bg":"","tertiary_button_custom_text":"","btns_font":"body","btns_size":18,"btns_weight":"600","btns_case":"uppercase","btns_ls":"0.085em","btns_style":"normal","block_layout":"stack","spacing_top":0,"spacing_bottom":0,"spacing_left":24,"spacing_right":0,"font_family":"inherit","font_family_custom":""}}},"block_order":["eyebrow_QtLqMB","heading_XGwGQT","content_UDCwLK","buttons_PjhpCe"],"name":"Hero Banner","settings":{"url":"shopify://collections/new-arrivals","image_background_desktop":"shopify://shop_images/summernewarrivals_desktop_hero.webp","video_mobile":"shopify://files/videos/Short Thread Brand Video (Mobile) (2).mp4","video_poster_mobile":"shopify://shop_images/Screenshot_2026-04-22_at_10.18.25_AM.png","show_video_background_mobile":false,"show_entire_image":false,"enable_lazy_loading":true,"color_scheme":"color__bg-overlay-1 color__text","color_text":"color__light","color_border":"!color__border-transparent","enable_gradient":false,"gradient_color":"#000000","gradient_opacity":40,"style_border":"","layout_horizontal":"window--edge","layout_y_spacing":"custom","custom_height_px":850,"layout_y_alignment":"items-end","content_offset_top":0,"content_offset_bottom":50,"layout_x_alignment":"justify-start","use_global_spacing":"custom","visibility":"hidden md:block"}},"banner_rk4ah3":{"type":"banner","blocks":{"eyebrow_HEwxrM":{"type":"eyebrow","disabled":true,"settings":{"content":"NEW ARRIVALS","block_layout":"stack","spacing_top":0,"spacing_bottom":0,"spacing_left":32,"spacing_right":0,"font_family":"body","font_family_custom":"","font_size":14,"font_weight":"700","text_transform":"uppercase","letter_spacing":"0.16em","custom_color":"#1e7db3"}},"heading_KhYh8P":{"type":"heading","disabled":true,"settings":{"content":"Everyday Carry. Elevated.","outline_last_word":false,"block_layout":"stack","spacing_top":0,"spacing_bottom":0,"spacing_left":32,"spacing_right":0,"font_family":"inherit","font_family_custom":"","font_size":48,"font_weight":"700","text_transform":"uppercase","letter_spacing":"0.02em","line_height":80,"custom_color":""}},"content_f4WLnk":{"type":"content","settings":{"content":"<p>Expressive Everyday Carry</p>","block_layout":"stack","spacing_top":0,"spacing_bottom":0,"spacing_left":32,"spacing_right":22,"font_family":"body","font_family_custom":"","font_size":16,"font_weight":"400","text_transform":"none","letter_spacing":"0.07em","custom_color":""}},"buttons_zbxBbw":{"type":"buttons","settings":{"button_color":"btn btn--plain","button_label":"Shop New Arrivals","button_show_arrow":true,"button_url":"shopify://collections/new-arrivals","button_custom_bg":"","button_custom_text":"#ffffff","secondary_button_color":"btn--glass-dark","secondary_button_label":"","secondary_button_url":"","secondary_button_custom_bg":"","secondary_button_custom_text":"","tertiary_button_color":"btn btn--neutral","tertiary_button_label":"","tertiary_button_url":"","tertiary_button_custom_bg":"","tertiary_button_custom_text":"","btns_font":"body","btns_size":16,"btns_weight":"600","btns_case":"uppercase","btns_ls":"0.085em","btns_style":"normal","block_layout":"stack","spacing_top":0,"spacing_bottom":8,"spacing_left":24,"spacing_right":0,"font_family":"inherit","font_family_custom":""}}},"block_order":["eyebrow_HEwxrM","heading_KhYh8P","content_f4WLnk","buttons_zbxBbw"],"name":"Hero Banner","settings":{"url":"","image_background_desktop":"shopify://shop_images/summernewarrivals_desktop_hero.webp","image_background_mobile":"shopify://shop_images/IMG_4838.png","show_video_background_mobile":false,"show_entire_image":false,"enable_lazy_loading":true,"color_scheme":"color__bg-overlay-1 color__text","color_text":"color__light","color_border":"!color__border-transparent","enable_gradient":false,"gradient_color":"#000000","gradient_opacity":40,"style_border":"","layout_horizontal":"window--edge","layout_y_spacing":"custom","custom_height_px":600,"layout_y_alignment":"items-end","content_offset_top":0,"content_offset_bottom":235,"layout_x_alignment":"justify-start","use_global_spacing":"custom","visibility":"md:hidden"}},"image_grid_Y9rzMQ":{"type":"image-grid","blocks":{"card_qk6DRf":{"type":"card","settings":{"card_mode":"label","image":"shopify://shop_images/s1d1_pdp_photo_zipper_sawyerolive.png","bg_color":"#e0ddd8","link":"shopify://collections/all-wallets","label":"Wallets","label_align":"inherit","heading":"","subtext":"","btn_label":"Shop now","btn_link":"","rich_ph":16,"rich_pv":16,"rich_gap":12,"visibility":"desktop"}},"card_WjMtgP":{"type":"card","settings":{"card_mode":"label","image":"shopify://shop_images/s1d1_pdp_photo_utilitytote_brown.png","bg_color":"#e0ddd8","link":"shopify://collections/all-bags","label":"Bags","label_align":"inherit","heading":"Bags","subtext":"","btn_label":"Shop bags","btn_link":"","rich_ph":14,"rich_pv":12,"rich_gap":12,"visibility":"desktop"}},"card_QHYbFX":{"type":"card","settings":{"card_mode":"label","image":"shopify://shop_images/trifecta_vert_emmemlien.png","bg_color":"#e0ddd8","link":"shopify://collections/all-accessories","label":"Accessories","label_align":"inherit","heading":"","subtext":"","btn_label":"Shop now","btn_link":"","rich_ph":16,"rich_pv":16,"rich_gap":12,"visibility":"desktop"}},"card_DyViKg":{"type":"card","settings":{"card_mode":"label","image":"shopify://shop_images/vert_trifecta_tort_bf7f7924-fe44-4678-a760-c11e45558840.png","bg_color":"#e0ddd8","link":"shopify://collections/shop-all","label":"Shop All","label_align":"inherit","heading":"","subtext":"","btn_label":"Shop now","btn_link":"","rich_ph":16,"rich_pv":16,"rich_gap":12,"visibility":"desktop"}}},"block_order":["card_qk6DRf","card_WjMtgP","card_QHYbFX","card_DyViKg"],"name":"Image Grid","settings":{"visibility":"hidden md:block","bg_color":"#ffffff","use_global_spacing":"custom","sec_pt":16,"sec_pb":20,"sec_ph":0,"show_title":false,"title_text":"Shop By Category","title_font":"header","title_size":80,"title_weight":"700","title_case":"uppercase","title_ls":"0.02","title_color":"#1c1c1c","title_ph":24,"title_pt":0,"title_gap":24,"title_align":"left","eyebrow_text":"","eyebrow_color":"#1e7db3","show_header_link":false,"header_link_label":"Shop all","header_link_url":"shopify://collections/shop-all","label_position":"overlay","overlay_label_size":16,"cols_mob":"2","cols_tabl":"2","cols_desk":"4","col_gap":0,"row_gap":0,"img_ratio":"133","img_ratio_desktop":"133","img_ph":0,"img_radius":0,"label_font":"body","label_size":22,"label_weight":"400","label_case":"capitalize","label_ls":"0.10","label_color":"#1c1c1c","label_pt":8,"label_ph":24,"label_pb":24,"label_align":"left","rh_font":"body","rh_size":20,"rh_weight":"700","rh_case":"none","rh_ls":"0.05","rh_lh":130,"rh_color":"#1c1c1c","rs_font":"body","rs_size":16,"rs_weight":"400","rs_case":"none","rs_ls":"0.01","rs_lh":150,"rs_color":"#1c1c1c","rb_style":"outline-pill","rb_font":"body","rb_size":13,"rb_weight":"400","rb_case":"uppercase","rb_ls":"0.08","rb_pv":10,"rb_ph":24,"rb_border_w":2,"rb_radius":4,"rb_bg":"#1c1c1c","rb_text":"#ffffff","rb_border_color":"#1c1c1c"}},"image_grid_RjH9Gp":{"type":"image-grid","blocks":{"card_8BrUYQ":{"type":"card","settings":{"card_mode":"label","image":"shopify://shop_images/s1d1_pdp_photo_zipper_sawyerolive.png","bg_color":"#e0ddd8","link":"shopify://collections/all-wallets","label":"Wallets","label_align":"inherit","heading":"","subtext":"","btn_label":"Shop now","btn_link":"","rich_ph":16,"rich_pv":16,"rich_gap":12,"visibility":"mobile"}},"card_fXy6qJ":{"type":"card","settings":{"card_mode":"label","image":"shopify://shop_images/s1d1_pdp_photo_utilitytote_brown.png","bg_color":"#e0ddd8","link":"shopify://collections/all-bags","label":"Bags","label_align":"inherit","heading":"Bags","subtext":"","btn_label":"Shop bags","btn_link":"","rich_ph":14,"rich_pv":12,"rich_gap":12,"visibility":"mobile"}},"card_WEbTxE":{"type":"card","settings":{"card_mode":"label","image":"shopify://shop_images/trifecta_vert_emmemlien.png","bg_color":"#e0ddd8","link":"shopify://collections/all-accessories","label":"Accessories","label_align":"inherit","heading":"","subtext":"","btn_label":"Shop now","btn_link":"","rich_ph":16,"rich_pv":16,"rich_gap":12,"visibility":"mobile"}},"card_NYkHam":{"type":"card","settings":{"card_mode":"label","image":"shopify://shop_images/vert_trifecta_tort_bf7f7924-fe44-4678-a760-c11e45558840.png","bg_color":"#e0ddd8","link":"shopify://collections/shop-all","label":"Shop All","label_align":"inherit","heading":"","subtext":"","btn_label":"Shop now","btn_link":"","rich_ph":16,"rich_pv":16,"rich_gap":12,"visibility":"mobile"}}},"block_order":["card_8BrUYQ","card_fXy6qJ","card_WEbTxE","card_NYkHam"],"name":"Image Grid","settings":{"visibility":"md:hidden","bg_color":"#ffffff","use_global_spacing":"custom","sec_pt":16,"sec_pb":24,"sec_ph":0,"show_title":false,"title_text":"Shop by Category","title_font":"header","title_size":36,"title_weight":"700","title_case":"uppercase","title_ls":"0.02","title_color":"#1c1c1c","title_ph":16,"title_pt":8,"title_gap":12,"title_align":"left","eyebrow_text":"","eyebrow_color":"#1e7db3","show_header_link":false,"header_link_label":"Shop all","header_link_url":"shopify://collections/shop-all","label_position":"overlay","overlay_label_size":15,"cols_mob":"2","cols_tabl":"2","cols_desk":"3","col_gap":16,"row_gap":8,"img_ratio":"133","img_ratio_desktop":"75","img_ph":0,"img_radius":0,"label_font":"body","label_size":18,"label_weight":"400","label_case":"capitalize","label_ls":"0.10","label_color":"#1c1c1c","label_pt":8,"label_ph":16,"label_pb":12,"label_align":"left","rh_font":"body","rh_size":20,"rh_weight":"700","rh_case":"none","rh_ls":"0.05","rh_lh":130,"rh_color":"#1c1c1c","rs_font":"body","rs_size":16,"rs_weight":"400","rs_case":"none","rs_ls":"0.01","rs_lh":150,"rs_color":"#1c1c1c","rb_style":"outline-pill","rb_font":"body","rb_size":13,"rb_weight":"400","rb_case":"uppercase","rb_ls":"0.08","rb_pv":10,"rb_ph":24,"rb_border_w":2,"rb_radius":4,"rb_bg":"#1c1c1c","rb_text":"#ffffff","rb_border_color":"#1c1c1c"}},"image_grid_ApnwaL":{"type":"image-grid","blocks":{"card_q6jb6V":{"type":"card","settings":{"card_mode":"label","image":"shopify://shop_images/s1d1_pdp_photo_zipper_sawyerolive.png","bg_color":"#e0ddd8","link":"","label":"Wallets","label_align":"inherit","heading":"","subtext":"","btn_label":"Shop now","btn_link":"","rich_ph":16,"rich_pv":16,"rich_gap":12,"visibility":"desktop"}},"card_7kyM8F":{"type":"card","settings":{"card_mode":"label","image":"shopify://shop_images/s1d1_pdp_photo_utilitytote_brown.png","bg_color":"#e0ddd8","link":"","label":"Bags","label_align":"inherit","heading":"Bags","subtext":"","btn_label":"Shop bags","btn_link":"","rich_ph":14,"rich_pv":12,"rich_gap":12,"visibility":"desktop"}},"card_DAJWPh":{"type":"card","settings":{"card_mode":"label","image":"shopify://shop_images/trifecta_vert_emmemlien.png","bg_color":"#e0ddd8","link":"shopify://collections/all-accessories","label":"Accessories","label_align":"inherit","heading":"","subtext":"","btn_label":"Shop now","btn_link":"","rich_ph":16,"rich_pv":16,"rich_gap":12,"visibility":"desktop"}},"card_F4PCRa":{"type":"card","disabled":true,"settings":{"card_mode":"label","image":"shopify://shop_images/vert_trifecta_tort_bf7f7924-fe44-4678-a760-c11e45558840.png","bg_color":"#e0ddd8","link":"","label":"Shop All","label_align":"inherit","heading":"","subtext":"","btn_label":"Shop now","btn_link":"","rich_ph":16,"rich_pv":16,"rich_gap":12,"visibility":"mobile"}}},"block_order":["card_q6jb6V","card_7kyM8F","card_DAJWPh","card_F4PCRa"],"disabled":true,"name":"Image Grid","settings":{"visibility":"","bg_color":"#ffffff","use_global_spacing":"custom","sec_pt":16,"sec_pb":0,"sec_ph":0,"show_title":false,"title_text":"SHOP BY CATEGORY","title_font":"header","title_size":60,"title_weight":"700","title_case":"none","title_ls":"0","title_color":"#1c1c1c","title_ph":46,"title_pt":0,"title_gap":16,"title_align":"center","eyebrow_text":"","eyebrow_color":"#1e7db3","show_header_link":true,"header_link_label":"","header_link_url":"","label_position":"below","overlay_label_size":15,"cols_mob":"2","cols_tabl":"2","cols_desk":"3","col_gap":16,"row_gap":8,"img_ratio":"133","img_ratio_desktop":"75","img_ph":0,"img_radius":0,"label_font":"body","label_size":18,"label_weight":"400","label_case":"capitalize","label_ls":"0.10","label_color":"#1c1c1c","label_pt":8,"label_ph":16,"label_pb":24,"label_align":"left","rh_font":"body","rh_size":20,"rh_weight":"700","rh_case":"none","rh_ls":"0.05","rh_lh":130,"rh_color":"#1c1c1c","rs_font":"body","rs_size":16,"rs_weight":"400","rs_case":"none","rs_ls":"0.01","rs_lh":150,"rs_color":"#1c1c1c","rb_style":"outline-pill","rb_font":"body","rb_size":13,"rb_weight":"400","rb_case":"uppercase","rb_ls":"0.08","rb_pv":10,"rb_ph":24,"rb_border_w":2,"rb_radius":4,"rb_bg":"#1c1c1c","rb_text":"#ffffff","rb_border_color":"#1c1c1c"}},"image_card_grid_9pCUtE":{"type":"image-card-grid","blocks":{"filter_tab_CyHr8M":{"type":"filter_tab","settings":{"tab_label":"Wallets","cta_label":"Shop Wallets","cta_url":""}},"filter_tab_NKRjqN":{"type":"filter_tab","settings":{"tab_label":"Bags","cta_label":"Shop Bags","cta_url":""}},"filter_tab_wfpLJX":{"type":"filter_tab","settings":{"tab_label":"Accessories","cta_label":"Shop Accessories","cta_url":""}},"image_card_Tp9XHD":{"type":"image_card","settings":{"image":"shopify://shop_images/amelia_5de3f6a3-43ae-4ed9-973b-b752a8503ae4.png","link":"","title":"All Wallets","subtitle":"Our flagship product. Famous for it's slim, minimalist look.","tab_filter":"Wallets","visibility":"mobile"}},"image_card_L66egX":{"type":"image_card","settings":{"image":"shopify://shop_images/vert_clark.png","link":"shopify://collections/vertical-leather-wallets","title":"Vertical Cardholder","subtitle":"A more sophisticated look with the same signature elastic.","tab_filter":"wallets","visibility":"both"}},"image_card_HRQbdg":{"type":"image_card","settings":{"image":"shopify://shop_images/Zipper-Wallet.png","link":"shopify://collections/vertical-leather-wallets","title":"Zipper Wallet","subtitle":"Genuine leather with a zipped pouch and signature elastic.","tab_filter":"wallets","visibility":"both"}},"image_card_RYRbLM":{"type":"image_card","settings":{"image":"shopify://shop_images/RETRO_BIFOLD.jpg","link":"shopify://collections/vertical-leather-wallets","title":"Bifold Wallet","subtitle":"A more sophisticated look with the same signature elastic.","tab_filter":"wallets","visibility":"both"}},"image_card_wtLBGb":{"type":"image_card","settings":{"image":"shopify://shop_images/MINI_UTILITY.jpg","link":"shopify://collections/utility-tote-bags","title":"Utility Tote","subtitle":"Utility for everyday.","tab_filter":"wallets","visibility":"both"}},"image_card_Vdxrzr":{"type":"image_card","settings":{"image":"shopify://shop_images/amelia_5de3f6a3-43ae-4ed9-973b-b752a8503ae4.png","link":"","title":"Elastic Wallet","subtitle":"Our flagship product. Famous for it's slim, minimalist look.","tab_filter":"Wallets","visibility":"both"}},"image_card_HMr9Fk":{"type":"image_card","settings":{"image":"shopify://shop_images/MINI_UTILITY.jpg","link":"shopify://collections/utility-tote-bags","title":"All Bags","subtitle":"Utility for everyday.","tab_filter":"bags","visibility":"mobile"}},"image_card_NPD7Yb":{"type":"image_card","settings":{"image":"shopify://shop_images/MINI_UTILITY.jpg","link":"shopify://collections/utility-tote-bags","title":"Crossbody Bag","subtitle":"Utility for everyday.","tab_filter":"bags","visibility":"both"}},"image_card_azrpqp":{"type":"image_card","settings":{"image":"shopify://shop_images/MINI_UTILITY.jpg","link":"shopify://collections/utility-tote-bags","title":"Slouchy Bag","subtitle":"Utility for everyday.","tab_filter":"bags","visibility":"both"}},"image_card_eLGrMF":{"type":"image_card","settings":{"image":"shopify://shop_images/MINI_UTILITY.jpg","link":"shopify://collections/utility-tote-bags","title":"Water Bottle Sling","subtitle":"Utility for everyday.","tab_filter":"bags","visibility":"both"}},"image_card_AX4UxD":{"type":"image_card","settings":{"image":"shopify://shop_images/MINI_UTILITY.jpg","link":"shopify://collections/utility-tote-bags","title":"Shoulder Bag","subtitle":"Utility for everyday.","tab_filter":"bags","visibility":"both"}},"image_card_ehpADi":{"type":"image_card","settings":{"image":"shopify://shop_images/MINI_UTILITY.jpg","link":"shopify://collections/utility-tote-bags","title":"Backpack","subtitle":"Utility for everyday.","tab_filter":"bags","visibility":"both"}},"image_card_MYDJmm":{"type":"image_card","settings":{"image":"shopify://shop_images/WRIST_LANYARD_d465808a-6a47-4644-9717-b638ba86acad.jpg","link":"","title":"All Accessories","subtitle":"What holds it all together.","tab_filter":"accessories","visibility":"mobile"}},"image_card_MEdGLt":{"type":"image_card","settings":{"image":"shopify://shop_images/WRIST_LANYARD_d465808a-6a47-4644-9717-b638ba86acad.jpg","link":"","title":"Wristlet Lanyard","subtitle":"What holds it all together.","tab_filter":"accessories","visibility":"both"}},"image_card_bgUWwA":{"type":"image_card","settings":{"image":"shopify://shop_images/WRIST_LANYARD_d465808a-6a47-4644-9717-b638ba86acad.jpg","link":"","title":"Wristlet Lanyard","subtitle":"What holds it all together.","tab_filter":"accessories","visibility":"both"}},"image_card_3hbYit":{"type":"image_card","settings":{"image":"shopify://shop_images/WRIST_LANYARD_d465808a-6a47-4644-9717-b638ba86acad.jpg","link":"","title":"Wristlet Lanyard","subtitle":"What holds it all together.","tab_filter":"accessories","visibility":"both"}},"image_card_9TF8QN":{"type":"image_card","settings":{"image":"shopify://shop_images/WRIST_LANYARD_d465808a-6a47-4644-9717-b638ba86acad.jpg","link":"","title":"Wristlet Lanyard","subtitle":"What holds it all together.","tab_filter":"accessories","visibility":"both"}},"image_card_WR3JDJ":{"type":"image_card","settings":{"image":"shopify://shop_images/WRIST_LANYARD_d465808a-6a47-4644-9717-b638ba86acad.jpg","link":"","title":"Wristlet Lanyard","subtitle":"What holds it all together.","tab_filter":"accessories","visibility":"both"}}},"block_order":["filter_tab_CyHr8M","filter_tab_NKRjqN","filter_tab_wfpLJX","image_card_Tp9XHD","image_card_L66egX","image_card_HRQbdg","image_card_RYRbLM","image_card_wtLBGb","image_card_Vdxrzr","image_card_HMr9Fk","image_card_NPD7Yb","image_card_azrpqp","image_card_eLGrMF","image_card_AX4UxD","image_card_ehpADi","image_card_MYDJmm","image_card_MEdGLt","image_card_bgUWwA","image_card_3hbYit","image_card_9TF8QN","image_card_WR3JDJ"],"disabled":true,"name":"Image card grid","settings":{"color_scheme":"color__bg-overlay-1 color__text","use_global_spacing":"custom","padding_top":60,"padding_bottom":80,"grid_padding":16,"visibility":"","show_title":true,"title_text":"the lineup","title_font":"header","title_size":56,"title_weight":"700","title_case":"uppercase","title_color":"#1c1c1c","title_padding_top":0,"title_padding_bottom":16,"title_align":"center","title_ls":"0.02em","show_filter":true,"filter_bg":"#f5f5f5","filter_border":"rgba(0,0,0,0)","active_color":"#1e7db3","inactive_color":"#1c1c1c","underline_width":2,"underline_offset":2,"filter_size":15,"filter_weight":"600","filter_case":"uppercase","filter_ls":"0.085em","tab_spacing":20,"filter_align":"center","cta_show":false,"cta_position":"between","cta_between_spacing_top":6,"cta_between_spacing_bottom":4,"cta_label":"Shop all","cta_url":"","cta_case":"uppercase","cta_weight":"700","cta_size":12,"cta_ls":"0.085em","cta_text_color":"#1c1c1c","cta_bg_color":"rgba(0,0,0,0)","cta_border_color":"#1c1c1c","cta_border_width":1.5,"cta_radius":50,"cta_pad_h":16,"cta_pad_v":8,"cta_full_width_mobile":true,"grid_mode":"grid","columns_mobile":"2","columns_desktop":"5","col_gap":16,"row_gap":16,"carousel_peek":16,"carousel_peek_desktop":16,"carousel_show_arrows":true,"image_radius":2,"image_aspect":"","image_height_desktop":0,"image_height_mobile":150,"card_text_pad_top":6,"card_text_pad_x":0,"card_text_align":"left","card_title_font":"body","card_title_size":16,"card_title_weight":"400","card_title_case":"capitalize","card_title_ls":"0.1em","card_title_color":"#1c1c1c","card_title_mb":12,"show_card_sub":false,"card_sub_font":"body","card_sub_size":13,"card_sub_weight":"300","card_sub_transform":"none","card_sub_ls":"0.1em","card_sub_line_height":1.4,"card_sub_opacity":0.6,"card_sub_color":"#1c1c1c"}},"trifecta_spotlight_main":{"type":"trifecta-spotlight","disabled":true,"name":"Trifecta Spotlight (bundle)","settings":{"eyebrow":"Everyday Carry Set","heading":"Everything. Together.","heading_size_m":36,"heading_size_d":76,"lede":"Your whole carry, clipped into one.","includes_text":"Wallet + Wristlet + Chapstick Holder","product":"everyday-carry-set-elastic-wallet","cta_label":"Build Your Everyday Carry Set","cta_url":"","image":"shopify://shop_images/trifecta_vert_emmemlien.png","media_height_mobile":40,"height_desktop":560,"show_badge":true,"badge_text":"DO WHAT CONNECTS YOU\u2122 \u00b7 THREAD\u00ae \u00b7 EST. 2015 \u00b7","show_proof":true,"proof_desktop_only":false,"proof_quote":"\u201cThe grab-and-go setup I didn\u2019t know I needed.\u201d","bg_color":"#1e7db3","accent_color":"#eebc2c","visibility":""}},"image_banners_4KeKzw":{"type":"image-banners","blocks":{"banner_4zL4Rq":{"type":"banner","settings":{"image":"shopify://shop_images/solids-mobile_1200x_31f6be6a-f566-49a6-b8be-211a7ef0a192.jpg","heading":"","subtitle":"","link_label":"","link_url":"","visibility":"desktop","text_position":"bottom-left","text_pad_top":32,"text_pad_right":32,"text_pad_bottom":32,"text_pad_left":32,"heading_font":"header","heading_size":32,"heading_weight":"700","heading_transform":"uppercase","heading_ls":"0.02em","heading_lh":1.1,"heading_color":"#ffffff","heading_mb":8,"subtitle_font":"body","subtitle_size":14,"subtitle_weight":"400","subtitle_ls":"0em","subtitle_lh":1.4,"subtitle_color":"#ffffff","subtitle_max_width":50,"subtitle_mb":12,"link_font":"body","link_size":13,"link_weight":"600","link_transform":"none","link_ls":"0em","link_underline":true,"link_color":"#ffffff","overlay_type":"none","overlay_color":"#000000","overlay_opacity":40,"gradient_direction":"to top","gradient_start":0,"gradient_end":60}},"banner_8qdwei":{"type":"banner","settings":{"image":"shopify://shop_images/wrist_05.png","heading":"\"So convenient!\"","subtitle":"\"Having my keys, walley, chapstick all together to grab and go is life changing\"  - Kylee","link_label":"","link_url":"","visibility":"desktop","text_position":"bottom-left","text_pad_top":122,"text_pad_right":160,"text_pad_bottom":32,"text_pad_left":56,"heading_font":"header","heading_size":72,"heading_weight":"700","heading_transform":"uppercase","heading_ls":"0.02em","heading_lh":1.1,"heading_color":"#ffffff","heading_mb":8,"subtitle_font":"body","subtitle_size":22,"subtitle_weight":"400","subtitle_ls":"0.1em","subtitle_lh":1.6,"subtitle_color":"#ffffff","subtitle_max_width":56,"subtitle_mb":32,"link_font":"body","link_size":13,"link_weight":"600","link_transform":"none","link_ls":"0em","link_underline":true,"link_color":"#ffffff","overlay_type":"gradient","overlay_color":"#000000","overlay_opacity":10,"gradient_direction":"to top","gradient_start":20,"gradient_end":95}},"banner_4A4paN":{"type":"banner","settings":{"image":"shopify://shop_images/wrist_05.png","heading":"\"So convenient!\"","subtitle":"\"Having my wallet, chapstick and keys all together to grab and go is life changing.\"","link_label":"Shop Wallet Keychain Bundles","link_url":"shopify://products/everyday-carry-set-group","visibility":"mobile","text_position":"top-center","text_pad_top":36,"text_pad_right":16,"text_pad_bottom":24,"text_pad_left":16,"heading_font":"header","heading_size":72,"heading_weight":"700","heading_transform":"uppercase","heading_ls":"0.02em","heading_lh":1.1,"heading_color":"#ffffff","heading_mb":8,"subtitle_font":"body","subtitle_size":18,"subtitle_weight":"400","subtitle_ls":"0.1em","subtitle_lh":1.6,"subtitle_color":"#ffffff","subtitle_max_width":56,"subtitle_mb":32,"link_font":"body","link_size":16,"link_weight":"600","link_transform":"uppercase","link_ls":"0.1em","link_underline":true,"link_color":"#ffffff","overlay_type":"gradient","overlay_color":"#1c1c1c","overlay_opacity":30,"gradient_direction":"to bottom","gradient_start":20,"gradient_end":100}}},"block_order":["banner_4zL4Rq","banner_8qdwei","banner_4A4paN"],"disabled":true,"name":"Image banners","settings":{"color_scheme":"color__bg-body color__text","padding_top":0,"padding_bottom":0,"side_padding":0,"gap":0,"radius":0,"columns_desktop":"2","columns_mobile":"1","aspect_ratio":"16 / 9","height_desktop":640,"height_mobile":520,"visibility":"","overlay_strength":0,"overlay_extent":60}},"brand_statement_c9UxhP":{"type":"brand-statement","disabled":true,"name":"Brand statement","settings":{"heading":"","heading_tag":"h2","heading_font":"inherit","heading_size_mobile":28,"heading_size_desktop":40,"heading_weight":"400","heading_transform":"none","heading_line_height":1.2,"heading_letter_spacing":0,"heading_color":"#1c1c1c","heading_max_width":800,"subheading":"","sub_font":"inherit","sub_size_mobile":14,"sub_size_desktop":18,"sub_weight":"400","sub_transform":"none","sub_line_height":1.4,"sub_letter_spacing":0.1,"sub_color":"#1c1c1c","show_stars":true,"rating_number":"4.8","review_count_text":"16K Reviews","star_color":"#ffffff","star_size":12,"stars_text_size":16,"stars_text_weight":"400","stars_text_color":"#ffffff","stars_text_letter_spacing":"0.2","stars_gap":4,"use_global_spacing":"custom","heading_sub_spacing":8,"sub_stars_spacing":0,"spacing_top":12,"spacing_bottom":12,"spacing_sides":0,"background_color":"#1e7db3","visibility":""}},"best_sellers_fRWFny":{"type":"best-sellers","blocks":{"filter_tab_mCbeTN":{"type":"filter_tab","settings":{"tab_label":"Wallets","collection_handle":"all-wallets","cta_label":"Shop Wallets","cta_url":"shopify://collections/all-wallets"}},"filter_tab_nY6kQE":{"type":"filter_tab","settings":{"tab_label":"Bags","collection_handle":"all-bags","cta_label":"Shop Bags","cta_url":"shopify://collections/all-bags"}},"filter_tab_capKcG":{"type":"filter_tab","settings":{"tab_label":"Accessories","collection_handle":"all-accessories","cta_label":"Shop Accessories","cta_url":"shopify://collections/all-accessories"}},"filter_tab_7BRabL":{"type":"filter_tab","disabled":true,"settings":{"tab_label":"Bags","collection_handle":"","cta_label":"Shop all","cta_url":""}}},"block_order":["filter_tab_mCbeTN","filter_tab_nY6kQE","filter_tab_capKcG","filter_tab_7BRabL"],"name":"Featured Collection","settings":{"color_scheme":"color__bg-body color__text","use_global_spacing":"custom","padding_top":24,"padding_bottom":24,"grid_padding":8,"visibility":"md:hidden","show_title":true,"title_text":"Best Sellers","title_font":"header","title_size":48,"title_weight":"700","title_case":"uppercase","title_color":"#1c1c1c","header_padding_sides":16,"title_padding_top":0,"title_padding_bottom":8,"title_align":"center","title_ls":"0.02em","show_filter":true,"default_collection":"","filter_bg":"#ffffff","filter_border":"rgba(0,0,0,0)","active_color":"#1e7db3","inactive_color":"#1c1c1c","underline_width":1,"underline_offset":0,"filter_size":15,"filter_font":"body","filter_weight":"600","filter_case":"uppercase","filter_ls":"0.085em","tab_spacing":16,"filter_align":"center","cta_show":true,"cta_position":"below","cta_between_spacing_top":16,"cta_between_spacing_bottom":8,"cta_label":"Shop Wallets","cta_url":"shopify://collections/all-wallets","cta_case":"uppercase","cta_weight":"700","cta_size":17,"cta_ls":"0.085em","cta_text_color":"#ffffff","cta_bg_color":"#1e7db3","cta_border_color":"#1c1c1c","cta_border_width":0,"cta_radius":8,"cta_pad_h":16,"cta_pad_v":14,"cta_full_width_mobile":true,"grid_mode":"grid","product_count":8,"columns_mobile":"2","columns_desktop":"4","col_gap":8,"row_gap":32,"carousel_peek":0}},"best_sellers_hb8Lem":{"type":"best-sellers","blocks":{"filter_tab_YqdYc8":{"type":"filter_tab","settings":{"tab_label":"Wallets","collection_handle":"all-wallets","cta_label":"Shop Best Sellers","cta_url":""}},"filter_tab_XQX9tM":{"type":"filter_tab","settings":{"tab_label":"Bags","collection_handle":"all-bags","cta_label":"Shop Bags","cta_url":"shopify://collections/all-bags"}},"filter_tab_keVFGK":{"type":"filter_tab","settings":{"tab_label":"Accessories","collection_handle":"all-accessories","cta_label":"Shop Accessories","cta_url":"shopify://collections/all-accessories"}},"filter_tab_3qiUEY":{"type":"filter_tab","disabled":true,"settings":{"tab_label":"Bags","collection_handle":"","cta_label":"Shop all","cta_url":""}}},"block_order":["filter_tab_YqdYc8","filter_tab_XQX9tM","filter_tab_keVFGK","filter_tab_3qiUEY"],"name":"Featured Collection","settings":{"color_scheme":"color__bg-body color__text","use_global_spacing":"custom","padding_top":24,"padding_bottom":48,"grid_padding":48,"visibility":"hidden md:block","show_title":true,"title_text":"Best Sellers","title_font":"header","title_size":64,"title_weight":"700","title_case":"uppercase","title_color":"#1c1c1c","header_padding_sides":16,"title_padding_top":0,"title_padding_bottom":8,"title_align":"center","title_ls":"0.02em","show_filter":true,"default_collection":"","filter_bg":"#ffffff","filter_border":"rgba(0,0,0,0)","active_color":"#1e7db3","inactive_color":"#1c1c1c","underline_width":1,"underline_offset":0,"filter_size":15,"filter_font":"body","filter_weight":"600","filter_case":"uppercase","filter_ls":"0.085em","tab_spacing":16,"filter_align":"center","cta_show":true,"cta_position":"below","cta_between_spacing_top":16,"cta_between_spacing_bottom":8,"cta_label":"Shop All Best Sellers","cta_url":"shopify://collections/best-sellers","cta_case":"uppercase","cta_weight":"700","cta_size":15,"cta_ls":"0.085em","cta_text_color":"#ffffff","cta_bg_color":"#1e7db3","cta_border_color":"#1c1c1c","cta_border_width":0,"cta_radius":8,"cta_pad_h":16,"cta_pad_v":14,"cta_full_width_mobile":true,"grid_mode":"grid","product_count":8,"columns_mobile":"2","columns_desktop":"4","col_gap":8,"row_gap":32,"carousel_peek":0}},"hero_secondary_desktop":{"type":"banner","blocks":{"eyebrow_sec_d":{"type":"eyebrow","disabled":true,"settings":{"content":"DO WHAT CONNECTS YOU","block_layout":"stack","spacing_top":0,"spacing_bottom":8,"spacing_left":32,"spacing_right":0,"font_family":"body","font_family_custom":"","font_size":14,"font_weight":"700","text_transform":"uppercase","letter_spacing":"0.16em","custom_color":"#1e7db3"}},"heading_sec_d":{"type":"heading","settings":{"content":"Built For The Everyday.","outline_last_word":false,"block_layout":"stack","spacing_top":0,"spacing_bottom":0,"spacing_left":32,"spacing_right":0,"font_family":"inherit","font_family_custom":"","font_size":64,"font_weight":"700","text_transform":"uppercase","letter_spacing":"0.02em","line_height":80,"custom_color":""}},"content_sec_d":{"type":"content","settings":{"content":"<p>Designed for life on the move.</p>","block_layout":"stack","spacing_top":0,"spacing_bottom":0,"spacing_left":32,"spacing_right":22,"font_family":"body","font_family_custom":"","font_size":18,"font_weight":"400","text_transform":"none","letter_spacing":"0.07em","custom_color":""}},"buttons_sec_d":{"type":"buttons","settings":{"button_color":"btn btn--plain","button_label":"Shop Best Sellers","button_show_arrow":true,"button_url":"shopify://collections/best-sellers","button_custom_bg":"","button_custom_text":"#ffffff","secondary_button_color":"btn--glass-dark","secondary_button_label":"","secondary_button_url":"","secondary_button_custom_bg":"","secondary_button_custom_text":"","tertiary_button_color":"btn btn--neutral","tertiary_button_label":"","tertiary_button_url":"","tertiary_button_custom_bg":"","tertiary_button_custom_text":"","btns_font":"body","btns_size":18,"btns_weight":"600","btns_case":"uppercase","btns_ls":"0.085em","btns_style":"normal","block_layout":"stack","spacing_top":0,"spacing_bottom":0,"spacing_left":24,"spacing_right":0,"font_family":"inherit","font_family_custom":""}}},"block_order":["eyebrow_sec_d","heading_sec_d","content_sec_d","buttons_sec_d"],"name":"Hero Banner (secondary)","settings":{"url":"","image_background_desktop":"shopify://shop_images/solids-mobile_1200x_31f6be6a-f566-49a6-b8be-211a7ef0a192.jpg","show_video_background_mobile":false,"show_entire_image":false,"enable_lazy_loading":true,"color_scheme":"color__bg-overlay-1 color__text","color_text":"color__light","color_border":"!color__border-transparent","enable_gradient":true,"gradient_color":"#000000","gradient_opacity":40,"style_border":"","layout_horizontal":"window--edge","layout_y_spacing":"custom","custom_height_px":580,"layout_y_alignment":"items-end","content_offset_top":0,"content_offset_bottom":50,"layout_x_alignment":"justify-start","use_global_spacing":"custom","visibility":"hidden md:block"}},"hero_secondary_mobile":{"type":"banner","blocks":{"eyebrow_sec_m":{"type":"eyebrow","disabled":true,"settings":{"content":"DO WHAT CONNECTS YOU","block_layout":"stack","spacing_top":0,"spacing_bottom":8,"spacing_left":32,"spacing_right":0,"font_family":"body","font_family_custom":"","font_size":14,"font_weight":"700","text_transform":"uppercase","letter_spacing":"0.16em","custom_color":"#1e7db3"}},"heading_sec_m":{"type":"heading","settings":{"content":"Built For The Everyday.","outline_last_word":false,"block_layout":"stack","spacing_top":0,"spacing_bottom":0,"spacing_left":32,"spacing_right":0,"font_family":"inherit","font_family_custom":"","font_size":48,"font_weight":"700","text_transform":"uppercase","letter_spacing":"0.02em","line_height":80,"custom_color":""}},"content_sec_m":{"type":"content","settings":{"content":"<p>Designed for life on the move.</p>","block_layout":"stack","spacing_top":0,"spacing_bottom":0,"spacing_left":32,"spacing_right":22,"font_family":"body","font_family_custom":"","font_size":16,"font_weight":"400","text_transform":"none","letter_spacing":"0.07em","custom_color":""}},"buttons_sec_m":{"type":"buttons","settings":{"button_color":"btn btn--plain","button_label":"Shop Best Sellers","button_show_arrow":true,"button_url":"shopify://collections/best-sellers","button_custom_bg":"","button_custom_text":"#ffffff","secondary_button_color":"btn--glass-dark","secondary_button_label":"","secondary_button_url":"","secondary_button_custom_bg":"","secondary_button_custom_text":"","tertiary_button_color":"btn btn--neutral","tertiary_button_label":"","tertiary_button_url":"","tertiary_button_custom_bg":"","tertiary_button_custom_text":"","btns_font":"body","btns_size":16,"btns_weight":"600","btns_case":"uppercase","btns_ls":"0.085em","btns_style":"normal","block_layout":"stack","spacing_top":0,"spacing_bottom":8,"spacing_left":24,"spacing_right":0,"font_family":"inherit","font_family_custom":""}}},"block_order":["eyebrow_sec_m","heading_sec_m","content_sec_m","buttons_sec_m"],"name":"Hero Banner (secondary)","settings":{"url":"","image_background_mobile":"shopify://shop_images/solids-mobile_1200x_31f6be6a-f566-49a6-b8be-211a7ef0a192.jpg","show_video_background_mobile":false,"show_entire_image":false,"enable_lazy_loading":true,"color_scheme":"color__bg-overlay-1 color__text","color_text":"color__light","color_border":"!color__border-transparent","enable_gradient":true,"gradient_color":"#000000","gradient_opacity":15,"style_border":"","layout_horizontal":"window--edge","layout_y_spacing":"custom","custom_height_px":550,"layout_y_alignment":"items-end","content_offset_top":0,"content_offset_bottom":40,"layout_x_alignment":"justify-start","use_global_spacing":"custom","visibility":"md:hidden"}},"reviews_carried_loved":{"type":"reviews-carried-loved","blocks":{"review_1":{"type":"review","settings":{"stars":5,"quote":"[Placeholder \u2014 paste a real Okendo review]","reviewer":"Reviewer name","product":"","product_label":""}},"review_2":{"type":"review","settings":{"stars":5,"quote":"[Placeholder \u2014 paste a real Okendo review]","reviewer":"Reviewer name","product":"","product_label":""}},"review_3":{"type":"review","settings":{"stars":5,"quote":"[Placeholder \u2014 paste a real Okendo review]","reviewer":"Reviewer name","product":"","product_label":""}}},"block_order":["review_1","review_2","review_3"],"disabled":true,"name":"Reviews \u2014 Carried & Loved","settings":{"eyebrow":"4.8 stars \u00b7 16,000+ reviews","heading":"Carried & Loved","bg_color":"#f4f1ea","eyebrow_color":"#1e7db3","star_color":"#c08951","padding_top":56,"padding_bottom":64,"visibility":""}},"ugc_gallery_pbDXkz":{"type":"ugc-gallery","blocks":{"tile_tGWaxR":{"type":"tile","settings":{"media_type":"video","video":"shopify://files/videos/aprilinfusion_lip_pdp.mp4","aspect":"portrait","username":"@skyelane","link":"","alt_override":""}},"tile_Jr6XKH":{"type":"tile","settings":{"media_type":"image","image":"shopify://shop_images/wrist_02.png","aspect":"portrait","username":"@juneaux","link":"","alt_override":""}},"tile_Bbd8er":{"type":"tile","settings":{"media_type":"image","image":"shopify://shop_images/wrist_04.png","aspect":"portrait","username":"@rynebernard","link":"","alt_override":""}},"tile_wNQX4k":{"type":"tile","settings":{"media_type":"video","video":"shopify://files/videos/aprilinfusion_neck_pdp.mp4","aspect":"square","username":"@mackkenzi","link":"","alt_override":""}},"tile_NAJGd3":{"type":"tile","settings":{"media_type":"image","image":"shopify://shop_images/wrist_05.png","aspect":"portrait","username":"@username","link":"","alt_override":""}},"tile_EAGNXt":{"type":"tile","settings":{"media_type":"image","image":"shopify://shop_images/neck_01.png","aspect":"portrait","username":"@coop.travels","link":"","alt_override":""}},"tile_7Q3UW7":{"type":"tile","settings":{"media_type":"video","video":"shopify://files/videos/aprilinfusion_wrist_pdp.mp4","aspect":"square","username":"@dailycarry","link":"","alt_override":""}},"tile_qGgEKc":{"type":"tile","settings":{"media_type":"image","image":"shopify://shop_images/lipbalmholder_01.png","aspect":"square","username":"@tentandtrail","link":"","alt_override":""}}},"block_order":["tile_tGWaxR","tile_Jr6XKH","tile_Bbd8er","tile_wNQX4k","tile_NAJGd3","tile_EAGNXt","tile_7Q3UW7","tile_qGgEKc"],"name":"UGC gallery","settings":{"show_eyebrow":false,"eyebrow_text":"STAY CONNECTED","heading":"DO WHAT CONNECTS YOU\u2122","heading_tag":"h2","lede":"Genuine connection. That\u2019s what it\u2019s all about.","heading_alignment":"center","eyebrow_font":"body","eyebrow_size_mobile":13,"eyebrow_size_desktop":13,"eyebrow_weight":"700","eyebrow_transform":"uppercase","eyebrow_letter_spacing":0.1,"eyebrow_color":"#1e7db3","heading_font":"inherit","heading_size_mobile":48,"heading_size_desktop":76,"heading_weight":"700","heading_transform":"uppercase","heading_line_height":0.8,"heading_letter_spacing":"0.02","heading_color":"","lede_font":"inherit","lede_size_mobile":16,"lede_size_desktop":17,"lede_weight":"400","lede_line_height":1.3,"lede_letter_spacing":"0.05","lede_color":"","caption_size_mobile":14,"caption_size_desktop":14,"caption_color":"#ffffff","autoplay":true,"force_autoplay":true,"loop_duration_seconds":25,"pause_on_hover":false,"enable_drag":true,"gap_px":16,"show_cta":true,"cta_position":"above_gallery","cta_pad_top":16,"cta_pad_bot":24,"cta_style":"link-arrow","cta_label":"MORE ABOUT US","cta_url":"shopify://pages/about","cta_font":"body","cta_size_mobile":15,"cta_size_desktop":15,"cta_weight":"700","cta_transform":"uppercase","cta_letter_spacing":0.1,"cta_color":"#1e7db3","background":"bone","padding_top_desktop":60,"padding_bottom_desktop":60,"padding_top_mobile":32,"padding_bottom_mobile":32}},"1709748309b5b3be26":{"type":"apps","blocks":{"instafeed_app_block_mrQHUB":{"type":"shopify://apps/instafeed/blocks/app-block/c447db20-095d-4a10-9725-b5977662c9d5","settings":{"title":"","title_color":"#1c1c1c","title_size_v2":0,"alignment":"center","instafeed_margin_top":0,"instafeed_margin_bottom":0,"instafeed_margin_sides":0,"show_instagram_link":false,"link_alignment":"center","link_color":"#267683","background_color":"","feed_id":"","html_area":""}}},"block_order":["instafeed_app_block_mrQHUB"],"disabled":true,"settings":{"spacing_top":0,"spacing_bottom":0,"color_scheme":"color__bg-body color__text","color_border":"color__border-divider-1","style_border":"border--b-width","layout_horizontal":"window","layout_padding":false}},"homepage_quickfilter_bar_6jV8rK":{"type":"homepage-quickfilter-bar","blocks":{"link_LUNKWw":{"type":"link","settings":{"label":"Wallets","url":"shopify://collections/all-wallets","force_active":false}},"link_cickAM":{"type":"link","settings":{"label":"Bags","url":"shopify://collections/all-bags","force_active":false}},"link_PP3riW":{"type":"link","settings":{"label":"Lanyards","url":"shopify://collections/lanyards","force_active":false}},"link_mywhrG":{"type":"link","settings":{"label":"New Arrivals","url":"shopify://collections/new-arrivals","force_active":false}}},"block_order":["link_LUNKWw","link_cickAM","link_PP3riW","link_mywhrG"],"disabled":true,"name":"Homepage quickfilter bar","settings":{"hpqf_enable":true,"hpqf_always_visible_in_editor":true,"hpqf_font":"inherit","hpqf_weight":"600","hpqf_text_transform":"uppercase","hpqf_letter_spacing":"0.085em","hpqf_size_mobile":13,"hpqf_text_color":"#1c1c1c","hpqf_active_color":"#1e7db3","hpqf_underline_offset":2,"hpqf_underline_thickness":1,"hpqf_chip_pad_v":16,"hpqf_chip_pad_h":16,"hpqf_chip_gap":0,"hpqf_edge_padding":16,"hpqf_top_offset_extra":0,"hpqf_bar_bg":"","hpqf_bar_border_color":""}}},"order":["85942a7d-a700-4a34-9b4d-8e0a35c6feb7","banner_rk4ah3","image_grid_Y9rzMQ","image_grid_RjH9Gp","image_grid_ApnwaL","image_card_grid_9pCUtE","trifecta_spotlight_main","image_banners_4KeKzw","brand_statement_c9UxhP","best_sellers_fRWFny","best_sellers_hb8Lem","hero_secondary_desktop","hero_secondary_mobile","reviews_carried_loved","ugc_gallery_pbDXkz","1709748309b5b3be26","homepage_quickfilter_bar_6jV8rK"]}
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "85942a7d-a700-4a34-9b4d-8e0a35c6feb7": {
+      "type": "banner",
+      "blocks": {
+        "eyebrow_QtLqMB": {
+          "type": "eyebrow",
+          "disabled": true,
+          "settings": {
+            "content": "NEW ARRIVALS",
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 8,
+            "spacing_left": 32,
+            "spacing_right": 0,
+            "font_family": "body",
+            "font_family_custom": "",
+            "font_size": 14,
+            "font_weight": "700",
+            "text_transform": "uppercase",
+            "letter_spacing": "0.16em",
+            "custom_color": "#1e7db3"
+          }
+        },
+        "heading_XGwGQT": {
+          "type": "heading",
+          "disabled": true,
+          "settings": {
+            "content": "Everyday Carry. Elevated.",
+            "outline_last_word": false,
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_left": 32,
+            "spacing_right": 0,
+            "font_family": "inherit",
+            "font_family_custom": "",
+            "font_size": 76,
+            "font_weight": "700",
+            "text_transform": "uppercase",
+            "letter_spacing": "0.02em",
+            "line_height": 80,
+            "custom_color": ""
+          }
+        },
+        "content_UDCwLK": {
+          "type": "content",
+          "disabled": true,
+          "settings": {
+            "content": "<p>Functional & expressive wallets, bags and accessories.</p>",
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_left": 32,
+            "spacing_right": 22,
+            "font_family": "body",
+            "font_family_custom": "",
+            "font_size": 18,
+            "font_weight": "400",
+            "text_transform": "none",
+            "letter_spacing": "0.07em",
+            "custom_color": ""
+          }
+        },
+        "buttons_PjhpCe": {
+          "type": "buttons",
+          "disabled": true,
+          "settings": {
+            "button_color": "btn btn--plain",
+            "button_label": "Shop Spring Collection",
+            "button_show_arrow": true,
+            "button_url": "shopify://collections/all",
+            "button_custom_bg": "",
+            "button_custom_text": "#ffffff",
+            "secondary_button_color": "btn--glass-dark",
+            "secondary_button_label": "",
+            "secondary_button_url": "",
+            "secondary_button_custom_bg": "",
+            "secondary_button_custom_text": "",
+            "tertiary_button_color": "btn btn--neutral",
+            "tertiary_button_label": "",
+            "tertiary_button_url": "",
+            "tertiary_button_custom_bg": "",
+            "tertiary_button_custom_text": "",
+            "btns_font": "body",
+            "btns_size": 18,
+            "btns_weight": "600",
+            "btns_case": "uppercase",
+            "btns_ls": "0.085em",
+            "btns_style": "normal",
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_left": 24,
+            "spacing_right": 0,
+            "font_family": "inherit",
+            "font_family_custom": ""
+          }
+        }
+      },
+      "block_order": [
+        "eyebrow_QtLqMB",
+        "heading_XGwGQT",
+        "content_UDCwLK",
+        "buttons_PjhpCe"
+      ],
+      "name": "Hero Banner",
+      "settings": {
+        "url": "shopify://collections/new-arrivals",
+        "image_background_desktop": "shopify://shop_images/summernewarrivals_desktop_hero.webp",
+        "video_mobile": "shopify://files/videos/Short Thread Brand Video (Mobile) (2).mp4",
+        "video_poster_mobile": "shopify://shop_images/Screenshot_2026-04-22_at_10.18.25_AM.png",
+        "show_video_background_mobile": false,
+        "show_entire_image": false,
+        "enable_lazy_loading": true,
+        "color_scheme": "color__bg-overlay-1 color__text",
+        "color_text": "color__light",
+        "color_border": "!color__border-transparent",
+        "enable_gradient": false,
+        "gradient_color": "#000000",
+        "gradient_opacity": 40,
+        "style_border": "",
+        "layout_horizontal": "window--edge",
+        "layout_y_spacing": "custom",
+        "custom_height_px": 850,
+        "layout_y_alignment": "items-end",
+        "content_offset_top": 0,
+        "content_offset_bottom": 50,
+        "layout_x_alignment": "justify-start",
+        "use_global_spacing": "custom",
+        "visibility": "hidden md:block"
+      }
+    },
+    "banner_rk4ah3": {
+      "type": "banner",
+      "blocks": {
+        "eyebrow_HEwxrM": {
+          "type": "eyebrow",
+          "disabled": true,
+          "settings": {
+            "content": "NEW ARRIVALS",
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_left": 32,
+            "spacing_right": 0,
+            "font_family": "body",
+            "font_family_custom": "",
+            "font_size": 14,
+            "font_weight": "700",
+            "text_transform": "uppercase",
+            "letter_spacing": "0.16em",
+            "custom_color": "#1e7db3"
+          }
+        },
+        "heading_KhYh8P": {
+          "type": "heading",
+          "disabled": true,
+          "settings": {
+            "content": "Everyday Carry. Elevated.",
+            "outline_last_word": false,
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_left": 32,
+            "spacing_right": 0,
+            "font_family": "inherit",
+            "font_family_custom": "",
+            "font_size": 48,
+            "font_weight": "700",
+            "text_transform": "uppercase",
+            "letter_spacing": "0.02em",
+            "line_height": 80,
+            "custom_color": ""
+          }
+        },
+        "content_f4WLnk": {
+          "type": "content",
+          "settings": {
+            "content": "<p>Expressive Everyday Carry</p>",
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_left": 32,
+            "spacing_right": 22,
+            "font_family": "body",
+            "font_family_custom": "",
+            "font_size": 16,
+            "font_weight": "400",
+            "text_transform": "none",
+            "letter_spacing": "0.07em",
+            "custom_color": ""
+          }
+        },
+        "buttons_zbxBbw": {
+          "type": "buttons",
+          "settings": {
+            "button_color": "btn btn--plain",
+            "button_label": "Shop New Arrivals",
+            "button_show_arrow": true,
+            "button_url": "shopify://collections/new-arrivals",
+            "button_custom_bg": "",
+            "button_custom_text": "#ffffff",
+            "secondary_button_color": "btn--glass-dark",
+            "secondary_button_label": "",
+            "secondary_button_url": "",
+            "secondary_button_custom_bg": "",
+            "secondary_button_custom_text": "",
+            "tertiary_button_color": "btn btn--neutral",
+            "tertiary_button_label": "",
+            "tertiary_button_url": "",
+            "tertiary_button_custom_bg": "",
+            "tertiary_button_custom_text": "",
+            "btns_font": "body",
+            "btns_size": 16,
+            "btns_weight": "600",
+            "btns_case": "uppercase",
+            "btns_ls": "0.085em",
+            "btns_style": "normal",
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 8,
+            "spacing_left": 24,
+            "spacing_right": 0,
+            "font_family": "inherit",
+            "font_family_custom": ""
+          }
+        }
+      },
+      "block_order": [
+        "eyebrow_HEwxrM",
+        "heading_KhYh8P",
+        "content_f4WLnk",
+        "buttons_zbxBbw"
+      ],
+      "name": "Hero Banner",
+      "settings": {
+        "url": "",
+        "image_background_desktop": "shopify://shop_images/summernewarrivals_desktop_hero.webp",
+        "image_background_mobile": "shopify://shop_images/IMG_4838.png",
+        "show_video_background_mobile": false,
+        "show_entire_image": false,
+        "enable_lazy_loading": true,
+        "color_scheme": "color__bg-overlay-1 color__text",
+        "color_text": "color__light",
+        "color_border": "!color__border-transparent",
+        "enable_gradient": false,
+        "gradient_color": "#000000",
+        "gradient_opacity": 40,
+        "style_border": "",
+        "layout_horizontal": "window--edge",
+        "layout_y_spacing": "custom",
+        "custom_height_px": 600,
+        "layout_y_alignment": "items-end",
+        "content_offset_top": 0,
+        "content_offset_bottom": 235,
+        "layout_x_alignment": "justify-start",
+        "use_global_spacing": "custom",
+        "visibility": "md:hidden"
+      }
+    },
+    "image_grid_Y9rzMQ": {
+      "type": "image-grid",
+      "blocks": {
+        "card_qk6DRf": {
+          "type": "card",
+          "settings": {
+            "card_mode": "label",
+            "image": "shopify://shop_images/s1d1_pdp_photo_zipper_sawyerolive.png",
+            "bg_color": "#e0ddd8",
+            "link": "shopify://collections/all-wallets",
+            "label": "Wallets",
+            "label_align": "inherit",
+            "heading": "",
+            "subtext": "",
+            "btn_label": "Shop now",
+            "btn_link": "",
+            "rich_ph": 16,
+            "rich_pv": 16,
+            "rich_gap": 12,
+            "visibility": "desktop"
+          }
+        },
+        "card_WjMtgP": {
+          "type": "card",
+          "settings": {
+            "card_mode": "label",
+            "image": "shopify://shop_images/s1d1_pdp_photo_utilitytote_brown.png",
+            "bg_color": "#e0ddd8",
+            "link": "shopify://collections/all-bags",
+            "label": "Bags",
+            "label_align": "inherit",
+            "heading": "Bags",
+            "subtext": "",
+            "btn_label": "Shop bags",
+            "btn_link": "",
+            "rich_ph": 14,
+            "rich_pv": 12,
+            "rich_gap": 12,
+            "visibility": "desktop"
+          }
+        },
+        "card_QHYbFX": {
+          "type": "card",
+          "settings": {
+            "card_mode": "label",
+            "image": "shopify://shop_images/trifecta_vert_emmemlien.png",
+            "bg_color": "#e0ddd8",
+            "link": "shopify://collections/all-accessories",
+            "label": "Accessories",
+            "label_align": "inherit",
+            "heading": "",
+            "subtext": "",
+            "btn_label": "Shop now",
+            "btn_link": "",
+            "rich_ph": 16,
+            "rich_pv": 16,
+            "rich_gap": 12,
+            "visibility": "desktop"
+          }
+        },
+        "card_DyViKg": {
+          "type": "card",
+          "settings": {
+            "card_mode": "label",
+            "image": "shopify://shop_images/vert_trifecta_tort_bf7f7924-fe44-4678-a760-c11e45558840.png",
+            "bg_color": "#e0ddd8",
+            "link": "shopify://collections/shop-all",
+            "label": "Shop All",
+            "label_align": "inherit",
+            "heading": "",
+            "subtext": "",
+            "btn_label": "Shop now",
+            "btn_link": "",
+            "rich_ph": 16,
+            "rich_pv": 16,
+            "rich_gap": 12,
+            "visibility": "desktop"
+          }
+        }
+      },
+      "block_order": [
+        "card_qk6DRf",
+        "card_WjMtgP",
+        "card_QHYbFX",
+        "card_DyViKg"
+      ],
+      "name": "Image Grid",
+      "settings": {
+        "visibility": "hidden md:block",
+        "bg_color": "#ffffff",
+        "use_global_spacing": "custom",
+        "sec_pt": 16,
+        "sec_pb": 20,
+        "sec_ph": 0,
+        "show_title": false,
+        "title_text": "Shop By Category",
+        "title_font": "header",
+        "title_size": 80,
+        "title_weight": "700",
+        "title_case": "uppercase",
+        "title_ls": "0.02",
+        "title_color": "#1c1c1c",
+        "title_ph": 24,
+        "title_pt": 0,
+        "title_gap": 24,
+        "title_align": "left",
+        "eyebrow_text": "",
+        "eyebrow_color": "#1e7db3",
+        "show_header_link": false,
+        "header_link_label": "Shop all",
+        "header_link_url": "shopify://collections/shop-all",
+        "label_position": "overlay",
+        "overlay_label_size": 16,
+        "cols_mob": "2",
+        "cols_tabl": "2",
+        "cols_desk": "4",
+        "col_gap": 0,
+        "row_gap": 0,
+        "img_ratio": "133",
+        "img_ratio_desktop": "133",
+        "img_ph": 0,
+        "img_radius": 0,
+        "label_font": "body",
+        "label_size": 22,
+        "label_weight": "400",
+        "label_case": "capitalize",
+        "label_ls": "0.10",
+        "label_color": "#1c1c1c",
+        "label_pt": 8,
+        "label_ph": 24,
+        "label_pb": 24,
+        "label_align": "left",
+        "rh_font": "body",
+        "rh_size": 20,
+        "rh_weight": "700",
+        "rh_case": "none",
+        "rh_ls": "0.05",
+        "rh_lh": 130,
+        "rh_color": "#1c1c1c",
+        "rs_font": "body",
+        "rs_size": 16,
+        "rs_weight": "400",
+        "rs_case": "none",
+        "rs_ls": "0.01",
+        "rs_lh": 150,
+        "rs_color": "#1c1c1c",
+        "rb_style": "outline-pill",
+        "rb_font": "body",
+        "rb_size": 13,
+        "rb_weight": "400",
+        "rb_case": "uppercase",
+        "rb_ls": "0.08",
+        "rb_pv": 10,
+        "rb_ph": 24,
+        "rb_border_w": 2,
+        "rb_radius": 4,
+        "rb_bg": "#1c1c1c",
+        "rb_text": "#ffffff",
+        "rb_border_color": "#1c1c1c"
+      }
+    },
+    "image_grid_RjH9Gp": {
+      "type": "image-grid",
+      "blocks": {
+        "card_8BrUYQ": {
+          "type": "card",
+          "settings": {
+            "card_mode": "label",
+            "image": "shopify://shop_images/s1d1_pdp_photo_zipper_sawyerolive.png",
+            "bg_color": "#e0ddd8",
+            "link": "shopify://collections/all-wallets",
+            "label": "Wallets",
+            "label_align": "inherit",
+            "heading": "",
+            "subtext": "",
+            "btn_label": "Shop now",
+            "btn_link": "",
+            "rich_ph": 16,
+            "rich_pv": 16,
+            "rich_gap": 12,
+            "visibility": "mobile"
+          }
+        },
+        "card_fXy6qJ": {
+          "type": "card",
+          "settings": {
+            "card_mode": "label",
+            "image": "shopify://shop_images/s1d1_pdp_photo_utilitytote_brown.png",
+            "bg_color": "#e0ddd8",
+            "link": "shopify://collections/all-bags",
+            "label": "Bags",
+            "label_align": "inherit",
+            "heading": "Bags",
+            "subtext": "",
+            "btn_label": "Shop bags",
+            "btn_link": "",
+            "rich_ph": 14,
+            "rich_pv": 12,
+            "rich_gap": 12,
+            "visibility": "mobile"
+          }
+        },
+        "card_WEbTxE": {
+          "type": "card",
+          "settings": {
+            "card_mode": "label",
+            "image": "shopify://shop_images/trifecta_vert_emmemlien.png",
+            "bg_color": "#e0ddd8",
+            "link": "shopify://collections/all-accessories",
+            "label": "Accessories",
+            "label_align": "inherit",
+            "heading": "",
+            "subtext": "",
+            "btn_label": "Shop now",
+            "btn_link": "",
+            "rich_ph": 16,
+            "rich_pv": 16,
+            "rich_gap": 12,
+            "visibility": "mobile"
+          }
+        },
+        "card_NYkHam": {
+          "type": "card",
+          "settings": {
+            "card_mode": "label",
+            "image": "shopify://shop_images/vert_trifecta_tort_bf7f7924-fe44-4678-a760-c11e45558840.png",
+            "bg_color": "#e0ddd8",
+            "link": "shopify://collections/shop-all",
+            "label": "Shop All",
+            "label_align": "inherit",
+            "heading": "",
+            "subtext": "",
+            "btn_label": "Shop now",
+            "btn_link": "",
+            "rich_ph": 16,
+            "rich_pv": 16,
+            "rich_gap": 12,
+            "visibility": "mobile"
+          }
+        }
+      },
+      "block_order": [
+        "card_8BrUYQ",
+        "card_fXy6qJ",
+        "card_WEbTxE",
+        "card_NYkHam"
+      ],
+      "name": "Image Grid",
+      "settings": {
+        "visibility": "md:hidden",
+        "bg_color": "#ffffff",
+        "use_global_spacing": "custom",
+        "sec_pt": 16,
+        "sec_pb": 24,
+        "sec_ph": 0,
+        "show_title": false,
+        "title_text": "Shop by Category",
+        "title_font": "header",
+        "title_size": 36,
+        "title_weight": "700",
+        "title_case": "uppercase",
+        "title_ls": "0.02",
+        "title_color": "#1c1c1c",
+        "title_ph": 16,
+        "title_pt": 8,
+        "title_gap": 12,
+        "title_align": "left",
+        "eyebrow_text": "",
+        "eyebrow_color": "#1e7db3",
+        "show_header_link": false,
+        "header_link_label": "Shop all",
+        "header_link_url": "shopify://collections/shop-all",
+        "label_position": "overlay",
+        "overlay_label_size": 15,
+        "cols_mob": "2",
+        "cols_tabl": "2",
+        "cols_desk": "3",
+        "col_gap": 16,
+        "row_gap": 8,
+        "img_ratio": "133",
+        "img_ratio_desktop": "75",
+        "img_ph": 0,
+        "img_radius": 0,
+        "label_font": "body",
+        "label_size": 18,
+        "label_weight": "400",
+        "label_case": "capitalize",
+        "label_ls": "0.10",
+        "label_color": "#1c1c1c",
+        "label_pt": 8,
+        "label_ph": 16,
+        "label_pb": 12,
+        "label_align": "left",
+        "rh_font": "body",
+        "rh_size": 20,
+        "rh_weight": "700",
+        "rh_case": "none",
+        "rh_ls": "0.05",
+        "rh_lh": 130,
+        "rh_color": "#1c1c1c",
+        "rs_font": "body",
+        "rs_size": 16,
+        "rs_weight": "400",
+        "rs_case": "none",
+        "rs_ls": "0.01",
+        "rs_lh": 150,
+        "rs_color": "#1c1c1c",
+        "rb_style": "outline-pill",
+        "rb_font": "body",
+        "rb_size": 13,
+        "rb_weight": "400",
+        "rb_case": "uppercase",
+        "rb_ls": "0.08",
+        "rb_pv": 10,
+        "rb_ph": 24,
+        "rb_border_w": 2,
+        "rb_radius": 4,
+        "rb_bg": "#1c1c1c",
+        "rb_text": "#ffffff",
+        "rb_border_color": "#1c1c1c"
+      }
+    },
+    "image_grid_ApnwaL": {
+      "type": "image-grid",
+      "blocks": {
+        "card_q6jb6V": {
+          "type": "card",
+          "settings": {
+            "card_mode": "label",
+            "image": "shopify://shop_images/s1d1_pdp_photo_zipper_sawyerolive.png",
+            "bg_color": "#e0ddd8",
+            "link": "",
+            "label": "Wallets",
+            "label_align": "inherit",
+            "heading": "",
+            "subtext": "",
+            "btn_label": "Shop now",
+            "btn_link": "",
+            "rich_ph": 16,
+            "rich_pv": 16,
+            "rich_gap": 12,
+            "visibility": "desktop"
+          }
+        },
+        "card_7kyM8F": {
+          "type": "card",
+          "settings": {
+            "card_mode": "label",
+            "image": "shopify://shop_images/s1d1_pdp_photo_utilitytote_brown.png",
+            "bg_color": "#e0ddd8",
+            "link": "",
+            "label": "Bags",
+            "label_align": "inherit",
+            "heading": "Bags",
+            "subtext": "",
+            "btn_label": "Shop bags",
+            "btn_link": "",
+            "rich_ph": 14,
+            "rich_pv": 12,
+            "rich_gap": 12,
+            "visibility": "desktop"
+          }
+        },
+        "card_DAJWPh": {
+          "type": "card",
+          "settings": {
+            "card_mode": "label",
+            "image": "shopify://shop_images/trifecta_vert_emmemlien.png",
+            "bg_color": "#e0ddd8",
+            "link": "shopify://collections/all-accessories",
+            "label": "Accessories",
+            "label_align": "inherit",
+            "heading": "",
+            "subtext": "",
+            "btn_label": "Shop now",
+            "btn_link": "",
+            "rich_ph": 16,
+            "rich_pv": 16,
+            "rich_gap": 12,
+            "visibility": "desktop"
+          }
+        },
+        "card_F4PCRa": {
+          "type": "card",
+          "disabled": true,
+          "settings": {
+            "card_mode": "label",
+            "image": "shopify://shop_images/vert_trifecta_tort_bf7f7924-fe44-4678-a760-c11e45558840.png",
+            "bg_color": "#e0ddd8",
+            "link": "",
+            "label": "Shop All",
+            "label_align": "inherit",
+            "heading": "",
+            "subtext": "",
+            "btn_label": "Shop now",
+            "btn_link": "",
+            "rich_ph": 16,
+            "rich_pv": 16,
+            "rich_gap": 12,
+            "visibility": "mobile"
+          }
+        }
+      },
+      "block_order": [
+        "card_q6jb6V",
+        "card_7kyM8F",
+        "card_DAJWPh",
+        "card_F4PCRa"
+      ],
+      "disabled": true,
+      "name": "Image Grid",
+      "settings": {
+        "visibility": "",
+        "bg_color": "#ffffff",
+        "use_global_spacing": "custom",
+        "sec_pt": 16,
+        "sec_pb": 0,
+        "sec_ph": 0,
+        "show_title": false,
+        "title_text": "SHOP BY CATEGORY",
+        "title_font": "header",
+        "title_size": 60,
+        "title_weight": "700",
+        "title_case": "none",
+        "title_ls": "0",
+        "title_color": "#1c1c1c",
+        "title_ph": 46,
+        "title_pt": 0,
+        "title_gap": 16,
+        "title_align": "center",
+        "eyebrow_text": "",
+        "eyebrow_color": "#1e7db3",
+        "show_header_link": true,
+        "header_link_label": "",
+        "header_link_url": "",
+        "label_position": "below",
+        "overlay_label_size": 15,
+        "cols_mob": "2",
+        "cols_tabl": "2",
+        "cols_desk": "3",
+        "col_gap": 16,
+        "row_gap": 8,
+        "img_ratio": "133",
+        "img_ratio_desktop": "75",
+        "img_ph": 0,
+        "img_radius": 0,
+        "label_font": "body",
+        "label_size": 18,
+        "label_weight": "400",
+        "label_case": "capitalize",
+        "label_ls": "0.10",
+        "label_color": "#1c1c1c",
+        "label_pt": 8,
+        "label_ph": 16,
+        "label_pb": 24,
+        "label_align": "left",
+        "rh_font": "body",
+        "rh_size": 20,
+        "rh_weight": "700",
+        "rh_case": "none",
+        "rh_ls": "0.05",
+        "rh_lh": 130,
+        "rh_color": "#1c1c1c",
+        "rs_font": "body",
+        "rs_size": 16,
+        "rs_weight": "400",
+        "rs_case": "none",
+        "rs_ls": "0.01",
+        "rs_lh": 150,
+        "rs_color": "#1c1c1c",
+        "rb_style": "outline-pill",
+        "rb_font": "body",
+        "rb_size": 13,
+        "rb_weight": "400",
+        "rb_case": "uppercase",
+        "rb_ls": "0.08",
+        "rb_pv": 10,
+        "rb_ph": 24,
+        "rb_border_w": 2,
+        "rb_radius": 4,
+        "rb_bg": "#1c1c1c",
+        "rb_text": "#ffffff",
+        "rb_border_color": "#1c1c1c"
+      }
+    },
+    "image_card_grid_9pCUtE": {
+      "type": "image-card-grid",
+      "blocks": {
+        "filter_tab_CyHr8M": {
+          "type": "filter_tab",
+          "settings": {
+            "tab_label": "Wallets",
+            "cta_label": "Shop Wallets",
+            "cta_url": ""
+          }
+        },
+        "filter_tab_NKRjqN": {
+          "type": "filter_tab",
+          "settings": {
+            "tab_label": "Bags",
+            "cta_label": "Shop Bags",
+            "cta_url": ""
+          }
+        },
+        "filter_tab_wfpLJX": {
+          "type": "filter_tab",
+          "settings": {
+            "tab_label": "Accessories",
+            "cta_label": "Shop Accessories",
+            "cta_url": ""
+          }
+        },
+        "image_card_Tp9XHD": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/amelia_5de3f6a3-43ae-4ed9-973b-b752a8503ae4.png",
+            "link": "",
+            "title": "All Wallets",
+            "subtitle": "Our flagship product. Famous for it's slim, minimalist look.",
+            "tab_filter": "Wallets",
+            "visibility": "mobile"
+          }
+        },
+        "image_card_L66egX": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/vert_clark.png",
+            "link": "shopify://collections/vertical-leather-wallets",
+            "title": "Vertical Cardholder",
+            "subtitle": "A more sophisticated look with the same signature elastic.",
+            "tab_filter": "wallets",
+            "visibility": "both"
+          }
+        },
+        "image_card_HRQbdg": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/Zipper-Wallet.png",
+            "link": "shopify://collections/vertical-leather-wallets",
+            "title": "Zipper Wallet",
+            "subtitle": "Genuine leather with a zipped pouch and signature elastic.",
+            "tab_filter": "wallets",
+            "visibility": "both"
+          }
+        },
+        "image_card_RYRbLM": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/RETRO_BIFOLD.jpg",
+            "link": "shopify://collections/vertical-leather-wallets",
+            "title": "Bifold Wallet",
+            "subtitle": "A more sophisticated look with the same signature elastic.",
+            "tab_filter": "wallets",
+            "visibility": "both"
+          }
+        },
+        "image_card_wtLBGb": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/MINI_UTILITY.jpg",
+            "link": "shopify://collections/utility-tote-bags",
+            "title": "Utility Tote",
+            "subtitle": "Utility for everyday.",
+            "tab_filter": "wallets",
+            "visibility": "both"
+          }
+        },
+        "image_card_Vdxrzr": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/amelia_5de3f6a3-43ae-4ed9-973b-b752a8503ae4.png",
+            "link": "",
+            "title": "Elastic Wallet",
+            "subtitle": "Our flagship product. Famous for it's slim, minimalist look.",
+            "tab_filter": "Wallets",
+            "visibility": "both"
+          }
+        },
+        "image_card_HMr9Fk": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/MINI_UTILITY.jpg",
+            "link": "shopify://collections/utility-tote-bags",
+            "title": "All Bags",
+            "subtitle": "Utility for everyday.",
+            "tab_filter": "bags",
+            "visibility": "mobile"
+          }
+        },
+        "image_card_NPD7Yb": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/MINI_UTILITY.jpg",
+            "link": "shopify://collections/utility-tote-bags",
+            "title": "Crossbody Bag",
+            "subtitle": "Utility for everyday.",
+            "tab_filter": "bags",
+            "visibility": "both"
+          }
+        },
+        "image_card_azrpqp": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/MINI_UTILITY.jpg",
+            "link": "shopify://collections/utility-tote-bags",
+            "title": "Slouchy Bag",
+            "subtitle": "Utility for everyday.",
+            "tab_filter": "bags",
+            "visibility": "both"
+          }
+        },
+        "image_card_eLGrMF": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/MINI_UTILITY.jpg",
+            "link": "shopify://collections/utility-tote-bags",
+            "title": "Water Bottle Sling",
+            "subtitle": "Utility for everyday.",
+            "tab_filter": "bags",
+            "visibility": "both"
+          }
+        },
+        "image_card_AX4UxD": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/MINI_UTILITY.jpg",
+            "link": "shopify://collections/utility-tote-bags",
+            "title": "Shoulder Bag",
+            "subtitle": "Utility for everyday.",
+            "tab_filter": "bags",
+            "visibility": "both"
+          }
+        },
+        "image_card_ehpADi": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/MINI_UTILITY.jpg",
+            "link": "shopify://collections/utility-tote-bags",
+            "title": "Backpack",
+            "subtitle": "Utility for everyday.",
+            "tab_filter": "bags",
+            "visibility": "both"
+          }
+        },
+        "image_card_MYDJmm": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/WRIST_LANYARD_d465808a-6a47-4644-9717-b638ba86acad.jpg",
+            "link": "",
+            "title": "All Accessories",
+            "subtitle": "What holds it all together.",
+            "tab_filter": "accessories",
+            "visibility": "mobile"
+          }
+        },
+        "image_card_MEdGLt": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/WRIST_LANYARD_d465808a-6a47-4644-9717-b638ba86acad.jpg",
+            "link": "",
+            "title": "Wristlet Lanyard",
+            "subtitle": "What holds it all together.",
+            "tab_filter": "accessories",
+            "visibility": "both"
+          }
+        },
+        "image_card_bgUWwA": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/WRIST_LANYARD_d465808a-6a47-4644-9717-b638ba86acad.jpg",
+            "link": "",
+            "title": "Wristlet Lanyard",
+            "subtitle": "What holds it all together.",
+            "tab_filter": "accessories",
+            "visibility": "both"
+          }
+        },
+        "image_card_3hbYit": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/WRIST_LANYARD_d465808a-6a47-4644-9717-b638ba86acad.jpg",
+            "link": "",
+            "title": "Wristlet Lanyard",
+            "subtitle": "What holds it all together.",
+            "tab_filter": "accessories",
+            "visibility": "both"
+          }
+        },
+        "image_card_9TF8QN": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/WRIST_LANYARD_d465808a-6a47-4644-9717-b638ba86acad.jpg",
+            "link": "",
+            "title": "Wristlet Lanyard",
+            "subtitle": "What holds it all together.",
+            "tab_filter": "accessories",
+            "visibility": "both"
+          }
+        },
+        "image_card_WR3JDJ": {
+          "type": "image_card",
+          "settings": {
+            "image": "shopify://shop_images/WRIST_LANYARD_d465808a-6a47-4644-9717-b638ba86acad.jpg",
+            "link": "",
+            "title": "Wristlet Lanyard",
+            "subtitle": "What holds it all together.",
+            "tab_filter": "accessories",
+            "visibility": "both"
+          }
+        }
+      },
+      "block_order": [
+        "filter_tab_CyHr8M",
+        "filter_tab_NKRjqN",
+        "filter_tab_wfpLJX",
+        "image_card_Tp9XHD",
+        "image_card_L66egX",
+        "image_card_HRQbdg",
+        "image_card_RYRbLM",
+        "image_card_wtLBGb",
+        "image_card_Vdxrzr",
+        "image_card_HMr9Fk",
+        "image_card_NPD7Yb",
+        "image_card_azrpqp",
+        "image_card_eLGrMF",
+        "image_card_AX4UxD",
+        "image_card_ehpADi",
+        "image_card_MYDJmm",
+        "image_card_MEdGLt",
+        "image_card_bgUWwA",
+        "image_card_3hbYit",
+        "image_card_9TF8QN",
+        "image_card_WR3JDJ"
+      ],
+      "disabled": true,
+      "name": "Image card grid",
+      "settings": {
+        "color_scheme": "color__bg-overlay-1 color__text",
+        "use_global_spacing": "custom",
+        "padding_top": 60,
+        "padding_bottom": 80,
+        "grid_padding": 16,
+        "visibility": "",
+        "show_title": true,
+        "title_text": "the lineup",
+        "title_font": "header",
+        "title_size": 56,
+        "title_weight": "700",
+        "title_case": "uppercase",
+        "title_color": "#1c1c1c",
+        "title_padding_top": 0,
+        "title_padding_bottom": 16,
+        "title_align": "center",
+        "title_ls": "0.02em",
+        "show_filter": true,
+        "filter_bg": "#f5f5f5",
+        "filter_border": "rgba(0,0,0,0)",
+        "active_color": "#1e7db3",
+        "inactive_color": "#1c1c1c",
+        "underline_width": 2,
+        "underline_offset": 2,
+        "filter_size": 15,
+        "filter_weight": "600",
+        "filter_case": "uppercase",
+        "filter_ls": "0.085em",
+        "tab_spacing": 20,
+        "filter_align": "center",
+        "cta_show": false,
+        "cta_position": "between",
+        "cta_between_spacing_top": 6,
+        "cta_between_spacing_bottom": 4,
+        "cta_label": "Shop all",
+        "cta_url": "",
+        "cta_case": "uppercase",
+        "cta_weight": "700",
+        "cta_size": 12,
+        "cta_ls": "0.085em",
+        "cta_text_color": "#1c1c1c",
+        "cta_bg_color": "rgba(0,0,0,0)",
+        "cta_border_color": "#1c1c1c",
+        "cta_border_width": 1.5,
+        "cta_radius": 50,
+        "cta_pad_h": 16,
+        "cta_pad_v": 8,
+        "cta_full_width_mobile": true,
+        "grid_mode": "grid",
+        "columns_mobile": "2",
+        "columns_desktop": "5",
+        "col_gap": 16,
+        "row_gap": 16,
+        "carousel_peek": 16,
+        "carousel_peek_desktop": 16,
+        "carousel_show_arrows": true,
+        "image_radius": 2,
+        "image_aspect": "",
+        "image_height_desktop": 0,
+        "image_height_mobile": 150,
+        "card_text_pad_top": 6,
+        "card_text_pad_x": 0,
+        "card_text_align": "left",
+        "card_title_font": "body",
+        "card_title_size": 16,
+        "card_title_weight": "400",
+        "card_title_case": "capitalize",
+        "card_title_ls": "0.1em",
+        "card_title_color": "#1c1c1c",
+        "card_title_mb": 12,
+        "show_card_sub": false,
+        "card_sub_font": "body",
+        "card_sub_size": 13,
+        "card_sub_weight": "300",
+        "card_sub_transform": "none",
+        "card_sub_ls": "0.1em",
+        "card_sub_line_height": 1.4,
+        "card_sub_opacity": 0.6,
+        "card_sub_color": "#1c1c1c"
+      }
+    },
+    "trifecta_spotlight_main": {
+      "type": "trifecta-spotlight",
+      "disabled": true,
+      "name": "Trifecta Spotlight (bundle)",
+      "settings": {
+        "eyebrow": "Everyday Carry Set",
+        "heading": "Everything. Together.",
+        "heading_size_m": 36,
+        "heading_size_d": 76,
+        "lede": "Your whole carry, clipped into one.",
+        "includes_text": "Wallet + Wristlet + Chapstick Holder",
+        "product": "everyday-carry-set-elastic-wallet",
+        "cta_label": "Build Your Everyday Carry Set",
+        "cta_url": "",
+        "image": "shopify://shop_images/trifecta_vert_emmemlien.png",
+        "media_height_mobile": 40,
+        "height_desktop": 560,
+        "show_badge": true,
+        "badge_text": "DO WHAT CONNECTS YOU™ · THREAD® · EST. 2015 ·",
+        "show_proof": true,
+        "proof_desktop_only": false,
+        "proof_quote": "“The grab-and-go setup I didn’t know I needed.”",
+        "bg_color": "#1e7db3",
+        "accent_color": "#eebc2c",
+        "visibility": ""
+      }
+    },
+    "image_banners_4KeKzw": {
+      "type": "image-banners",
+      "blocks": {
+        "banner_4zL4Rq": {
+          "type": "banner",
+          "settings": {
+            "image": "shopify://shop_images/solids-mobile_1200x_31f6be6a-f566-49a6-b8be-211a7ef0a192.jpg",
+            "heading": "",
+            "subtitle": "",
+            "link_label": "",
+            "link_url": "",
+            "visibility": "desktop",
+            "text_position": "bottom-left",
+            "text_pad_top": 32,
+            "text_pad_right": 32,
+            "text_pad_bottom": 32,
+            "text_pad_left": 32,
+            "heading_font": "header",
+            "heading_size": 32,
+            "heading_weight": "700",
+            "heading_transform": "uppercase",
+            "heading_ls": "0.02em",
+            "heading_lh": 1.1,
+            "heading_color": "#ffffff",
+            "heading_mb": 8,
+            "subtitle_font": "body",
+            "subtitle_size": 14,
+            "subtitle_weight": "400",
+            "subtitle_ls": "0em",
+            "subtitle_lh": 1.4,
+            "subtitle_color": "#ffffff",
+            "subtitle_max_width": 50,
+            "subtitle_mb": 12,
+            "link_font": "body",
+            "link_size": 13,
+            "link_weight": "600",
+            "link_transform": "none",
+            "link_ls": "0em",
+            "link_underline": true,
+            "link_color": "#ffffff",
+            "overlay_type": "none",
+            "overlay_color": "#000000",
+            "overlay_opacity": 40,
+            "gradient_direction": "to top",
+            "gradient_start": 0,
+            "gradient_end": 60
+          }
+        },
+        "banner_8qdwei": {
+          "type": "banner",
+          "settings": {
+            "image": "shopify://shop_images/wrist_05.png",
+            "heading": "\"So convenient!\"",
+            "subtitle": "\"Having my keys, walley, chapstick all together to grab and go is life changing\"  - Kylee",
+            "link_label": "",
+            "link_url": "",
+            "visibility": "desktop",
+            "text_position": "bottom-left",
+            "text_pad_top": 122,
+            "text_pad_right": 160,
+            "text_pad_bottom": 32,
+            "text_pad_left": 56,
+            "heading_font": "header",
+            "heading_size": 72,
+            "heading_weight": "700",
+            "heading_transform": "uppercase",
+            "heading_ls": "0.02em",
+            "heading_lh": 1.1,
+            "heading_color": "#ffffff",
+            "heading_mb": 8,
+            "subtitle_font": "body",
+            "subtitle_size": 22,
+            "subtitle_weight": "400",
+            "subtitle_ls": "0.1em",
+            "subtitle_lh": 1.6,
+            "subtitle_color": "#ffffff",
+            "subtitle_max_width": 56,
+            "subtitle_mb": 32,
+            "link_font": "body",
+            "link_size": 13,
+            "link_weight": "600",
+            "link_transform": "none",
+            "link_ls": "0em",
+            "link_underline": true,
+            "link_color": "#ffffff",
+            "overlay_type": "gradient",
+            "overlay_color": "#000000",
+            "overlay_opacity": 10,
+            "gradient_direction": "to top",
+            "gradient_start": 20,
+            "gradient_end": 95
+          }
+        },
+        "banner_4A4paN": {
+          "type": "banner",
+          "settings": {
+            "image": "shopify://shop_images/wrist_05.png",
+            "heading": "\"So convenient!\"",
+            "subtitle": "\"Having my wallet, chapstick and keys all together to grab and go is life changing.\"",
+            "link_label": "Shop Wallet Keychain Bundles",
+            "link_url": "shopify://products/everyday-carry-set-group",
+            "visibility": "mobile",
+            "text_position": "top-center",
+            "text_pad_top": 36,
+            "text_pad_right": 16,
+            "text_pad_bottom": 24,
+            "text_pad_left": 16,
+            "heading_font": "header",
+            "heading_size": 72,
+            "heading_weight": "700",
+            "heading_transform": "uppercase",
+            "heading_ls": "0.02em",
+            "heading_lh": 1.1,
+            "heading_color": "#ffffff",
+            "heading_mb": 8,
+            "subtitle_font": "body",
+            "subtitle_size": 18,
+            "subtitle_weight": "400",
+            "subtitle_ls": "0.1em",
+            "subtitle_lh": 1.6,
+            "subtitle_color": "#ffffff",
+            "subtitle_max_width": 56,
+            "subtitle_mb": 32,
+            "link_font": "body",
+            "link_size": 16,
+            "link_weight": "600",
+            "link_transform": "uppercase",
+            "link_ls": "0.1em",
+            "link_underline": true,
+            "link_color": "#ffffff",
+            "overlay_type": "gradient",
+            "overlay_color": "#1c1c1c",
+            "overlay_opacity": 30,
+            "gradient_direction": "to bottom",
+            "gradient_start": 20,
+            "gradient_end": 100
+          }
+        }
+      },
+      "block_order": [
+        "banner_4zL4Rq",
+        "banner_8qdwei",
+        "banner_4A4paN"
+      ],
+      "disabled": true,
+      "name": "Image banners",
+      "settings": {
+        "color_scheme": "color__bg-body color__text",
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "side_padding": 0,
+        "gap": 0,
+        "radius": 0,
+        "columns_desktop": "2",
+        "columns_mobile": "1",
+        "aspect_ratio": "16 / 9",
+        "height_desktop": 640,
+        "height_mobile": 520,
+        "visibility": "",
+        "overlay_strength": 0,
+        "overlay_extent": 60
+      }
+    },
+    "brand_statement_c9UxhP": {
+      "type": "brand-statement",
+      "disabled": true,
+      "name": "Brand statement",
+      "settings": {
+        "heading": "",
+        "heading_tag": "h2",
+        "heading_font": "inherit",
+        "heading_size_mobile": 28,
+        "heading_size_desktop": 40,
+        "heading_weight": "400",
+        "heading_transform": "none",
+        "heading_line_height": 1.2,
+        "heading_letter_spacing": 0,
+        "heading_color": "#1c1c1c",
+        "heading_max_width": 800,
+        "subheading": "",
+        "sub_font": "inherit",
+        "sub_size_mobile": 14,
+        "sub_size_desktop": 18,
+        "sub_weight": "400",
+        "sub_transform": "none",
+        "sub_line_height": 1.4,
+        "sub_letter_spacing": 0.1,
+        "sub_color": "#1c1c1c",
+        "show_stars": true,
+        "rating_number": "4.8",
+        "review_count_text": "16K Reviews",
+        "star_color": "#ffffff",
+        "star_size": 12,
+        "stars_text_size": 16,
+        "stars_text_weight": "400",
+        "stars_text_color": "#ffffff",
+        "stars_text_letter_spacing": "0.2",
+        "stars_gap": 4,
+        "use_global_spacing": "custom",
+        "heading_sub_spacing": 8,
+        "sub_stars_spacing": 0,
+        "spacing_top": 12,
+        "spacing_bottom": 12,
+        "spacing_sides": 0,
+        "background_color": "#1e7db3",
+        "visibility": ""
+      }
+    },
+    "best_sellers_fRWFny": {
+      "type": "best-sellers",
+      "blocks": {
+        "filter_tab_mCbeTN": {
+          "type": "filter_tab",
+          "settings": {
+            "tab_label": "Wallets",
+            "collection_handle": "all-wallets",
+            "cta_label": "Shop Wallets",
+            "cta_url": "shopify://collections/all-wallets"
+          }
+        },
+        "filter_tab_nY6kQE": {
+          "type": "filter_tab",
+          "settings": {
+            "tab_label": "Bags",
+            "collection_handle": "all-bags",
+            "cta_label": "Shop Bags",
+            "cta_url": "shopify://collections/all-bags"
+          }
+        },
+        "filter_tab_capKcG": {
+          "type": "filter_tab",
+          "settings": {
+            "tab_label": "Accessories",
+            "collection_handle": "all-accessories",
+            "cta_label": "Shop Accessories",
+            "cta_url": "shopify://collections/all-accessories"
+          }
+        },
+        "filter_tab_7BRabL": {
+          "type": "filter_tab",
+          "disabled": true,
+          "settings": {
+            "tab_label": "Bags",
+            "collection_handle": "",
+            "cta_label": "Shop all",
+            "cta_url": ""
+          }
+        }
+      },
+      "block_order": [
+        "filter_tab_mCbeTN",
+        "filter_tab_nY6kQE",
+        "filter_tab_capKcG",
+        "filter_tab_7BRabL"
+      ],
+      "name": "Featured Collection",
+      "settings": {
+        "color_scheme": "color__bg-body color__text",
+        "use_global_spacing": "custom",
+        "padding_top": 24,
+        "padding_bottom": 24,
+        "grid_padding": 8,
+        "visibility": "md:hidden",
+        "show_title": true,
+        "title_text": "Best Sellers",
+        "title_font": "header",
+        "title_size": 48,
+        "title_weight": "700",
+        "title_case": "uppercase",
+        "title_color": "#1c1c1c",
+        "header_padding_sides": 16,
+        "title_padding_top": 0,
+        "title_padding_bottom": 8,
+        "title_align": "center",
+        "title_ls": "0.02em",
+        "show_filter": true,
+        "default_collection": "",
+        "filter_bg": "#ffffff",
+        "filter_border": "rgba(0,0,0,0)",
+        "active_color": "#1e7db3",
+        "inactive_color": "#1c1c1c",
+        "underline_width": 1,
+        "underline_offset": 0,
+        "filter_size": 15,
+        "filter_font": "body",
+        "filter_weight": "600",
+        "filter_case": "uppercase",
+        "filter_ls": "0.085em",
+        "tab_spacing": 16,
+        "filter_align": "center",
+        "cta_show": true,
+        "cta_position": "below",
+        "cta_between_spacing_top": 16,
+        "cta_between_spacing_bottom": 8,
+        "cta_label": "Shop Wallets",
+        "cta_url": "shopify://collections/all-wallets",
+        "cta_case": "uppercase",
+        "cta_weight": "700",
+        "cta_size": 17,
+        "cta_ls": "0.085em",
+        "cta_text_color": "#ffffff",
+        "cta_bg_color": "#1e7db3",
+        "cta_border_color": "#1c1c1c",
+        "cta_border_width": 0,
+        "cta_radius": 8,
+        "cta_pad_h": 16,
+        "cta_pad_v": 14,
+        "cta_full_width_mobile": true,
+        "grid_mode": "grid",
+        "product_count": 8,
+        "columns_mobile": "2",
+        "columns_desktop": "4",
+        "col_gap": 8,
+        "row_gap": 32,
+        "carousel_peek": 0
+      }
+    },
+    "best_sellers_hb8Lem": {
+      "type": "best-sellers",
+      "blocks": {
+        "filter_tab_YqdYc8": {
+          "type": "filter_tab",
+          "settings": {
+            "tab_label": "Wallets",
+            "collection_handle": "all-wallets",
+            "cta_label": "Shop Best Sellers",
+            "cta_url": ""
+          }
+        },
+        "filter_tab_XQX9tM": {
+          "type": "filter_tab",
+          "settings": {
+            "tab_label": "Bags",
+            "collection_handle": "all-bags",
+            "cta_label": "Shop Bags",
+            "cta_url": "shopify://collections/all-bags"
+          }
+        },
+        "filter_tab_keVFGK": {
+          "type": "filter_tab",
+          "settings": {
+            "tab_label": "Accessories",
+            "collection_handle": "all-accessories",
+            "cta_label": "Shop Accessories",
+            "cta_url": "shopify://collections/all-accessories"
+          }
+        },
+        "filter_tab_3qiUEY": {
+          "type": "filter_tab",
+          "disabled": true,
+          "settings": {
+            "tab_label": "Bags",
+            "collection_handle": "",
+            "cta_label": "Shop all",
+            "cta_url": ""
+          }
+        }
+      },
+      "block_order": [
+        "filter_tab_YqdYc8",
+        "filter_tab_XQX9tM",
+        "filter_tab_keVFGK",
+        "filter_tab_3qiUEY"
+      ],
+      "name": "Featured Collection",
+      "settings": {
+        "color_scheme": "color__bg-body color__text",
+        "use_global_spacing": "custom",
+        "padding_top": 24,
+        "padding_bottom": 48,
+        "grid_padding": 48,
+        "visibility": "hidden md:block",
+        "show_title": true,
+        "title_text": "Best Sellers",
+        "title_font": "header",
+        "title_size": 64,
+        "title_weight": "700",
+        "title_case": "uppercase",
+        "title_color": "#1c1c1c",
+        "header_padding_sides": 16,
+        "title_padding_top": 0,
+        "title_padding_bottom": 8,
+        "title_align": "center",
+        "title_ls": "0.02em",
+        "show_filter": true,
+        "default_collection": "",
+        "filter_bg": "#ffffff",
+        "filter_border": "rgba(0,0,0,0)",
+        "active_color": "#1e7db3",
+        "inactive_color": "#1c1c1c",
+        "underline_width": 1,
+        "underline_offset": 0,
+        "filter_size": 15,
+        "filter_font": "body",
+        "filter_weight": "600",
+        "filter_case": "uppercase",
+        "filter_ls": "0.085em",
+        "tab_spacing": 16,
+        "filter_align": "center",
+        "cta_show": true,
+        "cta_position": "below",
+        "cta_between_spacing_top": 16,
+        "cta_between_spacing_bottom": 8,
+        "cta_label": "Shop All Best Sellers",
+        "cta_url": "shopify://collections/best-sellers",
+        "cta_case": "uppercase",
+        "cta_weight": "700",
+        "cta_size": 15,
+        "cta_ls": "0.085em",
+        "cta_text_color": "#ffffff",
+        "cta_bg_color": "#1e7db3",
+        "cta_border_color": "#1c1c1c",
+        "cta_border_width": 0,
+        "cta_radius": 8,
+        "cta_pad_h": 16,
+        "cta_pad_v": 14,
+        "cta_full_width_mobile": true,
+        "grid_mode": "grid",
+        "product_count": 8,
+        "columns_mobile": "2",
+        "columns_desktop": "4",
+        "col_gap": 8,
+        "row_gap": 32,
+        "carousel_peek": 0
+      }
+    },
+    "hero_secondary_desktop": {
+      "type": "banner",
+      "blocks": {
+        "eyebrow_sec_d": {
+          "type": "eyebrow",
+          "disabled": true,
+          "settings": {
+            "content": "DO WHAT CONNECTS YOU",
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 8,
+            "spacing_left": 32,
+            "spacing_right": 0,
+            "font_family": "body",
+            "font_family_custom": "",
+            "font_size": 14,
+            "font_weight": "700",
+            "text_transform": "uppercase",
+            "letter_spacing": "0.16em",
+            "custom_color": "#1e7db3"
+          }
+        },
+        "heading_sec_d": {
+          "type": "heading",
+          "settings": {
+            "content": "Built For The Everyday.",
+            "outline_last_word": false,
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_left": 32,
+            "spacing_right": 0,
+            "font_family": "inherit",
+            "font_family_custom": "",
+            "font_size": 64,
+            "font_weight": "700",
+            "text_transform": "uppercase",
+            "letter_spacing": "0.02em",
+            "line_height": 80,
+            "custom_color": ""
+          }
+        },
+        "content_sec_d": {
+          "type": "content",
+          "settings": {
+            "content": "<p>Designed for life on the move.</p>",
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_left": 32,
+            "spacing_right": 22,
+            "font_family": "body",
+            "font_family_custom": "",
+            "font_size": 18,
+            "font_weight": "400",
+            "text_transform": "none",
+            "letter_spacing": "0.07em",
+            "custom_color": ""
+          }
+        },
+        "buttons_sec_d": {
+          "type": "buttons",
+          "settings": {
+            "button_color": "btn btn--plain",
+            "button_label": "Shop Best Sellers",
+            "button_show_arrow": true,
+            "button_url": "shopify://collections/best-sellers",
+            "button_custom_bg": "",
+            "button_custom_text": "#ffffff",
+            "secondary_button_color": "btn--glass-dark",
+            "secondary_button_label": "",
+            "secondary_button_url": "",
+            "secondary_button_custom_bg": "",
+            "secondary_button_custom_text": "",
+            "tertiary_button_color": "btn btn--neutral",
+            "tertiary_button_label": "",
+            "tertiary_button_url": "",
+            "tertiary_button_custom_bg": "",
+            "tertiary_button_custom_text": "",
+            "btns_font": "body",
+            "btns_size": 18,
+            "btns_weight": "600",
+            "btns_case": "uppercase",
+            "btns_ls": "0.085em",
+            "btns_style": "normal",
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_left": 24,
+            "spacing_right": 0,
+            "font_family": "inherit",
+            "font_family_custom": ""
+          }
+        }
+      },
+      "block_order": [
+        "eyebrow_sec_d",
+        "heading_sec_d",
+        "content_sec_d",
+        "buttons_sec_d"
+      ],
+      "name": "Hero Banner (secondary)",
+      "settings": {
+        "url": "",
+        "image_background_desktop": "shopify://shop_images/solids-mobile_1200x_31f6be6a-f566-49a6-b8be-211a7ef0a192.jpg",
+        "show_video_background_mobile": false,
+        "show_entire_image": false,
+        "enable_lazy_loading": true,
+        "color_scheme": "color__bg-overlay-1 color__text",
+        "color_text": "color__light",
+        "color_border": "!color__border-transparent",
+        "enable_gradient": true,
+        "gradient_color": "#000000",
+        "gradient_opacity": 40,
+        "style_border": "",
+        "layout_horizontal": "window--edge",
+        "layout_y_spacing": "custom",
+        "custom_height_px": 580,
+        "layout_y_alignment": "items-end",
+        "content_offset_top": 0,
+        "content_offset_bottom": 50,
+        "layout_x_alignment": "justify-start",
+        "use_global_spacing": "custom",
+        "visibility": "hidden md:block"
+      }
+    },
+    "hero_secondary_mobile": {
+      "type": "banner",
+      "blocks": {
+        "eyebrow_sec_m": {
+          "type": "eyebrow",
+          "disabled": true,
+          "settings": {
+            "content": "DO WHAT CONNECTS YOU",
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 8,
+            "spacing_left": 32,
+            "spacing_right": 0,
+            "font_family": "body",
+            "font_family_custom": "",
+            "font_size": 14,
+            "font_weight": "700",
+            "text_transform": "uppercase",
+            "letter_spacing": "0.16em",
+            "custom_color": "#1e7db3"
+          }
+        },
+        "heading_sec_m": {
+          "type": "heading",
+          "settings": {
+            "content": "Built For The Everyday.",
+            "outline_last_word": false,
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_left": 32,
+            "spacing_right": 0,
+            "font_family": "inherit",
+            "font_family_custom": "",
+            "font_size": 48,
+            "font_weight": "700",
+            "text_transform": "uppercase",
+            "letter_spacing": "0.02em",
+            "line_height": 80,
+            "custom_color": ""
+          }
+        },
+        "content_sec_m": {
+          "type": "content",
+          "settings": {
+            "content": "<p>Designed for life on the move.</p>",
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_left": 32,
+            "spacing_right": 22,
+            "font_family": "body",
+            "font_family_custom": "",
+            "font_size": 16,
+            "font_weight": "400",
+            "text_transform": "none",
+            "letter_spacing": "0.07em",
+            "custom_color": ""
+          }
+        },
+        "buttons_sec_m": {
+          "type": "buttons",
+          "settings": {
+            "button_color": "btn btn--plain",
+            "button_label": "Shop Best Sellers",
+            "button_show_arrow": true,
+            "button_url": "shopify://collections/best-sellers",
+            "button_custom_bg": "",
+            "button_custom_text": "#ffffff",
+            "secondary_button_color": "btn--glass-dark",
+            "secondary_button_label": "",
+            "secondary_button_url": "",
+            "secondary_button_custom_bg": "",
+            "secondary_button_custom_text": "",
+            "tertiary_button_color": "btn btn--neutral",
+            "tertiary_button_label": "",
+            "tertiary_button_url": "",
+            "tertiary_button_custom_bg": "",
+            "tertiary_button_custom_text": "",
+            "btns_font": "body",
+            "btns_size": 16,
+            "btns_weight": "600",
+            "btns_case": "uppercase",
+            "btns_ls": "0.085em",
+            "btns_style": "normal",
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 8,
+            "spacing_left": 24,
+            "spacing_right": 0,
+            "font_family": "inherit",
+            "font_family_custom": ""
+          }
+        }
+      },
+      "block_order": [
+        "eyebrow_sec_m",
+        "heading_sec_m",
+        "content_sec_m",
+        "buttons_sec_m"
+      ],
+      "name": "Hero Banner (secondary)",
+      "settings": {
+        "url": "",
+        "image_background_mobile": "shopify://shop_images/solids-mobile_1200x_31f6be6a-f566-49a6-b8be-211a7ef0a192.jpg",
+        "show_video_background_mobile": false,
+        "show_entire_image": false,
+        "enable_lazy_loading": true,
+        "color_scheme": "color__bg-overlay-1 color__text",
+        "color_text": "color__light",
+        "color_border": "!color__border-transparent",
+        "enable_gradient": true,
+        "gradient_color": "#000000",
+        "gradient_opacity": 15,
+        "style_border": "",
+        "layout_horizontal": "window--edge",
+        "layout_y_spacing": "custom",
+        "custom_height_px": 550,
+        "layout_y_alignment": "items-end",
+        "content_offset_top": 0,
+        "content_offset_bottom": 40,
+        "layout_x_alignment": "justify-start",
+        "use_global_spacing": "custom",
+        "visibility": "md:hidden"
+      }
+    },
+    "reviews_carried_loved": {
+      "type": "reviews-carried-loved",
+      "blocks": {
+        "review_1": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "quote": "[Placeholder — paste a real Okendo review]",
+            "reviewer": "Reviewer name",
+            "product": "",
+            "product_label": ""
+          }
+        },
+        "review_2": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "quote": "[Placeholder — paste a real Okendo review]",
+            "reviewer": "Reviewer name",
+            "product": "",
+            "product_label": ""
+          }
+        },
+        "review_3": {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "quote": "[Placeholder — paste a real Okendo review]",
+            "reviewer": "Reviewer name",
+            "product": "",
+            "product_label": ""
+          }
+        }
+      },
+      "block_order": [
+        "review_1",
+        "review_2",
+        "review_3"
+      ],
+      "disabled": true,
+      "name": "Reviews — Carried & Loved",
+      "settings": {
+        "eyebrow": "4.8 stars · 16,000+ reviews",
+        "heading": "Carried & Loved",
+        "bg_color": "#f4f1ea",
+        "eyebrow_color": "#1e7db3",
+        "star_color": "#c08951",
+        "padding_top": 56,
+        "padding_bottom": 64,
+        "visibility": ""
+      }
+    },
+    "ugc_gallery_pbDXkz": {
+      "type": "ugc-gallery",
+      "blocks": {
+        "tile_tGWaxR": {
+          "type": "tile",
+          "settings": {
+            "media_type": "video",
+            "video": "shopify://files/videos/aprilinfusion_lip_pdp.mp4",
+            "aspect": "portrait",
+            "username": "@skyelane",
+            "link": "",
+            "alt_override": ""
+          }
+        },
+        "tile_Jr6XKH": {
+          "type": "tile",
+          "settings": {
+            "media_type": "image",
+            "image": "shopify://shop_images/wrist_02.png",
+            "aspect": "portrait",
+            "username": "@juneaux",
+            "link": "",
+            "alt_override": ""
+          }
+        },
+        "tile_Bbd8er": {
+          "type": "tile",
+          "settings": {
+            "media_type": "image",
+            "image": "shopify://shop_images/wrist_04.png",
+            "aspect": "portrait",
+            "username": "@rynebernard",
+            "link": "",
+            "alt_override": ""
+          }
+        },
+        "tile_wNQX4k": {
+          "type": "tile",
+          "settings": {
+            "media_type": "video",
+            "video": "shopify://files/videos/aprilinfusion_neck_pdp.mp4",
+            "aspect": "square",
+            "username": "@mackkenzi",
+            "link": "",
+            "alt_override": ""
+          }
+        },
+        "tile_NAJGd3": {
+          "type": "tile",
+          "settings": {
+            "media_type": "image",
+            "image": "shopify://shop_images/wrist_05.png",
+            "aspect": "portrait",
+            "username": "@username",
+            "link": "",
+            "alt_override": ""
+          }
+        },
+        "tile_EAGNXt": {
+          "type": "tile",
+          "settings": {
+            "media_type": "image",
+            "image": "shopify://shop_images/neck_01.png",
+            "aspect": "portrait",
+            "username": "@coop.travels",
+            "link": "",
+            "alt_override": ""
+          }
+        },
+        "tile_7Q3UW7": {
+          "type": "tile",
+          "settings": {
+            "media_type": "video",
+            "video": "shopify://files/videos/aprilinfusion_wrist_pdp.mp4",
+            "aspect": "square",
+            "username": "@dailycarry",
+            "link": "",
+            "alt_override": ""
+          }
+        },
+        "tile_qGgEKc": {
+          "type": "tile",
+          "settings": {
+            "media_type": "image",
+            "image": "shopify://shop_images/lipbalmholder_01.png",
+            "aspect": "square",
+            "username": "@tentandtrail",
+            "link": "",
+            "alt_override": ""
+          }
+        }
+      },
+      "block_order": [
+        "tile_tGWaxR",
+        "tile_Jr6XKH",
+        "tile_Bbd8er",
+        "tile_wNQX4k",
+        "tile_NAJGd3",
+        "tile_EAGNXt",
+        "tile_7Q3UW7",
+        "tile_qGgEKc"
+      ],
+      "name": "UGC gallery",
+      "settings": {
+        "show_eyebrow": false,
+        "eyebrow_text": "STAY CONNECTED",
+        "heading": "DO WHAT CONNECTS YOU™",
+        "heading_tag": "h2",
+        "lede": "Genuine connection. That’s what it’s all about.",
+        "heading_alignment": "center",
+        "eyebrow_font": "body",
+        "eyebrow_size_mobile": 13,
+        "eyebrow_size_desktop": 13,
+        "eyebrow_weight": "700",
+        "eyebrow_transform": "uppercase",
+        "eyebrow_letter_spacing": 0.1,
+        "eyebrow_color": "#1e7db3",
+        "heading_font": "inherit",
+        "heading_size_mobile": 48,
+        "heading_size_desktop": 76,
+        "heading_weight": "700",
+        "heading_transform": "uppercase",
+        "heading_line_height": 0.8,
+        "heading_letter_spacing": "0.02",
+        "heading_color": "",
+        "lede_font": "inherit",
+        "lede_size_mobile": 16,
+        "lede_size_desktop": 17,
+        "lede_weight": "400",
+        "lede_line_height": 1.3,
+        "lede_letter_spacing": "0.05",
+        "lede_color": "",
+        "caption_size_mobile": 14,
+        "caption_size_desktop": 14,
+        "caption_color": "#ffffff",
+        "autoplay": true,
+        "force_autoplay": true,
+        "loop_duration_seconds": 25,
+        "pause_on_hover": false,
+        "enable_drag": true,
+        "gap_px": 16,
+        "show_cta": true,
+        "cta_position": "above_gallery",
+        "cta_pad_top": 16,
+        "cta_pad_bot": 24,
+        "cta_style": "link-arrow",
+        "cta_label": "MORE ABOUT US",
+        "cta_url": "shopify://pages/about",
+        "cta_font": "body",
+        "cta_size_mobile": 15,
+        "cta_size_desktop": 15,
+        "cta_weight": "700",
+        "cta_transform": "uppercase",
+        "cta_letter_spacing": 0.1,
+        "cta_color": "#1e7db3",
+        "background": "bone",
+        "padding_top_desktop": 60,
+        "padding_bottom_desktop": 60,
+        "padding_top_mobile": 32,
+        "padding_bottom_mobile": 32
+      }
+    },
+    "1709748309b5b3be26": {
+      "type": "apps",
+      "blocks": {
+        "instafeed_app_block_mrQHUB": {
+          "type": "shopify://apps/instafeed/blocks/app-block/c447db20-095d-4a10-9725-b5977662c9d5",
+          "settings": {
+            "title": "",
+            "title_color": "#1c1c1c",
+            "title_size_v2": 0,
+            "alignment": "center",
+            "instafeed_margin_top": 0,
+            "instafeed_margin_bottom": 0,
+            "instafeed_margin_sides": 0,
+            "show_instagram_link": false,
+            "link_alignment": "center",
+            "link_color": "#267683",
+            "background_color": "",
+            "feed_id": "",
+            "html_area": ""
+          }
+        }
+      },
+      "block_order": [
+        "instafeed_app_block_mrQHUB"
+      ],
+      "disabled": true,
+      "settings": {
+        "spacing_top": 0,
+        "spacing_bottom": 0,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "style_border": "border--b-width",
+        "layout_horizontal": "window",
+        "layout_padding": false
+      }
+    },
+    "homepage_quickfilter_bar_6jV8rK": {
+      "type": "homepage-quickfilter-bar",
+      "blocks": {
+        "link_LUNKWw": {
+          "type": "link",
+          "settings": {
+            "label": "Wallets",
+            "url": "shopify://collections/all-wallets",
+            "force_active": false
+          }
+        },
+        "link_cickAM": {
+          "type": "link",
+          "settings": {
+            "label": "Bags",
+            "url": "shopify://collections/all-bags",
+            "force_active": false
+          }
+        },
+        "link_PP3riW": {
+          "type": "link",
+          "settings": {
+            "label": "Lanyards",
+            "url": "shopify://collections/lanyards",
+            "force_active": false
+          }
+        },
+        "link_mywhrG": {
+          "type": "link",
+          "settings": {
+            "label": "New Arrivals",
+            "url": "shopify://collections/new-arrivals",
+            "force_active": false
+          }
+        }
+      },
+      "block_order": [
+        "link_LUNKWw",
+        "link_cickAM",
+        "link_PP3riW",
+        "link_mywhrG"
+      ],
+      "disabled": true,
+      "name": "Homepage quickfilter bar",
+      "settings": {
+        "hpqf_enable": true,
+        "hpqf_always_visible_in_editor": true,
+        "hpqf_font": "inherit",
+        "hpqf_weight": "600",
+        "hpqf_text_transform": "uppercase",
+        "hpqf_letter_spacing": "0.085em",
+        "hpqf_size_mobile": 13,
+        "hpqf_text_color": "#1c1c1c",
+        "hpqf_active_color": "#1e7db3",
+        "hpqf_underline_offset": 2,
+        "hpqf_underline_thickness": 1,
+        "hpqf_chip_pad_v": 16,
+        "hpqf_chip_pad_h": 16,
+        "hpqf_chip_gap": 0,
+        "hpqf_edge_padding": 16,
+        "hpqf_top_offset_extra": 0,
+        "hpqf_bar_bg": "",
+        "hpqf_bar_border_color": ""
+      }
+    }
+  },
+  "order": [
+    "85942a7d-a700-4a34-9b4d-8e0a35c6feb7",
+    "banner_rk4ah3",
+    "image_grid_Y9rzMQ",
+    "image_grid_RjH9Gp",
+    "image_grid_ApnwaL",
+    "image_card_grid_9pCUtE",
+    "trifecta_spotlight_main",
+    "image_banners_4KeKzw",
+    "brand_statement_c9UxhP",
+    "best_sellers_fRWFny",
+    "best_sellers_hb8Lem",
+    "hero_secondary_desktop",
+    "hero_secondary_mobile",
+    "reviews_carried_loved",
+    "ugc_gallery_pbDXkz",
+    "1709748309b5b3be26",
+    "homepage_quickfilter_bar_6jV8rK"
+  ]
+}

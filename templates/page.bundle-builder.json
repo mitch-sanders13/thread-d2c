@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "bundle_builder": {
@@ -11,7 +20,7 @@
         "lanyard_collection": "lanyards",
         "chapstick_collection": "chapstick-holder-keychains",
         "discount_type": "percent",
-        "discount_value": 10,
+        "discount_value": 25,
         "discount_code": "",
         "spacing_top": 60,
         "spacing_bottom": 60,
@@ -23,5 +32,7 @@
       }
     }
   },
-  "order": ["bundle_builder"]
+  "order": [
+    "bundle_builder"
+  ]
 }

@@ -1,8 +1,8 @@
 {% comment %}
-  Everyday Carry Set bundler — Market Tote–style picker (page section).
+  Trifecta bundler — Market Tote–style picker (page section).
 
   Markup + Alpine live in snippets/bundle-builder__instance.liquid so
-  the cart drawer (and Section Rendering fetch) can reuse the same UI.
+  the PDP drawer can preload the same UI without fetching a page.
 
   Slots: Wallet, Lanyard, Chapstick Holder (cart property key remains
   "Chapstick" for compatibility with cart grouping / edit / upsell).
@@ -31,7 +31,7 @@
 
 {% schema %}
 {
-  "name": "Everyday Carry Set bundler",
+  "name": "Trifecta bundler",
   "tag": "section",
   "class": "section-bundle-builder",
   "settings": [
@@ -43,7 +43,7 @@
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "default": "Build Your Everyday Carry Set"
+      "default": "Build Your Trifecta"
     },
     {
       "type": "text",
@@ -67,7 +67,7 @@
     {
       "type": "header",
       "content": "Products",
-      "info": "Leave blank to use Theme settings → Everyday Carry Set collections."
+      "info": "Leave blank to use Theme settings → Trifecta bundle collections."
     },
     {
       "type": "collection",
@@ -110,7 +110,7 @@
       "type": "text",
       "id": "discount_code",
       "label": "Discount code (overrides theme setting)",
-      "info": "Leave blank to use Theme settings → Everyday Carry Set → Discount code."
+      "info": "Leave blank to use Theme settings → Trifecta bundle → Discount code."
     },
     {
       "type": "header",
@@ -201,7 +201,7 @@
   ],
   "presets": [
     {
-      "name": "Everyday Carry Set bundler"
+      "name": "Trifecta bundler"
     }
   ]
 }
