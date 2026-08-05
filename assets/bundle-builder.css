@@ -478,10 +478,9 @@
   font-size: 0.75rem;
   font-weight: 600;
 }
-/* Quiet Change affordance — deliberately low contrast so it doesn't
- * compete with the Add Bundle CTA. Desktop: nearly invisible until
- * the card is hovered, focused, or its dropdown is open. Mobile: always
- * visible at low contrast (no reliable hover). */
+/* Change affordance — always visible at rest so customers can find
+ * it. Slightly quieter than Add Bundle via opacity; brightens on
+ * hover / when that card's dropdown is open. */
 .bundle-pdp-preview__item-change-hint {
   margin-top: 3px;
   display: inline-flex;
@@ -492,26 +491,13 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-weight: 500;
-  opacity: 0.4;
+  opacity: 0.55;
   transition: opacity 0.15s ease;
 }
 .bundle-pdp-preview__item-card:hover .bundle-pdp-preview__item-change-hint,
 .bundle-pdp-preview__item-card:focus-visible .bundle-pdp-preview__item-change-hint,
 .bundle-pdp-preview__item.is-active-dropdown .bundle-pdp-preview__item-change-hint {
-  opacity: 0.85;
-}
-@media (hover: hover) and (pointer: fine) {
-  /* Desktop with a real pointer: hide at rest so the price stays the
-   * last strong signal on the card. Touch devices keep the quieter
-   * resting opacity above. */
-  .bundle-pdp-preview__item-change-hint {
-    opacity: 0;
-  }
-  .bundle-pdp-preview__item-card:hover .bundle-pdp-preview__item-change-hint,
-  .bundle-pdp-preview__item-card:focus-visible .bundle-pdp-preview__item-change-hint,
-  .bundle-pdp-preview__item.is-active-dropdown .bundle-pdp-preview__item-change-hint {
-    opacity: 0.75;
-  }
+  opacity: 0.9;
 }
 .bundle-pdp-preview__item-caret {
   display: inline-block;
@@ -615,7 +601,8 @@
    * to productsPerSlot=200 swatches in 3 columns, 67 rows × ~92px
    * ≈ 6200px — older 1800px cap was clipping the bottom rows for any
    * large collection. The browser still animates over the full range
-   * but reaches content height early so the reveal stays snappy. */
+   * but reaches content height early so the reveal stays snappy.
+   * Extra headroom also covers the confirm footer below the grid. */
   max-height: 9000px;
   opacity: 1;
   margin-top: 0;
@@ -831,6 +818,18 @@
   font-size: 0.78rem;
   text-align: center;
   opacity: 0.6;
+}
+
+/* Confirm footer — commits the swatch preview and closes the panel.
+ * Sticky feel at the bottom of the open dropdown so customers don't
+ * have to scroll back up after browsing a long swatch grid. */
+.bundle-pdp-preview__dropdown-confirm {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+.bundle-pdp-preview__dropdown-confirm-btn {
+  min-height: 44px;
 }
 
 /* ============ PDP sticky-bar trifecta upgrade strip ============ */
