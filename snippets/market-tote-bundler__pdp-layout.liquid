@@ -132,9 +132,23 @@
         :disabled="!canAddToCart() || cartLoading"
         :class="{ 'opacity-50 cursor-not-allowed': !canAddToCart() || cartLoading }"
         @click="finalizeBundle()">
-        <span x-show="!cartLoading">{{ _cart_label }}</span>
-        <span x-show="cartLoading" x-cloak>Adding…</span>
+        <span x-show="!cartLoading">Add Bundle &mdash; Save {{ discount_value | default: 25 }}%</span>
+        <span x-show="cartLoading" x-cloak>Adding&hellip;</span>
       </button>
+    </div>
+
+    <div class="mtb-pdp__summary" x-show="totalSelected() > 0" x-cloak>
+      <p class="mtb-pdp__summary-total">
+        <span class="mtb-pdp__summary-label">Bundle total:</span>
+        <strong
+          class="mtb-pdp__summary-now"
+          x-text="formatMoney(isComplete() ? totalCents() : subtotalCents())"></strong>
+        <s
+          class="mtb-pdp__summary-was"
+          x-show="isComplete() && discountCents() > 0"
+          x-text="formatMoney(subtotalCents())"
+          x-cloak></s>
+      </p>
     </div>
 
     <div class="mtb-pdp__picks" x-show="totalSelected() > 0" x-cloak>
@@ -157,12 +171,6 @@
           </li>
         </template>
       </ul>
-    </div>
-
-    <div class="mtb-pdp__summary" x-show="totalSelected() > 0" x-cloak>
-      {% render 'bundle__price-summary',
-          discount_type: discount_type,
-          discount_value: discount_value %}
     </div>
   </div>
 </div>
