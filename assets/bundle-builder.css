@@ -1686,28 +1686,37 @@
 /* Trifecta / Everyday Carry Set slot tabs + type filters */
 .tri-pdp__slots {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
+  flex-wrap: nowrap;
+  gap: 6px;
+  margin: 12px 0 16px;
+  width: 100%;
 }
 .tri-pdp__slot {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  justify-content: center;
+  gap: 3px;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 5px 4px;
   margin: 0;
   border: 2px solid #dc2626;
   border-radius: 4px;
   background: transparent;
   color: inherit;
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.62rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   cursor: pointer;
-  line-height: 1.2;
+  line-height: 1.15;
   transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.tri-pdp__slot-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .tri-pdp__slot.is-empty:hover {
   background: rgba(220, 38, 38, 0.06);
@@ -1732,7 +1741,16 @@
 }
 .tri-pdp__slot-check {
   color: #16a34a;
-  font-size: 0.75rem;
+  font-size: 0.65rem;
+  flex-shrink: 0;
+}
+@media (min-width: 750px) {
+  .tri-pdp__slot {
+    font-size: 0.72rem;
+    padding: 6px 8px;
+    gap: 4px;
+    letter-spacing: 0.03em;
+  }
 }
 .tri-pdp__type-filters {
   display: flex;
