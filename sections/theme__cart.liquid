@@ -1196,11 +1196,13 @@
                    * snapshot doesn't pre-emptively bundle the cart. */
                   bundleEligibilityReady: false,
 
-                  /* Trifecta bundle grouping + edit/remove handlers.
+                  /* Bundle grouping + edit/remove handlers.
                    * Takes the raw cart.items array and returns a display
                    * array where items sharing a _bundle_id property are
                    * collapsed into a single 'lead' row carrying its
-                   * siblings under __bundleGroup. */
+                   * siblings under __bundleGroup. __bundleType comes from
+                   * _bundle_type (market_tote) or defaults to trifecta for
+                   * legacy Trifecta lines that only set _bundle_id. */
                   bundleGroups(items) {
                     var seen = {};
                     var out = [];
@@ -1210,14 +1212,12 @@
                       if (seen[bid]) return;
                       seen[bid] = true;
                       var group = items.filter(function(x){ return x.properties &amp;&amp; x.properties._bundle_id === bid; });
-                      // __bundleKey includes the line keys so the cart's x-for
-                      // forces a remount of the bundle widget whenever the
-                      // underlying line items change (e.g. after a swap). The
-                      // widget's init() reads the new keys and re-syncs state.
                       var lineKeys = group.map(function(g){ return g.key; }).join('|');
+                      var bundleType = (group[0].properties &amp;&amp; group[0].properties._bundle_type) || 'trifecta';
                       out.push(Object.assign({}, group[0], {
                         __bundleLead: true,
                         __bundleGroup: group,
+                        __bundleType: bundleType,
                         __bundleKey: 'bundle:' + bid + ':' + lineKeys
                       }));
                     });
@@ -1503,8 +1503,13 @@
               <template x-for="(item, index) in bundleGroups(cart.items)" :key="item.__bundleLead ? item.__bundleKey : item.key">
                 <div>
 
-                {%- comment -%} Trifecta bundle group {%- endcomment -%}
-                <template x-if="item.__bundleLead">
+                {%- comment -%} Bundle group — Market Tote vs Trifecta {%- endcomment -%}
+                <template x-if="item.__bundleLead && item.__bundleType === 'market_tote'">
+                  <div>
+                    {% render 'market-tote-bundler__cart-group' %}
+                  </div>
+                </template>
+                <template x-if="item.__bundleLead && item.__bundleType !== 'market_tote'">
                   <div>
                     {% render 'bundle__cart-group' %}
                   </div>

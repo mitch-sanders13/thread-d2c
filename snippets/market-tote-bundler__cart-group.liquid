@@ -1,0 +1,290 @@
+{% comment %}
+  Cart drawer summary for a Market Tote 3-pack (_bundle_type = market_tote).
+
+  Same collapsed-row layout as the Trifecta widget, but:
+    - Title / subtitle are Market Tote specific
+    - Images come from the three cart line items (not Trifecta slots)
+    - No inline Trifecta editor (edit chevron hidden)
+    - Remove + qty stepper adjust all three line keys together
+    - Client-side 25% display discount (checkout uses the real code)
+
+  Parent scope provides item.__bundleGroup (the 3 line items).
+{% endcomment %}
+
+{% doc %}
+  Cart drawer grouped row for a Market Tote bundle.
+  @example
+  {% render 'market-tote-bundler__cart-group' %}
+{% enddoc %}
+
+{%- assign _trash_icon_size = section.settings.trash_icon_size | default: 20 -%}
+{%- assign _tote_discount_pct = 25 -%}
+
+<div
+  class="cart__bundle-group cart__market-tote-group"
+  x-data="{
+    group: item.__bundleGroup || [],
+    loading: false,
+    qtyLoading: false,
+    localQty: 0,
+
+    init() {
+      this.applyDisplayDiscount();
+    },
+
+    shortName(title) {
+      if (!title) return '';
+      var idx = title.indexOf(' - ');
+      return idx > 0 ? title.slice(0, idx) : title;
+    },
+
+    subtitle() {
+      return (this.group || []).map(function(it) {
+        var t = it.product_title || it.title || '';
+        var idx = t.indexOf(' - ');
+        return idx > 0 ? t.slice(0, idx) : t;
+      }).filter(Boolean).join(' · ');
+    },
+
+    lineKeys() {
+      return (this.group || []).map(function(it){ return it.key; }).filter(Boolean);
+    },
+
+    rootScope() {
+      return (window.Alpine && document.body) ? window.Alpine.$data(document.body) : null;
+    },
+
+    qty() {
+      var root = this.rootScope();
+      var keys = this.lineKeys();
+      var items = (root && root.cart && root.cart.items) || [];
+      for (var i = 0; i < items.length; i++) {
+        if (keys.indexOf(items[i].key) !== -1) return items[i].quantity || 1;
+      }
+      if (this.localQty > 0) return this.localQty;
+      return (this.group[0] && this.group[0].quantity) || 1;
+    },
+
+    unitSubtotal() {
+      return (this.group || []).reduce(function(sum, it) {
+        return sum + (typeof it.price === 'number' ? it.price : 0);
+      }, 0);
+    },
+
+    unitTotal() {
+      return Math.round(this.unitSubtotal() * (1 - ({{ _tote_discount_pct }} / 100)));
+    },
+
+    lineSubtotal() {
+      return this.qty() * this.unitSubtotal();
+    },
+
+    lineTotal() {
+      return this.qty() * this.unitTotal();
+    },
+
+    formatMoney(cents) {
+      if (typeof cents !== 'number') return '';
+      if (window.Shopify && window.Shopify.formatMoney) {
+        return window.Shopify.formatMoney(cents, '{{ cart.currency.symbol }}');
+      }
+      return '$' + (cents / 100).toFixed(2);
+    },
+
+    applyDisplayDiscount() {
+      var root = this.rootScope();
+      if (!root || !root.cart || !Array.isArray(root.cart.items)) return;
+      var keys = this.lineKeys();
+      if (!keys.length) return;
+      var rate = 1 - ({{ _tote_discount_pct }} / 100);
+      var newTotal = 0;
+      for (var i = 0; i < root.cart.items.length; i++) {
+        var ci = root.cart.items[i];
+        if (keys.indexOf(ci.key) !== -1) {
+          var discounted = Math.round((ci.price || 0) * (ci.quantity || 0) * rate);
+          ci.line_price = discounted;
+          ci.final_line_price = discounted;
+        }
+        newTotal += (ci.line_price || 0);
+      }
+      root.cart.total_price = newTotal;
+    },
+
+    removeBundle() {
+      if (this.loading) return;
+      this.loading = true;
+      var self = this;
+      var root = this.rootScope();
+      var keys = this.lineKeys();
+      if (!root || typeof root.changeCartItemQuantity !== 'function') {
+        this.loading = false;
+        return;
+      }
+      keys.reduce(function(chain, key) {
+        return chain.then(function() {
+          return root.changeCartItemQuantity(key, 0, false, false);
+        });
+      }, Promise.resolve()).then(function() {
+        if (typeof root.updateCart === 'function') root.updateCart(false);
+      }).finally(function() {
+        self.loading = false;
+      });
+    },
+
+    setQty(qty) {
+      if (this.qtyLoading) return;
+      var n = parseInt(qty, 10);
+      if (isNaN(n) || n < 1) {
+        var self0 = this;
+        setTimeout(function(){ self0.removeBundle(); }, 0);
+        return;
+      }
+      this.localQty = n;
+      var self = this;
+      setTimeout(function(){ self._dispatchQty(n); }, 0);
+    },
+
+    _dispatchQty(n) {
+      var keys = this.lineKeys();
+      var root = this.rootScope();
+      if (!keys.length || !root || typeof root.changeCartItemQuantity !== 'function') return;
+      this.qtyLoading = true;
+      var self = this;
+      keys.reduce(function(chain, key) {
+        return chain.then(function() {
+          return root.changeCartItemQuantity(key, n, false, false);
+        });
+      }, Promise.resolve()).finally(function() {
+        self.applyDisplayDiscount();
+        setTimeout(function(){ self.qtyLoading = false; }, 150);
+      });
+    }
+  }"
+  x-init="init()"
+  @cart:updated.window="applyDisplayDiscount()">
+
+  <div
+    class="
+      cart__bundle-summary-row cart__item-row border--b-width flex w-full p-4 gap-2
+      {{ section.settings.main_color_scheme_first }}
+      {{ section.settings.main_color_border }}
+    ">
+
+    <div class="cart__bundle-summary-imgcol w-[20%] h-full" aria-hidden="true">
+      <div class="cart__bundle-summary-stack">
+        <div class="cart__bundle-summary-stack-main">
+          <img
+            class="cart__bundle-summary-img"
+            :src="group[0] && group[0].image ? group[0].image.replace(/\.(jpg|jpeg|png|webp|gif)(\?|$)/i, '_240x240.$1$2') : ''"
+            :alt="group[0] ? (group[0].product_title || group[0].title || '') : ''"
+            width="160"
+            height="160"
+            loading="eager"
+            decoding="async" />
+        </div>
+        <div class="cart__bundle-summary-stack-row">
+          <div class="cart__bundle-summary-stack-side">
+            <img
+              class="cart__bundle-summary-img"
+              :src="group[1] && group[1].image ? group[1].image.replace(/\.(jpg|jpeg|png|webp|gif)(\?|$)/i, '_120x120.$1$2') : ''"
+              :alt="group[1] ? (group[1].product_title || group[1].title || '') : ''"
+              width="80"
+              height="80"
+              loading="eager"
+              decoding="async" />
+          </div>
+          <div class="cart__bundle-summary-stack-side">
+            <img
+              class="cart__bundle-summary-img"
+              :src="group[2] && group[2].image ? group[2].image.replace(/\.(jpg|jpeg|png|webp|gif)(\?|$)/i, '_120x120.$1$2') : ''"
+              :alt="group[2] ? (group[2].product_title || group[2].title || '') : ''"
+              width="80"
+              height="80"
+              loading="eager"
+              decoding="async" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col flex-grow animation-500"
+      {% if settings.enable_animations %}
+        :class="{ 'opacity-50' : cart_loading || loading }"
+      {% endif %}>
+      <div class="flex gap-2 justify-between items-start">
+        <div class="no-underline hover:no-underline type__nav">
+          <p class="cart__item-title mb-0 !leading-tight !font-bold">
+            Market Tote Bundle
+          </p>
+          <p class="cart__item-variant mb-0 opacity-75 type--small" x-text="subtitle()"></p>
+        </div>
+
+        <div class="cart__item-prices flex flex-col items-end">
+          <span
+            class="cart__item-price !leading-tight"
+            x-text="formatMoney(lineTotal())"></span>
+          <span x-show="lineSubtotal() > lineTotal()" x-cloak>
+            <s
+              class="cart__item-compare !leading-tight"
+              x-text="formatMoney(lineSubtotal())"></s>
+          </span>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2 mt-2">
+        <div class="flex gap-2 justify-between items-center pr-[14px]">
+          <div class="flex items-center gap-4 w-full min-w-0">
+            <div
+              class="cart__qty-stepper max-w-[150px] color__text color__border-divider-1 border--width hover:color__border-selected-1 border__input--radius relative flex w-full overflow-hidden">
+              <button
+                type="button"
+                class="cart__qty-btn btn--smaller shrink-0 !rounded-none border--r-width color__border-divider-1"
+                :disabled="qtyLoading || loading"
+                title="{{ 'cart.general.decrease' | t }}"
+                @click.prevent.stop="qty() <= 1 ? removeBundle() : setQty(qty() - 1)">
+                {% render 'component__icon', icon: 'minus', size: '14', class: '' %}
+              </button>
+              <label class="sr-only" :for="'cart-market-tote-qty-' + (group[0] && group[0].key ? group[0].key : 'qty')">
+                {{- 'products.general.quantity' | t -}}
+              </label>
+              <input
+                :id="'cart-market-tote-qty-' + (group[0] && group[0].key ? group[0].key : 'qty')"
+                type="text"
+                inputmode="numeric"
+                class="cart__qty-input form-input !border-0 text-center !rounded-none"
+                :value="qty()"
+                @keydown.enter.prevent.stop="setQty($event.target.value)"
+                @change.debounce.stop="setQty($event.target.value)" />
+              <div
+                class="btn__spinner btn--smaller !w-auto !color__bg-body"
+                :class="{ '!visible color__bg-overlay-1 z-10' : qtyLoading }">
+                {% render 'component__icon', icon: 'spinner', size: '16', class: '' %}
+              </div>
+              <button
+                type="button"
+                class="cart__qty-btn btn--smaller shrink-0 !rounded-none border--l-width color__border-divider-1"
+                :disabled="qtyLoading || loading"
+                title="{{ 'cart.general.increase' | t }}"
+                @click.prevent.stop="setQty(qty() + 1)">
+                {% render 'component__icon', icon: 'plus', size: '14', class: '' %}
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button
+              type="button"
+              class="cart__bundle-trash cart__trash-btn !py-0 !px-0 !bg-transparent !border-0"
+              :class="{ 'btn--loading' : loading }"
+              :disabled="loading"
+              aria-label="Remove Market Tote bundle"
+              title="Remove bundle"
+              @click="removeBundle()">
+              {% render 'component__icon', icon: 'trash', size: _trash_icon_size, class: '' %}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
