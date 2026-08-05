@@ -601,8 +601,7 @@
    * to productsPerSlot=200 swatches in 3 columns, 67 rows × ~92px
    * ≈ 6200px — older 1800px cap was clipping the bottom rows for any
    * large collection. The browser still animates over the full range
-   * but reaches content height early so the reveal stays snappy.
-   * Extra headroom also covers the confirm footer below the grid. */
+   * but reaches content height early so the reveal stays snappy. */
   max-height: 9000px;
   opacity: 1;
   margin-top: 0;
@@ -818,18 +817,6 @@
   font-size: 0.78rem;
   text-align: center;
   opacity: 0.6;
-}
-
-/* Confirm footer — commits the swatch preview and closes the panel.
- * Sticky feel at the bottom of the open dropdown so customers don't
- * have to scroll back up after browsing a long swatch grid. */
-.bundle-pdp-preview__dropdown-confirm {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-}
-.bundle-pdp-preview__dropdown-confirm-btn {
-  min-height: 44px;
 }
 
 /* ============ PDP sticky-bar trifecta upgrade strip ============ */
