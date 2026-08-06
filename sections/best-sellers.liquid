@@ -174,7 +174,12 @@
 
   {%- comment -%} Filter bar {%- endcomment -%}
   {% if section.settings.show_filter %}
-    <div style="background:{{ section.settings.filter_bg }};border-bottom:1px solid {{ section.settings.filter_border }};overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:none;overscroll-behavior-y:none;padding-left:{{ section.settings.header_padding_sides }}px;padding-right:{{ section.settings.header_padding_sides }}px;">
+    {%- comment -%}
+      Horizontal overflow only so tabs can swipe on narrow screens.
+      Do not set overscroll-behavior-y: none — that traps the mouse wheel
+      while the cursor is over this row and blocks page scroll.
+    {%- endcomment -%}
+    <div style="background:{{ section.settings.filter_bg }};border-bottom:1px solid {{ section.settings.filter_border }};overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:none;padding-left:{{ section.settings.header_padding_sides }}px;padding-right:{{ section.settings.header_padding_sides }}px;">
       <div id="js:filterBar-{{ section.id }}" style="display:flex;justify-content:{{ section.settings.filter_align }};min-width:100%;">
         {% for block in section.blocks %}
           {% if block.type == 'filter_tab' %}

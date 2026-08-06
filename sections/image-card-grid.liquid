@@ -156,7 +156,12 @@
           {% render 'component__icon', icon: 'arrow-left', size: '20', class: '' %}
         </button>
       {% endif %}
-      <div style="{% if _filter_row_flex %}flex:1 1 auto;min-width:0;{% endif %}overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:none;overscroll-behavior-y:none;{% if _arrows_in_filter %}padding-left:{{ section.settings.grid_padding | default: 16 }}px;{% endif %}">
+      {%- comment -%}
+        Horizontal overflow only so filter chips can swipe on narrow screens.
+        Avoid overscroll-behavior-y: none — it traps vertical wheel scroll
+        when the cursor is over this row (same bug as Best Sellers tabs).
+      {%- endcomment -%}
+      <div style="{% if _filter_row_flex %}flex:1 1 auto;min-width:0;{% endif %}overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:none;{% if _arrows_in_filter %}padding-left:{{ section.settings.grid_padding | default: 16 }}px;{% endif %}">
         <div id="js:icgFilterBar-{{ section.id }}" style="display:flex;justify-content:{{ section.settings.filter_align }};min-width:100%;">
           {% for block in section.blocks %}
             {% if block.type == 'filter_tab' %}
