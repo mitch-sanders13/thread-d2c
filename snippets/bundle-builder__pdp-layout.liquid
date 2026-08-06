@@ -120,8 +120,20 @@
     </div>
   </div>
 
+  {%- comment -%}
+    Mobile-only product title/price above the gallery — same pattern as
+    the PDP (md:hidden summary before media). Desktop keeps the copy
+    inside .mtb-pdp__info via .tri-pdp__desktop-only.
+  {%- endcomment -%}
+  <div class="tri-pdp__mobile-only tri-pdp__mobile-summary">
+    <div x-show="previewProduct()" x-cloak>
+      <h3 class="mtb-pdp__title" x-text="previewProduct()?.title || ''"></h3>
+      <p class="mtb-pdp__price" x-text="previewProduct() ? formatMoney(previewProduct().price) : ''"></p>
+    </div>
+  </div>
+
   <div class="mtb-pdp__info">
-    <div x-show="previewProduct()">
+    <div class="tri-pdp__desktop-only" x-show="previewProduct()" x-cloak>
       <h3 class="mtb-pdp__title" x-text="previewProduct()?.title || ''"></h3>
       <p class="mtb-pdp__price" x-text="previewProduct() ? formatMoney(previewProduct().price) : ''"></p>
     </div>

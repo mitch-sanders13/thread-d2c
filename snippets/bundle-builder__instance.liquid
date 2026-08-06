@@ -280,9 +280,9 @@
     x-data="bundleBuilder_{{ js_id }}">
 
     {% comment %}
-      Heading + savings live in the right column (bundle-builder__pdp-layout)
-      so they sit with the product selector instead of a centered gold strip
-      above the whole layout.
+      Heading + savings (and mobile title placement) are handled inside
+      bundle-builder__pdp-layout so mobile stacks correctly without a
+      centered gold strip above the layout.
     {% endcomment %}
     {% render 'bundle-builder__pdp-layout',
         cart_label: cart_label,
