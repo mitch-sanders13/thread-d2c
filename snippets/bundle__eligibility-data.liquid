@@ -31,8 +31,13 @@
     <script type="application/json" id="trifecta-eligibility-data">
     {
       "Wallet": [
+        {%- assign _ecs_wallet_types = "Elastic Wallet|Vertical Leather Wallet|Leather Zip Wallet" | split: "|" -%}
+        {%- assign _elig_first = true -%}
         {%- for p in _wallet.products limit: 250 -%}
-          {{ p.id }}{%- unless forloop.last -%},{%- endunless -%}
+          {%- unless _ecs_wallet_types contains p.type -%}{%- continue -%}{%- endunless -%}
+          {%- unless _elig_first -%},{%- endunless -%}
+          {%- assign _elig_first = false -%}
+          {{ p.id }}
         {%- endfor -%}
       ],
       "Lanyard": [
@@ -94,6 +99,12 @@
       var MAX_PAGES = 6, PAGE_SIZE = 250;
       var routeRoot = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
 
+      var WALLET_ALLOWED = {
+        'Elastic Wallet': true,
+        'Vertical Leather Wallet': true,
+        'Leather Zip Wallet': true
+      };
+
       function fetchAllPages(handle, slot) {
         function page(p){
           if (p > MAX_PAGES) return Promise.resolve();
@@ -105,6 +116,7 @@
               var products = (d && d.products) || [];
               if (products.length === 0) return;
               products.forEach(function(prod){
+                if (slot === 'Wallet' && !WALLET_ALLOWED[prod.product_type || '']) return;
                 eligibility[slot].byHandle[prod.handle] = prod.id;
                 eligibility[slot].byProductId[prod.id] = true;
               });

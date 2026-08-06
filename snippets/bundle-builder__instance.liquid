@@ -107,13 +107,18 @@
       Liquid caps collection.products at 50/page. Embed the first page for
       fast paint; Alpine _loadMoreProducts fetches the rest via products.json.
       Skip Bundle / trifecta SKUs (prebuilt sets) — same as best-sellers.
+      Wallet slot is limited to Elastic / Vertical Leather / Leather Zip only.
     {%- endcomment -%}
+    {%- assign _ecs_wallet_types = "Elastic Wallet|Vertical Leather Wallet|Leather Zip Wallet" | split: "|" -%}
     {%- assign _ecs_emitted = 0 -%}
     {%- paginate wallet_coll.products by 100 -%}
       {%- for product in wallet_coll.products limit: 100 -%}
         {%- if product.type == 'Bundle' or product.tags contains 'trifecta' -%}
           {%- continue -%}
         {%- endif -%}
+        {%- unless _ecs_wallet_types contains product.type -%}
+          {%- continue -%}
+        {%- endunless -%}
         {%- if _ecs_emitted >= 50 -%}
           {%- break -%}
         {%- endif -%}
@@ -359,6 +364,12 @@
       // URL deep-link items to re-apply after AJAX pages load (handle may
       // sit past Liquid's first-50 collection page).
       _pendingPrefillItems: [],
+      // Everyday Carry wallet slot — only these product types (order = filter pills).
+      walletAllowedTypes: [
+        'Elastic Wallet',
+        'Vertical Leather Wallet',
+        'Leather Zip Wallet'
+      ],
 
       init() {
         var dataEl = document.getElementById('{{ section_id }}-data');
@@ -367,6 +378,7 @@
         try { data = JSON.parse(dataEl.textContent); }
         catch (e) { console.error('[bundle-builder] bad JSON data', e); return; }
 
+        var self = this;
         this.discountCode = (data.discountCode || '').trim();
         this.slots = (data.slots || []).map(function(slot) {
           return {
@@ -375,8 +387,8 @@
             silhouette: slot.silhouette || '',
             collectionHandle: slot.collectionHandle || '',
             products: (slot.products || []).filter(function(p) {
-              var t = (p.type || '').toLowerCase();
-              return t !== 'bundle';
+              if (self._isExcludedProduct(p, slot.key)) return false;
+              return true;
             }),
             selectedHandle: null,
             locked: false
@@ -395,7 +407,6 @@
         // Liquid only embeds the first ~50 products per collection.
         // Background-fetch the rest so type filters / swatches cover
         // large catalogs (e.g. lanyards 1000+). Same pattern as cart edit.
-        var self = this;
         this.slots.forEach(function(slot, sIdx) {
           if (slot.collectionHandle) self._loadMoreProducts(slot.collectionHandle, sIdx);
         });
@@ -461,12 +472,17 @@
         }
       },
 
-      _isExcludedProduct(p) {
+      _isExcludedProduct(p, slotKey) {
         var t = ((p && (p.type || p.product_type)) || '').toLowerCase();
         if (t === 'bundle') return true;
         var tags = (p && p.tags) || '';
         if (Array.isArray(tags)) tags = tags.join(',');
         if (typeof tags === 'string' && tags.toLowerCase().indexOf('trifecta') !== -1) return true;
+        // Wallet slot: Elastic / Vertical Leather / Leather Zip only.
+        if (slotKey === 'Wallet') {
+          var rawType = ((p && (p.type || p.product_type)) || '').trim();
+          if (this.walletAllowedTypes.indexOf(rawType) === -1) return true;
+        }
         return false;
       },
 
@@ -481,9 +497,9 @@
         return '';
       },
 
-      _normalizeAjaxProduct(p) {
+      _normalizeAjaxProduct(p, slotKey) {
         if (!p || !p.variants || !p.variants.length) return null;
-        if (this._isExcludedProduct(p)) return null;
+        if (this._isExcludedProduct(p, slotKey)) return null;
         var v = p.variants[0];
         // products.json returns variant.price as a dollar string ("15.99").
         var priceCents;
@@ -541,7 +557,7 @@
               slot.products.forEach(function(p) { existing[p.handle] = true; });
               data.products.forEach(function(raw) {
                 if (existing[raw.handle]) return;
-                var normalized = self._normalizeAjaxProduct(raw);
+                var normalized = self._normalizeAjaxProduct(raw, slot.key);
                 if (!normalized) return;
                 existing[normalized.handle] = true;
                 slot.products.push(normalized);
@@ -575,11 +591,20 @@
       },
 
       activeTypeFilters() {
+        var slot = this.activeSlot();
         var seen = {};
-        var types = [];
+        var present = {};
         this.activeProducts().forEach(function(p) {
           var t = (p.type || '').trim();
-          if (!t || seen[t]) return;
+          if (t) present[t] = true;
+        });
+        // Wallet: fixed allowlist order (Elastic → Vertical Leather → Leather Zip).
+        if (slot && slot.key === 'Wallet') {
+          return this.walletAllowedTypes.filter(function(t) { return present[t]; });
+        }
+        var types = [];
+        Object.keys(present).forEach(function(t) {
+          if (seen[t]) return;
           seen[t] = true;
           types.push(t);
         });

@@ -2635,7 +2635,7 @@
       },
       {
         "type": "paragraph",
-        "content": "On any product whose Type matches an Everyday Carry Set slot (Wallet / Lanyard / Chapstick Holder Keychain types), show a secondary CTA that links to the bundler page with this product already selected (not locked). Slot type lists live in snippets/bundle__pdp-cta.liquid."
+        "content": "On Elastic / Vertical Leather / Leather Zip wallets, plus Lanyard / Chapstick Holder types, show a secondary CTA that links to the bundler page with this product already selected (not locked). Slot type lists live in snippets/bundle__pdp-cta.liquid."
       },
       {
         "type": "checkbox",

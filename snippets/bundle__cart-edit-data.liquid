@@ -212,9 +212,11 @@
 -%}
 
 {%- capture _slot_json_wallet -%}
+{%- assign _ecs_wallet_types = "Elastic Wallet|Vertical Leather Wallet|Leather Zip Wallet" | split: "|" -%}
 {%- assign _b1 = '' -%}{%- assign _b2 = '' -%}{%- assign _b3 = '' -%}
 {%- for p in _wallet_coll.products limit: 200 -%}
   {%- if p.type == 'Bundle' -%}{%- continue -%}{%- endif -%}
+  {%- unless _ecs_wallet_types contains p.type -%}{%- continue -%}{%- endunless -%}
   {%- assign _v = p.selected_or_first_available_variant -%}
   {%- assign _is_type_match = false -%}
   {%- if _default_wallet_type != blank and p.type == _default_wallet_type -%}{%- assign _is_type_match = true -%}{%- endif -%}
@@ -585,6 +587,15 @@
               data.products.forEach(function(p){
                 if (existing[p.handle]) return;
                 if (!p.variants || p.variants.length === 0) return;
+                // Wallet slot: Elastic / Vertical Leather / Leather Zip only.
+                if (slot.label === 'Wallet') {
+                  var allowed = {
+                    'Elastic Wallet': true,
+                    'Vertical Leather Wallet': true,
+                    'Leather Zip Wallet': true
+                  };
+                  if (!allowed[p.product_type || '']) return;
+                }
                 var v = p.variants[0];
                 var priceCents;
                 if (typeof v.price === 'number') {
