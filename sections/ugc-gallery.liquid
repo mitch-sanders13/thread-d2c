@@ -571,8 +571,11 @@
     user-select: none;
     -webkit-user-select: none;
     touch-action: pan-y;
+    /* Soft crossfade when Instagram tiles replace the SSR/manual set */
+    transition: opacity 240ms ease;
   }
   .ugc-gallery__track-wrap.is-dragging { cursor: grabbing; }
+  .ugc-gallery__track-wrap.is-swapping { opacity: 0; }
 
   .ugc-gallery__track {
     display: flex;
@@ -612,8 +615,25 @@
     display: block;
     pointer-events: none;
   }
+  /* Fade images in once decoded so empty tiles don't flash */
+  img.ugc-gallery__media {
+    opacity: 0;
+    transition: opacity 280ms ease;
+  }
+  img.ugc-gallery__media.is-loaded {
+    opacity: 1;
+  }
   .ugc-gallery__media--placeholder {
     background: linear-gradient(135deg, var(--color__bg-overlay-light-2) 0%, var(--color__bg-overlay-light-3) 100%);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ugc-gallery__track-wrap,
+    img.ugc-gallery__media {
+      transition: none !important;
+    }
+    .ugc-gallery__track-wrap.is-swapping { opacity: 1; }
+    img.ugc-gallery__media { opacity: 1; }
   }
 
   .ugc-gallery__caption {
@@ -723,9 +743,10 @@
           ''
         );
       }
+      // Prefer a mid-size variant when Instafeed provides one (faster paint on ~340px tiles).
       return safeUrl(
-        (post.images && post.images.standard_resolution && post.images.standard_resolution.url) ||
         (post.images && post.images.low_resolution && post.images.low_resolution.url) ||
+        (post.images && post.images.standard_resolution && post.images.standard_resolution.url) ||
         (post.images && post.images.thumbnail && post.images.thumbnail.url) ||
         ''
       );
@@ -740,7 +761,8 @@
     }
 
     // Build one tile matching the Liquid markup so CSS / carousel behave the same.
-    function buildTileHtml(post, meta, aspect) {
+    // index: first few tiles eager-load; the rest stay lazy so the carousel paints sooner.
+    function buildTileHtml(post, meta, aspect, index) {
       var aspectClass = aspect === 'square' ? 'ugc-gallery__tile--square' : 'ugc-gallery__tile--portrait';
       var link = safeUrl(post.link);
       var username = usernameFor(post, meta);
@@ -750,6 +772,7 @@
       var isVideo = post.type === 'video';
       var videoSrc = isVideo ? mediaUrl(post, 'video') : '';
       var imageSrc = mediaUrl(post, 'image');
+      var eager = (index || 0) < 4;
       var tagOpen;
       var tagClose;
       var captionTag;
@@ -768,16 +791,19 @@
 
       var mediaHtml = '';
       if (isVideo && videoSrc) {
+        // preload=none until near viewport — poster still shows immediately.
         mediaHtml =
-          '<video class="ugc-gallery__media" data-ugc-video muted loop playsinline preload="metadata"' +
+          '<video class="ugc-gallery__media" data-ugc-video muted loop playsinline preload="none"' +
           (imageSrc ? ' poster="' + escapeHtml(imageSrc) + '"' : '') +
           ' aria-hidden="true" tabindex="-1">' +
           '<source src="' + escapeHtml(videoSrc) + '" type="video/mp4">' +
           '</video>';
       } else if (imageSrc) {
         mediaHtml =
-          '<img class="ugc-gallery__media" src="' + escapeHtml(imageSrc) + '" alt="' +
-          escapeHtml(alt) + '" loading="lazy" width="420" height="560" decoding="async">';
+          '<img class="ugc-gallery__media" data-ugc-img src="' + escapeHtml(imageSrc) + '" alt="' +
+          escapeHtml(alt) + '" loading="' + (eager ? 'eager' : 'lazy') + '"' +
+          (eager ? ' fetchpriority="high"' : '') +
+          ' width="420" height="560" decoding="async">';
       } else {
         mediaHtml = '<div class="ugc-gallery__media ugc-gallery__media--placeholder" aria-hidden="true"></div>';
       }
@@ -787,6 +813,62 @@
         : '';
 
       return tagOpen + mediaHtml + captionHtml + tagClose;
+    }
+
+    // Warm the first few images in cache before swapping the track (avoids empty flash).
+    function preloadLeadingImages(posts, count) {
+      var urls = [];
+      var i;
+      for (i = 0; i < posts.length && urls.length < count; i++) {
+        var url = mediaUrl(posts[i], 'image');
+        if (url) urls.push(url);
+      }
+      if (!urls.length) return Promise.resolve();
+
+      return Promise.all(urls.map(function (url) {
+        return new Promise(function (resolve) {
+          var img = new Image();
+          var done = false;
+          function finish() {
+            if (done) return;
+            done = true;
+            resolve();
+          }
+          img.onload = finish;
+          img.onerror = finish;
+          img.src = url;
+          setTimeout(finish, 1800);
+        });
+      }));
+    }
+
+    function crossfadeSwapTrack(wrap, track, html) {
+      return new Promise(function (resolve) {
+        if (!wrap || osReducedMotion) {
+          track.innerHTML = html;
+          resolve();
+          return;
+        }
+        wrap.classList.add('is-swapping');
+        setTimeout(function () {
+          track.innerHTML = html;
+          void wrap.offsetWidth;
+          wrap.classList.remove('is-swapping');
+          resolve();
+        }, 220);
+      });
+    }
+
+    function markImagesLoaded(track) {
+      qsa(track, 'img.ugc-gallery__media').forEach(function (img) {
+        function mark() { img.classList.add('is-loaded'); }
+        if (img.complete && img.naturalWidth > 0) {
+          mark();
+        } else {
+          img.addEventListener('load', mark, { once: true });
+          img.addEventListener('error', mark, { once: true });
+        }
+      });
     }
 
     /**
@@ -906,12 +988,18 @@
             return track.children.length > 0;
           }
 
-          var html = posts.map(function (post) {
-            return buildTileHtml(post, meta, aspect);
+          var wrap = root.querySelector('.ugc-gallery__track-wrap');
+          var html = posts.map(function (post, i) {
+            return buildTileHtml(post, meta, aspect, i);
           }).join('');
 
-          track.innerHTML = html;
-          return track.children.length > 0;
+          // Prefetch leading images, then crossfade so the swap doesn't feel clunky.
+          return preloadLeadingImages(posts, 4).then(function () {
+            return crossfadeSwapTrack(wrap, track, html);
+          }).then(function () {
+            markImagesLoaded(track);
+            return track.children.length > 0;
+          });
         });
       }).catch(function (err) {
         if (typeof console !== 'undefined' && console.warn) {
@@ -945,6 +1033,14 @@
           el.setAttribute('tabindex', '-1');
           if (el.tagName === 'A') el.setAttribute('aria-hidden', 'true');
         });
+        // Clones are off-screen duplicates — keep them lazy so we don't double-fetch eager tiles.
+        qsa(clone, 'img').forEach(function (img) {
+          img.setAttribute('loading', 'lazy');
+          img.removeAttribute('fetchpriority');
+        });
+        qsa(clone, 'video').forEach(function (v) {
+          v.setAttribute('preload', 'none');
+        });
         track.appendChild(clone);
       });
 
@@ -958,6 +1054,13 @@
         loopWidth = w;
       }
       measure();
+      markImagesLoaded(track);
+      // Re-measure as images settle so scroll speed stays consistent.
+      qsa(track, 'img').forEach(function (img) {
+        if (!img.complete) {
+          img.addEventListener('load', measure, { once: true });
+        }
+      });
       if (window.requestAnimationFrame) {
         requestAnimationFrame(function () { requestAnimationFrame(measure); });
       }
@@ -1077,7 +1180,7 @@
         root.classList.add('is-revealed');
       }
 
-      // Video tiles — play in view, pause out; skip entirely if motion is blocked.
+      // Video tiles — load + play in view, pause out; skip entirely if motion is blocked.
       var videoIO = null;
       var videos = qsa(track, '[data-ugc-video]');
       if (!motionBlocked && 'IntersectionObserver' in window && videos.length) {
@@ -1085,13 +1188,17 @@
           entries.forEach(function (entry) {
             var v = entry.target;
             if (entry.isIntersecting) {
+              if (v.getAttribute('preload') === 'none') {
+                v.setAttribute('preload', 'metadata');
+                try { v.load(); } catch (_) {}
+              }
               var p = v.play();
               if (p && p.catch) p.catch(function () {});
             } else {
               v.pause();
             }
           });
-        }, { threshold: 0.1 });
+        }, { threshold: 0.1, rootMargin: '80px 0px' });
         videos.forEach(function (v) { videoIO.observe(v); });
       }
 
@@ -1491,7 +1598,7 @@
       "min": 10,
       "max": 90,
       "step": 5,
-      "default": 35
+      "default": 55
     },
     {
       "type": "checkbox",
