@@ -2631,16 +2631,16 @@
       },
       {
         "type": "header",
-        "content": "PDP CTA"
+        "content": "PDP CTA + Frequently Bought Together"
       },
       {
         "type": "paragraph",
-        "content": "On Elastic / Vertical Leather / Leather Zip wallets, plus Lanyard / Chapstick Holder types, show a secondary CTA that links to the bundler page with this product already selected (not locked). Slot type lists live in snippets/bundle__pdp-cta.liquid."
+        "content": "On Elastic / Vertical Leather / Leather Zip wallets, plus Lanyard / Chapstick Holder types, show (1) a Bundle CTA that links to the bundler page with this product selected, and (2) underneath it the Frequently Bought Together inline preview (3 cards + Add Bundle). Slot type lists live in snippets/bundle__pdp-cta.liquid and snippets/bundle__pdp-fbt.liquid."
       },
       {
         "type": "checkbox",
         "id": "trifecta_pdp_preview_enable",
-        "label": "Show Everyday Carry Set CTA on eligible PDPs",
+        "label": "Show Everyday Carry Set CTA + FBT on eligible PDPs",
         "default": true
       },
       {
@@ -2648,6 +2648,34 @@
         "id": "trifecta_pdp_cta_text",
         "label": "PDP CTA button text",
         "default": "Build an Everyday Carry Set — Save 10%"
+      },
+      {
+        "type": "text",
+        "id": "trifecta_pdp_preview_heading",
+        "label": "Frequently Bought Together heading",
+        "default": "Frequently Bought Together"
+      },
+      {
+        "type": "paragraph",
+        "content": "Default product type per slot for FBT companion picks. Color-match still ranks above type-match. Leave blank to skip type preference. Case-sensitive — must match Shopify product type exactly."
+      },
+      {
+        "type": "text",
+        "id": "trifecta_default_wallet_type",
+        "label": "Default wallet type",
+        "default": "Vertical Leather Wallet"
+      },
+      {
+        "type": "text",
+        "id": "trifecta_default_lanyard_type",
+        "label": "Default lanyard type",
+        "default": "Neck Lanyard"
+      },
+      {
+        "type": "text",
+        "id": "trifecta_default_chapstick_type",
+        "label": "Default chapstick type",
+        "default": "Chapstick Holder Keychain"
       },
       {
         "type": "text",

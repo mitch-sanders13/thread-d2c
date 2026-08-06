@@ -264,12 +264,14 @@
 </div>
 
 {%- comment -%}
-  Everyday Carry Set + Market Tote copper CTAs sit directly under Add to
-  Cart (and Shop Pay when enabled), before trust icons. Skipped on
-  featured-product sections so homepage embeds don't pick them up.
+  Everyday Carry Set Bundle CTA + Frequently Bought Together preview,
+  then Market Tote CTA. Sit under Add to Cart (and Shop Pay when
+  enabled), before trust icons. Skipped on featured-product sections
+  so homepage embeds don't pick them up.
 {%- endcomment -%}
 {% unless featured %}
   {% render 'bundle__pdp-cta' %}
+  {% render 'bundle__pdp-fbt' %}
   {% render 'market-tote-bundler__pdp-cta' %}
 {% endunless %}
 

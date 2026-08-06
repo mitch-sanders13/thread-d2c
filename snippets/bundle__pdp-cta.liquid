@@ -4,10 +4,15 @@
   Shows a secondary CTA on Wallet / Lanyard / Chapstick Holder PDPs
   (matched by product.type). Links to the standalone bundler page with
   this product pre-selected (not locked) via ?slot_<key>=<handle>.
+
+  The Frequently Bought Together inline preview renders next
+  (snippets/bundle__pdp-fbt.liquid) so both the Bundle button and the
+  FBT section appear on eligible PDPs.
 {% endcomment %}
 
 {% doc %}
   Everyday Carry Set PDP CTA — navigates to the bundler page.
+  FBT preview is a separate snippet rendered after this one.
   @example
   {% render 'bundle__pdp-cta' %}
 {% enddoc %}
