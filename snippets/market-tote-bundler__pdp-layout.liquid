@@ -1,7 +1,10 @@
 {% comment %}
-  PDP-style Market Tote bundler body: hero image, swatch grid with
-  in-grid Add, progress dots, mini-bundle strip with remove, and
-  Add to Cart CTA once 3 totes are picked.
+  PDP-style Market Tote bundler body — aligned with Everyday Carry Set:
+  page intro (heading + savings) in the right column, styles header,
+  swatch grid with in-tile Add and X-to-remove, progress, CTA.
+
+  Heading + savings are the first DOM child so mobile stacks
+  intro → gallery → details (same grid-area trick as ECS).
 {% endcomment %}
 
 {% doc %}
@@ -9,13 +12,29 @@
   @param {string} cart_label - Add to Cart button text
   @param {string} discount_type - percent | fixed_off | none
   @param {number} discount_value - display savings amount
+  @param {string} [heading] - Page heading (right column on desktop)
+  @param {string} [savings_label] - Bronze savings line under heading
   @example
-  {% render 'market-tote-bundler__pdp-layout', cart_label: 'Add Bundle to Cart', discount_type: 'percent', discount_value: 25 %}
+  {% render 'market-tote-bundler__pdp-layout', cart_label: 'Add Bundle to Cart', discount_type: 'percent', discount_value: 25, heading: 'Build Your Tote Bundle', savings_label: '3 Market Totes = 25% OFF' %}
 {% enddoc %}
 
 {%- assign _cart_label = cart_label | default: 'Add Bundle to Cart' -%}
 
-<div class="mtb-pdp" x-show="products.length > 0" x-cloak>
+<div
+  class="mtb-pdp tri-pdp{% unless heading == blank and savings_label == blank %} tri-pdp--has-intro{% endunless %}"
+  x-show="products.length > 0"
+  x-cloak>
+  {%- unless heading == blank and savings_label == blank -%}
+    <div class="tri-pdp__page-intro">
+      {%- unless heading == blank -%}
+        <h2 class="tri-pdp__page-heading">{{ heading }}</h2>
+      {%- endunless -%}
+      {%- unless savings_label == blank -%}
+        <p class="mtb-pdp__savings">{{ savings_label }}</p>
+      {%- endunless -%}
+    </div>
+  {%- endunless -%}
+
   <div
     class="mtb-pdp__media"
     :class="{ 'mtb-pdp__media--solo': previewImages().length <= 1 }">
@@ -45,42 +64,106 @@
       </template>
     </div>
 
-    <div class="mtb-pdp__hero" :class="{ 'is-loading': !heroReady }">
-      <img
-        x-show="heroSrc"
-        :src="heroSrc"
-        :srcset="heroSrcset || null"
-        sizes="(min-width: 990px) 45vw, 100vw"
-        width="1200"
-        height="1200"
-        :alt="heroAlt"
-        decoding="async"
-        fetchpriority="high" />
+    {%- comment -%}
+      Main hero — same wrap + arrows/dots pattern as Everyday Carry Set.
+    {%- endcomment -%}
+    <div class="mtb-pdp__hero-wrap">
+      <div class="mtb-pdp__hero" :class="{ 'is-loading': !heroReady }">
+        <img
+          x-show="heroSrc"
+          :src="heroSrc"
+          :srcset="heroSrcset || null"
+          sizes="(min-width: 990px) 55vw, 100vw"
+          width="1200"
+          height="1200"
+          :alt="heroAlt"
+          decoding="async"
+          fetchpriority="high" />
+      </div>
+
+      <template x-if="previewImages().length > 1">
+        <div class="mtb-pdp__hero-arrows" aria-hidden="false">
+          <button
+            type="button"
+            class="mtb-pdp__hero-arrow mtb-pdp__hero-arrow--prev btn btn--plain btn--small shadow-sm"
+            aria-label="Previous image"
+            @click="galleryPrev()">
+            {% render 'component__icon', icon: 'arrow-left', size: '20', class: '' %}
+          </button>
+          <button
+            type="button"
+            class="mtb-pdp__hero-arrow mtb-pdp__hero-arrow--next btn btn--plain btn--small shadow-sm"
+            aria-label="Next image"
+            @click="galleryNext()">
+            {% render 'component__icon', icon: 'arrow-right', size: '20', class: '' %}
+          </button>
+        </div>
+      </template>
+
+      <div
+        class="mtb-pdp__hero-dots"
+        x-show="previewImages().length > 1 && previewImages().length <= 12"
+        x-cloak
+        role="tablist"
+        aria-label="Image pagination">
+        <template x-for="(image, imgIdx) in previewImages()" :key="'dot-' + imgIdx">
+          <button
+            type="button"
+            class="mtb-pdp__hero-dot"
+            role="tab"
+            :class="{ 'is-active': galleryIndex === imgIdx }"
+            :aria-selected="galleryIndex === imgIdx"
+            :aria-label="'Image ' + (imgIdx + 1)"
+            @click="selectGallery(imgIdx)"></button>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%}
+    Mobile-only product title/price above the gallery — same pattern as
+    Everyday Carry / PDP. Desktop keeps the copy inside .mtb-pdp__info.
+  {%- endcomment -%}
+  <div class="tri-pdp__mobile-only tri-pdp__mobile-summary">
+    <div x-show="previewProduct()" x-cloak>
+      <h3 class="mtb-pdp__title" x-text="previewProduct()?.title || ''"></h3>
+      <p class="mtb-pdp__price" x-text="previewProduct() ? formatMoney(previewProduct().price) : ''"></p>
     </div>
   </div>
 
   <div class="mtb-pdp__info">
-    <div x-show="previewProduct()">
+    <div class="tri-pdp__desktop-only" x-show="previewProduct()" x-cloak>
       <h3 class="mtb-pdp__title" x-text="previewProduct()?.title || ''"></h3>
       <p class="mtb-pdp__price" x-text="previewProduct() ? formatMoney(previewProduct().price) : ''"></p>
     </div>
 
+    {%- comment -%}
+      Title row matches Everyday Carry / PDP related-styles: "Select Your Style"
+      left, style count right-justified on the same line.
+    {%- endcomment -%}
     <div class="mtb-pdp__styles-header">
-      <p class="mtb-pdp__styles-label">
-        Select Your Style
-        <span class="mtb-pdp__styles-count" x-text="'(' + products.length + ' styles)'"></span>
-      </p>
+      <div class="mtb-pdp__styles-titlerow">
+        <h4 class="mtb-pdp__styles-label">Select Your Style</h4>
+        <span
+          class="mtb-pdp__styles-count"
+          x-text="products.length + (products.length === 1 ? ' style' : ' styles')"></span>
+      </div>
     </div>
 
     <div class="mtb-pdp__swatches" role="listbox" aria-label="Market Tote styles">
       <template x-for="product in products" :key="product.handle">
+        {%- comment -%}
+          Div (not button) so Add and Remove can be real nested buttons.
+          Click/keyboard still previews the tote.
+        {%- endcomment -%}
         <div
           role="option"
           class="mtb-pdp__swatch"
           :tabindex="product.available ? 0 : -1"
           :class="{
             'is-current': isPreview(product.handle),
-            'is-unavailable': !product.available
+            'is-unavailable': !product.available,
+            'is-picked': isPicked(product.handle)
           }"
           :aria-selected="isPreview(product.handle)"
           :aria-disabled="!product.available"
@@ -98,10 +181,27 @@
               :alt="product.title"
               loading="lazy"
               decoding="async" />
+            {%- comment -%}
+              X removes one instance of this tote from the bundle.
+              Replaces the old "In your bundle" strip remove control.
+            {%- endcomment -%}
+            <button
+              type="button"
+              class="mtb-pdp__swatch-remove"
+              x-show="isPicked(product.handle)"
+              x-cloak
+              :aria-label="'Remove ' + shortName(product.title) + ' from bundle'"
+              @click.stop="removePickByHandle(product.handle)">
+              <span aria-hidden="true">&times;</span>
+            </button>
             <span
               class="mtb-pdp__swatch-check"
-              x-show="isPreview(product.handle)"
-              aria-hidden="true">✓</span>
+              x-show="isPreview(product.handle) && !isPicked(product.handle)"
+              aria-hidden="true">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
           </span>
           <span class="mtb-pdp__swatch-name" x-text="shortName(product.title)"></span>
           <button
@@ -122,7 +222,9 @@
           :class="{ 'is-filled': totalSelected() >= i }"
           aria-hidden="true"></span>
       </template>
-      <span class="mtb-pdp__progress-label type--small" x-text="totalSelected() + ' of ' + requiredCount + ' added'"></span>
+      <span
+        class="mtb-pdp__progress-label type--small"
+        x-text="totalSelected() + ' of ' + requiredCount + ' added'"></span>
     </div>
 
     <div class="mtb-pdp__cta" x-show="isComplete()" x-cloak>
@@ -149,28 +251,6 @@
           x-text="formatMoney(subtotalCents())"
           x-cloak></s>
       </p>
-    </div>
-
-    <div class="mtb-pdp__picks" x-show="totalSelected() > 0" x-cloak>
-      <p class="mtb-pdp__picks-label type--small">In your bundle</p>
-      <ul class="mtb-pdp__picks-list">
-        <template x-for="(handle, idx) in picks" :key="idx + '-' + handle">
-          <li class="mtb-pdp__pick">
-            <img
-              :src="pickProduct(idx)?.swatchImage"
-              width="48"
-              height="48"
-              :alt="pickProduct(idx)?.title || ''"
-              loading="lazy" />
-            <span class="mtb-pdp__pick-name" x-text="shortName(pickProduct(idx)?.title || '')"></span>
-            <button
-              type="button"
-              class="mtb-pdp__pick-remove"
-              :aria-label="'Remove ' + shortName(pickProduct(idx)?.title || 'tote') + ' from bundle'"
-              @click="removePick(idx)">Remove from Bundle</button>
-          </li>
-        </template>
-      </ul>
     </div>
   </div>
 </div>

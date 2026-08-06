@@ -47,7 +47,7 @@
   else
     assign heading = heading | default: 'Build Your Tote Bundle'
   endif
-  assign savings_label = savings_label | default: 'Save 25% when you buy 3 Market Totes'
+  assign savings_label = savings_label | default: '3 Market Totes = 25% OFF'
 
   if discount_code == blank
     assign discount_code = settings.market_tote_discount_code | default: ''
@@ -96,23 +96,17 @@
     "
     x-data="marketToteBundler_{{ js_id }}">
 
-    {%- unless heading == blank and savings_label == blank -%}
-      <div class="flex flex-col items-center px-4 pb-4 text-center">
-        <div class="max-w-prose">
-          {%- unless heading == blank -%}
-            <h2>{{ heading }}</h2>
-          {%- endunless -%}
-          {%- unless savings_label == blank -%}
-            <p class="mtb-pdp__savings">{{ savings_label }}</p>
-          {%- endunless -%}
-        </div>
-      </div>
-    {%- endunless -%}
-
+    {% comment %}
+      Heading + savings live inside market-tote-bundler__pdp-layout so
+      mobile stacks like Everyday Carry (intro → gallery → details)
+      without a centered strip above the layout.
+    {% endcomment %}
     {% render 'market-tote-bundler__pdp-layout',
         cart_label: cart_label,
         discount_type: discount_type,
-        discount_value: discount_value %}
+        discount_value: discount_value,
+        heading: heading,
+        savings_label: savings_label %}
 
     <p
       class="type--small px-4 pb-4 text-center"
@@ -358,6 +352,22 @@
         this.applyHero(false);
       },
 
+      galleryPrev() {
+        var images = this.previewImages();
+        if (images.length < 2) return;
+        var next = this.galleryIndex - 1;
+        if (next < 0) next = images.length - 1;
+        this.selectGallery(next);
+      },
+
+      galleryNext() {
+        var images = this.previewImages();
+        if (images.length < 2) return;
+        var next = this.galleryIndex + 1;
+        if (next >= images.length) next = 0;
+        this.selectGallery(next);
+      },
+
       productByHandle(handle) {
         return this.products.find(function(p){ return p.handle === handle; }) || null;
       },
@@ -378,6 +388,11 @@
 
       isPreview(handle) {
         return this.previewHandle === handle;
+      },
+
+      /* True when this tote appears at least once in the picks list. */
+      isPicked(handle) {
+        return this.picks.indexOf(handle) !== -1;
       },
 
       totalSelected() {
@@ -421,6 +436,17 @@
       removePick(index) {
         if (index < 0 || index >= this.picks.length) return;
         this.picks = this.picks.filter(function(_, i){ return i !== index; });
+      },
+
+      /*
+        Remove one instance of a tote from the bundle (last match).
+        Used by the X on each product tile — duplicates are allowed,
+        so we only drop a single pick per click.
+      */
+      removePickByHandle(handle) {
+        var idx = this.picks.lastIndexOf(handle);
+        if (idx === -1) return;
+        this.removePick(idx);
       },
 
       pickProduct(index) {
