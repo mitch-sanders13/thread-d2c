@@ -2498,6 +2498,30 @@
   justify-content: center;
 }
 /*
+  How many of this SKU are in the tote bundle (top-left of the tile).
+  Pairs with the X remove control on the top-right.
+*/
+.mtb-pdp__swatch-qty {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #166534;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  pointer-events: none;
+}
+/*
   X on a picked tote tile — replaces the old "In your bundle" strip.
   Styled like Everyday Carry slot remove so remove controls feel the same.
 */
@@ -2553,6 +2577,14 @@
   text-transform: uppercase;
   line-height: 1.1;
   min-height: 0;
+}
+/* Second+ of the same tote SKU — compact plus affordance. */
+.mtb-pdp__swatch-action--plus {
+  font-size: 1rem;
+  letter-spacing: 0;
+  line-height: 1;
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 
 .mtb-pdp__progress {
