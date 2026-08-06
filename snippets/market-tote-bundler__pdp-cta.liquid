@@ -1,15 +1,16 @@
 {% comment %}
   PDP entry for the Market Tote bundler. Shows only when the current
   product belongs to the configured Market Tote collection (default:
-  reusable-market-tote-bags). Links to the standalone bundler page with
-  this product pre-selected (not locked) via ?preselect=<handle> — same
-  pattern as Everyday Carry Set's ?slot_<key>=<handle> deep link.
+  reusable-market-tote-bags). Links to the Market Tote collection
+  bundler (or configured path) with this product pre-selected via
+  ?preselect=<handle>#build-your-tote-bundle — same deep-link idea as
+  Everyday Carry Set's ?slot_<key>=<handle>.
 
   Cart upsell is intentionally skipped for V1.
 {% endcomment %}
 
 {% doc %}
-  Market Tote PDP CTA — navigates to the bundler page.
+  Market Tote PDP CTA — navigates to the collection bundler with preselect.
   Renders nothing when the product is not in the Market Tote collection
   or the feature is disabled.
   @example
@@ -31,8 +32,12 @@
   endfor
 
   assign cta_text = settings.market_tote_pdp_cta_text | default: 'Build a tote bundle — Save 25%'
-  assign page_path = settings.market_tote_page_path | default: '/pages/build-your-tote-bundle'
-  assign bundler_url = page_path | append: '?preselect=' | append: product.handle
+  comment
+    Live bundler lives on the Market Tote collection template — the
+    /pages/build-your-tote-bundle path was never published and 404s.
+  endcomment
+  assign page_path = settings.market_tote_page_path | default: '/collections/reusable-market-tote-bags'
+  assign bundler_url = page_path | append: '?preselect=' | append: product.handle | append: '#build-your-tote-bundle'
 -%}
 
 {%- if settings.market_tote_pdp_enable and is_market_tote -%}
