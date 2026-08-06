@@ -171,6 +171,9 @@
       _prefetchCache: {},
       // handle|galleryIndex → { src, srcset } after first successful load
       _heroCache: {},
+      // Full PDP media gallery (images + video posters) loaded once per handle.
+      _galleryHydrated: {},
+      _galleryHydrating: {},
       requiredCount: {{ required_count }},
       cartLoading: false,
       incompleteReason: '',
@@ -190,11 +193,19 @@
         this.galleryIndex = 0;
         this._prefetchCache = {};
         this._heroCache = {};
+        this._galleryHydrated = {};
+        this._galleryHydrating = {};
         var first = this.products.find(function(p){ return p.available; }) || this.products[0] || null;
         this.previewHandle = first ? first.handle : null;
         this.applyHero(true);
         // Deep link from Market Tote PDP: ?preselect=<handle>
         this._readUrlPrefill();
+        // When the selected style changes, pull the full media list (PDP parity).
+        var self = this;
+        this.$watch('previewHandle', function(handle) {
+          if (handle) self.hydrateGalleryFor(handle);
+        });
+        if (this.previewHandle) this.hydrateGalleryFor(this.previewHandle);
       },
 
       // Read ?preselect=<handle> so the PDP CTA lands on the product the
@@ -326,11 +337,110 @@
         img.src = src;
       },
 
+      // Shopify CDN: append/replace ?width= so thumbs/heroes match Liquid image_url sizes.
+      _cdnWidth(src, width) {
+        if (!src) return '';
+        var url = String(src);
+        if (url.indexOf('//') === 0) url = 'https:' + url;
+        try {
+          var u = new URL(url, window.location.origin);
+          u.searchParams.set('width', String(width));
+          return u.toString();
+        } catch (e) {
+          return url;
+        }
+      },
+
+      // Build gallery frames from /products/{handle}.js media (images + video posters),
+      // matching the PDP which uses product.media — not product.images alone.
+      _mediaToGalleryImages(productJson) {
+        var self = this;
+        var frames = [];
+        var media = (productJson && productJson.media) || [];
+        var MAX = 12;
+
+        function pushSrc(src, mediaType) {
+          if (!src || frames.length >= MAX) return;
+          frames.push({
+            thumb: self._cdnWidth(src, 160),
+            hero: self._cdnWidth(src, 1200),
+            hero600: self._cdnWidth(src, 600),
+            hero900: self._cdnWidth(src, 900),
+            mediaType: mediaType || 'image'
+          });
+        }
+
+        media.forEach(function(m) {
+          if (!m || frames.length >= MAX) return;
+          var src = '';
+          if (m.preview_image && m.preview_image.src) src = m.preview_image.src;
+          else if (m.src && (m.media_type === 'image' || !m.media_type)) src = m.src;
+          if (src) pushSrc(src, m.media_type || 'image');
+        });
+
+        // Fallback when media is empty — still images only.
+        if (!frames.length && productJson && productJson.images) {
+          (productJson.images || []).forEach(function(img) {
+            var src = (img && (img.src || img)) || '';
+            pushSrc(src, 'image');
+          });
+        }
+        return frames;
+      },
+
+      _applyHydratedGallery(handle, gallery) {
+        var p = this.productByHandle(handle);
+        if (!p || !gallery || !gallery.length) return;
+        p.images = gallery;
+        p.galleryHydrated = true;
+      },
+
+      // Fetch full PDP media once per handle and swap into the catalog entry.
+      hydrateGalleryFor(handle) {
+        if (!handle) return;
+        if (this._galleryHydrated[handle] || this._galleryHydrating[handle]) return;
+        var existing = this.productByHandle(handle);
+        if (existing && existing.galleryHydrated) {
+          this._galleryHydrated[handle] = true;
+          return;
+        }
+
+        var self = this;
+        this._galleryHydrating[handle] = true;
+        var root = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+        var url = root + 'products/' + encodeURIComponent(handle) + '.js';
+
+        fetch(url, { credentials: 'same-origin' })
+          .then(function(r) { return r.ok ? r.json() : null; })
+          .then(function(data) {
+            self._galleryHydrating[handle] = false;
+            if (!data) return;
+            var gallery = self._mediaToGalleryImages(data);
+            if (!gallery.length) {
+              self._galleryHydrated[handle] = true;
+              return;
+            }
+            self._applyHydratedGallery(handle, gallery);
+            self._galleryHydrated[handle] = true;
+            // Refresh hero/thumbs if this is still the selected style.
+            if (self.previewHandle === handle) {
+              if (self.galleryIndex >= gallery.length) self.galleryIndex = 0;
+              self.applyHero(false);
+            }
+          })
+          .catch(function(err) {
+            self._galleryHydrating[handle] = false;
+            console.warn('[market-tote-bundler] gallery hydrate failed', handle, err);
+          });
+      },
+
       // Warm the primary hero for a tote on swatch hover/focus only —
       // not a bulk preload of the whole collection (egress-safe).
       prefetchProduct(handle) {
         var p = this.productByHandle(handle);
         if (!p) return;
+        // Start media hydrate early so thumbs are ready when clicked.
+        this.hydrateGalleryFor(handle);
         var image = (p.images && p.images[0]) || null;
         var url = image
           ? (image.hero900 || image.hero || p.swatchImage)
