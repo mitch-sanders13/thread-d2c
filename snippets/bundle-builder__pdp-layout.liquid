@@ -43,13 +43,17 @@
       x-cloak
       role="listbox"
       aria-label="Product images">
-      <template x-for="(image, imgIdx) in previewImages()" :key="imgIdx">
+      <template x-for="(image, imgIdx) in previewImages()" :key="(image.hero || image.thumb || '') + '-' + imgIdx">
         <button
           type="button"
           role="option"
           class="mtb-pdp__thumb"
-          :class="{ 'is-active': galleryIndex === imgIdx }"
+          :class="{
+            'is-active': galleryIndex === imgIdx,
+            'is-video': image.mediaType === 'video' || image.mediaType === 'external_video'
+          }"
           :aria-selected="galleryIndex === imgIdx"
+          :aria-label="(previewProduct()?.title || 'Product') + (image.mediaType === 'video' || image.mediaType === 'external_video' ? ' video ' : ' image ') + (imgIdx + 1)"
           @click="selectGallery(imgIdx)"
           @mouseenter="prefetchUrl(image.hero900 || image.hero)">
           <img
@@ -66,11 +70,40 @@
     {%- comment -%}
       Main hero — sized like the PDP gallery main column, with side
       arrows + dots when there is more than one product image.
+      Videos play muted/looped (same as PDP); thumbs show a play badge.
     {%- endcomment -%}
     <div class="mtb-pdp__hero-wrap">
-      <div class="mtb-pdp__hero" :class="{ 'is-loading': !heroReady }">
+      <div
+        class="mtb-pdp__hero"
+        :class="{
+          'is-loading': !heroReady,
+          'is-video': isHeroVideo() || isHeroExternalVideo()
+        }">
+        <template x-if="isHeroVideo()">
+          <video
+            class="mtb-pdp__hero-video"
+            :key="'vid-' + heroVideoUrl"
+            :src="heroVideoUrl"
+            :poster="heroSrc || null"
+            autoplay
+            loop
+            muted
+            playsinline
+            @loadeddata="heroReady = true"></video>
+        </template>
+        <template x-if="isHeroExternalVideo() && heroEmbedUrl()">
+          <iframe
+            class="mtb-pdp__hero-embed"
+            :key="'ext-' + heroExternalHost + '-' + heroExternalId"
+            :src="heroEmbedUrl()"
+            :title="heroAlt || 'Product video'"
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowfullscreen
+            loading="lazy"
+            @load="heroReady = true"></iframe>
+        </template>
         <img
-          x-show="heroSrc"
+          x-show="!isHeroVideo() && !isHeroExternalVideo() && heroSrc"
           :src="heroSrc"
           :srcset="heroSrcset || null"
           sizes="(min-width: 990px) 55vw, 100vw"

@@ -135,16 +135,7 @@
             "available": {{ first_variant.available | json }},
             "variantId": {{ first_variant.id | json }},
             "swatchImage": {{ product.featured_image | image_url: width: 200 | json }},
-            "images": [
-              {%- for image in product.images limit: 8 -%}
-                {
-                  "thumb": {{ image | image_url: width: 160 | json }},
-                  "hero": {{ image | image_url: width: 1200 | json }},
-                  "hero600": {{ image | image_url: width: 600 | json }},
-                  "hero900": {{ image | image_url: width: 900 | json }}
-                }{%- unless forloop.last -%},{%- endunless -%}
-              {%- endfor -%}
-            ]
+            "images": {% render 'bundle__gallery-frames', product: product %}
           }{%- unless forloop.last -%},{%- endunless -%}
         {%- endfor -%}
       {%- endpaginate -%}
@@ -167,11 +158,16 @@
       heroSrcset: '',
       heroAlt: '',
       heroReady: false,
+      // Hero media kind — image | video | external_video (PDP parity).
+      heroMediaType: 'image',
+      heroVideoUrl: '',
+      heroExternalHost: '',
+      heroExternalId: '',
       _pendingHero: '',
       _prefetchCache: {},
-      // handle|galleryIndex → { src, srcset } after first successful load
+      // handle|galleryIndex|frame → { src, srcset } after first successful load
       _heroCache: {},
-      // Full PDP media gallery (images + video posters) loaded once per handle.
+      // Full PDP media gallery (images + videos) loaded once per handle.
       _galleryHydrated: {},
       _galleryHydrating: {},
       requiredCount: {{ required_count }},
@@ -269,24 +265,73 @@
 
       heroSrcsetFor(image) {
         if (!image) return '';
+        if (image.mediaType === 'video' || image.mediaType === 'external_video') return '';
         return (image.hero600 || '') + ' 600w, ' + (image.hero900 || '') + ' 900w, ' + (image.hero || '') + ' 1200w';
       },
 
+      // Include frame URL so hydrate cannot revive a stale pre-hydrate entry.
       _heroCacheKey() {
-        return (this.previewHandle || '') + '|' + this.galleryIndex;
+        var image = this.currentHero();
+        var frame = (image && (image.hero || image.videoUrl || image.thumb)) || '';
+        return (this.previewHandle || '') + '|' + this.galleryIndex + '|' + frame;
       },
 
-      // Show a tiny already-cached image immediately, then swap in the
-      // large hero once it finishes loading (no <img> remount).
+      _clearHeroCacheForHandle(handle) {
+        if (!handle) return;
+        var prefix = handle + '|';
+        Object.keys(this._heroCache).forEach(function(key) {
+          if (key.indexOf(prefix) === 0) delete this._heroCache[key];
+        }.bind(this));
+      },
+
+      isHeroVideo() {
+        return this.heroMediaType === 'video' && !!this.heroVideoUrl;
+      },
+
+      isHeroExternalVideo() {
+        return this.heroMediaType === 'external_video' && !!this.heroExternalId;
+      },
+
+      heroEmbedUrl() {
+        if (!this.isHeroExternalVideo()) return '';
+        var id = encodeURIComponent(this.heroExternalId);
+        var host = String(this.heroExternalHost || '').toLowerCase();
+        if (host === 'youtube') {
+          return 'https://www.youtube.com/embed/' + id + '?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=' + id;
+        }
+        if (host === 'vimeo') {
+          return 'https://player.vimeo.com/video/' + id + '?autoplay=1&muted=1&loop=1&background=1';
+        }
+        return '';
+      },
+
+      _setHeroMediaMeta(image) {
+        var type = (image && image.mediaType) || 'image';
+        this.heroMediaType = type;
+        this.heroVideoUrl = (image && image.videoUrl) || '';
+        this.heroExternalHost = (image && image.externalHost) || '';
+        this.heroExternalId = (image && image.externalId) || '';
+      },
+
+      // Show the current sharp frame while the next hero loads (no blur flash).
       applyHero(useSwatchPlaceholder) {
         var p = this.previewProduct();
         var image = this.currentHero();
         if (!p || !image) return;
 
         this.heroAlt = p.title || '';
+        this._setHeroMediaMeta(image);
+
+        if (this.isHeroVideo() || this.isHeroExternalVideo()) {
+          this._pendingHero = '';
+          this.heroSrc = image.hero || image.thumb || p.swatchImage || '';
+          this.heroSrcset = '';
+          this.heroReady = true;
+          return;
+        }
+
         var cacheKey = this._heroCacheKey();
         var cached = this._heroCache[cacheKey];
-        // Instant swap when this SKU/gallery frame was already loaded
         if (cached) {
           if (this.heroSrc === cached.src && this.heroReady) return;
           this._pendingHero = cached.src;
@@ -303,12 +348,15 @@
         var target = image.hero || image.hero900 || placeholder;
         var targetSrcset = this.heroSrcsetFor(image);
 
-        // Already showing this large hero — nothing to do
         if (this.heroSrc === target && this.heroReady) return;
 
-        this.heroSrc = placeholder;
-        this.heroSrcset = '';
-        this.heroReady = false;
+        var keepCurrent = !!(this.heroSrc && this.heroReady);
+        if (!keepCurrent) {
+          this.heroSrc = placeholder;
+          this.heroSrcset = '';
+          // Show the placeholder immediately (no blank/blur frame).
+          this.heroReady = true;
+        }
         this._loadHero(target, targetSrcset, cacheKey);
       },
 
@@ -319,9 +367,20 @@
         var img = new Image();
         img.onload = function() {
           if (self._pendingHero !== src) return;
+          var shouldFade = !!(self.heroSrc && self.heroSrc !== src);
           self.heroSrc = src;
           self.heroSrcset = srcset || '';
-          self.heroReady = true;
+          if (shouldFade) {
+            self.heroReady = false;
+            requestAnimationFrame(function() {
+              requestAnimationFrame(function() {
+                if (self._pendingHero !== src) return;
+                self.heroReady = true;
+              });
+            });
+          } else {
+            self.heroReady = true;
+          }
           if (cacheKey) {
             self._heroCache[cacheKey] = { src: src, srcset: srcset || '' };
           }
@@ -351,7 +410,25 @@
         }
       },
 
-      // Build gallery frames from /products/{handle}.js media (images + video posters),
+      _bestVideoUrl(mediaItem) {
+        var sources = (mediaItem && mediaItem.sources) || [];
+        var mp4 = '';
+        var fallback = '';
+        for (var i = 0; i < sources.length; i++) {
+          var s = sources[i];
+          if (!s || !s.url) continue;
+          if (!fallback) fallback = s.url;
+          var fmt = String(s.format || '').toLowerCase();
+          var mime = String(s.mime_type || '').toLowerCase();
+          if (fmt === 'mp4' || mime === 'video/mp4') {
+            mp4 = s.url;
+            break;
+          }
+        }
+        return mp4 || fallback || '';
+      },
+
+      // Build gallery frames from /products/{handle}.js media (images + videos),
       // matching the PDP which uses product.media — not product.images alone.
       _mediaToGalleryImages(productJson) {
         var self = this;
@@ -359,30 +436,54 @@
         var media = (productJson && productJson.media) || [];
         var MAX = 12;
 
-        function pushSrc(src, mediaType) {
+        function pushFrame(src, mediaType, extra) {
           if (!src || frames.length >= MAX) return;
-          frames.push({
+          var frame = {
             thumb: self._cdnWidth(src, 160),
             hero: self._cdnWidth(src, 1200),
             hero600: self._cdnWidth(src, 600),
             hero900: self._cdnWidth(src, 900),
-            mediaType: mediaType || 'image'
-          });
+            mediaType: mediaType || 'image',
+            videoUrl: '',
+            externalHost: '',
+            externalId: ''
+          };
+          if (extra) {
+            if (extra.videoUrl) frame.videoUrl = extra.videoUrl;
+            if (extra.externalHost) frame.externalHost = extra.externalHost;
+            if (extra.externalId) frame.externalId = extra.externalId;
+          }
+          frames.push(frame);
         }
 
         media.forEach(function(m) {
           if (!m || frames.length >= MAX) return;
+          var type = m.media_type || 'image';
           var src = '';
           if (m.preview_image && m.preview_image.src) src = m.preview_image.src;
-          else if (m.src && (m.media_type === 'image' || !m.media_type)) src = m.src;
-          if (src) pushSrc(src, m.media_type || 'image');
+          else if (m.src && (type === 'image' || !m.media_type)) src = m.src;
+
+          if (type === 'video') {
+            if (!src) return;
+            pushFrame(src, 'video', { videoUrl: self._bestVideoUrl(m) });
+            return;
+          }
+          if (type === 'external_video') {
+            if (!src) return;
+            pushFrame(src, 'external_video', {
+              externalHost: m.host || '',
+              externalId: m.external_id || ''
+            });
+            return;
+          }
+          if (type !== 'image') return;
+          if (src) pushFrame(src, 'image');
         });
 
-        // Fallback when media is empty — still images only.
         if (!frames.length && productJson && productJson.images) {
           (productJson.images || []).forEach(function(img) {
             var src = (img && (img.src || img)) || '';
-            pushSrc(src, 'image');
+            pushFrame(src, 'image');
           });
         }
         return frames;
@@ -391,6 +492,7 @@
       _applyHydratedGallery(handle, gallery) {
         var p = this.productByHandle(handle);
         if (!p || !gallery || !gallery.length) return;
+        this._clearHeroCacheForHandle(handle);
         p.images = gallery;
         p.galleryHydrated = true;
       },
@@ -493,7 +595,8 @@
         if (!p || !p.available) return;
         this.previewHandle = handle;
         this.galleryIndex = 0;
-        this.applyHero(true);
+        // false = keep prior sharp hero while the new frame loads (no blur flash).
+        this.applyHero(false);
       },
 
       isPreview(handle) {

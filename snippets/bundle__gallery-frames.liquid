@@ -1,0 +1,49 @@
+{% comment %}
+  JSON array of gallery frames from product.media (images + hosted/
+  external videos), matching PDP order. Videos include an mp4 URL
+  when Shopify provides sources so the bundler can play them in-hero.
+
+  @param {object} product - Shopify product drop
+{% endcomment %}
+[
+{%- assign _gf_emitted = 0 -%}
+{%- for media in product.media limit: 8 -%}
+  {%- liquid
+    if media.media_type == 'image'
+      assign frame_img = media
+    else
+      assign frame_img = media.preview_image
+    endif
+  -%}
+  {%- if frame_img == blank -%}{%- continue -%}{%- endif -%}
+  {%- assign video_url = '' -%}
+  {%- assign external_host = '' -%}
+  {%- assign external_id = '' -%}
+  {%- if media.media_type == 'video' -%}
+    {%- for source in media.sources -%}
+      {%- if source.format == 'mp4' or source.mime_type == 'video/mp4' -%}
+        {%- assign video_url = source.url -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if video_url == blank and media.sources.size > 0 -%}
+      {%- assign video_url = media.sources.first.url -%}
+    {%- endif -%}
+  {%- elsif media.media_type == 'external_video' -%}
+    {%- assign external_host = media.host -%}
+    {%- assign external_id = media.external_id -%}
+  {%- endif -%}
+  {%- if _gf_emitted > 0 -%},{%- endif -%}
+  {%- assign _gf_emitted = _gf_emitted | plus: 1 -%}
+  {
+    "thumb": {{ frame_img | image_url: width: 160 | json }},
+    "hero": {{ frame_img | image_url: width: 1200 | json }},
+    "hero600": {{ frame_img | image_url: width: 600 | json }},
+    "hero900": {{ frame_img | image_url: width: 900 | json }},
+    "mediaType": {{ media.media_type | json }},
+    "videoUrl": {{ video_url | json }},
+    "externalHost": {{ external_host | json }},
+    "externalId": {{ external_id | json }}
+  }
+{%- endfor -%}
+]
