@@ -263,6 +263,16 @@
   {% endif %}
 </div>
 
+{%- comment -%}
+  Everyday Carry Set + Market Tote copper CTAs sit directly under Add to
+  Cart (and Shop Pay when enabled), before trust icons. Skipped on
+  featured-product sections so homepage embeds don't pick them up.
+{%- endcomment -%}
+{% unless featured %}
+  {% render 'bundle__pdp-cta' %}
+  {% render 'market-tote-bundler__pdp-cta' %}
+{% endunless %}
+
 {% comment %} Trust icons row — renders inside pdp-atc-content so it follows the sticky bar.
    Each of the 4 slots accepts a Lucide library icon (preferred when set)
    OR an uploaded image as fallback. Sizing/color come from the

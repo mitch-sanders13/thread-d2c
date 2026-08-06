@@ -1353,15 +1353,6 @@
                       }
                     </style>
                   {% endif %}
-                  {%- comment -%}
-                    No px-4 wrapper around the bundle — the bundle
-                    handles its own horizontal padding internally so
-                    its top/bottom divider lines (in bundle-builder
-                    .css) span the full column width, lining up with
-                    the accordion dividers below it on the PDP.
-                  {%- endcomment -%}
-                  {% render 'bundle__pdp-cta' %}
-                  {% render 'market-tote-bundler__pdp-cta' %}
                 </div>
 
               {%- when 'stickyadd' -%}
