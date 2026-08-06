@@ -1,15 +1,17 @@
 {% comment %}
   PDP entry for the Market Tote bundler. Shows only when the current
   product belongs to the configured Market Tote collection (default:
-  reusable-market-tote-bags). Opens the full wizard in a drawer with
-  this product locked as Tote 1.
+  reusable-market-tote-bags). Links to the standalone bundler page with
+  this product pre-selected (not locked) via ?preselect=<handle> — same
+  pattern as Everyday Carry Set's ?slot_<key>=<handle> deep link.
 
   Cart upsell is intentionally skipped for V1.
 {% endcomment %}
 
 {% doc %}
-  Market Tote PDP CTA + drawer host. Renders nothing when the product
-  is not in the Market Tote collection or the feature is disabled.
+  Market Tote PDP CTA — navigates to the bundler page.
+  Renders nothing when the product is not in the Market Tote collection
+  or the feature is disabled.
   @example
   {% render 'market-tote-bundler__pdp-cta' %}
 {% enddoc %}
@@ -28,43 +30,17 @@
     endif
   endfor
 
-  assign drawer_id = 'market-tote-drawer-pdp-' | append: product.id
   assign cta_text = settings.market_tote_pdp_cta_text | default: 'Build a tote bundle — Save 25%'
   assign page_path = settings.market_tote_page_path | default: '/pages/build-your-tote-bundle'
+  assign bundler_url = page_path | append: '?preselect=' | append: product.handle
 -%}
 
 {%- if settings.market_tote_pdp_enable and is_market_tote -%}
-  {%- comment -%}
-    Put ids on data-* attrs — do NOT use | json inside @click="...".
-    | json emits double quotes and terminates the HTML attribute early,
-    so Alpine never binds the handler and the button appears dead.
-  {%- endcomment -%}
   <div class="market-tote-pdp-cta px-4 py-4">
-    <button
-      type="button"
-      class="btn btn--secondary w-full market-tote-pdp-cta__btn"
-      data-drawer-id="{{ drawer_id | escape }}"
-      data-product-handle="{{ product.handle | escape }}"
-      @click="
-        window.dispatchEvent(new CustomEvent('market-tote-drawer:open', {
-          detail: {
-            drawerId: $el.dataset.drawerId,
-            mode: 'lock',
-            payload: {
-              slotLabel: 'Tote 1',
-              productHandle: $el.dataset.productHandle
-            }
-          }
-        }));
-      ">
+    <a
+      href="{{ bundler_url }}"
+      class="btn btn--secondary w-full market-tote-pdp-cta__btn">
       {{ cta_text }}
-    </button>
+    </a>
   </div>
-
-  {% render 'market-tote-bundler__drawer',
-      drawer_id: drawer_id,
-      bundle_page_path: page_path,
-      bundle_section_id: 'market_tote_bundler',
-      title: settings.market_tote_drawer_title,
-      preload: true %}
 {%- endif -%}
