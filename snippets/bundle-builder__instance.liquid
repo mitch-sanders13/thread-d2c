@@ -293,7 +293,6 @@
     {%- endunless -%}
 
     {% render 'bundle-builder__pdp-layout',
-        add_bundle_label: add_bundle_label,
         cart_label: cart_label,
         discount_type: discount_type,
         discount_value: discount_value %}
@@ -857,7 +856,7 @@
 
       selectPreview(handle) {
         var p = this.productByHandleInSlot(this.activeSlotIndex, handle);
-        if (!p) return;
+        if (!p || !p.available) return;
         var slot = this.activeSlot();
         if (slot && slot.locked) return;
         this.previewHandle = handle;
@@ -903,6 +902,18 @@
         if (!slot || slot.locked) return false;
         var p = this.previewProduct();
         return !!(p && p.available);
+      },
+
+      /* True when the previewed swatch is not yet the active slot's pick. */
+      showPreviewAction(handle) {
+        if (!this.isPreview(handle) || !this.canAddToBundle()) return false;
+        var slot = this.activeSlot();
+        return !!(slot && slot.selectedHandle !== handle);
+      },
+
+      previewActionLabel() {
+        var slot = this.activeSlot();
+        return (slot && slot.selectedHandle) ? 'Swap' : 'Add';
       },
 
       addToBundle() {

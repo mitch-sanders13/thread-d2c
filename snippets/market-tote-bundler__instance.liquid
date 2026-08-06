@@ -105,7 +105,6 @@
     {%- endunless -%}
 
     {% render 'market-tote-bundler__pdp-layout',
-        add_bundle_label: add_bundle_label,
         cart_label: cart_label,
         discount_type: discount_type,
         discount_value: discount_value %}
@@ -352,7 +351,7 @@
 
       selectPreview(handle) {
         var p = this.productByHandle(handle);
-        if (!p) return;
+        if (!p || !p.available) return;
         this.previewHandle = handle;
         this.galleryIndex = 0;
         this.applyHero(true);
@@ -384,6 +383,15 @@
         if (this.isComplete()) return false;
         var p = this.previewProduct();
         return !!(p && p.available);
+      },
+
+      /* Market Tote only adds (no per-slot swap). Show Add on the previewed swatch. */
+      showPreviewAction(handle) {
+        return this.isPreview(handle) && this.canAddToBundle();
+      },
+
+      previewActionLabel() {
+        return 'Add';
       },
 
       addToBundle() {
