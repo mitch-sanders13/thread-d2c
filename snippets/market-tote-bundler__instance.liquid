@@ -1,11 +1,11 @@
 {% comment %}
-  Shared Market Tote bundler instance (page section + PDP drawer).
+  Shared Market Tote bundler instance (page section + optional drawer).
 
   Renders the picker UI, product JSON, and Alpine factory. Callers pass
   an instance_id so multiple copies on one page stay unique.
 
-  PDP drawer preloads this snippet so it does not depend on a separate
-  /pages/build-your-tote-bundle existing with the right template.
+  PDP CTAs link here with ?preselect=<handle> to preview that tote and
+  seed it as pick #1 (not locked) — mirrors Everyday Carry Set deep links.
 {% endcomment %}
 
 {% doc %}
@@ -194,13 +194,27 @@
         var first = this.products.find(function(p){ return p.available; }) || this.products[0] || null;
         this.previewHandle = first ? first.handle : null;
         this.applyHero(true);
+        // Deep link from Market Tote PDP: ?preselect=<handle>
+        this._readUrlPrefill();
+      },
+
+      // Read ?preselect=<handle> so the PDP CTA lands on the product the
+      // customer came from (selected as pick #1, not locked).
+      _readUrlPrefill() {
+        try {
+          var params = new URLSearchParams(window.location.search || '');
+          var handle = params.get('preselect');
+          if (handle) this.preselect(handle);
+        } catch (e) {
+          console.warn('[market-tote-bundler] URL prefill failed', e);
+        }
       },
 
       lockSlot(slotLabel, productHandle) {
         return this.preselect(productHandle);
       },
 
-      // PDP drawer: preview this tote and seed it as pick #1 if empty.
+      // PDP deep link / drawer: preview this tote and seed it as pick #1 if empty.
       preselect(productHandle) {
         if (!productHandle) return false;
         var match = this.products.find(function(p){ return p.handle === productHandle; });

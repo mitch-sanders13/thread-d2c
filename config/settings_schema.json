@@ -2988,7 +2988,7 @@
         "id": "market_tote_page_path",
         "label": "Bundler page path",
         "default": "/pages/build-your-tote-bundle",
-        "info": "Optional standalone page (assign the market-tote-bundler template). The PDP drawer preloads the bundler and does not require this page."
+        "info": "Standalone page for the PDP CTA (assign the market-tote-bundler template). The CTA links here with ?preselect=<product-handle> so the current tote is live in the builder."
       },
       {
         "type": "text",
@@ -2999,8 +2999,9 @@
       {
         "type": "text",
         "id": "market_tote_drawer_title",
-        "label": "Drawer title",
-        "default": "Build Your Tote Bundle"
+        "label": "Drawer title (legacy)",
+        "default": "Build Your Tote Bundle",
+        "info": "Only used if the drawer snippet is rendered elsewhere. PDP CTAs navigate to the bundler page instead."
       },
       {
         "type": "header",
