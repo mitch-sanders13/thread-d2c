@@ -1981,6 +1981,10 @@
     gap: 40px;
     align-items: start;
   }
+  /* Everyday Carry: match PDP gallery width (md:w-2/3 media / md:w-1/3 info). */
+  .mtb-pdp.tri-pdp {
+    grid-template-columns: 2fr 1fr;
+  }
 }
 
 .mtb-pdp__media {
