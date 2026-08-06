@@ -2152,6 +2152,13 @@
        sitting between the savings line and the product title. */
     column-gap: 40px;
     row-gap: 0;
+    /*
+      Without this, a tall gallery (spanning both rows) inflates the
+      auto intro row and leaves a large empty band between the savings
+      line and the product title. auto|1fr keeps the intro row only as
+      tall as its content; leftover height goes to the info row.
+    */
+    grid-template-rows: auto 1fr;
   }
   .mtb-pdp.tri-pdp.tri-pdp--has-intro > .tri-pdp__page-intro {
     grid-area: intro;
