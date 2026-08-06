@@ -39,6 +39,7 @@
     },
     "collection_banner_jaEnzU": {
       "type": "collection__banner",
+      "disabled": true,
       "settings": {
         "color_scheme": "color__bg-body color__text",
         "color_text": "color__dark",
