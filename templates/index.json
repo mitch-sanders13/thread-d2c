@@ -1643,7 +1643,7 @@
       "name": "Hero Banner (secondary)",
       "settings": {
         "url": "",
-        "image_background_desktop": "shopify://shop_images/solids-mobile_1200x_31f6be6a-f566-49a6-b8be-211a7ef0a192.jpg",
+        "video_background": "shopify://files/videos/nocopy.mp4",
         "show_video_background_mobile": false,
         "show_entire_image": false,
         "enable_lazy_loading": true,
