@@ -22,7 +22,7 @@
         "discount_type": "percent",
         "discount_value": 25,
         "discount_code": "",
-        "spacing_top": 60,
+        "spacing_top": 20,
         "spacing_bottom": 60,
         "layout_horizontal": "window",
         "color_scheme": "color__bg-body color__text",
