@@ -75,14 +75,19 @@
   assign visibility = visibility | default: ''
 -%}
 
+{%- comment -%}
+  Stable #build-your-tote-bundle anchor for PDP deep links (skip in
+  compact drawer so multiple instances don't collide).
+{%- endcomment -%}
 <section
-  id="{{ section_id }}"
+  id="{% if compact %}{{ section_id }}{% else %}build-your-tote-bundle{% endif %}"
   class="
     {{ visibility }}
     {{ color_scheme }}
     {{ color_border }}
     {{ style_border }}
-  ">
+  "
+  {% unless compact %}data-section-id="{{ section_id }}"{% endunless %}>
   <div
     class="market-tote-bundler {{ layout_horizontal }}"
     style="

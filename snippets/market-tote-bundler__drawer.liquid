@@ -1,14 +1,13 @@
 {% comment %}
   Slide-over drawer that hosts the Market Tote bundler wizard.
 
-  Prefer preload (server-rendered instance in the drawer body) so the PDP
-  CTA works even when /pages/build-your-tote-bundle is missing or not
-  assigned the market-tote-bundler template. Fetch remains as a fallback
-  when preload is off.
+  Prefer preload (server-rendered instance in the drawer body) so the CTA
+  works even when the bundler page/collection path is missing. Fetch
+  remains as a fallback when preload is off.
 
   Inputs:
     - drawer_id: REQUIRED unique key
-    - bundle_page_path: defaults to theme setting /pages/build-your-tote-bundle
+    - bundle_page_path: defaults to theme setting /collections/reusable-market-tote-bags
     - bundle_section_id: defaults to 'market_tote_bundler'
     - title: drawer header text
     - preload: when true, render the bundler instance into the body now
@@ -33,7 +32,7 @@
 {% enddoc %}
 
 {%- assign _drawer_id = drawer_id | default: 'market-tote-drawer' -%}
-{%- assign _bundle_page_path = bundle_page_path | default: settings.market_tote_page_path | default: '/pages/build-your-tote-bundle' -%}
+{%- assign _bundle_page_path = bundle_page_path | default: settings.market_tote_page_path | default: '/collections/reusable-market-tote-bags' -%}
 {%- assign _bundle_section_id = bundle_section_id | default: 'market_tote_bundler' -%}
 {%- assign _title = title | default: settings.market_tote_drawer_title | default: 'Build Your Tote Bundle' -%}
 {%- assign _preload = preload | default: false -%}

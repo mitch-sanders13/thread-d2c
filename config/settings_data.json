@@ -300,7 +300,7 @@
     "trifecta_actions_mt": 0,
     "market_tote_pdp_enable": true,
     "market_tote_collection": "reusable-market-tote-bags",
-    "market_tote_page_path": "/pages/build-your-tote-bundle",
+    "market_tote_page_path": "/collections/reusable-market-tote-bags",
     "market_tote_pdp_cta_text": "Build a tote bundle — Save 25%",
     "market_tote_drawer_title": "Build Your Tote Bundle",
     "market_tote_discount_code": "TOTE25",

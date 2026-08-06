@@ -2987,8 +2987,8 @@
         "type": "text",
         "id": "market_tote_page_path",
         "label": "Bundler page path",
-        "default": "/pages/build-your-tote-bundle",
-        "info": "Standalone page for the PDP CTA (assign the market-tote-bundler template). The CTA links here with ?preselect=<product-handle> so the current tote is live in the builder."
+        "default": "/collections/reusable-market-tote-bags",
+        "info": "Where the PDP CTA sends customers. Defaults to the Market Tote collection (bundler section is on that template). A dedicated page with the market-tote-bundler template also works. CTA appends ?preselect=<handle>#build-your-tote-bundle."
       },
       {
         "type": "text",
