@@ -3,7 +3,9 @@
   swatches (with in-grid Add/Swap), progress, picks strip, and
   Add to Cart CTA once the set is complete.
 
-  Reuses Market Tote (.mtb-pdp*) visual classes for a consistent look.
+  Product selector (title row, type pills, swatch grid) mirrors the
+  PDP related-styles widget so the bundler feels like the regular PDP.
+  Heading + savings sit in the right column (not a centered top strip).
 {% endcomment %}
 
 {% doc %}
@@ -11,6 +13,8 @@
   @param {string} cart_label
   @param {string} discount_type
   @param {number} discount_value
+  @param {string} [heading]
+  @param {string} [savings_label]
 {% enddoc %}
 
 {%- assign _cart_label = cart_label | default: 'Add Bundle to Cart' -%}
@@ -60,6 +64,17 @@
   </div>
 
   <div class="mtb-pdp__info">
+    {%- unless heading == blank and savings_label == blank -%}
+      <div class="tri-pdp__page-intro">
+        {%- unless heading == blank -%}
+          <h2 class="tri-pdp__page-heading">{{ heading }}</h2>
+        {%- endunless -%}
+        {%- unless savings_label == blank -%}
+          <p class="mtb-pdp__savings">{{ savings_label }}</p>
+        {%- endunless -%}
+      </div>
+    {%- endunless -%}
+
     <div x-show="previewProduct()">
       <h3 class="mtb-pdp__title" x-text="previewProduct()?.title || ''"></h3>
       <p class="mtb-pdp__price" x-text="previewProduct() ? formatMoney(previewProduct().price) : ''"></p>
@@ -99,13 +114,39 @@
       </template>
     </div>
 
-    <div class="mtb-pdp__styles-header">
-      <p class="mtb-pdp__styles-label">
-        Select Your <span x-text="activeSlot()?.label || 'Style'"></span>
+    {%- comment -%}
+      Title row matches PDP related-styles: "Select Your Wallet" left,
+      style count + prev/next arrows right-justified on the same line.
+    {%- endcomment -%}
+    <div
+      class="mtb-pdp__styles-header"
+      :class="{ 'mtb-pdp__styles-header--paginated': swatchHasPagination }">
+      <div class="mtb-pdp__styles-titlerow">
+        <h4 class="mtb-pdp__styles-label">
+          Select Your <span x-text="activeSlot()?.label || 'Style'"></span>
+        </h4>
         <span
           class="mtb-pdp__styles-count"
-          x-text="'(' + filteredProducts().length + ' styles)'"></span>
-      </p>
+          x-text="filteredProducts().length + (filteredProducts().length === 1 ? ' style' : ' styles')"></span>
+        <div class="mtb-pdp__styles-arrows">
+          <button
+            type="button"
+            class="mtb-pdp__styles-arrow btn btn--plain btn--small shadow-sm"
+            aria-label="Previous styles"
+            :disabled="!swatchCanPrev"
+            @click="scrollSwatches(-1)">
+            {% render 'component__icon', icon: 'arrow-left', size: '20', class: '' %}
+          </button>
+          <button
+            type="button"
+            class="mtb-pdp__styles-arrow btn btn--plain btn--small shadow-sm"
+            aria-label="Next styles"
+            :disabled="!swatchCanNext"
+            @click="scrollSwatches(1)">
+            {% render 'component__icon', icon: 'arrow-right', size: '20', class: '' %}
+          </button>
+        </div>
+      </div>
       <p class="tri-pdp__locked-note type--small" x-show="activeSlot()?.locked" x-cloak>
         Locked from this product page
       </p>
@@ -136,8 +177,10 @@
 
     <div
       class="mtb-pdp__swatches"
+      x-ref="swatchGrid"
       role="listbox"
-      :aria-label="(activeSlot()?.label || 'Product') + ' styles'">
+      :aria-label="(activeSlot()?.label || 'Product') + ' styles'"
+      @scroll.passive="updateSwatchArrows()">
       <template x-for="product in filteredProducts()" :key="product.handle">
         {%- comment -%}
           Div (not button) so the Add/Swap control can be a real nested
@@ -171,7 +214,11 @@
             <span
               class="mtb-pdp__swatch-check"
               x-show="isPreview(product.handle) || activeSlot()?.selectedHandle === product.handle"
-              aria-hidden="true">✓</span>
+              aria-hidden="true">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
           </span>
           <span class="mtb-pdp__swatch-name" x-text="shortName(product.title)"></span>
           <button

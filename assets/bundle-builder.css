@@ -1805,33 +1805,50 @@
 }
 .tri-pdp__type-filters {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-wrap: nowrap;
+  gap: 12px;
   margin: 0 0 12px;
+  padding: 2px 0 2px 2px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  /* Hide scrollbar so it doesn't sit on top of the pills (PDP tab pattern). */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.tri-pdp__type-filters::-webkit-scrollbar {
+  display: none;
 }
 .tri-pdp__type-filter {
   display: inline-flex;
   align-items: center;
-  padding: 6px 10px;
+  padding: 7px 14px;
   margin: 0;
-  border: 1px solid var(--color-divider, #ddd);
-  border-radius: 4px;
-  background: transparent;
+  /* Match PDP related-styles / cart dropdown type pills: rounded pill,
+     light fill, black active state. */
+  border: 1.5px solid #c4c4c4;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.04);
   color: inherit;
   font: inherit;
   font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  text-transform: capitalize;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
   cursor: pointer;
   line-height: 1.2;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 .tri-pdp__type-filter:hover {
-  border-color: currentColor;
+  border-color: #1a1a1a;
 }
 .tri-pdp__type-filter.is-active {
-  border-color: currentColor;
-  background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.06));
+  border-color: #1a1a1a;
+  background: #1a1a1a;
+  color: #fff;
+  transform: scale(1.03);
 }
 .tri-pdp__filter-empty {
   margin: 0 0 12px;
@@ -1856,6 +1873,213 @@
 }
 .mtb-pdp__swatch.is-picked .mtb-pdp__swatch-img {
   border-color: #16a34a;
+}
+
+/* Everyday Carry right-column page intro (was centered gold strip above layout). */
+.tri-pdp__page-intro {
+  margin: 0 0 16px;
+}
+.tri-pdp__page-heading {
+  margin: 0;
+  font-size: clamp(1.15rem, 2.2vw, 1.5rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+.tri-pdp .mtb-pdp__savings {
+  margin: 8px 0 0;
+  text-align: left;
+}
+
+/*
+  Everyday Carry product selector — scoped under .tri-pdp so Market Tote
+  keeps its vertical-scroll swatch grid. Mirrors PDP related-styles:
+  title + count + arrows on one row, horizontal column-flow grid,
+  light-gray swatches with corner check badge.
+*/
+.tri-pdp .mtb-pdp__styles-header {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+.tri-pdp .mtb-pdp__styles-titlerow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.tri-pdp .mtb-pdp__styles-label {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: left;
+}
+.tri-pdp .mtb-pdp__styles-count {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--thread-grey, #888);
+  opacity: 1;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.tri-pdp .mtb-pdp__styles-arrows {
+  display: none;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+@media (min-width: 750px) {
+  .tri-pdp .mtb-pdp__styles-header--paginated .mtb-pdp__styles-arrows {
+    display: inline-flex;
+  }
+}
+.tri-pdp .mtb-pdp__styles-arrow {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.tri-pdp .mtb-pdp__styles-arrow:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* 4 cols desktop / 3 cols mobile, 3 rows, horizontal peek of next column. */
+.tri-pdp .mtb-pdp__swatches {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, auto);
+  grid-auto-columns: calc((100% - (3 * 8px)) / 3.2);
+  gap: 12px 8px;
+  max-height: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-top: 8px;
+  padding-bottom: 2px;
+}
+.tri-pdp .mtb-pdp__swatches::-webkit-scrollbar {
+  display: none;
+}
+@media (min-width: 750px) {
+  .tri-pdp .mtb-pdp__swatches {
+    grid-auto-columns: calc((100% - (4 * 8px)) / 4.3);
+    max-height: none;
+  }
+}
+
+.tri-pdp .mtb-pdp__swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+.tri-pdp .mtb-pdp__swatch.is-unavailable {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.tri-pdp .mtb-pdp__swatch-img {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 4px;
+  /* overflow visible so the check badge can sit slightly past the corner */
+  overflow: visible;
+  border: 2px solid transparent;
+  background: #f5f5f5;
+  transition: transform 0.12s ease, border-color 0.2s ease;
+}
+.tri-pdp .mtb-pdp__swatch-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: inherit;
+}
+.tri-pdp .mtb-pdp__swatch:hover .mtb-pdp__swatch-img {
+  transform: scale(1.04);
+}
+.tri-pdp .mtb-pdp__swatch.is-current .mtb-pdp__swatch-img {
+  border-color: var(--thread-ink, #111);
+}
+/* Selected inner white ring — same trick as PDP related-styles. */
+.tri-pdp .mtb-pdp__swatch.is-current .mtb-pdp__swatch-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid #fff;
+  border-radius: 2px;
+  pointer-events: none;
+}
+.tri-pdp .mtb-pdp__swatch-check {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--thread-ink, #111);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0;
+  line-height: 1;
+  z-index: 2;
+  pointer-events: none;
+}
+.tri-pdp .mtb-pdp__swatch-check svg {
+  display: block;
+}
+.tri-pdp .mtb-pdp__swatch-name {
+  font-size: 0.7rem;
+  line-height: 1.15;
+  font-weight: 400;
+  opacity: 0.85;
+  width: 100%;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+.tri-pdp .mtb-pdp__swatch.is-current .mtb-pdp__swatch-name {
+  opacity: 1;
+  font-weight: 700;
+}
+/* Picked-for-bundle still uses green so it stays distinct from preview. */
+.tri-pdp .mtb-pdp__swatch.is-picked:not(.is-current) .mtb-pdp__swatch-img {
+  border-color: #16a34a;
+}
+.tri-pdp .mtb-pdp__swatch-action {
+  width: 100%;
+  margin-top: 2px;
+  padding: 6px 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  min-height: 0;
 }
 
 /* ============ Market Tote bundler — PDP layout ============ */
