@@ -624,7 +624,7 @@
         this.resetSwatchScroll();
       },
 
-      /* PDP-style horizontal swatch paging — same step math as related-styles. */
+      /* Swatch paging — vertical scroll (compact 4/5-col grid). */
       updateSwatchArrows() {
         var grid = this.$refs.swatchGrid;
         if (!grid) {
@@ -633,7 +633,7 @@
           this.swatchCanNext = false;
           return;
         }
-        var max = grid.scrollWidth - grid.clientWidth;
+        var max = grid.scrollHeight - grid.clientHeight;
         var hasOverflow = max > 1;
         this.swatchHasPagination = hasOverflow;
         if (!hasOverflow) {
@@ -641,22 +641,22 @@
           this.swatchCanNext = false;
           return;
         }
-        this.swatchCanPrev = grid.scrollLeft > 1;
-        this.swatchCanNext = grid.scrollLeft < max - 1;
+        this.swatchCanPrev = grid.scrollTop > 1;
+        this.swatchCanNext = grid.scrollTop < max - 1;
       },
 
       scrollSwatches(dir) {
         var grid = this.$refs.swatchGrid;
         if (!grid) return;
-        var step = Math.max(grid.clientWidth * 0.9, 120);
-        grid.scrollBy({ left: dir * step, behavior: 'smooth' });
+        var step = Math.max(grid.clientHeight * 0.85, 120);
+        grid.scrollBy({ top: dir * step, behavior: 'smooth' });
       },
 
       resetSwatchScroll() {
         var self = this;
         this.$nextTick(function() {
           var grid = self.$refs.swatchGrid;
-          if (grid) grid.scrollLeft = 0;
+          if (grid) grid.scrollTop = 0;
           self.updateSwatchArrows();
         });
       },

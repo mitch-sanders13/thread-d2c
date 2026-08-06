@@ -135,7 +135,7 @@
             aria-label="Previous styles"
             :disabled="!swatchCanPrev"
             @click="scrollSwatches(-1)">
-            {% render 'component__icon', icon: 'arrow-left', size: '20', class: '' %}
+            {% render 'component__icon', icon: 'arrow-up', size: '20', class: '' %}
           </button>
           <button
             type="button"
@@ -143,7 +143,7 @@
             aria-label="Next styles"
             :disabled="!swatchCanNext"
             @click="scrollSwatches(1)">
-            {% render 'component__icon', icon: 'arrow-right', size: '20', class: '' %}
+            {% render 'component__icon', icon: 'arrow-down', size: '20', class: '' %}
           </button>
         </div>
       </div>
