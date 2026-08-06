@@ -5,15 +5,16 @@
 
   Data sources (Theme Editor → "Gallery source"):
     - Manual tiles: merchant-curated blocks (image/video + username) — original behavior.
-    - Instagram (Instafeed): client-side fetch from Mintt Instafeed Feed API, rendered into
-      the same tile markup so the branded carousel stays intact. Requires Instafeed installed,
-      Instagram connected, and a Feed API key (Admin → Apps → Instafeed → Integrations).
-      If the fetch fails or the key is blank, manual tile blocks are kept as a fallback.
+    - Instagram (Instafeed): client-side fetch from Mintt Instafeed, rendered into the same
+      tile markup so the branded carousel stays intact.
 
-  Security note: the Instafeed API key is a theme setting and is output as a data attribute
-  so the storefront can call the Feed API. It is readable in page HTML / network requests.
-  The key is read-only feed access; rotate it in Instafeed if it leaks. Prefer a server proxy
-  later if you need the key off the storefront.
+  Auth (important): browser calls always send an Origin header. Instafeed then requires either
+    (1) the storefront `hash` query param — same secret the Instafeed widget embeds in
+        cdn.nfcube.com/instafeed-*.js (already public on the storefront), OR
+    (2) a valid Feed API key via the X-API-Key header (Apps → Instafeed → Integrations).
+  A missing/wrong key with no hash returns 401 and we keep manual tiles. Prefer the hash.
+
+  Requires Instafeed installed + Instagram connected. Manual tile blocks are the SSR fallback.
 
   Reuses from theme__styles.liquid:
     - Typography utilities: .type-display, .type-h1, .type-h2, .type-h3, .type-body, .type-small, .type-label
@@ -60,6 +61,7 @@
   if ugc_ig_fid == blank
     assign ugc_ig_fid = '0'
   endif
+  assign ugc_ig_hash = section.settings.instagram_storefront_hash | strip
   assign ugc_ig_fallback = false
   if section.settings.instagram_fallback_manual
     assign ugc_ig_fallback = true
@@ -231,6 +233,7 @@
   {%- if ugc_use_instagram -%}
     data-ugc-ig-endpoint="https://instafeed.nfcube.com/feed/{{ ugc_ig_version | escape }}"
     data-ugc-ig-key="{{ section.settings.instagram_api_key | escape }}"
+    data-ugc-ig-hash="{{ ugc_ig_hash | escape }}"
     data-ugc-ig-account="{{ ugc_ig_account | escape }}"
     data-ugc-ig-fid="{{ ugc_ig_fid | escape }}"
     data-ugc-ig-limit="{{ section.settings.instagram_post_limit | default: 12 }}"
@@ -682,12 +685,13 @@
   }
 {% endstylesheet %}
 
-{% javascript %}
+<script>
   (function () {
     'use strict';
     var SELECTOR = '[data-ugc-gallery]';
     var osReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var instances = new WeakMap();
+    // One WeakMap across section re-renders in the Theme Editor.
+    var instances = window.__ugcGalleryInstances || (window.__ugcGalleryInstances = new WeakMap());
 
     function qs(root, sel)  { return root.querySelector(sel); }
     function qsa(root, sel) { return Array.prototype.slice.call(root.querySelectorAll(sel)); }
@@ -742,6 +746,7 @@
       var username = usernameFor(post, meta);
       var alt = (post.alt_text && String(post.alt_text).trim()) ||
         (username ? username.replace(/^@/, '') + ' — Instagram photo' : 'Instagram photo');
+      // Instafeed uses image | video | carousel_album (treat album as image tile).
       var isVideo = post.type === 'video';
       var videoSrc = isVideo ? mediaUrl(post, 'video') : '';
       var imageSrc = mediaUrl(post, 'image');
@@ -785,9 +790,28 @@
     }
 
     /**
-     * Fetch Instagram posts from Mintt Instafeed Feed API and replace track children.
-     * Returns true when tiles were written; false when we should keep Liquid fallback tiles.
+     * Browser requests always include Origin. Instafeed then requires either:
+     *   - storefront `hash` query param (same value embedded in their CDN widget script), or
+     *   - a valid X-API-Key from Integrations.
+     * Missing/wrong auth → 401 → keep manual tiles.
      */
+    function discoverHashFromWidget() {
+      try {
+        var api = window.InstafeedAPI;
+        var instances = api && api.settings && api.settings.instances;
+        if (!instances) return '';
+        var list = Array.isArray(instances)
+          ? instances
+          : Object.keys(instances).map(function (k) { return instances[k]; });
+        for (var i = 0; i < list.length; i++) {
+          var inst = list[i];
+          var opts = (inst && inst.options) || inst || {};
+          if (opts.hash) return String(opts.hash);
+        }
+      } catch (e) {}
+      return '';
+    }
+
     function loadInstagramFeed(root, track) {
       var key = (root.dataset.ugcIgKey || '').trim();
       var account = (root.dataset.ugcIgAccount || '').trim();
@@ -797,61 +821,102 @@
       var aspect = root.dataset.ugcIgAspect || 'portrait';
       var allowFallback = root.dataset.ugcIgFallback !== 'false';
 
-      // No key yet — leave manual tiles in place when fallback is on (Theme Editor setup path).
-      if (!key || !account || !endpoint) {
+      if (!account || !endpoint) {
         if (!allowFallback) track.innerHTML = '';
         return Promise.resolve(track.children.length > 0);
       }
 
-      var url = endpoint +
-        '?limit=' + encodeURIComponent(String(limit)) +
-        '&account=' + encodeURIComponent(account) +
-        '&fu=0&fid=' + encodeURIComponent(fid);
-
-      function request() {
-        return fetch(url, {
-          method: 'GET',
-          headers: { 'X-API-Key': key, 'Accept': 'application/json' },
-          credentials: 'omit'
-        }).then(function (res) {
-          return res.json().then(function (body) {
-            return { httpStatus: res.status, body: body };
-          }).catch(function () {
-            return { httpStatus: res.status, body: null };
-          });
+      function resolveHash() {
+        var immediate = (root.dataset.ugcIgHash || '').trim() || discoverHashFromWidget();
+        if (immediate) return Promise.resolve(immediate);
+        // Instafeed head script may still be loading; poll briefly for an instance hash.
+        return new Promise(function (resolve) {
+          var tries = 0;
+          var timer = setInterval(function () {
+            tries += 1;
+            var found = discoverHashFromWidget();
+            if (found || tries >= 12) {
+              clearInterval(timer);
+              resolve(found || '');
+            }
+          }, 250);
         });
       }
 
-      // Instafeed may return 202 while cache builds — retry once after a short wait.
-      return request().then(function (first) {
-        var code = (first.body && first.body.meta && first.body.meta.code) || first.httpStatus;
-        if (code === 202) {
-          return new Promise(function (resolve) {
-            setTimeout(function () {
-              request().then(resolve).catch(function () { resolve(first); });
-            }, 1500);
-          });
-        }
-        return first;
-      }).then(function (result) {
-        var body = result.body;
-        var code = (body && body.meta && body.meta.code) || result.httpStatus;
-        var posts = (body && body.data) || [];
-        var meta = (body && body.meta) || {};
-
-        if (code !== 200 || !posts.length) {
+      return resolveHash().then(function (hash) {
+        // Prefer hash (storefront widget auth). API key alone often 401s if blank/wrong
+        // once Origin is present — which every browser fetch sends.
+        if (!hash && !key) {
+          if (typeof console !== 'undefined' && console.warn) {
+            console.warn('[ugc-gallery] Instagram source needs a storefront hash or Feed API key; keeping manual tiles.');
+          }
           if (!allowFallback) track.innerHTML = '';
           return track.children.length > 0;
         }
 
-        var html = posts.map(function (post) {
-          return buildTileHtml(post, meta, aspect);
-        }).join('');
+        var url = endpoint +
+          '?limit=' + encodeURIComponent(String(limit)) +
+          '&account=' + encodeURIComponent(account) +
+          '&fu=0&fid=' + encodeURIComponent(fid) +
+          '&locale=en';
+        if (hash) {
+          url += '&hash=' + encodeURIComponent(hash);
+        }
 
-        track.innerHTML = html;
-        return track.children.length > 0;
-      }).catch(function () {
-        // Network / CORS / parse errors — keep manual tiles when fallback is on.
+        function request() {
+          var headers = { Accept: 'application/json' };
+          // Only send X-API-Key when we have no hash — a wrong key with Origin → 401.
+          if (!hash && key) {
+            headers['X-API-Key'] = key;
+          }
+          return fetch(url, {
+            method: 'GET',
+            headers: headers,
+            credentials: 'omit'
+          }).then(function (res) {
+            return res.json().then(function (body) {
+              return { httpStatus: res.status, body: body };
+            }).catch(function () {
+              return { httpStatus: res.status, body: null };
+            });
+          });
+        }
+
+        return request().then(function (first) {
+          var code = (first.body && first.body.meta && first.body.meta.code) || first.httpStatus;
+          if (code === 202) {
+            return new Promise(function (resolve) {
+              setTimeout(function () {
+                request().then(resolve).catch(function () { resolve(first); });
+              }, 1500);
+            });
+          }
+          return first;
+        }).then(function (result) {
+          var body = result.body;
+          var code = (body && body.meta && body.meta.code) || result.httpStatus;
+          var posts = (body && body.data) || [];
+          var meta = (body && body.meta) || {};
+
+          if (code !== 200 || !posts.length) {
+            if (typeof console !== 'undefined' && console.warn) {
+              console.warn('[ugc-gallery] Instagram feed unavailable (code ' + code + '); keeping manual tiles.');
+            }
+            if (!allowFallback) track.innerHTML = '';
+            return track.children.length > 0;
+          }
+
+          var html = posts.map(function (post) {
+            return buildTileHtml(post, meta, aspect);
+          }).join('');
+
+          track.innerHTML = html;
+          return track.children.length > 0;
+        });
+      }).catch(function (err) {
+        if (typeof console !== 'undefined' && console.warn) {
+          console.warn('[ugc-gallery] Instagram feed request failed; keeping manual tiles.', err && err.message ? err.message : err);
+        }
         if (!allowFallback) track.innerHTML = '';
         return track.children.length > 0;
       });
@@ -1107,10 +1172,14 @@
       initAll();
     }
 
-    document.addEventListener('shopify:section:load', function (e) { initAll(e.target); });
-    document.addEventListener('shopify:section:unload', function (e) { destroy(e.target); });
+    // Bind Theme Editor hooks once — inline section scripts re-run on every render.
+    if (!window.__ugcGalleryEditorHooks) {
+      window.__ugcGalleryEditorHooks = true;
+      document.addEventListener('shopify:section:load', function (e) { initAll(e.target); });
+      document.addEventListener('shopify:section:unload', function (e) { destroy(e.target); });
+    }
   })();
-{% endjavascript %}
+</script>
 
 {% schema %}
 {
@@ -1173,22 +1242,28 @@
       "type": "select",
       "id": "data_source",
       "label": "Pull tiles from",
-      "info": "Instagram uses Mintt Instafeed's Feed API and keeps this section's carousel styling. Manual uses the tile blocks below.",
+      "info": "Instagram uses Mintt Instafeed and keeps this section's carousel styling. Manual uses the tile blocks below.",
       "options": [
         { "value": "manual", "label": "Manual tiles (Theme Editor blocks)" },
-        { "value": "instagram", "label": "Instagram (Instafeed Feed API)" }
+        { "value": "instagram", "label": "Instagram (Instafeed)" }
       ],
       "default": "manual"
     },
     {
       "type": "paragraph",
-      "content": "Instagram setup: install/connect Instafeed, then copy the Feed API key from Apps → Instafeed → Integrations. The key is readable in the storefront (read-only feed access) — rotate it in Instafeed if needed."
+      "content": "Instagram auth: browsers must send Instafeed's storefront hash (same value their widget uses) OR a valid Feed API key. Prefer the hash — a missing/wrong API key returns 401 and falls back to manual tiles. Hash is already public in Instafeed's CDN script (cdn.nfcube.com/instafeed-*.js)."
+    },
+    {
+      "type": "text",
+      "id": "instagram_storefront_hash",
+      "label": "Instafeed storefront hash",
+      "info": "Preferred. Find it in the Instafeed CDN script (search for \"hash\":\") or leave blank if the Instafeed app block has already initialized on the page."
     },
     {
       "type": "text",
       "id": "instagram_api_key",
-      "label": "Instafeed API key",
-      "info": "Required for Instagram source. Do not commit this value to a public theme repo if the repo is shared outside your team."
+      "label": "Instafeed Feed API key (optional)",
+      "info": "Only used when storefront hash is blank. From Apps → Instafeed → Integrations. Readable in storefront HTML."
     },
     {
       "type": "select",
@@ -1237,7 +1312,7 @@
       "type": "checkbox",
       "id": "instagram_fallback_manual",
       "label": "Fall back to manual tiles if Instagram fails",
-      "info": "When on, tile blocks below stay visible if the API key is missing, the feed is empty, or the request errors.",
+      "info": "When on, tile blocks below stay visible if auth is missing, the feed is empty, or the request errors.",
       "default": true
     },
 
