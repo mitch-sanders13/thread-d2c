@@ -1011,19 +1011,6 @@
         return this.productByHandleInSlot(slotIdx, slot.selectedHandle);
       },
 
-      filledPicks() {
-        var out = [];
-        for (var i = 0; i < this.slots.length; i++) {
-          if (!this.slots[i].selectedHandle) continue;
-          out.push({
-            idx: i,
-            slot: this.slots[i],
-            product: this.pickProduct(i)
-          });
-        }
-        return out;
-      },
-
       slotFilled(slotIdx) {
         return !!(this.slots[slotIdx] && this.slots[slotIdx].selectedHandle);
       },
