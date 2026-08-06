@@ -1704,7 +1704,8 @@
   display: flex;
   flex-wrap: nowrap;
   gap: 6px;
-  margin: 12px 0 16px;
+  /* Tighter bottom gap so "Select Your …" sits closer (PDP-like). */
+  margin: 12px 0 8px;
   width: 100%;
 }
 .tri-pdp__slot {
@@ -1928,6 +1929,10 @@
   text-align: left;
   overflow-wrap: anywhere;
 }
+/* When savings is the last intro line, don't leave extra space before title. */
+.tri-pdp .tri-pdp__page-intro > .mtb-pdp__savings:last-child {
+  margin-bottom: 0;
+}
 
 /* PDP-style mobile/desktop visibility for title+price placement. */
 .tri-pdp__mobile-summary {
@@ -1951,8 +1956,9 @@
   rules below (4/5-col, max-height, vertical scroll) so cards stay compact.
 */
 .tri-pdp .mtb-pdp__styles-header {
-  margin-top: 20px;
-  margin-bottom: 10px;
+  /* Match PDP related-styles: small top gap after slots, rs_title_mb 4. */
+  margin-top: 12px;
+  margin-bottom: 4px;
 }
 .tri-pdp .mtb-pdp__styles-titlerow {
   display: flex;
@@ -1964,20 +1970,25 @@
   margin: 0;
   flex: 1 1 auto;
   min-width: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
+  /* Match product.json related_styles rs_title_* */
+  font-family: var(--type-font-body-family);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   line-height: 1.3;
   text-align: left;
+  text-transform: none;
 }
 .tri-pdp .mtb-pdp__styles-count {
   flex: 0 0 auto;
   margin-left: auto;
-  font-size: 0.75rem;
+  font-family: var(--type-font-body-family);
+  font-size: 13px;
   font-weight: 400;
+  letter-spacing: 0.08em;
   color: var(--thread-grey, #888);
   opacity: 1;
   text-transform: none;
-  letter-spacing: 0;
 }
 .tri-pdp .mtb-pdp__styles-arrows {
   display: none;
@@ -2137,10 +2148,14 @@
     grid-template-areas:
       "media intro"
       "media info";
+    /* Keep media|info column gap; kill the 40px row gap that was
+       sitting between the savings line and the product title. */
+    column-gap: 40px;
+    row-gap: 0;
   }
   .mtb-pdp.tri-pdp.tri-pdp--has-intro > .tri-pdp__page-intro {
     grid-area: intro;
-    margin: 0 0 12px;
+    margin: 0 0 4px;
   }
   .mtb-pdp.tri-pdp.tri-pdp--has-intro > .mtb-pdp__media {
     grid-area: media;
@@ -2324,18 +2339,26 @@
   }
 }
 
+/* Match regular PDP title block (product.json title_* / .pdp-title). */
 .mtb-pdp__title {
   margin: 0;
-  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
-  font-weight: 700;
+  font-family: var(--type-font-header-family);
+  font-size: 42px;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.02em;
-  line-height: 1.15;
+  line-height: 1;
   overflow-wrap: anywhere;
 }
+/* Match regular PDP price block (product.json price_* / .pdp-price-regular). */
 .mtb-pdp__price {
-  margin: 8px 0 0;
-  font-size: 1.05rem;
+  margin: 4px 0 0;
+  font-family: var(--type-font-body-family);
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: #1c1c1c;
+  line-height: 1.2;
 }
 .mtb-pdp__info {
   min-width: 0;
