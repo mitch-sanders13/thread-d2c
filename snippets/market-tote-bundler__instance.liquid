@@ -505,6 +505,16 @@
         return this.picks.indexOf(handle) !== -1;
       },
 
+      /* How many of this tote SKU are already in the bundle. */
+      pickCount(handle) {
+        if (!handle) return 0;
+        var n = 0;
+        for (var i = 0; i < this.picks.length; i++) {
+          if (this.picks[i] === handle) n++;
+        }
+        return n;
+      },
+
       totalSelected() {
         return this.picks.length;
       },
@@ -529,12 +539,17 @@
         return !!(p && p.available);
       },
 
-      /* Market Tote only adds (no per-slot swap). Show Add on the previewed swatch. */
+      /* Market Tote only adds (no per-slot swap). Show Add/+ on the previewed swatch. */
       showPreviewAction(handle) {
         return this.isPreview(handle) && this.canAddToBundle();
       },
 
+      /*
+        First pick of a style: "Add".
+        Already in the bundle and room left: "+" so shoppers can add another of the same SKU.
+      */
       previewActionLabel() {
+        if (this.isPicked(this.previewHandle)) return '+';
         return 'Add';
       },
 

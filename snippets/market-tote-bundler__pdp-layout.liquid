@@ -182,8 +182,17 @@
               loading="lazy"
               decoding="async" />
             {%- comment -%}
+              Qty badge (top-left) — how many of this SKU are in the bundle.
+              Same style can be added more than once (up to 3 total picks).
+            {%- endcomment -%}
+            <span
+              class="mtb-pdp__swatch-qty"
+              x-show="pickCount(product.handle) > 0"
+              x-cloak
+              :aria-label="pickCount(product.handle) + ' in bundle'"
+              x-text="pickCount(product.handle)"></span>
+            {%- comment -%}
               X removes one instance of this tote from the bundle.
-              Replaces the old "In your bundle" strip remove control.
             {%- endcomment -%}
             <button
               type="button"
@@ -207,9 +216,11 @@
           <button
             type="button"
             class="mtb-pdp__swatch-action btn btn--primary"
+            :class="{ 'mtb-pdp__swatch-action--plus': isPicked(product.handle) }"
             x-show="showPreviewAction(product.handle)"
             x-cloak
             @click.stop="addToBundle()"
+            :aria-label="isPicked(product.handle) ? ('Add another ' + shortName(product.title)) : ('Add ' + shortName(product.title))"
             x-text="previewActionLabel()"></button>
         </div>
       </template>
