@@ -1791,15 +1791,16 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 18px;
-  height: 18px;
+  /* Larger tap target on mobile; visual size stays compact via font. */
+  width: 28px;
+  height: 28px;
   padding: 0;
   margin: 0;
   border: 1px solid currentColor;
   border-radius: 50%;
   background: #fff;
   color: #166534;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
@@ -1828,8 +1829,8 @@
     height: 56px;
   }
   .tri-pdp__slot-remove {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     font-size: 16px;
   }
 }
@@ -1905,7 +1906,7 @@
   border-color: #16a34a;
 }
 
-/* Everyday Carry right-column page intro (was centered gold strip above layout). */
+/* Everyday Carry page intro — first in DOM for mobile stack order. */
 .tri-pdp__page-intro {
   margin: 0 0 16px;
 }
@@ -2054,12 +2055,32 @@
     minmax(0, …) is required so the info column's pills/swatches can't
     force the media column narrower than its fr share (default
     min-width:auto on grid items was shrinking the hero).
+
+    When the page intro is present it is the first DOM child (for
+    mobile order). Grid areas pin it to the top of the right column
+    so desktop still reads: media | intro+info.
   */
   .mtb-pdp.tri-pdp {
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   }
+  .mtb-pdp.tri-pdp.tri-pdp--has-intro {
+    grid-template-areas:
+      "media intro"
+      "media info";
+  }
+  .mtb-pdp.tri-pdp.tri-pdp--has-intro > .tri-pdp__page-intro {
+    grid-area: intro;
+    margin: 0 0 12px;
+  }
+  .mtb-pdp.tri-pdp.tri-pdp--has-intro > .mtb-pdp__media {
+    grid-area: media;
+  }
+  .mtb-pdp.tri-pdp.tri-pdp--has-intro > .mtb-pdp__info {
+    grid-area: info;
+  }
   .mtb-pdp.tri-pdp > .mtb-pdp__media,
-  .mtb-pdp.tri-pdp > .mtb-pdp__info {
+  .mtb-pdp.tri-pdp > .mtb-pdp__info,
+  .mtb-pdp.tri-pdp > .tri-pdp__page-intro {
     min-width: 0;
   }
 }
