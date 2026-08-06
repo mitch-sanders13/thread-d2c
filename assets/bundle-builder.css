@@ -1785,7 +1785,32 @@
   background: rgba(22, 163, 74, 0.22);
   box-shadow: 0 0 0 1px #16a34a;
 }
-.tri-pdp__slot-check {
+/* Remove control replaces the old checkmark on filled (unlocked) cards. */
+.tri-pdp__slot-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin: 0;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: #fff;
+  color: #166534;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.tri-pdp__slot-remove:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+.tri-pdp__slot-locked {
   color: #16a34a;
   font-size: 0.6rem;
   flex-shrink: 0;
@@ -1801,6 +1826,11 @@
   .tri-pdp__slot-thumb {
     width: 56px;
     height: 56px;
+  }
+  .tri-pdp__slot-remove {
+    width: 20px;
+    height: 20px;
+    font-size: 16px;
   }
 }
 .tri-pdp__type-filters {

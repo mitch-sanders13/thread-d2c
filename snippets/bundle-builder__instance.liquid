@@ -1001,10 +1001,8 @@
         var slot = this.slots[slotIdx];
         if (!slot || slot.locked) return;
         slot.selectedHandle = null;
-        if (this.activeSlotIndex === slotIdx) {
-          this.typeFilter = 'all';
-          this._syncPreviewFromActive(true);
-        }
+        // Land on the cleared slot so the customer can pick a replacement.
+        this.selectSlot(slotIdx);
       },
 
       pickProduct(slotIdx) {

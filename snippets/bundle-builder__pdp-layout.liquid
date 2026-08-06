@@ -125,10 +125,14 @@
 
     <div class="tri-pdp__slots" role="tablist" aria-label="Bundle slots">
       <template x-for="(slot, sIdx) in slots" :key="slot.key">
-        <button
-          type="button"
+        {%- comment -%}
+          Div (not button) so a nested Remove control is valid HTML.
+          Click/keyboard still selects the slot; Remove uses @click.stop.
+        {%- endcomment -%}
+        <div
           role="tab"
           class="tri-pdp__slot"
+          tabindex="0"
           :class="{
             'is-active': activeSlotIndex === sIdx,
             'is-filled': slotFilled(sIdx),
@@ -136,12 +140,29 @@
             'is-locked': slot.locked
           }"
           :aria-selected="activeSlotIndex === sIdx"
-          @click="selectSlot(sIdx)">
+          :aria-label="slot.label + (slotFilled(sIdx) ? ', selected' : ', empty')"
+          @click="selectSlot(sIdx)"
+          @keydown.enter.prevent="selectSlot(sIdx)"
+          @keydown.space.prevent="selectSlot(sIdx)">
           <span class="tri-pdp__slot-top">
             <span
               class="tri-pdp__slot-label"
               x-html="(slot.label || '').replace(/ /g, '<br>')"></span>
-            <span class="tri-pdp__slot-check" x-show="slotFilled(sIdx)" aria-hidden="true">✓</span>
+            <button
+              type="button"
+              class="tri-pdp__slot-remove"
+              x-show="slotFilled(sIdx) && !slot.locked"
+              x-cloak
+              :aria-label="'Remove ' + (slot.label || 'item') + ' from bundle'"
+              @click.stop="removePick(sIdx)">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <span
+              class="tri-pdp__slot-locked"
+              x-show="slotFilled(sIdx) && slot.locked"
+              x-cloak
+              title="Locked from this product page"
+              aria-hidden="true">✓</span>
           </span>
           <span class="tri-pdp__slot-thumb" aria-hidden="true">
             <img
@@ -153,7 +174,7 @@
               loading="lazy"
               decoding="async" />
           </span>
-        </button>
+        </div>
       </template>
     </div>
 
@@ -318,33 +339,6 @@
           x-text="formatMoney(subtotalCents())"
           x-cloak></s>
       </p>
-    </div>
-
-    <div class="mtb-pdp__picks" x-show="filledPicks().length > 0" x-cloak>
-      <p class="mtb-pdp__picks-label type--small">In your bundle</p>
-      <ul class="mtb-pdp__picks-list">
-        <template x-for="pick in filledPicks()" :key="pick.slot.key">
-          <li class="mtb-pdp__pick">
-            <img
-              :src="pick.product?.swatchImage"
-              width="48"
-              height="48"
-              :alt="pick.product?.title || ''"
-              loading="lazy" />
-            <span class="mtb-pdp__pick-name">
-              <span class="tri-pdp__pick-slot" x-text="pick.slot.label"></span>
-              <span x-text="shortName(pick.product?.title || '')"></span>
-            </span>
-            <button
-              type="button"
-              class="mtb-pdp__pick-remove"
-              x-show="!pick.slot.locked"
-              :aria-label="'Remove ' + pick.slot.label + ' from bundle'"
-              @click="removePick(pick.idx)">Remove from Bundle</button>
-            <span class="tri-pdp__pick-locked type--small" x-show="pick.slot.locked" x-cloak>Locked</span>
-          </li>
-        </template>
-      </ul>
     </div>
   </div>
 </div>
