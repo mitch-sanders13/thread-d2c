@@ -2539,6 +2539,15 @@
 
 .mtb-pdp__cta {
   margin-top: 16px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.mtb-pdp__cta .btn {
+  /* .btn sets width:auto after Tailwind .w-full in the cascade —
+     keep content-sized and center under the style grid. */
+  width: auto;
+  max-width: 100%;
 }
 .mtb-pdp__cta .btn:disabled {
   opacity: 0.5;
