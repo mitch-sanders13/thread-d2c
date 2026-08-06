@@ -903,6 +903,22 @@
         this.applyHero(false);
       },
 
+      galleryPrev() {
+        var images = this.previewImages();
+        if (images.length < 2) return;
+        var next = this.galleryIndex - 1;
+        if (next < 0) next = images.length - 1;
+        this.selectGallery(next);
+      },
+
+      galleryNext() {
+        var images = this.previewImages();
+        if (images.length < 2) return;
+        var next = this.galleryIndex + 1;
+        if (next >= images.length) next = 0;
+        this.selectGallery(next);
+      },
+
       shortName(title) {
         if (!title) return '';
         var idx = title.indexOf(' - ');

@@ -49,17 +49,60 @@
       </template>
     </div>
 
-    <div class="mtb-pdp__hero" :class="{ 'is-loading': !heroReady }">
-      <img
-        x-show="heroSrc"
-        :src="heroSrc"
-        :srcset="heroSrcset || null"
-        sizes="(min-width: 990px) 45vw, 100vw"
-        width="1200"
-        height="1200"
-        :alt="heroAlt"
-        decoding="async"
-        fetchpriority="high" />
+    {%- comment -%}
+      Main hero — sized like the PDP gallery main column, with side
+      arrows + dots when there is more than one product image.
+    {%- endcomment -%}
+    <div class="mtb-pdp__hero-wrap">
+      <div class="mtb-pdp__hero" :class="{ 'is-loading': !heroReady }">
+        <img
+          x-show="heroSrc"
+          :src="heroSrc"
+          :srcset="heroSrcset || null"
+          sizes="(min-width: 990px) 55vw, 100vw"
+          width="1200"
+          height="1200"
+          :alt="heroAlt"
+          decoding="async"
+          fetchpriority="high" />
+      </div>
+
+      <template x-if="previewImages().length > 1">
+        <div class="mtb-pdp__hero-arrows" aria-hidden="false">
+          <button
+            type="button"
+            class="mtb-pdp__hero-arrow mtb-pdp__hero-arrow--prev btn btn--plain btn--small shadow-sm"
+            aria-label="Previous image"
+            @click="galleryPrev()">
+            {% render 'component__icon', icon: 'arrow-left', size: '20', class: '' %}
+          </button>
+          <button
+            type="button"
+            class="mtb-pdp__hero-arrow mtb-pdp__hero-arrow--next btn btn--plain btn--small shadow-sm"
+            aria-label="Next image"
+            @click="galleryNext()">
+            {% render 'component__icon', icon: 'arrow-right', size: '20', class: '' %}
+          </button>
+        </div>
+      </template>
+
+      <div
+        class="mtb-pdp__hero-dots"
+        x-show="previewImages().length > 1 && previewImages().length <= 12"
+        x-cloak
+        role="tablist"
+        aria-label="Image pagination">
+        <template x-for="(image, imgIdx) in previewImages()" :key="'dot-' + imgIdx">
+          <button
+            type="button"
+            class="mtb-pdp__hero-dot"
+            role="tab"
+            :class="{ 'is-active': galleryIndex === imgIdx }"
+            :aria-selected="galleryIndex === imgIdx"
+            :aria-label="'Image ' + (imgIdx + 1)"
+            @click="selectGallery(imgIdx)"></button>
+        </template>
+      </div>
     </div>
   </div>
 
