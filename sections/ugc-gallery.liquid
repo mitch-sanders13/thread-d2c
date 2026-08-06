@@ -3,6 +3,18 @@
   UGC / "Do what connects you" gallery.
   Horizontal infinite-scroll track of image/video tiles with username captions.
 
+  Data sources (Theme Editor → "Gallery source"):
+    - Manual tiles: merchant-curated blocks (image/video + username) — original behavior.
+    - Instagram (Instafeed): client-side fetch from Mintt Instafeed Feed API, rendered into
+      the same tile markup so the branded carousel stays intact. Requires Instafeed installed,
+      Instagram connected, and a Feed API key (Admin → Apps → Instafeed → Integrations).
+      If the fetch fails or the key is blank, manual tile blocks are kept as a fallback.
+
+  Security note: the Instafeed API key is a theme setting and is output as a data attribute
+  so the storefront can call the Feed API. It is readable in page HTML / network requests.
+  The key is read-only feed access; rotate it in Instafeed if it leaks. Prefer a server proxy
+  later if you need the key off the storefront.
+
   Reuses from theme__styles.liquid:
     - Typography utilities: .type-display, .type-h1, .type-h2, .type-h3, .type-body, .type-small, .type-label
     - Spacing utility: .spacing-sides (side gutter for header + CTA; track is full-bleed)
@@ -29,6 +41,30 @@
   assign section_id = section.id
   assign heading_text = section.settings.heading | default: ''
   assign align = section.settings.heading_alignment | default: 'center'
+
+  comment
+    Gallery source — "instagram" pulls live posts via Instafeed; anything else is manual blocks.
+  endcomment
+  assign ugc_source = section.settings.data_source | default: 'manual'
+  assign ugc_use_instagram = false
+  if ugc_source == 'instagram'
+    assign ugc_use_instagram = true
+  endif
+
+  assign ugc_ig_account = section.settings.instagram_shop_domain | strip
+  if ugc_ig_account == blank
+    assign ugc_ig_account = shop.permanent_domain
+  endif
+  assign ugc_ig_version = section.settings.instagram_api_version | default: 'v6'
+  assign ugc_ig_fid = section.settings.instagram_feed_id | default: '0' | strip
+  if ugc_ig_fid == blank
+    assign ugc_ig_fid = '0'
+  endif
+  assign ugc_ig_fallback = false
+  if section.settings.instagram_fallback_manual
+    assign ugc_ig_fallback = true
+  endif
+
 
   case section.settings.background
     when 'body'
@@ -186,11 +222,21 @@
     --ugc-pb-m: {{ section.settings.padding_bottom_mobile }}px;
     --ugc-bg: {{ bg_value }};"
   data-ugc-gallery
+  data-ugc-source="{{ ugc_source }}"
   data-duration="{{ section.settings.loop_duration_seconds }}"
   data-autoplay="{{ autoplay_attr }}"
   data-force-motion="{{ force_motion_attr }}"
   data-pause-on-hover="{{ pause_attr }}"
-  data-drag="{{ drag_attr }}">
+  data-drag="{{ drag_attr }}"
+  {%- if ugc_use_instagram -%}
+    data-ugc-ig-endpoint="https://instafeed.nfcube.com/feed/{{ ugc_ig_version | escape }}"
+    data-ugc-ig-key="{{ section.settings.instagram_api_key | escape }}"
+    data-ugc-ig-account="{{ ugc_ig_account | escape }}"
+    data-ugc-ig-fid="{{ ugc_ig_fid | escape }}"
+    data-ugc-ig-limit="{{ section.settings.instagram_post_limit | default: 12 }}"
+    data-ugc-ig-aspect="{{ section.settings.instagram_tile_aspect | default: 'portrait' | escape }}"
+    data-ugc-ig-fallback="{% if ugc_ig_fallback %}true{% else %}false{% endif %}"
+  {%- endif -%}>
 
   {%- assign ugc_show_eyebrow = false -%}
   {%- if section.settings.show_eyebrow and section.settings.eyebrow_text != blank -%}{%- assign ugc_show_eyebrow = true -%}{%- endif -%}
@@ -252,7 +298,12 @@
     {{ _ugc_cta_html }}
   {%- endif -%}
 
-  {%- if section.blocks.size > 0 -%}
+  {%- comment -%}
+    Track renders when there are manual tiles OR Instagram mode is on
+    (JS will fill / replace tiles after the Instafeed fetch). Manual blocks
+    also act as the SSR fallback while Instagram is loading or if it fails.
+  {%- endcomment -%}
+  {%- if section.blocks.size > 0 or ugc_use_instagram -%}
     <div
       class="ugc-gallery__track-wrap"
       role="region"
@@ -641,13 +692,172 @@
     function qs(root, sel)  { return root.querySelector(sel); }
     function qsa(root, sel) { return Array.prototype.slice.call(root.querySelectorAll(sel)); }
 
-    function init(root) {
-      if (instances.has(root)) return;
+    // Escape text before injecting into HTML built from the Instagram API response.
+    function escapeHtml(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
 
-      var track = qs(root, '[data-ugc-track]');
-      var wrap  = qs(root, '.ugc-gallery__track-wrap');
-      if (!track) return;
+    // Only allow http(s) URLs from the feed (permalinks + media).
+    function safeUrl(url) {
+      if (!url || typeof url !== 'string') return '';
+      var trimmed = url.trim();
+      if (/^https?:\/\//i.test(trimmed)) return trimmed;
+      return '';
+    }
 
+    function mediaUrl(post, kind) {
+      if (!post) return '';
+      if (kind === 'video') {
+        return safeUrl(
+          (post.videos && post.videos.standard_resolution && post.videos.standard_resolution.url) ||
+          (post.videos && post.videos.low_resolution && post.videos.low_resolution.url) ||
+          ''
+        );
+      }
+      return safeUrl(
+        (post.images && post.images.standard_resolution && post.images.standard_resolution.url) ||
+        (post.images && post.images.low_resolution && post.images.low_resolution.url) ||
+        (post.images && post.images.thumbnail && post.images.thumbnail.url) ||
+        ''
+      );
+    }
+
+    function usernameFor(post, meta) {
+      var fromPost = post && post.user && post.user.username;
+      var fromMeta = meta && meta.username;
+      var name = fromPost || fromMeta || '';
+      if (!name) return '';
+      return name.charAt(0) === '@' ? name : '@' + name;
+    }
+
+    // Build one tile matching the Liquid markup so CSS / carousel behave the same.
+    function buildTileHtml(post, meta, aspect) {
+      var aspectClass = aspect === 'square' ? 'ugc-gallery__tile--square' : 'ugc-gallery__tile--portrait';
+      var link = safeUrl(post.link);
+      var username = usernameFor(post, meta);
+      var alt = (post.alt_text && String(post.alt_text).trim()) ||
+        (username ? username.replace(/^@/, '') + ' — Instagram photo' : 'Instagram photo');
+      var isVideo = post.type === 'video';
+      var videoSrc = isVideo ? mediaUrl(post, 'video') : '';
+      var imageSrc = mediaUrl(post, 'image');
+      var tagOpen;
+      var tagClose;
+      var captionTag;
+
+      if (link) {
+        tagOpen = '<a class="ugc-gallery__tile ' + aspectClass + '" href="' + escapeHtml(link) +
+          '" target="_blank" rel="noopener noreferrer" aria-label="' +
+          escapeHtml(username || 'View Instagram post') + '">';
+        tagClose = '</a>';
+        captionTag = 'span';
+      } else {
+        tagOpen = '<figure class="ugc-gallery__tile ' + aspectClass + '">';
+        tagClose = '</figure>';
+        captionTag = 'figcaption';
+      }
+
+      var mediaHtml = '';
+      if (isVideo && videoSrc) {
+        mediaHtml =
+          '<video class="ugc-gallery__media" data-ugc-video muted loop playsinline preload="metadata"' +
+          (imageSrc ? ' poster="' + escapeHtml(imageSrc) + '"' : '') +
+          ' aria-hidden="true" tabindex="-1">' +
+          '<source src="' + escapeHtml(videoSrc) + '" type="video/mp4">' +
+          '</video>';
+      } else if (imageSrc) {
+        mediaHtml =
+          '<img class="ugc-gallery__media" src="' + escapeHtml(imageSrc) + '" alt="' +
+          escapeHtml(alt) + '" loading="lazy" width="420" height="560" decoding="async">';
+      } else {
+        mediaHtml = '<div class="ugc-gallery__media ugc-gallery__media--placeholder" aria-hidden="true"></div>';
+      }
+
+      var captionHtml = username
+        ? '<' + captionTag + ' class="ugc-gallery__caption">' + escapeHtml(username) + '</' + captionTag + '>'
+        : '';
+
+      return tagOpen + mediaHtml + captionHtml + tagClose;
+    }
+
+    /**
+     * Fetch Instagram posts from Mintt Instafeed Feed API and replace track children.
+     * Returns true when tiles were written; false when we should keep Liquid fallback tiles.
+     */
+    function loadInstagramFeed(root, track) {
+      var key = (root.dataset.ugcIgKey || '').trim();
+      var account = (root.dataset.ugcIgAccount || '').trim();
+      var endpoint = (root.dataset.ugcIgEndpoint || '').trim();
+      var fid = (root.dataset.ugcIgFid || '0').trim() || '0';
+      var limit = parseInt(root.dataset.ugcIgLimit, 10) || 12;
+      var aspect = root.dataset.ugcIgAspect || 'portrait';
+      var allowFallback = root.dataset.ugcIgFallback !== 'false';
+
+      // No key yet — leave manual tiles in place when fallback is on (Theme Editor setup path).
+      if (!key || !account || !endpoint) {
+        if (!allowFallback) track.innerHTML = '';
+        return Promise.resolve(track.children.length > 0);
+      }
+
+      var url = endpoint +
+        '?limit=' + encodeURIComponent(String(limit)) +
+        '&account=' + encodeURIComponent(account) +
+        '&fu=0&fid=' + encodeURIComponent(fid);
+
+      function request() {
+        return fetch(url, {
+          method: 'GET',
+          headers: { 'X-API-Key': key, 'Accept': 'application/json' },
+          credentials: 'omit'
+        }).then(function (res) {
+          return res.json().then(function (body) {
+            return { httpStatus: res.status, body: body };
+          }).catch(function () {
+            return { httpStatus: res.status, body: null };
+          });
+        });
+      }
+
+      // Instafeed may return 202 while cache builds — retry once after a short wait.
+      return request().then(function (first) {
+        var code = (first.body && first.body.meta && first.body.meta.code) || first.httpStatus;
+        if (code === 202) {
+          return new Promise(function (resolve) {
+            setTimeout(function () {
+              request().then(resolve).catch(function () { resolve(first); });
+            }, 1500);
+          });
+        }
+        return first;
+      }).then(function (result) {
+        var body = result.body;
+        var code = (body && body.meta && body.meta.code) || result.httpStatus;
+        var posts = (body && body.data) || [];
+        var meta = (body && body.meta) || {};
+
+        if (code !== 200 || !posts.length) {
+          if (!allowFallback) track.innerHTML = '';
+          return track.children.length > 0;
+        }
+
+        var html = posts.map(function (post) {
+          return buildTileHtml(post, meta, aspect);
+        }).join('');
+
+        track.innerHTML = html;
+        return track.children.length > 0;
+      }).catch(function () {
+        // Network / CORS / parse errors — keep manual tiles when fallback is on.
+        if (!allowFallback) track.innerHTML = '';
+        return track.children.length > 0;
+      });
+    }
+
+    function setupCarousel(root, track, wrap) {
       var duration    = parseFloat(root.dataset.duration) || 35;
       var autoplay    = root.dataset.autoplay === 'true';
       var forceMotion = root.dataset.forceMotion === 'true';
@@ -660,6 +870,8 @@
 
       // Clone children once for seamless infinite loop
       var originals = Array.prototype.slice.call(track.children);
+      if (!originals.length) return;
+
       originals.forEach(function (node) {
         var clone = node.cloneNode(true);
         clone.setAttribute('aria-hidden', 'true');
@@ -796,6 +1008,8 @@
           });
         }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
         revealIO.observe(root);
+      } else {
+        root.classList.add('is-revealed');
       }
 
       // Video tiles — play in view, pause out; skip entirely if motion is blocked.
@@ -834,6 +1048,32 @@
         if (revealIO) revealIO.disconnect();
         if (videoIO)  videoIO.disconnect();
       });
+    }
+
+    function init(root) {
+      if (instances.has(root)) return;
+
+      var track = qs(root, '[data-ugc-track]');
+      var wrap  = qs(root, '.ugc-gallery__track-wrap');
+      if (!track) return;
+
+      // Mark in-flight so Theme Editor double-fires don't start two carousels.
+      instances.set(root, function noop() {});
+
+      var source = root.dataset.ugcSource || 'manual';
+      var start = function () {
+        if (!track.children.length) {
+          instances.delete(root);
+          return;
+        }
+        setupCarousel(root, track, wrap);
+      };
+
+      if (source === 'instagram') {
+        loadInstagramFeed(root, track).then(start);
+      } else {
+        start();
+      }
     }
 
     function initAll(scope) {
@@ -926,6 +1166,79 @@
         { "value": "center", "label": "Center" }
       ],
       "default": "center"
+    },
+
+    { "type": "header", "content": "Gallery source" },
+    {
+      "type": "select",
+      "id": "data_source",
+      "label": "Pull tiles from",
+      "info": "Instagram uses Mintt Instafeed's Feed API and keeps this section's carousel styling. Manual uses the tile blocks below.",
+      "options": [
+        { "value": "manual", "label": "Manual tiles (Theme Editor blocks)" },
+        { "value": "instagram", "label": "Instagram (Instafeed Feed API)" }
+      ],
+      "default": "manual"
+    },
+    {
+      "type": "paragraph",
+      "content": "Instagram setup: install/connect Instafeed, then copy the Feed API key from Apps → Instafeed → Integrations. The key is readable in the storefront (read-only feed access) — rotate it in Instafeed if needed."
+    },
+    {
+      "type": "text",
+      "id": "instagram_api_key",
+      "label": "Instafeed API key",
+      "info": "Required for Instagram source. Do not commit this value to a public theme repo if the repo is shared outside your team."
+    },
+    {
+      "type": "select",
+      "id": "instagram_api_version",
+      "label": "Instafeed API version",
+      "info": "v6 = Instagram Login connection. v5 = Meta for Business connection. Match how the account was connected in Instafeed.",
+      "options": [
+        { "value": "v6", "label": "v6 — Instagram Login" },
+        { "value": "v5", "label": "v5 — Meta for Business" }
+      ],
+      "default": "v6"
+    },
+    {
+      "type": "text",
+      "id": "instagram_feed_id",
+      "label": "Feed ID",
+      "info": "Use 0 for the main Instafeed feed, or a numeric ID for a secondary feed.",
+      "default": "0"
+    },
+    {
+      "type": "text",
+      "id": "instagram_shop_domain",
+      "label": "Shopify domain override",
+      "info": "Leave blank to use this shop's permanent domain (e.g. your-store.myshopify.com). Only set if Instafeed was connected under a different domain."
+    },
+    {
+      "type": "range",
+      "id": "instagram_post_limit",
+      "label": "Number of Instagram posts",
+      "min": 4,
+      "max": 20,
+      "step": 1,
+      "default": 12
+    },
+    {
+      "type": "select",
+      "id": "instagram_tile_aspect",
+      "label": "Instagram tile aspect",
+      "options": [
+        { "value": "portrait", "label": "Portrait (3:4)" },
+        { "value": "square", "label": "Square (1:1)" }
+      ],
+      "default": "portrait"
+    },
+    {
+      "type": "checkbox",
+      "id": "instagram_fallback_manual",
+      "label": "Fall back to manual tiles if Instagram fails",
+      "info": "When on, tile blocks below stay visible if the API key is missing, the feed is empty, or the request errors.",
+      "default": true
     },
 
     { "type": "header", "content": "Eyebrow typography" },
