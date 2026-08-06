@@ -2033,7 +2033,7 @@
   text-align: center;
   min-width: 0;
 }
-.mtb-pdp__swatch:disabled {
+.mtb-pdp__swatch.is-unavailable {
   opacity: 0.4;
   cursor: not-allowed;
 }
@@ -2082,6 +2082,18 @@
 .mtb-pdp__swatch.is-current .mtb-pdp__swatch-name {
   opacity: 1;
   font-weight: 700;
+}
+/* Add / Swap under the previewed swatch — confirms the pick in-grid. */
+.mtb-pdp__swatch-action {
+  width: 100%;
+  margin-top: 2px;
+  padding: 6px 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  min-height: 0;
 }
 
 .mtb-pdp__progress {

@@ -1,19 +1,18 @@
 {% comment %}
-  PDP-style Market Tote bundler body: hero image, swatch grid, progress
-  dots, mini-bundle strip with remove, and Add to Bundle / Add to Cart CTA.
+  PDP-style Market Tote bundler body: hero image, swatch grid with
+  in-grid Add, progress dots, mini-bundle strip with remove, and
+  Add to Cart CTA once 3 totes are picked.
 {% endcomment %}
 
 {% doc %}
   Market Tote bundler PDP layout.
-  @param {string} add_bundle_label - Add to Bundle button text
   @param {string} cart_label - Add to Cart button text
   @param {string} discount_type - percent | fixed_off | none
   @param {number} discount_value - display savings amount
   @example
-  {% render 'market-tote-bundler__pdp-layout', add_bundle_label: 'Add to Bundle', cart_label: 'Add Bundle to Cart', discount_type: 'percent', discount_value: 25 %}
+  {% render 'market-tote-bundler__pdp-layout', cart_label: 'Add Bundle to Cart', discount_type: 'percent', discount_value: 25 %}
 {% enddoc %}
 
-{%- assign _add_label = add_bundle_label | default: 'Add to Bundle' -%}
 {%- assign _cart_label = cart_label | default: 'Add Bundle to Cart' -%}
 
 <div class="mtb-pdp" x-show="products.length > 0" x-cloak>
@@ -75,20 +74,22 @@
 
     <div class="mtb-pdp__swatches" role="listbox" aria-label="Market Tote styles">
       <template x-for="product in products" :key="product.handle">
-        <button
-          type="button"
+        <div
           role="option"
           class="mtb-pdp__swatch"
+          :tabindex="product.available ? 0 : -1"
           :class="{
             'is-current': isPreview(product.handle),
             'is-unavailable': !product.available
           }"
           :aria-selected="isPreview(product.handle)"
+          :aria-disabled="!product.available"
           :aria-label="product.title"
-          :disabled="!product.available"
           @mouseenter="prefetchProduct(product.handle)"
           @focus="prefetchProduct(product.handle)"
-          @click="selectPreview(product.handle)">
+          @click="selectPreview(product.handle)"
+          @keydown.enter.prevent="selectPreview(product.handle)"
+          @keydown.space.prevent="selectPreview(product.handle)">
           <span class="mtb-pdp__swatch-img">
             <img
               :src="product.swatchImage"
@@ -103,7 +104,14 @@
               aria-hidden="true">✓</span>
           </span>
           <span class="mtb-pdp__swatch-name" x-text="shortName(product.title)"></span>
-        </button>
+          <button
+            type="button"
+            class="mtb-pdp__swatch-action btn btn--primary"
+            x-show="showPreviewAction(product.handle)"
+            x-cloak
+            @click.stop="addToBundle()"
+            x-text="previewActionLabel()"></button>
+        </div>
       </template>
     </div>
 
@@ -117,21 +125,10 @@
       <span class="mtb-pdp__progress-label type--small" x-text="totalSelected() + ' of ' + requiredCount + ' added'"></span>
     </div>
 
-    <div class="mtb-pdp__cta">
+    <div class="mtb-pdp__cta" x-show="isComplete()" x-cloak>
       <button
         type="button"
         class="btn btn--primary w-full"
-        x-show="!isComplete()"
-        :disabled="!canAddToBundle()"
-        :class="{ 'opacity-50 cursor-not-allowed': !canAddToBundle() }"
-        @click="addToBundle()">
-        {{ _add_label }}
-      </button>
-      <button
-        type="button"
-        class="btn btn--primary w-full"
-        x-show="isComplete()"
-        x-cloak
         :disabled="!canAddToCart() || cartLoading"
         :class="{ 'opacity-50 cursor-not-allowed': !canAddToCart() || cartLoading }"
         @click="finalizeBundle()">
