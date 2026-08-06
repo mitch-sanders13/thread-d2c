@@ -279,23 +279,17 @@
     "
     x-data="bundleBuilder_{{ js_id }}">
 
-    {%- unless heading == blank and savings_label == blank -%}
-      <div class="flex flex-col items-center px-4 pb-4 text-center">
-        <div class="max-w-prose">
-          {%- unless heading == blank -%}
-            <h2>{{ heading }}</h2>
-          {%- endunless -%}
-          {%- unless savings_label == blank -%}
-            <p class="mtb-pdp__savings">{{ savings_label }}</p>
-          {%- endunless -%}
-        </div>
-      </div>
-    {%- endunless -%}
-
+    {% comment %}
+      Heading + savings live in the right column (bundle-builder__pdp-layout)
+      so they sit with the product selector instead of a centered gold strip
+      above the whole layout.
+    {% endcomment %}
     {% render 'bundle-builder__pdp-layout',
         cart_label: cart_label,
         discount_type: discount_type,
-        discount_value: discount_value %}
+        discount_value: discount_value,
+        heading: heading,
+        savings_label: savings_label %}
 
     <p
       class="type--small px-4 pb-4 text-center"
@@ -357,6 +351,11 @@
       discountCode: '',
       editingBundleId: null,
       editingKeys: [],
+      // Swatch-grid arrow state (mirrors PDP related-styles pagination).
+      swatchHasPagination: false,
+      swatchCanPrev: false,
+      swatchCanNext: false,
+      _swatchResizeObs: null,
       // URL deep-link items to re-apply after AJAX pages load (handle may
       // sit past Liquid's first-50 collection page).
       _pendingPrefillItems: [],
@@ -400,6 +399,11 @@
         this.slots.forEach(function(slot, sIdx) {
           if (slot.collectionHandle) self._loadMoreProducts(slot.collectionHandle, sIdx);
         });
+
+        // Keep arrow disabled state in sync when the grid size or filter changes.
+        this.$watch('typeFilter', function() { self.resetSwatchScroll(); });
+        this.$watch('activeSlotIndex', function() { self.resetSwatchScroll(); });
+        this.$nextTick(function() { self._bindSwatchResize(); self.updateSwatchArrows(); });
       },
 
       _readUrlPrefill() {
@@ -543,6 +547,10 @@
                 slot.products.push(normalized);
               });
               self._retryPendingPrefill();
+              // New swatches may unlock horizontal overflow — refresh arrows.
+              if (sIdx === self.activeSlotIndex) {
+                self.$nextTick(function() { self.updateSwatchArrows(); });
+              }
               return data.products.length >= PAGE_SIZE;
             });
         }
@@ -613,6 +621,53 @@
             this.applyHero(true);
           }
         }
+        this.resetSwatchScroll();
+      },
+
+      /* PDP-style horizontal swatch paging — same step math as related-styles. */
+      updateSwatchArrows() {
+        var grid = this.$refs.swatchGrid;
+        if (!grid) {
+          this.swatchHasPagination = false;
+          this.swatchCanPrev = false;
+          this.swatchCanNext = false;
+          return;
+        }
+        var max = grid.scrollWidth - grid.clientWidth;
+        var hasOverflow = max > 1;
+        this.swatchHasPagination = hasOverflow;
+        if (!hasOverflow) {
+          this.swatchCanPrev = false;
+          this.swatchCanNext = false;
+          return;
+        }
+        this.swatchCanPrev = grid.scrollLeft > 1;
+        this.swatchCanNext = grid.scrollLeft < max - 1;
+      },
+
+      scrollSwatches(dir) {
+        var grid = this.$refs.swatchGrid;
+        if (!grid) return;
+        var step = Math.max(grid.clientWidth * 0.9, 120);
+        grid.scrollBy({ left: dir * step, behavior: 'smooth' });
+      },
+
+      resetSwatchScroll() {
+        var self = this;
+        this.$nextTick(function() {
+          var grid = self.$refs.swatchGrid;
+          if (grid) grid.scrollLeft = 0;
+          self.updateSwatchArrows();
+        });
+      },
+
+      _bindSwatchResize() {
+        var grid = this.$refs.swatchGrid;
+        if (!grid || typeof ResizeObserver === 'undefined') return;
+        if (this._swatchResizeObs) this._swatchResizeObs.disconnect();
+        var self = this;
+        this._swatchResizeObs = new ResizeObserver(function() { self.updateSwatchArrows(); });
+        this._swatchResizeObs.observe(grid);
       },
 
       _matchTypeFilterToPreview() {
