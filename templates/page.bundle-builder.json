@@ -65,7 +65,7 @@
               "type": "accordion_text",
               "settings": {
                 "column": "left",
-                "heading": "",
+                "heading": "Versatile",
                 "subheading": "Go Bagless or Go from Bag to Bag",
                 "body": "<p>Clip your wallet to your lanyard and take only what you need — or move the whole set from bag to bag without losing a thing.</p>",
                 "hd_font": "body",
@@ -135,7 +135,7 @@
               "type": "accordion_text",
               "settings": {
                 "column": "left",
-                "heading": "",
+                "heading": "Easy",
                 "subheading": "One Easy System",
                 "body": "<p>Wallet, lanyard, and chapstick holder are designed to clip together so your everyday essentials stay connected.</p>",
                 "hd_font": "body",
@@ -205,7 +205,7 @@
               "type": "accordion_text",
               "settings": {
                 "column": "left",
-                "heading": "",
+                "heading": "Practical",
                 "subheading": "Finally Finish a Chapstick or Lip Gloss",
                 "body": "<p>Keep lip balm on your keys so it stays with you — and actually gets used — instead of disappearing in a bag.</p>",
                 "hd_font": "body",
