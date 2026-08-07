@@ -1707,11 +1707,20 @@
   color: #fff;
 }
 
-/* Trifecta / Everyday Carry Set slot tabs + type filters */
+/*
+  Trifecta / Everyday Carry Set slot tabs + type filters.
+
+  Design intent: one quiet card style for all three slots. Status is
+  communicated the same way the style-swatch grid below already does —
+  a real product photo + small dark check badge for "picked", a faint
+  "+" for "not yet picked" — instead of red/green alert-style borders.
+  The single warm brand accent (--thread-bronze) marks which slot is
+  currently active, so there's exactly one color doing the highlighting.
+*/
 .tri-pdp__slots {
   display: flex;
   flex-wrap: nowrap;
-  gap: 6px;
+  gap: 8px;
   /* Tighter bottom gap so "Select Your …" sits closer (PDP-like). */
   margin: 12px 0 8px;
   width: 100%;
@@ -1721,14 +1730,15 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 4px;
+  gap: 8px;
   flex: 1 1 0;
   min-width: 0;
-  padding: 6px 4px;
+  padding: 10px 6px 12px;
   margin: 0;
-  border: 2px solid #dc2626;
-  border-radius: 4px;
-  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   color: inherit;
   font: inherit;
   font-size: 0.62rem;
@@ -1737,27 +1747,26 @@
   text-transform: uppercase;
   cursor: pointer;
   line-height: 1.1;
-  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
-.tri-pdp__slot-top {
-  display: inline-flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 3px;
-  width: 100%;
-  min-height: 1.6em;
+.tri-pdp__slot:hover {
+  border-color: rgba(0, 0, 0, 0.24);
 }
 .tri-pdp__slot-label {
+  order: -1;
   text-align: center;
   white-space: normal;
   overflow: visible;
-  line-height: 1.15;
+  line-height: 1.2;
+  opacity: 0.6;
+  transition: opacity 0.15s ease, color 0.15s ease;
 }
 .tri-pdp__slot-thumb {
+  position: relative;
   display: block;
   width: 44px;
   height: 44px;
-  border-radius: 4px;
+  border-radius: 9px;
   overflow: hidden;
   background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.04));
   flex-shrink: 0;
@@ -1770,76 +1779,88 @@
 }
 .tri-pdp__slot-thumb img.is-silhouette {
   object-fit: contain;
-  padding: 2px;
-  opacity: 0.85;
+  padding: 5px;
+  opacity: 0.4;
 }
-.tri-pdp__slot.is-empty:hover {
-  background: rgba(220, 38, 38, 0.06);
+/* Empty slot: a quiet "add" affordance on the thumb, not a red border. */
+.tri-pdp__slot.is-empty .tri-pdp__slot-thumb::after {
+  content: '+';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 300;
+  color: rgba(0, 0, 0, 0.3);
 }
-.tri-pdp__slot.is-empty.is-active {
-  border-color: #dc2626;
-  background: rgba(220, 38, 38, 0.08);
-  box-shadow: 0 0 0 1px #dc2626;
-}
+/* Filled slot: label reads at full strength. The photo + check badge
+   already say "done" — no green wash needed. */
 .tri-pdp__slot.is-filled {
-  border-color: #16a34a;
-  background: rgba(22, 163, 74, 0.12);
-  color: #166534;
+  border-color: rgba(0, 0, 0, 0.14);
 }
-.tri-pdp__slot.is-filled:hover {
-  background: rgba(22, 163, 74, 0.18);
+.tri-pdp__slot.is-filled .tri-pdp__slot-label {
+  opacity: 1;
 }
-.tri-pdp__slot.is-filled.is-active {
-  border-color: #16a34a;
-  background: rgba(22, 163, 74, 0.22);
-  box-shadow: 0 0 0 1px #16a34a;
+/* Active = the slot currently being shopped. One accent color only. */
+.tri-pdp__slot.is-active {
+  border-color: var(--thread-bronze, #c08951);
+  background: color-mix(in srgb, var(--thread-bronze, #c08951) 6%, #fff);
+  box-shadow: 0 0 0 1px var(--thread-bronze, #c08951);
 }
-/* Remove control replaces the old checkmark on filled (unlocked) cards. */
-.tri-pdp__slot-remove {
+.tri-pdp__slot.is-active .tri-pdp__slot-label {
+  opacity: 1;
+  color: var(--thread-bronze, #c08951);
+}
+/* Remove control + locked check — same quiet dark badge, pinned to the
+   thumb corner like the style-swatch grid's current-pick check. */
+.tri-pdp__slot-remove,
+.tri-pdp__slot-check {
+  position: absolute;
+  top: -6px;
+  right: -6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   padding: 0;
   margin: 0;
-  border: 1px solid currentColor;
+  border: 1.5px solid #fff;
   border-radius: 50%;
-  background: #fff;
-  color: #166534;
-  font-size: 16px;
+  background: #1c1c1c;
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.tri-pdp__slot-remove {
+  font-size: 14px;
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  transition: background 0.12s ease;
 }
 .tri-pdp__slot-remove:hover {
   background: #dc2626;
-  border-color: #dc2626;
-  color: #fff;
 }
-.tri-pdp__slot-locked {
-  color: #16a34a;
-  font-size: 0.6rem;
-  flex-shrink: 0;
-  line-height: 1.15;
+.tri-pdp__slot-check svg {
+  display: block;
 }
 @media (min-width: 750px) {
   .tri-pdp__slot {
     font-size: 0.68rem;
-    padding: 8px 8px 10px;
-    gap: 6px;
+    padding: 12px 8px 14px;
+    gap: 10px;
     letter-spacing: 0.02em;
   }
   .tri-pdp__slot-thumb {
     width: 56px;
     height: 56px;
   }
-  .tri-pdp__slot-remove {
-    width: 20px;
-    height: 20px;
-    font-size: 15px;
+  .tri-pdp__slot-remove,
+  .tri-pdp__slot-check {
+    width: 22px;
+    height: 22px;
   }
 }
 .tri-pdp__type-filters {
