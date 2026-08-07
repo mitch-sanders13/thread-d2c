@@ -4,6 +4,7 @@ api_version = "2026-01"
 name = "t:name"
 description = "t:description"
 handle = "bundle-discount-ui"
+uid = "306923d9-beae-e434-86d2-f2581b05cacd865bc199"
 type = "ui_extension"
 
 [[extensions.targeting]]

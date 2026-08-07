@@ -21,11 +21,8 @@ description = "t:description"
   command = ""
   path = "dist/function.wasm"
 
-# Metafield shared with the Admin UI settings form.
-[extensions.input.variables]
-namespace = "$app"
-key = "function-configuration"
-
 # Link Function → Admin UI so this app appears under Create discount.
+# Config metafield ($app / function-configuration) is read directly in the
+# input GraphQL query — not via input.variables (those require $vars in the query).
 [extensions.ui]
 handle = "bundle-discount-ui"

@@ -5,6 +5,7 @@
  * Saves JSON to the $app / function-configuration metafield that the
  * Discount Function already reads.
  */
+/** @jsxImportSource preact */
 import "@shopify/ui-extensions/preact";
 import { render } from "preact";
 import { useEffect, useMemo, useState } from "preact/hooks";
