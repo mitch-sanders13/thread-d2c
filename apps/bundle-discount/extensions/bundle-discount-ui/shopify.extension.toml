@@ -1,0 +1,15 @@
+api_version = "2026-01"
+
+[[extensions]]
+name = "t:name"
+description = "t:description"
+handle = "bundle-discount-ui"
+type = "ui_extension"
+
+[[extensions.targeting]]
+module = "./src/DiscountFunctionSettings.jsx"
+target = "admin.discount-details.function-settings.render"
+
+[[extensions.metafields]]
+namespace = "$app"
+key = "function-configuration"

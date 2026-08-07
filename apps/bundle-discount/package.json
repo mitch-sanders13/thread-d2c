@@ -10,10 +10,14 @@
     "info": "shopify app info",
     "generate": "shopify app generate",
     "deploy": "shopify app deploy",
+    "link": "shopify app config link",
+    "login": "shopify auth login",
     "test": "npm --prefix extensions/discount-function test"
   },
-  "dependencies": {},
   "trustedDependencies": [
     "@shopify/plugin-cloudflare"
-  ]
+  ],
+  "devDependencies": {
+    "@shopify/cli": "^4.6.1"
+  }
 }

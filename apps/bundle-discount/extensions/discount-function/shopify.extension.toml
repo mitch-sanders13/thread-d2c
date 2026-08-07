@@ -20,3 +20,12 @@ description = "t:description"
   [extensions.build]
   command = ""
   path = "dist/function.wasm"
+
+# Metafield shared with the Admin UI settings form.
+[extensions.input.variables]
+namespace = "$app"
+key = "function-configuration"
+
+# Link Function → Admin UI so this app appears under Create discount.
+[extensions.ui]
+handle = "bundle-discount-ui"

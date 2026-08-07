@@ -11,35 +11,51 @@ No public discount code. Incomplete or unstamped carts get nothing.
 
 ## Deploy (Partner app)
 
-1. From this folder, link a Partner app (needs `write_discounts`):
+Shopify CLI for this app is installed locally as `@shopify/cli` **4.6.1** (use `npx` / npm scripts from this folder). Your global Homebrew CLI may still be older — prefer these commands.
+
+### 1. Log in to Partner / Dev Dashboard (interactive)
 
 ```bash
 cd apps/bundle-discount
-npm install
-shopify app config link
-shopify app deploy
+npm run login
 ```
 
-2. In Shopify admin → **Discounts → Create discount → App discount** (or Automatic discount powered by this app):
-   - Select **Thread Bundle Discount** / `bundle-discount`
-   - Discount classes: **Product**
-   - Combinations: usually off for other product discounts
+Complete the browser prompt (Partner account that owns Thread).
 
-3. Optional metafield config on the discount (`$app` / `function-configuration` JSON):
+### 2. Create or link the app
 
-```json
-{
-  "percent": 20,
-  "edcSlots": ["Wallet", "Lanyard", "Chapstick"],
-  "toteSize": 3,
-  "edcMessage": "Everyday Carry Set 20% off",
-  "toteMessage": "Tote Bundle 20% off"
-}
+```bash
+npm run link
 ```
 
-4. Keep theme discount code fields **blank** (already the case on `main`) so `/discount/CODE` is never called.
+- Choose your Partner org
+- **Create a new app** named `Thread Bundle Discount` (or link an existing one)
+- This writes `client_id` into `shopify.app.toml`
 
-5. Deactivate any leftover `TRIFECTA*` / `TOTE*` codes and native automatic bundle discounts so they don’t double-stack.
+### 3. Deploy the Discount Function
+
+```bash
+npm run deploy
+```
+
+Confirm releasing the new app version when prompted.
+
+### 4. Install the app on the Thread store
+
+After deploy, open the install URL the CLI prints (or Dev Dashboard → app → Install on store), and install on `thread-llc` / your production store.
+
+### 5. Create the Automatic discount in admin
+
+1. Shopify admin (`thread-llc`) → **Discounts → Create discount**
+2. You should now see **Thread Bundle Discount** (app discount)
+3. Create an **Automatic** discount, leave settings at 20%, save
+
+If it still does not appear, hard-refresh admin and confirm the app shows as installed under **Settings → Apps**.
+
+### 6. Cleanup
+
+- Keep theme discount code fields **blank**
+- Deactivate leftover `TRIFECTA*` / `TOTE*` codes and any native automatic bundle discounts
 
 ## Local test
 

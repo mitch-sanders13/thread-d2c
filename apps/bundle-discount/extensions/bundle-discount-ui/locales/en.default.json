@@ -1,0 +1,12 @@
+{
+  "name": "Thread Bundle Discount",
+  "description": "Configure 20% Everyday Carry and Market Tote set discounts",
+  "title": "Bundle settings",
+  "loading": "Loading…",
+  "error": "Could not update discount settings. Try again.",
+  "percentLabel": "Discount percent",
+  "toteSizeLabel": "Market Tote set size",
+  "edcMessageLabel": "Everyday Carry discount message",
+  "toteMessageLabel": "Market Tote discount message",
+  "help": "Applies only to cart lines stamped by the theme bundlers (_bundle_id). Incomplete sets are not discounted."
+}
