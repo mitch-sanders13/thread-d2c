@@ -1761,29 +1761,39 @@
   opacity: 0.6;
   transition: opacity 0.15s ease, color 0.15s ease;
 }
+/*
+  Outer box is only a positioning context (overflow:visible) so the
+  remove/check badge can sit half-outside the corner without being
+  clipped. The inner -frame does the actual rounding + cropping.
+*/
 .tri-pdp__slot-thumb {
   position: relative;
   display: block;
   width: 44px;
   height: 44px;
+  flex-shrink: 0;
+}
+.tri-pdp__slot-thumb-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
   border-radius: 9px;
   overflow: hidden;
   background: var(--color-bg-overlay-1, rgba(0, 0, 0, 0.04));
-  flex-shrink: 0;
 }
-.tri-pdp__slot-thumb img {
+.tri-pdp__slot-thumb-frame img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
-.tri-pdp__slot-thumb img.is-silhouette {
+.tri-pdp__slot-thumb-frame img.is-silhouette {
   object-fit: contain;
   padding: 5px;
   opacity: 0.4;
 }
 /* Empty slot: a quiet "add" affordance on the thumb, not a red border. */
-.tri-pdp__slot.is-empty .tri-pdp__slot-thumb::after {
+.tri-pdp__slot.is-empty .tri-pdp__slot-thumb-frame::after {
   content: '+';
   position: absolute;
   inset: 0;
@@ -1811,6 +1821,34 @@
 .tri-pdp__slot.is-active .tri-pdp__slot-label {
   opacity: 1;
   color: var(--thread-bronze, #c08951);
+}
+/*
+  "Show, don't tell" nudge: the next slot that still needs a style gets
+  a soft breathing glow instead of an instructional text line. Skipped
+  while it's also the active tab (it already has full attention) and
+  once the whole set is picked (see isNextSlot in the Alpine data).
+*/
+.tri-pdp__slot.is-next:not(.is-active) {
+  border-color: color-mix(in srgb, var(--thread-bronze, #c08951) 45%, rgba(0, 0, 0, 0.1));
+  animation: tri-pdp-pulse-ring 2.4s ease-in-out infinite;
+}
+.tri-pdp__slot.is-next:not(.is-active) .tri-pdp__slot-thumb-frame::after {
+  color: var(--thread-bronze, #c08951);
+  animation: tri-pdp-pulse-glyph 2.4s ease-in-out infinite;
+}
+@keyframes tri-pdp-pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--thread-bronze, #c08951) 35%, transparent); }
+  50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--thread-bronze, #c08951) 14%, transparent); }
+}
+@keyframes tri-pdp-pulse-glyph {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.25); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tri-pdp__slot.is-next:not(.is-active),
+  .tri-pdp__slot.is-next:not(.is-active) .tri-pdp__slot-thumb-frame::after {
+    animation: none;
+  }
 }
 /* Remove control + locked check — same quiet dark badge, pinned to the
    thumb corner like the style-swatch grid's current-pick check. */

@@ -185,25 +185,33 @@
             'is-active': activeSlotIndex === sIdx,
             'is-filled': slotFilled(sIdx),
             'is-empty': !slotFilled(sIdx),
-            'is-locked': slot.locked
+            'is-locked': slot.locked,
+            'is-next': isNextSlot(sIdx)
           }"
           :aria-selected="activeSlotIndex === sIdx"
-          :aria-label="slot.label + (slotFilled(sIdx) ? ', selected' : ', empty')"
+          :aria-label="slot.label + (slotFilled(sIdx) ? ', selected' : ', still needs a style')"
           @click="selectSlot(sIdx)"
           @keydown.enter.prevent="selectSlot(sIdx)"
           @keydown.space.prevent="selectSlot(sIdx)">
           <span
             class="tri-pdp__slot-label"
             x-html="(slot.label || '').replace(/ /g, '<br>')"></span>
+          {%- comment -%}
+            Outer thumb is the positioning box for the corner badge (kept
+            overflow:visible so the badge isn't clipped); the inner frame
+            clips + rounds the actual product photo.
+          {%- endcomment -%}
           <span class="tri-pdp__slot-thumb">
-            <img
-              :src="slotThumb(sIdx)"
-              width="56"
-              height="56"
-              :alt="''"
-              :class="{ 'is-silhouette': !slotFilled(sIdx) }"
-              loading="lazy"
-              decoding="async" />
+            <span class="tri-pdp__slot-thumb-frame">
+              <img
+                :src="slotThumb(sIdx)"
+                width="56"
+                height="56"
+                :alt="''"
+                :class="{ 'is-silhouette': !slotFilled(sIdx) }"
+                loading="lazy"
+                decoding="async" />
+            </span>
             {%- comment -%}
               Quiet dark badge in the thumb corner — same visual language as
               the style-swatch "current pick" check below, so filled vs.

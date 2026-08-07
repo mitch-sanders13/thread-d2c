@@ -1260,6 +1260,16 @@
         return !!(this.slots[slotIdx] && this.slots[slotIdx].selectedHandle);
       },
 
+      // True for the next empty slot the customer hasn't touched yet — lets
+      // the UI gently pulse that one tab (show, don't tell) instead of
+      // needing an instructional text line. Suppressed once it's the
+      // active tab (already has attention) or the set is complete.
+      isNextSlot(slotIdx) {
+        if (this.isComplete()) return false;
+        if (this.slotFilled(slotIdx)) return false;
+        return this.firstIncompleteSlot() === slotIdx;
+      },
+
       // Selected product swatch, or the slot silhouette when empty.
       slotThumb(slotIdx) {
         var slot = this.slots[slotIdx];
