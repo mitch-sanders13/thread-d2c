@@ -9,7 +9,10 @@
   Per-product dropdown UX:
     - Three product cards: current locked product + two companions.
     - Tap an unlocked card → dropdown with type tabs + swatch grid.
-      "Add to Bundle" commits; ✕ / Close / Escape discards preview.
+      Tap a swatch to preview it on the card; an Add/Swap button
+      appears under that swatch image (same pattern as the Everyday
+      Carry bundler). Swap commits and closes; ✕ / Close / Escape
+      discard an unconfirmed preview.
     - Locked card has no dropdown (already on that PDP).
 
   Server-side ranking (per non-locked slot):
@@ -988,22 +991,39 @@
 
     <div class="bundle-pdp-preview__dropdown-grid">
       <template x-for="p in (dropdownOpen >= 0 ? productsForCurrentType(dropdownOpen) : [])" :key="p.handle">
-        <button
-          type="button"
+        {%- comment -%}
+          Div (not button) so the Add/Swap control can be a real nested
+          button — same pattern as the Everyday Carry bundler swatch grid.
+        {%- endcomment -%}
+        <div
+          role="option"
           class="bundle-pdp-preview__dropdown-swatch"
+          tabindex="0"
+          :tabindex="p.available ? 0 : -1"
           :class="{
             'is-selected': dropdownOpen >= 0 && currentProduct(dropdownOpen).handle === p.handle,
+            'is-picked': dropdownOpen >= 0 && committedHandle(dropdownOpen) === p.handle,
             'is-unavailable': !p.available
           }"
-          :disabled="!p.available"
+          :aria-selected="dropdownOpen >= 0 && currentProduct(dropdownOpen).handle === p.handle"
+          :aria-disabled="!p.available"
           :aria-label="p.title + (p.available ? '' : ' (sold out)')"
           :title="p.title"
-          @click="selectProduct(dropdownOpen, p)">
+          @click="p.available && selectProduct(dropdownOpen, p)"
+          @keydown.enter.prevent="p.available && selectProduct(dropdownOpen, p)"
+          @keydown.space.prevent="p.available && selectProduct(dropdownOpen, p)">
           <span class="bundle-pdp-preview__dropdown-swatch-img">
             <img :src="p.image" :alt="p.title" loading="lazy" decoding="async" />
           </span>
           <span class="bundle-pdp-preview__dropdown-swatch-name" x-text="shortName(p.title)"></span>
-        </button>
+          <button
+            type="button"
+            class="bundle-pdp-preview__dropdown-swatch-action btn btn--primary"
+            x-show="showSwatchAction(p)"
+            x-cloak
+            @click.stop="confirmSelection()"
+            x-text="swatchActionLabel()"></button>
+        </div>
       </template>
     </div>
 
@@ -1013,24 +1033,6 @@
       x-cloak>
       No products available in this type.
     </p>
-
-    {%- comment -%}
-      Confirm footer — swatch clicks only preview the pick on the card.
-      "Add to Bundle" commits that preview and closes the panel. ✕ /
-      Close / Escape revert to the selection that was active when the
-      dropdown opened (see _openSnapshot in the Alpine component).
-    {%- endcomment -%}
-    <div
-      class="bundle-pdp-preview__dropdown-confirm"
-      x-show="dropdownOpen >= 0"
-      x-cloak>
-      <button
-        type="button"
-        class="btn btn--primary w-full bundle-pdp-preview__dropdown-confirm-btn"
-        @click="confirmSelection()">
-        Add to Bundle
-      </button>
-    </div>
   </div>
 
   {%- comment -%}
@@ -1099,9 +1101,9 @@
       checked: [true, true, true],
       dropdownOpen: -1,
       /* Snapshot of selectedIndex for the open slot, taken when the
-       * dropdown opens. Swatch clicks preview live on the card; ✕ /
-       * Close / Escape restore this index. confirmSelection keeps the
-       * preview and clears the snapshot. */
+       * dropdown opens. Swatch clicks preview live on the card; the
+       * under-image Swap/Add button commits; ✕ / Close / Escape
+       * restore this index. */
       _openSnapshot: null,
       loading: false,
       error: '',
@@ -1412,7 +1414,8 @@
       },
 
       /* Swatch click — preview only. Updates the card (and totals) live
-       * but leaves the dropdown open until confirmSelection / cancel. */
+       * but leaves the dropdown open until Swap/Add (confirmSelection)
+       * or cancel. */
       selectProduct: function(sIdx, p) {
         if (sIdx < 0 || !p || !p.available) return;
         var slot = this.slots[sIdx];
@@ -1423,6 +1426,33 @@
             break;
           }
         }
+      },
+
+      /* Handle committed when the dropdown opened (before any preview). */
+      committedHandle: function(sIdx) {
+        if (!this._openSnapshot || this._openSnapshot.sIdx !== sIdx) {
+          var cur = this.currentProduct(sIdx);
+          return cur && cur.handle ? cur.handle : '';
+        }
+        var slot = this.slots[sIdx];
+        if (!slot || !slot.products) return '';
+        var p = slot.products[this._openSnapshot.index];
+        return (p && p.handle) ? p.handle : '';
+      },
+
+      /* Show Add/Swap under the previewed swatch when it differs from
+       * the committed pick — mirrors bundler showPreviewAction(). */
+      showSwatchAction: function(p) {
+        if (this.dropdownOpen < 0 || !p || !p.available) return false;
+        var preview = this.currentProduct(this.dropdownOpen);
+        if (!preview || preview.handle !== p.handle) return false;
+        return p.handle !== this.committedHandle(this.dropdownOpen);
+      },
+
+      /* FBT slots start filled, so the label is almost always Swap.
+       * Fall back to Add if somehow nothing was committed yet. */
+      swatchActionLabel: function() {
+        return this.committedHandle(this.dropdownOpen) ? 'Swap' : 'Add';
       },
 
       /* Commit the current preview and close the panel (with the same

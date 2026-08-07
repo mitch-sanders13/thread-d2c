@@ -762,6 +762,10 @@
   min-width: 0;
   outline: none;
 }
+.bundle-pdp-preview__dropdown-swatch:focus-visible .bundle-pdp-preview__dropdown-swatch-img {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
 .bundle-pdp-preview__dropdown-swatch-img {
   position: relative;
   display: block;
@@ -779,7 +783,7 @@
   display: block;
   border-radius: inherit;
 }
-.bundle-pdp-preview__dropdown-swatch:hover .bundle-pdp-preview__dropdown-swatch-img { transform: scale(1.04); }
+.bundle-pdp-preview__dropdown-swatch:hover:not(.is-unavailable) .bundle-pdp-preview__dropdown-swatch-img { transform: scale(1.04); }
 .bundle-pdp-preview__dropdown-swatch-name {
   width: 100%;
   text-align: center;
@@ -798,6 +802,22 @@
 .bundle-pdp-preview__dropdown-swatch.is-selected .bundle-pdp-preview__dropdown-swatch-name {
   opacity: 1;
   font-weight: 700;
+}
+.bundle-pdp-preview__dropdown-swatch.is-picked:not(.is-selected) .bundle-pdp-preview__dropdown-swatch-img {
+  border-color: rgba(0, 0, 0, 0.35);
+}
+/* Add / Swap under the previewed FBT swatch — same confirm pattern as
+ * the Everyday Carry bundler (.mtb-pdp__swatch-action). */
+.bundle-pdp-preview__dropdown-swatch-action {
+  width: 100%;
+  margin-top: 2px;
+  padding: 6px 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  min-height: 0;
 }
 .bundle-pdp-preview__dropdown-swatch.is-unavailable {
   cursor: not-allowed;
@@ -818,18 +838,6 @@
   font-size: 0.78rem;
   text-align: center;
   opacity: 0.6;
-}
-
-/* Confirm footer — commits the swatch preview and closes the panel.
- * Sticky feel at the bottom of the open dropdown so customers don't
- * have to scroll back up after browsing a long swatch grid. */
-.bundle-pdp-preview__dropdown-confirm {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-}
-.bundle-pdp-preview__dropdown-confirm-btn {
-  min-height: 44px;
 }
 
 /* ============ PDP sticky-bar trifecta upgrade strip ============ */
