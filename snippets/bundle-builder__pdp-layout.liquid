@@ -275,15 +275,16 @@
         class="tri-pdp__type-filter"
         :class="{ 'is-active': typeFilter === 'all' }"
         @click="setTypeFilter('all')">
-        All
+        <span>All</span>
       </button>
       <template x-for="type in activeTypeFilters()" :key="type">
         <button
           type="button"
           class="tri-pdp__type-filter"
           :class="{ 'is-active': typeFilter === type }"
-          @click="setTypeFilter(type)"
-          x-text="shortTypeLabel(type)"></button>
+          @click="setTypeFilter(type)">
+          <span x-text="type"></span>
+        </button>
       </template>
     </div>
 

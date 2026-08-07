@@ -1845,7 +1845,8 @@
 .tri-pdp__type-filters {
   display: flex;
   flex-wrap: nowrap;
-  gap: 12px;
+  /* Match FBT (.bundle-pdp-preview__type-tabs) gap from theme settings. */
+  gap: 8px;
   margin: 0 0 12px;
   padding: 2px 0 2px 2px;
   overflow-x: auto;
@@ -1861,22 +1862,24 @@
 .tri-pdp__type-filters::-webkit-scrollbar {
   display: none;
 }
+/* Match FBT type pills (.bundle-pdp-preview__type-tab + merchant dt_* settings). */
+.tri-pdp__type-filter,
+.tri-pdp__type-filter > * {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: capitalize;
+  color: #616161;
+}
 .tri-pdp__type-filter {
   display: inline-flex;
   align-items: center;
-  padding: 7px 14px;
+  padding: 4px 8px;
   margin: 0;
-  /* Match PDP related-styles / cart dropdown type pills: rounded pill,
-     light fill, black active state. */
-  border: 1.5px solid #c4c4c4;
+  border: 1px solid #c4c4c4;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.04);
-  color: inherit;
   font: inherit;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0;
-  text-transform: none;
   cursor: pointer;
   line-height: 1.2;
   white-space: nowrap;
@@ -1886,11 +1889,11 @@
 .tri-pdp__type-filter:hover {
   border-color: #1a1a1a;
 }
-.tri-pdp__type-filter.is-active {
-  border-color: #1a1a1a;
-  background: #1a1a1a;
-  color: #fff;
-  /* No scale — transform:scale overflows the mobile viewport. */
+.tri-pdp__type-filter.is-active,
+.tri-pdp__type-filter.is-active > * {
+  border-color: #1c1c1c;
+  background: #1c1c1c;
+  color: #ffffff;
 }
 .tri-pdp__filter-empty {
   margin: 0 0 12px;

@@ -107,18 +107,15 @@
       Liquid caps collection.products at 50/page. Embed the first page for
       fast paint; Alpine _loadMoreProducts fetches the rest via products.json.
       Skip Bundle / trifecta SKUs (prebuilt sets) — same as best-sellers.
-      Wallet slot is limited to Elastic / Vertical Leather / Leather Zip only.
+      All wallet types are included; Elastic / Vertical / Zip stay first
+      in the type-filter pills (see walletPreferredTypes in Alpine).
     {%- endcomment -%}
-    {%- assign _ecs_wallet_types = "Elastic Wallet|Vertical Leather Wallet|Leather Zip Wallet" | split: "|" -%}
     {%- assign _ecs_emitted = 0 -%}
     {%- paginate wallet_coll.products by 100 -%}
       {%- for product in wallet_coll.products limit: 100 -%}
         {%- if product.type == 'Bundle' or product.tags contains 'trifecta' -%}
           {%- continue -%}
         {%- endif -%}
-        {%- unless _ecs_wallet_types contains product.type -%}
-          {%- continue -%}
-        {%- endunless -%}
         {%- if _ecs_emitted >= 50 -%}
           {%- break -%}
         {%- endif -%}
@@ -345,8 +342,9 @@
       // URL deep-link items to re-apply after AJAX pages load (handle may
       // sit past Liquid's first-50 collection page).
       _pendingPrefillItems: [],
-      // Everyday Carry wallet slot — only these product types (order = filter pills).
-      walletAllowedTypes: [
+      // Wallet type-filter order: Elastic / Vertical / Zip first, then
+      // every other wallet type present in the collection (A–Z).
+      walletPreferredTypes: [
         'Elastic Wallet',
         'Vertical Leather Wallet',
         'Leather Zip Wallet'
@@ -466,11 +464,6 @@
         var tags = (p && p.tags) || '';
         if (Array.isArray(tags)) tags = tags.join(',');
         if (typeof tags === 'string' && tags.toLowerCase().indexOf('trifecta') !== -1) return true;
-        // Wallet slot: Elastic / Vertical Leather / Leather Zip only.
-        if (slotKey === 'Wallet') {
-          var rawType = ((p && (p.type || p.product_type)) || '').trim();
-          if (this.walletAllowedTypes.indexOf(rawType) === -1) return true;
-        }
         return false;
       },
 
@@ -580,22 +573,24 @@
 
       activeTypeFilters() {
         var slot = this.activeSlot();
-        var seen = {};
         var present = {};
         this.activeProducts().forEach(function(p) {
           var t = (p.type || '').trim();
           if (t) present[t] = true;
         });
-        // Wallet: fixed allowlist order (Elastic → Vertical Leather → Leather Zip).
-        if (slot && slot.key === 'Wallet') {
-          return this.walletAllowedTypes.filter(function(t) { return present[t]; });
-        }
         var types = [];
-        Object.keys(present).forEach(function(t) {
-          if (seen[t]) return;
-          seen[t] = true;
-          types.push(t);
-        });
+        // Wallet: preferred types first (Elastic → Vertical → Zip), then the rest A–Z.
+        if (slot && slot.key === 'Wallet') {
+          var preferred = this.walletPreferredTypes || [];
+          preferred.forEach(function(t) {
+            if (present[t]) types.push(t);
+          });
+          Object.keys(present).sort(function(a, b) { return a.localeCompare(b); }).forEach(function(t) {
+            if (preferred.indexOf(t) === -1) types.push(t);
+          });
+          return types;
+        }
+        Object.keys(present).forEach(function(t) { types.push(t); });
         types.sort(function(a, b) { return a.localeCompare(b); });
         return types;
       },
