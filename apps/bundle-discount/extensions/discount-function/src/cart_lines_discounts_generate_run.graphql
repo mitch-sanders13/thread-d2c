@@ -1,0 +1,25 @@
+# Input for Everyday Carry + Market Tote bundle discounts.
+# Groups cart lines by _bundle_id (stamped by the theme bundlers).
+query CartInput {
+  cart {
+    lines {
+      id
+      quantity
+      bundleId: attribute(key: "_bundle_id") {
+        value
+      }
+      bundleType: attribute(key: "_bundle_type") {
+        value
+      }
+      bundleSlot: attribute(key: "Bundle Slot") {
+        value
+      }
+    }
+  }
+  discount {
+    discountClasses
+    metafield(namespace: "$app", key: "function-configuration") {
+      jsonValue
+    }
+  }
+}

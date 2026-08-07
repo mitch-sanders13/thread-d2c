@@ -1,0 +1,21 @@
+# Thread bundle discount app — Everyday Carry + Market Tote Discount Function.
+# Link to a Partner app with: shopify app config link
+# Then deploy with: shopify app deploy
+
+name = "Thread Bundle Discount"
+client_id = ""
+application_url = "https://shopify.dev/apps/default-app-home"
+embedded = true
+
+[access_scopes]
+scopes = "write_discounts,read_products"
+
+[auth]
+redirect_urls = [ "https://shopify.dev/apps/default-app-home/api/auth" ]
+
+[discount.metafields.app.function-configuration]
+type = "json"
+name = "Bundle discount function configuration"
+description = "Optional JSON: percent, edcSlots, toteSize, edcMessage, toteMessage"
+access.admin = "merchant_read_write"
+access.storefront = "none"

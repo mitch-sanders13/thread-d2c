@@ -1614,6 +1614,7 @@
           if (isBundle) {
             props['Bundle Slot'] = this.slots[i].label;
             props['_bundle_id'] = bundleId;
+            props['_bundle_type'] = 'everyday_carry';
           }
           var entry = { id: p.variantId, quantity: 1 };
           if (isBundle) entry.properties = props;

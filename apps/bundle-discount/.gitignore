@@ -1,0 +1,8 @@
+# Ignore function build artifacts
+extensions/*/dist/
+extensions/*/node_modules/
+node_modules/
+.shopify/
+.env
+.env.*
+!.env.example

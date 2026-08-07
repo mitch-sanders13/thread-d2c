@@ -1,0 +1,6 @@
+# Shipping discounts are not used — return empty operations from the JS target.
+query DeliveryInput {
+  discount {
+    discountClasses
+  }
+}

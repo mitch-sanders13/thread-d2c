@@ -4,7 +4,8 @@
   Market Tote–style picker with three typed slots:
     Wallet → Lanyard → Chapstick Holder
 
-  Cart line property "Bundle Slot" still uses Wallet / Lanyard / Chapstick
+  Cart line property "Bundle Slot" still uses Wallet / Lanyard / Chapstick.
+  "_bundle_type" is stamped as everyday_carry for the Discount Function.
   so cart grouping, inline edit, and upsell keep working.
 
   PDP CTAs link here with ?slot_<key>=<handle> to pre-select (not lock)
@@ -1318,7 +1319,8 @@
             quantity: 1,
             properties: {
               'Bundle Slot': slot.key,
-              '_bundle_id': bundleId
+              '_bundle_id': bundleId,
+              '_bundle_type': 'everyday_carry'
             }
           });
         }
