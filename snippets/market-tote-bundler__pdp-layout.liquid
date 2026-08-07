@@ -15,7 +15,7 @@
   @param {string} [heading] - Page heading (right column on desktop)
   @param {string} [savings_label] - Bronze savings line under heading
   @example
-  {% render 'market-tote-bundler__pdp-layout', cart_label: 'Add Bundle to Cart', discount_type: 'percent', discount_value: 25, heading: 'Build Your Tote Bundle', savings_label: '3 Market Totes = 25% OFF' %}
+  {% render 'market-tote-bundler__pdp-layout', cart_label: 'Add Bundle to Cart', discount_type: 'percent', discount_value: 20, heading: 'Build Your Tote Bundle', savings_label: '3 Market Totes = 20% OFF' %}
 {% enddoc %}
 
 {%- assign _cart_label = cart_label | default: 'Add Bundle to Cart' -%}
@@ -278,7 +278,7 @@
         :disabled="!canAddToCart() || cartLoading"
         :class="{ 'opacity-50 cursor-not-allowed': !canAddToCart() || cartLoading }"
         @click="finalizeBundle()">
-        <span x-show="!cartLoading">{{ _cart_label }} &mdash; Save {{ discount_value | default: 25 }}%</span>
+        <span x-show="!cartLoading">{{ _cart_label }} &mdash; Save {{ discount_value | default: 20 }}%</span>
         <span x-show="cartLoading" x-cloak>Adding&hellip;</span>
       </button>
     </div>

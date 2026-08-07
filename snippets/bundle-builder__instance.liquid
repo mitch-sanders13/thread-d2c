@@ -44,7 +44,7 @@
   assign js_id = instance_id | replace: '-', '_'
 
   assign discount_type = discount_type | default: 'percent'
-  assign discount_value = discount_value | default: 10
+  assign discount_value = discount_value | default: 20
   assign add_bundle_label = add_bundle_label | default: 'Add to Bundle'
   assign cart_label = cart_label | default: 'Add Bundle to Cart'
   if compact
@@ -52,7 +52,7 @@
   else
     assign heading = heading | default: 'Build Your Everyday Carry Set'
   endif
-  assign savings_label = savings_label | default: 'Save 10% when you bundle a wallet, lanyard, and chapstick holder'
+  assign savings_label = savings_label | default: 'Save 20% when you bundle a wallet, lanyard, and chapstick holder'
 
   if discount_code == blank
     assign discount_code = settings.trifecta_discount_code | default: ''

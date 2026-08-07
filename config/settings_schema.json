@@ -2621,7 +2621,7 @@
         "type": "richtext",
         "id": "trifecta_upsell_copy",
         "label": "Upsell panel copy",
-        "default": "<p><strong>Complete your Everyday Carry Set</strong> and save 10%</p>"
+        "default": "<p><strong>Complete your Everyday Carry Set</strong> and save 20%</p>"
       },
       {
         "type": "text",
@@ -2647,7 +2647,7 @@
         "type": "text",
         "id": "trifecta_pdp_cta_text",
         "label": "PDP CTA button text",
-        "default": "Build an Everyday Carry Set — Save 10%"
+        "default": "Build an Everyday Carry Set — Save 20%"
       },
       {
         "type": "text",
@@ -2695,7 +2695,7 @@
         "id": "trifecta_pdp_sticky_text",
         "label": "Sticky bar upgrade strip text",
         "info": "Shown above the sticky add-to-cart button on eligible PDPs. Tap goes to the bundler page with this product selected. Leave blank to hide the strip even when the CTA is enabled.",
-        "default": "Save 10% with an Everyday Carry Set — Build Bundle"
+        "default": "Save 20% with an Everyday Carry Set — Build Bundle"
       },
       {
         "type": "header",
@@ -2703,7 +2703,7 @@
       },
       {
         "type": "paragraph",
-        "content": "Discount code that customers are redirected through (via /discount/CODE) after they add a bundle to cart, so the 10% applies at checkout. Leave blank to skip the redirect. Must match a discount you have created in Shopify admin (Discounts → Create discount)."
+        "content": "Discount code that customers are redirected through (via /discount/CODE) after they add a bundle to cart, so the 20% applies at checkout. Leave blank to skip the redirect. Must match a discount you have created in Shopify admin (Discounts → Create discount)."
       },
       {
         "type": "text",
@@ -2711,7 +2711,7 @@
         "label": "Everyday Carry Set discount code"
       },
 
-      { "type": "header", "content": "Bundle heading — 'Save 10% with an Everyday Carry Set'" },
+      { "type": "header", "content": "Bundle heading — 'Save 20% with an Everyday Carry Set'" },
       { "type": "select", "id": "trifecta_heading_font", "label": "Font", "options": [
         { "value": "", "label": "Inherit" },
         { "value": "body", "label": "Body" },
@@ -2997,7 +2997,7 @@
     "settings": [
       {
         "type": "paragraph",
-        "content": "Buy-3 Market Tote bundler. Create a matching 25% discount in Shopify admin (Discounts) and enter its code below. Customers are silently sent through /discount/CODE after add-to-cart."
+        "content": "Buy-3 Market Tote bundler. Create a matching 20% discount in Shopify admin (Discounts) and enter its code below. Customers are silently sent through /discount/CODE after add-to-cart."
       },
       {
         "type": "checkbox",
@@ -3022,7 +3022,7 @@
         "type": "text",
         "id": "market_tote_pdp_cta_text",
         "label": "PDP button text",
-        "default": "Build a tote bundle — Save 25%"
+        "default": "Build a tote bundle — Save 20%"
       },
       {
         "type": "text",

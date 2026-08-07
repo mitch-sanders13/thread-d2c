@@ -13,7 +13,7 @@
       "type": "text",
       "settings": {
         "heading": "Build your own bundle",
-        "content": "<h4>{{ product.title }} - Bundle & Save 10%<\/h4>",
+        "content": "<h4>{{ product.title }} - Bundle & Save 20%<\/h4>",
         "button_label": "",
         "button_url": "",
         "spacing_top": 40,

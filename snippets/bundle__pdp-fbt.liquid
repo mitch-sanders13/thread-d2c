@@ -935,7 +935,7 @@
 
   {%- comment -%}
     Incomplete-bundle helper — only when 1–2 slots are checked.
-    Explains why the CTA lost "Save 10%" and nudges the customer back
+    Explains why the CTA lost "Save 20%" and nudges the customer back
     to the full Trifecta. Hidden at 0 (CTA already says "Select at
     least one item") and at 3 (discount unlocked).
   {%- endcomment -%}
@@ -943,7 +943,7 @@
     class="bundle-pdp-preview__bundle-hint"
     x-show="checkedCount() > 0 && checkedCount() < 3"
     x-cloak>
-    Select all 3 to unlock 10% off
+    Select all 3 to unlock 20% off
   </p>
 
   {%- comment -%}
@@ -1052,7 +1052,7 @@
       @click="addBundle()">
       <span x-show="!loading && checkedCount() === 0" x-cloak>Select at least one item</span>
       <span x-show="!loading && checkedCount() > 0 && !checkedAvailable()" x-cloak>One selected item is sold out</span>
-      <span x-show="!loading && checkedCount() === 3 && checkedAvailable()" x-cloak>Add Bundle &mdash; Save 10%</span>
+      <span x-show="!loading && checkedCount() === 3 && checkedAvailable()" x-cloak>Add Bundle &mdash; Save 20%</span>
       <span x-show="!loading && checkedCount() === 2 && checkedAvailable()" x-cloak>Add 2 items to Cart</span>
       <span x-show="!loading && checkedCount() === 1 && checkedAvailable()" x-cloak>Add 1 item to Cart</span>
       <span x-show="loading" x-cloak>Adding&hellip;</span>
@@ -1077,7 +1077,7 @@
       <strong class="{% unless settings.trifecta_price_override %}pdp-price-regular {% endunless %}bundle-pdp-preview__summary-now" x-text="formatMoney(totals().total)"></strong>
       <s class="{% unless settings.trifecta_price_override %}pdp-price-compare {% endunless %}bundle-pdp-preview__summary-was" x-show="totals().bundled" x-text="formatMoney(totals().subtotal)" x-cloak></s>
       {%- comment -%}
-        Dollar savings next to the struck price so "Save 10%" isn't
+        Dollar savings next to the struck price so "Save 20%" isn't
         abstract — only when all 3 slots are checked (bundled).
       {%- endcomment -%}
       <span
@@ -1096,7 +1096,7 @@
       slots: [],
       selectedIndex: [0, 0, 0],
       selectedType: { 0: '', 1: '', 2: '' },
-      /* Per-slot include flag. All 3 checked → bundle with 10% discount;
+      /* Per-slot include flag. All 3 checked → bundle with 20% discount;
        * fewer checked → add selected items individually at full price. */
       checked: [true, true, true],
       dropdownOpen: -1,
@@ -1559,12 +1559,12 @@
           var p = this.currentProduct(i);
           sum += (p && typeof p.price === 'number') ? p.price : 0;
         }
-        /* 10% bundle discount applies only when all 3 slots are checked.
+        /* 20% bundle discount applies only when all 3 slots are checked.
          * Partial selections (1-2 items) add at full price as individual
          * cart lines; the cart-drawer auto-combine logic will re-fold
          * them into a Trifecta Bundle if/when the 3rd type lands. */
         var bundled = this.checkedCount() === 3;
-        var savings = bundled ? Math.round(sum * 0.10) : 0;
+        var savings = bundled ? Math.round(sum * 0.20) : 0;
         return { subtotal: sum, savings: savings, total: sum - savings, bundled: bundled };
       },
 

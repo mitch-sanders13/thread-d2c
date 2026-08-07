@@ -6,7 +6,7 @@
     - Images come from the three cart line items (not Trifecta slots)
     - No inline Trifecta editor (edit chevron hidden)
     - Remove + qty stepper adjust all three line keys together
-    - Client-side 25% display discount (checkout uses the real code)
+    - Client-side 20% display discount (checkout uses the real code)
 
   Parent scope provides item.__bundleGroup (the 3 line items).
 {% endcomment %}
@@ -18,7 +18,7 @@
 {% enddoc %}
 
 {%- assign _trash_icon_size = section.settings.trash_icon_size | default: 20 -%}
-{%- assign _tote_discount_pct = 25 -%}
+{%- assign _tote_discount_pct = 20 -%}
 
 <div
   class="cart__bundle-group cart__market-tote-group"

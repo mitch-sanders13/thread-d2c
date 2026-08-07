@@ -34,7 +34,7 @@
   assign js_id = instance_id | replace: '-', '_'
 
   assign discount_type = discount_type | default: 'percent'
-  assign discount_value = discount_value | default: 25
+  assign discount_value = discount_value | default: 20
   assign required_count = 3
   assign add_bundle_label = add_bundle_label | default: 'Add to Bundle'
   assign cart_label = cart_label | default: 'Add Bundle to Cart'
@@ -47,7 +47,7 @@
   else
     assign heading = heading | default: 'Build Your Tote Bundle'
   endif
-  assign savings_label = savings_label | default: '3 Market Totes = 25% OFF'
+  assign savings_label = savings_label | default: '3 Market Totes = 20% OFF'
 
   if discount_code == blank
     assign discount_code = settings.market_tote_discount_code | default: ''

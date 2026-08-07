@@ -508,7 +508,7 @@
   transform: rotate(180deg);
 }
 
-/* Nudge shown when 1–2 slots are checked — explains why Save 10% left
+/* Nudge shown when 1–2 slots are checked — explains why Save 20% left
  * the CTA and how to get it back. */
 .bundle-pdp-preview__bundle-hint {
   margin: 0 0 10px;
@@ -943,7 +943,7 @@
    * since the markup is now <p class="cart__item-title"> not <strong>. */
 }
 /* .cart__bundle-badge and .cart__bundle-savings rules removed —
- * the green 'save 10%' pill and 'You save $X' paragraph are no
+ * the green 'save 20%' pill and 'You save $X' paragraph are no
  * longer rendered. The discount is communicated entirely by the
  * total + crossed-out subtotal, matching every other discounted
  * line in the cart. Colors come from .cart__item-price /

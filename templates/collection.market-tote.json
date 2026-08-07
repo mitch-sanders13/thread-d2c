@@ -69,11 +69,11 @@
       "type": "market-tote-bundler",
       "settings": {
         "heading": "Build Your Tote Bundle",
-        "savings_label": "3 Market Totes = 25% OFF",
+        "savings_label": "3 Market Totes = 20% OFF",
         "cta_text": "Add Bundle to Cart",
         "source_collection": "reusable-market-tote-bags",
         "discount_type": "percent",
-        "discount_value": 25,
+        "discount_value": 20,
         "discount_code": "",
         "spacing_top": 40,
         "spacing_bottom": 40,

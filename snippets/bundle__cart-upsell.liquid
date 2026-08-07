@@ -184,7 +184,7 @@
           :disabled="loading"
           style="flex:1;"
           @click="buildBundle(cartBundleStatus)">
-          <span x-show="!loading">Add Bundle &mdash; Save 10%</span>
+          <span x-show="!loading">Add Bundle &mdash; Save 20%</span>
           <span x-show="loading" x-cloak>Adding&hellip;</span>
         </button>
       </div>
@@ -193,7 +193,7 @@
 
   {%- comment -%}
     Complete trifecta (all 3 types in cart as separate items): one-click
-    "Combine into Bundle" to save 10%. Rewires the 3 cart lines with
+    "Combine into Bundle" to save 20%. Rewires the 3 cart lines with
     _bundle_id properties and applies the discount code.
   {%- endcomment -%}
   <div
@@ -205,7 +205,7 @@
         <strong>You qualify for an Everyday Carry Set!</strong>
       </p>
       <div class="cart__trifecta-upsell-copy">
-        Save 10% by combining your wallet, lanyard, and chapstick holder.
+        Save 20% by combining your wallet, lanyard, and chapstick holder.
       </div>
     </div>
     <button
@@ -213,7 +213,7 @@
       class="cart__trifecta-upsell-cta btn btn--primary"
       :disabled="cart_loading"
       @click="combineCartIntoBundle()">
-      <span x-show="!cart_loading">Combine into Bundle &mdash; Save 10%</span>
+      <span x-show="!cart_loading">Combine into Bundle &mdash; Save 20%</span>
       <span x-show="cart_loading" x-cloak>Bundling&hellip;</span>
     </button>
   </div>
