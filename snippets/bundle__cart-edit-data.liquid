@@ -846,8 +846,9 @@
 
       /* Idempotent: for each bundle line item in the live cart,
        * rewrite line_price to price * qty * 0.8 (the displayed-only
-       * Trifecta 20% off — the discount code resolves at checkout,
-       * not in /cart/change.js), then recompute cart.total_price
+       * Trifecta 20% off — real savings come from an automatic discount
+       * at checkout, or from a discount code if one is configured;
+       * /cart/change.js does not apply either), then recompute cart.total_price
        * by summing every cart line's line_price. Re-runs on initial
        * mount and on the global cart:updated event so the
        * grand-total stays in sync no matter what triggered the

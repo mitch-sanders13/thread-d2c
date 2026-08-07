@@ -87,7 +87,7 @@
     {
       "type": "header",
       "content": "Bundle discount",
-      "info": "discount_type / discount_value control only the savings LABEL. Create a matching discount in Shopify admin and enter its code below (or in theme settings) so checkout gets the real 20% off."
+      "info": "discount_type / discount_value control only the savings LABEL. Prefer an Automatic 20% discount in Shopify admin on the eligibility collections (min qty 3). Leave discount code blank unless you intentionally use a silent code attach."
     },
     {
       "type": "select",
@@ -109,8 +109,8 @@
     {
       "type": "text",
       "id": "discount_code",
-      "label": "Discount code (overrides theme setting)",
-      "info": "Leave blank to use Theme settings → Trifecta bundle → Discount code."
+      "label": "Discount code (optional override)",
+      "info": "Leave blank for automatic discounts. If set, overrides Theme settings → Everyday Carry Set → discount code and silently attaches via /discount/CODE."
     },
     {
       "type": "header",
