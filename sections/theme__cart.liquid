@@ -1313,8 +1313,8 @@
                   },
 
                   /* All 3 trifecta types in cart as individual lines →
-                   * convert them to a Trifecta Bundle (adds _bundle_id +
-                   * Bundle Slot properties), apply discount code. */
+                   * convert them to a Trifecta Bundle (adds _bundle_id,
+                   * _bundle_type, Bundle Slot), apply discount code if set. */
                   combineCartIntoBundle() {
                     var status = this.cartBundleStatus;
                     if (!status.complete) return;
@@ -1335,7 +1335,8 @@
                         quantity: 1,
                         properties: {
                           'Bundle Slot': eli.slotLabel,
-                          '_bundle_id': bundleId
+                          '_bundle_id': bundleId,
+                          '_bundle_type': 'everyday_carry'
                         }
                       };
                     });

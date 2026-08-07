@@ -2703,13 +2703,13 @@
       },
       {
         "type": "paragraph",
-        "content": "Prefer an Automatic discount in Shopify admin (Discounts → Create discount → Automatic) for 20% off the wallet / lanyard / chapstick collections with a minimum of 3 items. Leave this code blank so nothing is public for scrapers. Only fill a code if you intentionally want the theme to silently attach one via /discount/CODE after add-to-cart."
+        "content": "Prefer the Thread Bundle Discount Function (apps/bundle-discount) for checkout: it applies 20% only to lines stamped with _bundle_id. Leave this code blank. Only fill a code if you intentionally want a silent /discount/CODE attach (public codes can be scraped)."
       },
       {
         "type": "text",
         "id": "trifecta_discount_code",
         "label": "Everyday Carry Set discount code (optional)",
-        "info": "Leave blank when using an automatic discount. If set, must match a Discount code in admin."
+        "info": "Leave blank when using the Bundle Discount Function or an automatic discount. If set, must match a Discount code in admin."
       },
 
       { "type": "header", "content": "Bundle heading — 'Save 20% with an Everyday Carry Set'" },
@@ -2998,7 +2998,7 @@
     "settings": [
       {
         "type": "paragraph",
-        "content": "Buy-3 Market Tote bundler. Prefer an Automatic discount in Shopify admin: 20% off the Market Tote collection, minimum quantity 3. Leave the discount code blank so scrapers have nothing to steal. Only fill a code if you want a silent /discount/CODE attach after add-to-cart."
+        "content": "Buy-3 Market Tote bundler. Prefer the Thread Bundle Discount Function (apps/bundle-discount): 20% on lines stamped with _bundle_id / market_tote. Leave the discount code blank. Only fill a code if you want a silent /discount/CODE attach after add-to-cart."
       },
       {
         "type": "checkbox",

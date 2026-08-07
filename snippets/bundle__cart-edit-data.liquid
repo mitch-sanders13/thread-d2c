@@ -508,7 +508,11 @@
               items: [{
                 id: p.variantId,
                 quantity: 1,
-                properties: { 'Bundle Slot': slotLabel, '_bundle_id': bundleId }
+                properties: {
+                  'Bundle Slot': slotLabel,
+                  '_bundle_id': bundleId,
+                  '_bundle_type': 'everyday_carry'
+                }
               }]
             })
           });
@@ -1033,7 +1037,8 @@
             quantity: 1,
             properties: {
               'Bundle Slot': label,
-              '_bundle_id': '__pending__'
+              '_bundle_id': '__pending__',
+              '_bundle_type': 'everyday_carry'
             }
           });
         }

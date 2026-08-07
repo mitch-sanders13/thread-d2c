@@ -1,0 +1,23 @@
+{
+  "name": "thread-bundle-discount",
+  "version": "1.0.0",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "shopify": "shopify",
+    "build": "shopify app build",
+    "dev": "shopify app dev",
+    "info": "shopify app info",
+    "generate": "shopify app generate",
+    "deploy": "shopify app deploy",
+    "link": "shopify app config link",
+    "login": "shopify auth login",
+    "test": "npm --prefix extensions/discount-function test"
+  },
+  "trustedDependencies": [
+    "@shopify/plugin-cloudflare"
+  ],
+  "devDependencies": {
+    "@shopify/cli": "^4.6.1"
+  }
+}
