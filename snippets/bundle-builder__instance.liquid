@@ -350,6 +350,16 @@
         'Vertical Leather Wallet',
         'Leather Zip Wallet'
       ],
+      // Lanyard type-filter order: Wrist → Neck → Keychain Clip first,
+      // then every other lanyard type present (A–Z). Both "Wrist Lanyard"
+      // and "Wide Wrist Lanyard" are listed so whichever Shopify type the
+      // catalog uses still lands in the lead pill slot.
+      lanyardPreferredTypes: [
+        'Wrist Lanyard',
+        'Wide Wrist Lanyard',
+        'Neck Lanyard',
+        'Keychain Clip'
+      ],
 
       init() {
         var dataEl = document.getElementById('{{ section_id }}-data');
@@ -580,9 +590,11 @@
           if (t) present[t] = true;
         });
         var types = [];
-        // Wallet: preferred types first (Elastic → Vertical → Zip), then the rest A–Z.
-        if (slot && slot.key === 'Wallet') {
-          var preferred = this.walletPreferredTypes || [];
+        // Preferred types first (wallet / lanyard), then the rest A–Z.
+        var preferred = null;
+        if (slot && slot.key === 'Wallet') preferred = this.walletPreferredTypes || [];
+        else if (slot && slot.key === 'Lanyard') preferred = this.lanyardPreferredTypes || [];
+        if (preferred) {
           preferred.forEach(function(t) {
             if (present[t]) types.push(t);
           });
