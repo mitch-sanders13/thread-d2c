@@ -16,30 +16,39 @@
 
 <meta charset='utf-8'>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
-{%- capture seo_title -%}
-  {{ page_title | strip_html }}
-{%- endcapture -%}
-<title>{{ seo_title }} {% if settings.type_seperator == 'dot' %}·{% else %}|{% endif %} {{ shop.name }}</title>
 
 {%- liquid
-  assign meta_type = 'website' 
-  assign meta_title = page_title | strip_html | escape 
-  assign meta_description = page_description | strip_html | escape 
-  if template contains 'product' 
-    assign meta_type = 'product' 
-    assign meta_title = product.title | strip_html | escape 
-    assign meta_price = product.price | money_without_currency | strip_html | escape 
-    assign meta_currency = shop.currency 
-  elsif template contains 'collection' 
+  assign seo_title = page_title | strip_html
+  assign meta_type = 'website'
+  assign meta_title = page_title | strip_html | escape
+  assign meta_description = page_description | strip_html | escape
+
+  if template.suffix == 'event-space' or page.handle == '241-event-space'
+    if page_title == page.title
+      assign seo_title = 'Event Venue in Downtown Provo, UT'
+      assign meta_title = seo_title | escape
+    endif
+    if page_description == blank
+      assign meta_description = 'Rent a 2,220 sq ft industrial event venue in downtown Provo, UT. Weddings, corporate events, and community gatherings for 100–150 guests at 241 W Center St.' | escape
+    endif
+  endif
+
+  if template contains 'product'
+    assign meta_type = 'product'
+    assign meta_title = product.title | strip_html | escape
+    assign meta_price = product.price | money_without_currency | strip_html | escape
+    assign meta_currency = shop.currency
+  elsif template contains 'collection'
     if page_description
-       assign meta_description = page_description | strip_html | escape
-    elsif collection.description != blank 
-      assign meta_description = collection.description | strip_html | escape 
-    endif 
-  elsif template contains 'article' 
-    assign meta_type = 'article' 
-  endif 
+      assign meta_description = page_description | strip_html | escape
+    elsif collection.description != blank
+      assign meta_description = collection.description | strip_html | escape
+    endif
+  elsif template contains 'article'
+    assign meta_type = 'article'
+  endif
 -%}
+<title>{{ seo_title }} {% if settings.type_seperator == 'dot' %}·{% else %}|{% endif %} {{ shop.name }}</title>
 
 <link href='{{ canonical_url }}' rel='canonical'>
 {% if settings.favicon %}

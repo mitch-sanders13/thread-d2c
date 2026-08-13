@@ -44,7 +44,7 @@
           "type": "content",
           "settings": {
             "heading": "Thread HQ Store",
-            "content": "<p>241 W Center St.<br/>Provo, UT 84601<br/>United States<br/>(801) 610-9238</p>",
+            "content": "<p>241 W Center St.<br/>Provo, UT 84601<br/>United States<br/>(801) 610-9238</p><p><a href=\"/pages/241-event-space\">Book the downtown Provo event space</a></p>",
             "content2": "<p>HOURS<br/>Mon-Sat\t\t10AM-8PM<br/><br/></p>",
             "show_image_above": true,
             "button_label": "Directions",

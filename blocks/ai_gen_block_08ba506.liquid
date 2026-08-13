@@ -180,7 +180,7 @@
               <div class="ai-event-gallery-image-wrapper-{{ ai_gen_id }}">
                 <img
                   src="{{ image | image_url: width: 1200 }}"
-                  alt="{{ image.alt | escape }}"
+                  alt="{{ caption | default: image.alt | default: 'Industrial event venue in downtown Provo, Utah' | escape }}"
                   loading="lazy"
                   width="{{ image.width }}"
                   height="{{ image.height }}"

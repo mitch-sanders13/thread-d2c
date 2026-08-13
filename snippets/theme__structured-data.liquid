@@ -232,6 +232,10 @@
   </script>
 {%- endif -%}
 
+{%- if template.suffix == 'event-space' or page.handle == '241-event-space' -%}
+  {% render 'event-space-seo' %}
+{%- endif -%}
+
 {% if template.name == 'article' -%}
   <script type="application/ld+json">
     {

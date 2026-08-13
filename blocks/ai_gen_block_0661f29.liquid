@@ -168,7 +168,7 @@
                 {% if item_image != blank %}
                   <img
                     src="{{ item_image | image_url: width: 600 }}"
-                    alt="{{ item_title | escape }}"
+                    alt="{{ item_title | append: ' at 241 Event Space in downtown Provo' | escape }}"
                     class="ai-event-inclusions-card-image-{{ ai_gen_id }}"
                     loading="lazy"
                     width="600"

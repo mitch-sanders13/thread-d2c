@@ -54,7 +54,7 @@
         "heading_hBQhH7": {
           "type": "heading",
           "settings": {
-            "content": "Event Space",
+            "content": "Provo Event Space",
             "block_layout": "stack",
             "spacing_top": 0,
             "spacing_bottom": 0,
@@ -73,7 +73,7 @@
         "content_3BLH96": {
           "type": "content",
           "settings": {
-            "content": "<p><em>241 W Center St Provo, UT 84601</em></p>",
+            "content": "<p><em><a href=\"https://www.google.com/maps/search/?api=1&amp;query=241+W+Center+St+Provo+UT+84601\">241 W Center St, Provo, UT 84601</a></em></p>",
             "block_layout": "stack",
             "spacing_top": 0,
             "spacing_bottom": 0,
@@ -91,7 +91,7 @@
         "content_T3y8YM": {
           "type": "content",
           "settings": {
-            "content": "<p>Inside our HQ we have a beautiful industrial-style venue perfect for corporate, private, or community events of all kinds.</p>",
+            "content": "<p>A historic industrial venue in downtown Provo for weddings, corporate events, workshops, and community gatherings.</p>",
             "block_layout": "stack",
             "spacing_top": 0,
             "spacing_bottom": 0,
@@ -176,8 +176,8 @@
       "custom_css": [],
       "name": "Rich text",
       "settings": {
-        "heading": "About",
-        "content": "<p>Built over 100 years ago in heart of downtown Provo is the industrial-style home of Thread. We have designed a flexible event venue equipped with a full kitchen, large stage with jumbotron, professional sound system with microphone, tables and chairs, tablecloths, decorations, a rolling bar, and a spacious layout, this space can be customized to fit your event. </p><p>If you have any question please email blythe@threadwallets.com or call (801) 874-1848</p>",
+        "heading": "About this downtown Provo venue",
+        "content": "<p>Thread’s 241 Event Space is a 2,220 sq ft industrial venue in downtown Provo, Utah, at 241 W Center Street. Built over a century ago, the historic red-brick building is a flexible setting for weddings, receptions, corporate events, workshops, nonprofit gatherings, and graduation parties in Utah County.</p><p>The space includes a full kitchen, a stage with jumbotron, a professional sound system, tables and chairs, a rolling bar, on-site parking, and an ADA-accessible layout for 100–150 guests. Whether you are planning a wedding in Provo or a community event on Center Street, the venue can be customized to fit your day.</p><p>If you have any questions please email blythe@threadwallets.com or call (801) 874-1848</p>",
         "button_label": "Book a tour",
         "button_url": "https://(calendly.com/blythe-threadwallets/30min)",
         "spacing_top": 60,
@@ -197,19 +197,19 @@
         "ai_gen_block_08ba506_QxykF7": {
           "type": "ai_gen_block_08ba506",
           "settings": {
-            "title": "",
-            "description": "",
+            "title": "Inside 241 Event Space",
+            "description": "A historic industrial venue on Center Street in downtown Provo, Utah.",
             "text_alignment": "center",
             "image_1": "shopify://shop_images/DamagedGoods-40_7ddbc986-1b63-4afd-befd-6ce1cb599da3.jpg",
-            "caption_1": "",
+            "caption_1": "Open event hall at 241 Event Space in downtown Provo",
             "image_2": "shopify://shop_images/AK_01812.jpg",
-            "caption_2": "",
+            "caption_2": "Historic industrial event venue on Center Street, Provo",
             "image_3": "shopify://shop_images/DamagedGoods-12.jpg",
-            "caption_3": "",
+            "caption_3": "Stage and jumbotron for Provo weddings and corporate events",
             "image_4": "shopify://shop_images/IMG_3715.jpg",
-            "caption_4": "",
+            "caption_4": "Downtown Provo event space ready for community gatherings",
             "image_5": "shopify://shop_images/AK_02369.jpg",
-            "caption_5": "",
+            "caption_5": "1912 red-brick event venue in Provo, Utah",
             "caption_6": "",
             "caption_7": "",
             "caption_8": "",
@@ -234,10 +234,10 @@
           "type": "ai_gen_block_0661f29",
           "settings": {
             "title": "What's Included",
-            "intro_text": "Everything you need for a seamless and stylish event is included.",
+            "intro_text": "Everything you need for a seamless event in downtown Provo is included.",
             "item_1_enabled": true,
             "item_1_title": "2,220 sq ft",
-            "item_1_description": "Beautiful 1912 industrial style (red brick and raw wood) building with a large open event room with high ceilings and wood beams.",
+            "item_1_description": "Beautiful 1912 industrial-style building in downtown Provo featuring exposed red brick, raw wood accents, soaring ceilings with exposed beams, and large skylights.",
             "item_1_image": "shopify://shop_images/AK_02369.jpg",
             "item_2_enabled": true,
             "item_2_title": "Full kitchen",
@@ -260,8 +260,8 @@
             "item_6_description": "Wheelchair accessible ramps and ADA compliant restrooms.",
             "item_6_image": "shopify://shop_images/IMG_3711.jpg",
             "item_7_enabled": true,
-            "item_7_title": "Private & Waste",
-            "item_7_description": "20+ spaces on-site, plus multiple nearby public parking options. 2 large trash cans and dumpster.",
+            "item_7_title": "Parking & Waste",
+            "item_7_description": "20+ on-site parking spaces at our Center Street venue in Provo, plus nearby public parking. Two large trash cans and dumpster access.",
             "item_7_image": "shopify://shop_images/AK_01691_f3c0a65f-ff75-4502-bcc5-ca90b9f8a6ed.jpg",
             "item_8_enabled": true,
             "item_8_title": "Mothers' room / bridal suite",
@@ -293,11 +293,11 @@
             "card_1_enabled": true,
             "card_1_name": "Community Events",
             "card_1_price": "$50/hr",
-            "card_1_description": "Ideal for workshops, clubs, nonprofits, networking events, and small gatherings. Discounts available for recurring booking.",
+            "card_1_description": "Ideal for workshops, clubs, nonprofits, networking, and small gatherings in Provo and Utah County. Discounts available for recurring booking.",
             "card_2_enabled": true,
             "card_2_name": "Private Celebrations",
             "card_2_price": "M - Th = $800\n<br>\nF - Su = $1200",
-            "card_2_description": "Perfect for weddings, receptions, graduation parties, and formal events.",
+            "card_2_description": "Perfect for weddings, receptions, graduation parties, and formal events in downtown Provo.",
             "card_3_enabled": true,
             "card_3_name": "Conference Rooms",
             "card_3_price": "Small Room = $25   Large Room = $30/hr",
@@ -448,6 +448,20 @@
     "accordions_wQpc46": {
       "type": "accordions",
       "blocks": {
+        "content_location": {
+          "type": "content",
+          "settings": {
+            "title": "Where is 241 Event Space located?",
+            "content": "<p>241 Event Space is in downtown Provo, Utah at 241 W Center Street, 84601, inside Thread HQ. The venue sits on Center Street with 20+ on-site parking spots, plus nearby street parking and a public garage.</p>"
+          }
+        },
+        "content_event_types": {
+          "type": "content",
+          "settings": {
+            "title": "What types of events can I host in Provo?",
+            "content": "<p>The venue hosts weddings, receptions, corporate events, workshops, nonprofit gatherings, networking events, and graduation parties in Provo and Utah County. Community events start at $50/hour, and private celebrations have weekday and weekend rates.</p>"
+          }
+        },
         "content_GtUYdT": {
           "type": "content",
           "settings": {
@@ -473,14 +487,14 @@
           "type": "content",
           "settings": {
             "title": "What is the capacity of the event space?",
-            "content": "<p>The event space comfortably accommodates up to 100-150 guests. If you’re unsure whether the space will suit your event, we encourage you to schedule a tour. We’d be happy to walk you through the space and answer any questions.</p>"
+            "content": "<p>The downtown Provo event space comfortably accommodates up to 100–150 guests. If you’re unsure whether the space will suit your event, we encourage you to schedule a tour.</p>"
           }
         },
         "content_VPKAc4": {
           "type": "content",
           "settings": {
             "title": "How large is the space?",
-            "content": "<p>The main event space offers 2,220 square feet, perfectly suited for intimate dinners and<br/>community events. Guests also have access to an open four-stall restroom and a private<br/>mother’s room.</p>"
+            "content": "<p>The main event space offers 2,220 square feet in our historic Center Street building, suited for intimate dinners, weddings, and community events in Provo. Guests also have access to an open four-stall restroom and a private mother’s room.</p>"
           }
         },
         "content_rByptH": {
@@ -508,11 +522,13 @@
           "type": "content",
           "settings": {
             "title": "Is there parking available for guests?",
-            "content": "<p>Yes. We offer 20+ on-site parking spaces, as well as street parking and a nearby parking<br/>garage.</p>"
+            "content": "<p>Yes. We offer 20+ on-site parking spaces at 241 W Center St in Provo, as well as street parking and a nearby parking garage.</p>"
           }
         }
       },
       "block_order": [
+        "content_location",
+        "content_event_types",
         "content_GtUYdT",
         "content_xfJHrk",
         "content_GKB4Mk",
@@ -545,7 +561,7 @@
       "name": "Rich text",
       "settings": {
         "heading": "Contact us",
-        "content": "<p>We would love to host your next event! Please email or call us with any questions. </p><p>(801) 874-1848 </p><p>blythe@threadwallets.com</p><p></p>",
+        "content": "<p>We would love to host your next event in downtown Provo. Email or call us with any questions.</p><p>(801) 874-1848 </p><p>blythe@threadwallets.com</p><p></p>",
         "button_label": "BOOK A TOUR",
         "button_url": "https://(calendly.com/blythe-threadwallets/30min)",
         "spacing_top": 100,

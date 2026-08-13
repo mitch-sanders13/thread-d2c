@@ -1,0 +1,148 @@
+{% doc %}
+  Local SEO structured data for the downtown Provo event venue page.
+  Renders EventVenue, FAQPage, and BreadcrumbList JSON-LD so search engines
+  can connect this page to Provo / Utah County event queries.
+
+  @example
+    {% render 'event-space-seo' %}
+{% enddoc %}
+
+{%- liquid
+  assign venue_name = '241 Event Space'
+  assign venue_description = 'A 2,220 sq ft industrial event venue in downtown Provo, Utah. Hosts weddings, corporate events, workshops, nonprofit gatherings, and community celebrations for 100–150 guests at 241 W Center Street.'
+  assign venue_street = '241 W Center St'
+  assign venue_locality = 'Provo'
+  assign venue_region = 'UT'
+  assign venue_postal = '84601'
+  assign venue_phone = '+1-801-874-1848'
+  assign venue_url = canonical_url
+  if venue_url == blank
+    assign venue_url = shop.url | append: '/pages/241-event-space'
+  endif
+-%}
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "EventVenue",
+    "@id": {{ venue_url | append: '#venue' | json }},
+    "name": {{ venue_name | json }},
+    "alternateName": ["Thread Event Space", "Thread 241 Event Space"],
+    "description": {{ venue_description | json }},
+    "url": {{ venue_url | json }},
+    "telephone": {{ venue_phone | json }},
+    "maximumAttendeeCapacity": 150,
+    "isAccessibleForFree": false,
+    "publicAccess": true,
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": {{ venue_street | json }},
+      "addressLocality": {{ venue_locality | json }},
+      "addressRegion": {{ venue_region | json }},
+      "postalCode": {{ venue_postal | json }},
+      "addressCountry": "US"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 40.233565,
+      "longitude": -111.662936
+    },
+    "hasMap": "https://www.google.com/maps/search/?api=1&query=241+W+Center+St+Provo+UT+84601",
+    "containedInPlace": {
+      "@type": "City",
+      "name": "Provo",
+      "containedInPlace": {
+        "@type": "AdministrativeArea",
+        "name": "Utah County"
+      }
+    },
+    "areaServed": [
+      { "@type": "City", "name": "Provo" },
+      { "@type": "City", "name": "Orem" },
+      { "@type": "AdministrativeArea", "name": "Utah County" }
+    ],
+    "amenityFeature": [
+      { "@type": "LocationFeatureSpecification", "name": "Full kitchen", "value": true },
+      { "@type": "LocationFeatureSpecification", "name": "Stage and jumbotron", "value": true },
+      { "@type": "LocationFeatureSpecification", "name": "Sound system", "value": true },
+      { "@type": "LocationFeatureSpecification", "name": "On-site parking", "value": true },
+      { "@type": "LocationFeatureSpecification", "name": "Wheelchair accessible", "value": true },
+      { "@type": "LocationFeatureSpecification", "name": "Bridal suite", "value": true }
+    ],
+    "parentOrganization": {
+      "@type": "Organization",
+      "name": {{ shop.name | json }},
+      "url": {{ shop.url | json }}
+    }
+  }
+</script>
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Where is 241 Event Space located?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "241 Event Space is in downtown Provo, Utah at 241 W Center Street, 84601, inside Thread HQ. The venue is on Center Street with 20+ on-site parking spots plus nearby street and garage parking."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What types of events can I host in Provo?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The venue hosts weddings, receptions, corporate events, workshops, nonprofit gatherings, networking events, and graduation parties in Provo and Utah County. Community events start at $50/hour; private celebrations have weekday and weekend rates."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the capacity of the event space?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The event space comfortably accommodates up to 100-150 guests in 2,220 square feet."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the venue wheelchair accessible?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The downtown Provo venue is ADA compliant and wheelchair accessible, with ramps throughout the event space."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is there parking available for guests?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. There are 20+ on-site parking spaces at 241 W Center St in Provo, plus street parking and a nearby parking garage."
+        }
+      }
+    ]
+  }
+</script>
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": {{ shop.url | json }}
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Provo Event Space",
+        "item": {{ venue_url | json }}
+      }
+    ]
+  }
+</script>
