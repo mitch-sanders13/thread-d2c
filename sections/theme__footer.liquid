@@ -395,15 +395,16 @@
                     {% endcapture %}
                     {% capture accordion_inner_class %}{% endcapture %}
 
+                    {% capture event_space_footer_title %}{% render 'footer-link-title', link: link %}{% endcapture %}
                     {% render 'component__accordion', 
-                    button_label: link.title, 
+                    button_label: event_space_footer_title, 
                     button_class: "px-4",
                     container_class: accordion_container_class,
                     inner_class: accordion_inner_class
                     content: accordion_content %}
 
                     <noscript>
-                        <a class="border--t-width {{ section.settings.main_color_border }} block w-full p-4 no-underline" href="{{ link.url }}">{{ link.title }}</a>
+                        <a class="border--t-width {{ section.settings.main_color_border }} block w-full p-4 no-underline" href="{{ link.url }}">{% render 'footer-link-title', link: link %}</a>
                         {% for child_link in link.links %}
                             <a class="border--t-width {{ section.settings.main_color_border }} block w-full p-4 !pl-8 no-underline" href="{{ child_link.url }}">{{ child_link.title }}</a>
                             {% for grandchild_link in child_link.links %}
@@ -417,13 +418,13 @@
                     <a href="{{ link.url }}" target="_blank"
                     class="ft-link ft-accordion-item border--t-width block p-4 no-underline
                     {{ section.settings.main_color_border }}">
-                        {{ link.title }}
+                        {% render 'footer-link-title', link: link %}
                     </a>
                   {%- else -%}
                       <a href="{{ link.url }}"
                       class="ft-link ft-accordion-item border--t-width block p-4 no-underline
                       {{ section.settings.main_color_border }}">
-                          {{ link.title }}
+                          {% render 'footer-link-title', link: link %}
                       </a>
                   {%- endif -%}
 
@@ -564,12 +565,12 @@
                         {%- if link.url contains 'https://' -%}
                             <a href="{{ link.url }}" target='_blank' class="ft-link ft-link-row-d block mb-4 no-underline type__body type--small normal-case
                                 {% if forloop.index > 1 %}mt-4{% else %}mt-6{% endif %}">
-                                {{ link.title }}
+                                {% render 'footer-link-title', link: link %}
                             </a>
                         {%- else -%}
                             <a href="{{ link.url }}" class="ft-link ft-link-row-d block mb-4 no-underline type__body type--small normal-case
                                 {% if forloop.index > 1 %}mt-4{% else %}mt-6{% endif %}">
-                                {{ link.title }}
+                                {% render 'footer-link-title', link: link %}
                             </a>
                         {%- endif -%}
 

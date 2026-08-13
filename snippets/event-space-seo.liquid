@@ -14,11 +14,13 @@
   assign venue_locality = 'Provo'
   assign venue_region = 'UT'
   assign venue_postal = '84601'
-  assign venue_phone = '+1-801-874-1848'
+  assign venue_phone = '+1-720-883-8031'
+  assign venue_email = 'teagan@threadwallets.com'
   assign venue_url = canonical_url
   if venue_url == blank
     assign venue_url = shop.url | append: '/pages/241-event-space'
   endif
+  assign venue_photo = images['AK_01691.jpg']
 -%}
 
 <script type="application/ld+json">
@@ -31,6 +33,10 @@
     "description": {{ venue_description | json }},
     "url": {{ venue_url | json }},
     "telephone": {{ venue_phone | json }},
+    "email": {{ venue_email | json }},
+    {%- if venue_photo != blank -%}
+    "image": {{ venue_photo | image_url: width: 1200 | prepend: 'https:' | json }},
+    {%- endif -%}
     "maximumAttendeeCapacity": 150,
     "isAccessibleForFree": false,
     "publicAccess": true,

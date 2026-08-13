@@ -1,0 +1,13 @@
+{% doc %}
+  Footer link label. Uses a Provo-focused title for the event space page
+  so sitewide anchor text matches local search intent.
+
+  @param {object} link - A menu link from a footer linklist
+  @example
+    {% render 'footer-link-title', link: link %}
+{% enddoc %}
+{%- if link.url contains '/pages/241-event-space' -%}
+  Provo Event Space
+{%- else -%}
+  {{ link.title }}
+{%- endif -%}
