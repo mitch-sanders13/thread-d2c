@@ -67,6 +67,9 @@
 {%- if template contains 'collection' and collection.metafields.seo.noindex -%}
   <meta name="robots" content="noindex, follow">
 {%- endif -%}
+{%- if template.suffix == 'event-tour-booked' or page.handle == 'event-tour-booked' -%}
+  <meta name="robots" content="noindex, follow">
+{%- endif -%}
 
 <meta property="og:url" content="{{ canonical_url }}">
 <meta property="og:site_name" content="{{ shop.name }}">

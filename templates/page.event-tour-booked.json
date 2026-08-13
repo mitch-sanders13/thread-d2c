@@ -1,0 +1,133 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "page__main",
+      "disabled": true,
+      "settings": {
+        "color_scheme": "color__bg-body color__text",
+        "layout_horizontal": "window--wide"
+      }
+    },
+    "banner_tour_booked": {
+      "type": "banner",
+      "blocks": {
+        "heading_booked": {
+          "type": "heading",
+          "settings": {
+            "content": "You're booked",
+            "block_layout": "stack",
+            "spacing_top": 0,
+            "spacing_bottom": 0,
+            "spacing_left": 0,
+            "spacing_right": 0,
+            "font_family": "heading",
+            "font_family_custom": "",
+            "font_size": 64,
+            "font_weight": "700",
+            "text_transform": "uppercase",
+            "letter_spacing": "0em",
+            "line_height": 95,
+            "custom_color": ""
+          }
+        },
+        "content_thanks": {
+          "type": "content",
+          "settings": {
+            "content": "<p>Thanks for scheduling a tour of 241 Event Space in downtown Provo. A confirmation is on its way to your email.</p>",
+            "block_layout": "stack",
+            "spacing_top": 8,
+            "spacing_bottom": 0,
+            "spacing_left": 0,
+            "spacing_right": 0,
+            "font_family": "body",
+            "font_family_custom": "",
+            "font_size": 16,
+            "font_weight": "400",
+            "text_transform": "none",
+            "letter_spacing": "0.02em",
+            "custom_color": ""
+          }
+        },
+        "content_address": {
+          "type": "content",
+          "settings": {
+            "content": "<p><em>241 W Center St, Provo, UT 84601</em></p>",
+            "block_layout": "stack",
+            "spacing_top": 8,
+            "spacing_bottom": 0,
+            "spacing_left": 0,
+            "spacing_right": 0,
+            "font_family": "body",
+            "font_family_custom": "",
+            "font_size": 16,
+            "font_weight": "400",
+            "text_transform": "none",
+            "letter_spacing": "0.02em",
+            "custom_color": ""
+          }
+        }
+      },
+      "block_order": [
+        "heading_booked",
+        "content_thanks",
+        "content_address"
+      ],
+      "name": "t:sections.banner.name",
+      "settings": {
+        "url": "",
+        "image_background_desktop": "shopify://shop_images/AK_01691.jpg",
+        "image_background_mobile": "shopify://shop_images/AK_01695.jpg",
+        "show_video_background_mobile": true,
+        "show_entire_image": false,
+        "enable_lazy_loading": false,
+        "color_scheme": "color__bg-body color__text",
+        "color_text": "color__light",
+        "color_border": "color__border-divider-1",
+        "enable_gradient": true,
+        "style_border": "border--b-width",
+        "layout_horizontal": "window--full",
+        "layout_y_spacing": "min-h-[450px] max-h-[700px]",
+        "custom_height_px": 450,
+        "layout_y_alignment": "items-end",
+        "content_offset_top": 0,
+        "content_offset_bottom": 40,
+        "layout_x_alignment": "justify-start",
+        "use_global_spacing": "custom",
+        "visibility": ""
+      }
+    },
+    "text_next_steps": {
+      "type": "text",
+      "name": "Rich text",
+      "settings": {
+        "heading": "See you in Provo",
+        "content": "<p>We’ll meet you at 241 Event Space for your tour. If you need to reschedule or have questions about the venue, email teagan@threadwallets.com or call (720) 883-8031.</p>",
+        "button_label": "Event space details",
+        "button_url": "shopify://pages/241-event-space",
+        "spacing_top": 80,
+        "spacing_bottom": 100,
+        "color_scheme": "color__bg-body color__text",
+        "color_border": "color__border-divider-1",
+        "color_button": "btn",
+        "style_border": "",
+        "layout_x_alignment": "text-center justify-center",
+        "content_x_alignment": "text-center justify-center",
+        "visibility": ""
+      }
+    }
+  },
+  "order": [
+    "main",
+    "banner_tour_booked",
+    "text_next_steps"
+  ]
+}
