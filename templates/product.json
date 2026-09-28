@@ -570,7 +570,7 @@
             "rs_show_heading": true,
             "source_type": "silhouette",
             "collection": "",
-            "filter_collection": "sale",
+            "filter_collection": "sale-old",
             "instock_first": true,
             "cols_d": 4,
             "cols_m": 4,
